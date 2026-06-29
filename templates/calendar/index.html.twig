@@ -1,0 +1,149 @@
+{# templates/calendar/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Calendrier Médical - AniCare
+{% endblock %}
+
+{% block body %}
+<style>
+
+	.calendar-day-box:hover .add-action-indicator {
+		background-color: #0d9488 !important;
+		color: #ffffff !important;
+		border-color: #0d9488 !important;
+	}
+	.calendar-container {
+		width: 100%;
+		margin-top: 20px;
+		background-color: #ffffff;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+	}
+
+	.calendar-weekdays-grid {
+		display: grid !important;
+		grid-template-columns: repeat(7, 1fr) !important;
+		background-color: #f8fafc;
+		border-bottom: 1px solid #e2e8f0;
+		text-align: center;
+		font-weight: 700;
+		color: #475569;
+		text-transform: uppercase;
+		font-size: 0.85rem;
+		letter-spacing: 0.05em;
+	}
+
+	.calendar-weekdays-grid div {
+		padding: 12px 0;
+	}
+
+	.calendar-days-grid {
+		display: grid !important;
+		grid-template-columns: repeat(7, 1fr) !important;
+		background-color: #e2e8f0; /* Couleur des lignes de séparation */
+		gap: 1px; /* Épaisseur des bordures internes */
+	}
+
+	.calendar-day-box {
+		background-color: #ffffff;
+		padding: 8px;
+		min-height: 100px;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		box-sizing: border-box;
+	}
+
+	.calendar-day-box:hover:not(.day-box-empty) {
+		background-color: #f8fafc;
+	}
+
+	.day-box-empty {
+		background-color: #f1f5f9 !important;
+		opacity: 0.5;
+	}
+
+	.current-today-box {
+		background-color: rgba(13, 148, 136, 0.04) !important;
+	}
+
+	.event-badge {
+		display: block;
+		font-size: 0.72rem;
+		padding: 3px 6px;
+		margin-top: 4px;
+		border-radius: 4px;
+		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		background-color: rgba(13, 148, 136, 0.1);
+		color: #0f766e;
+		border-left: 3px solid #0d9488;
+		font-weight: 500;
+		transition: all 0.1s ease;
+	}
+
+	.event-badge:hover {
+		background-color: rgba(13, 148, 136, 0.2) !important;
+		color: #0d9488;
+	}
+</style>
+
+<div class="container">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1 class="page-title m-0">📅 Planning & Activités</h1>
+		<div class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm border">
+			<a href="{{ path('app_calendar', {'month': prevMonth, 'year': prevYear}) }}" class="btn btn-secondary btn-sm">◀</a>
+			<span class="fw-bold px-3 text-uppercase fs-6 text-teal" style="min-width: 165px; text-align: center;">
+				{{ currentMonthName }}
+				{{ currentYear }}
+			</span>
+			<a href="{{ path('app_calendar', {'month': nextMonth, 'year': nextYear}) }}" class="btn btn-secondary btn-sm">▶</a>
+		</div>
+	</div>
+
+	<div class="calendar-days-grid">
+		{# 1. Cases vides du début de mois #}
+		{% if startOfWeekDay > 1 %}
+			{% for i in 1..(startOfWeekDay - 1) %}
+				<div class="calendar-day-box day-box-empty"></div>
+			{% endfor %}
+		{% endif %}
+
+		{# 2. ✅ Cases réelles des jours transformées en liens dynamiques #}
+		{% for day in 1..daysInMonth %}
+			{% set isToday = (day == 'now'|date('j') and currentMonth == 'now'|date('n') and currentYear == 'now'|date('Y')) %}
+
+			{# Construction de la date au format Y-m-d pour la passer en paramètre d'URL #}
+			{% set targetDate = currentYear ~ '-' ~ (currentMonth < 10 ? '0' ~ currentMonth : currentMonth) ~ '-' ~ (day < 10 ? '0' ~ day : day) %}
+
+			<a href="{{ path('app_health_book_entry_new', {'preset_date': targetDate}) }}" class="calendar-day-box text-decoration-none text-dark position-relative {{ isToday ? 'current-today-box' : '' }}" style="cursor: pointer;">
+
+				<div class="d-flex justify-content-between align-items-center mb-1">
+					<span class="fw-bold small {{ isToday ? 'text-teal fs-6' : 'text-secondary' }}">
+						{{ day }}
+					</span>
+
+					{# Petit bouton d'ajout discret qui apparaît au survol ou reste minimaliste #}
+					<span class="add-action-indicator text-muted border rounded-circle d-flex align-items-center justify-content-center" style="width: 16px; height: 16px; font-size: 0.65rem; background-color: #f8fafc; font-weight: bold;">+</span>
+				</div>
+
+				<div class="day-events-list" onclick="event.stopPropagation();">
+					{% if entriesByDay[day] is defined %}
+						{% for entry in entriesByDay[day] %}
+							<a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="event-badge" title="{{ entry.animal.name ?? 'Animal' }} : {{ entry.title }}">
+								<strong>{{ entry.animal.name ?? 'Animal' }}</strong>:
+								{{ entry.title }}
+							</a>
+						{% endfor %}
+					{% endif %}
+				</div>
+			</a>
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}
+

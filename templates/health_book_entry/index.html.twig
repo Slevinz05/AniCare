@@ -1,44 +1,137 @@
+{# templates/health_book_entry/index.html.twig #}
+
 {% extends 'base.html.twig' %}
 
-{% block title %}HealthBookEntry index{% endblock %}
+{% block title %}Activité médicale - AniCare{% endblock %}
 
 {% block body %}
-    <h1>HealthBookEntry index</h1>
+<div class="container py-4">
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Description</th>
-                <th>VeterinarianName</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for health_book_entry in health_book_entries %}
-            <tr>
-                <td>{{ health_book_entry.id }}</td>
-                <td>{{ animal_share.animal.name }}</td>
-                <td>{{ health_book_entry.title }}</td>
-                <td>{{ health_book_entry.type }}</td>
-                <td>{{ health_book_entry.date ? health_book_entry.date|date('Y-m-d') : '' }}</td>
-                <td>{{ health_book_entry.description }}</td>
-                <td>{{ health_book_entry.veterinarianName }}</td>
-                <td>
-                    <a href="{{ path('app_health_book_entry_show', {'id': health_book_entry.id}) }}">show</a>
-                    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Suivi vétérinaire</p>
 
-    <a href="{{ path('app_health_book_entry_new') }}">Create new</a>
+                <h1 class="page-title mb-2">
+                    Activité médicale
+                </h1>
+
+                <p class="page-subtitle mb-0">
+                    Consultez l’ensemble des actes médicaux enregistrés pour vos animaux.
+                </p>
+            </div>
+
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary shadow-sm">
+                    Enregistrer un acte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if health_book_entries is empty %}
+        <div class="empty-state text-center p-5">
+            <span class="empty-state-icon mb-3">AM</span>
+
+            <h2 class="h4 page-title mb-2">
+                Aucun acte médical enregistré
+            </h2>
+
+            <p class="text-secondary mb-4">
+                Ajoutez un premier acte pour commencer le suivi médical de vos animaux.
+            </p>
+
+            <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary">
+                Créer un premier acte
+            </a>
+        </div>
+    {% else %}
+        <div class="card anicare-card overflow-hidden">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-medical health-entry-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Animal</th>
+                                <th>Acte médical</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Vétérinaire</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for health_book_entry in health_book_entries %}
+                                {% set entry_type = health_book_entry.type|default('')|lower %}
+
+                                <tr>
+                                    <td>
+                                        <strong class="text-teal">
+                                            {{ health_book_entry.animal.name ?? 'Non spécifié' }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="health-entry-title">
+                                            {{ health_book_entry.title }}
+                                        </div>
+
+                                        {% if health_book_entry.description %}
+                                            <div class="health-entry-description">
+                                                {{ health_book_entry.description|length > 90 
+                                                    ? health_book_entry.description|slice(0, 90) ~ '…' 
+                                                    : health_book_entry.description 
+                                                }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if entry_type == 'vaccin' or entry_type == 'vaccination' %}
+                                            <span class="badge-medical badge-vaccin">Vaccination</span>
+                                        {% elseif entry_type == 'chirurgie' %}
+                                            <span class="badge-medical badge-surgery">Chirurgie</span>
+                                        {% elseif entry_type == 'consultation' %}
+                                            <span class="badge-medical badge-consultation">Consultation</span>
+                                        {% else %}
+                                            <span class="badge-medical badge-neutral">
+                                                {{ health_book_entry.type ?: 'Non renseigné' }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ health_book_entry.date ? health_book_entry.date|date('d/m/Y') : 'Non renseignée' }}
+                                    </td>
+
+                                    <td>
+                                        {% if health_book_entry.veterinarianName %}
+                                            Dr. {{ health_book_entry.veterinarianName }}
+                                        {% else %}
+                                            <span class="text-secondary">Non renseigné</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ path('app_health_book_entry_show', {'id': health_book_entry.id}) }}" class="btn btn-outline-primary btn-sm">
+                                                Consulter
+                                            </a>
+
+                                            <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-primary btn-sm">
+                                                Modifier
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
 {% endblock %}

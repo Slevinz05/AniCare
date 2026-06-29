@@ -1,4 +1,93 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {
+    'attr': {
+        'class': 'anicare-form needs-validation',
+        'novalidate': 'novalidate'
+    }
+}) }}
+
+    <div class="row g-4">
+        <div class="col-12 col-md-6">
+            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.species, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.species, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.species) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.breed, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.breed, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.breed) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.birthDate, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.birthDate, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.birthDate) }}
+        </div>
+
+        <div class="col-12">
+            {{ form_label(form.gender, null, {'label_attr': {'class': 'form-label'}}) }}
+
+            <div class="anicare-radio-group">
+                {% for choice in form.gender %}
+                    <div class="form-check form-check-inline anicare-radio-item">
+                        {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            {{ form_errors(form.gender) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.weight, null, {'label_attr': {'class': 'form-label'}}) }}
+
+            <div class="input-group">
+                {{ form_widget(form.weight, {'attr': {'class': 'form-control'}}) }}
+                <span class="input-group-text">kg</span>
+            </div>
+
+            {{ form_errors(form.weight) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.bloodType, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.bloodType, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.bloodType) }}
+        </div>
+
+        <div class="col-12">
+            {{ form_label(form.identificationNumber, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.identificationNumber, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.identificationNumber) }}
+        </div>
+
+        <div class="col-12">
+            <div class="file-upload-card">
+                {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.attachments, {'attr': {'class': 'form-control'}}) }}
+
+                {% if form.attachments.vars.help %}
+                    <div class="form-text">
+                        {{ form.attachments.vars.help }}
+                    </div>
+                {% endif %}
+
+                {{ form_errors(form.attachments) }}
+            </div>
+        </div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+        {{ button_label|default('Enregistrer') }}
+    </button>
+
 {{ form_end(form) }}

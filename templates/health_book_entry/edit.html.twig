@@ -1,13 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit HealthBookEntry{% endblock %}
+{% block title %}Modifier l’acte médical - AniCare{% endblock %}
 
 {% block body %}
-    <h1>Edit HealthBookEntry</h1>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card form-card">
+                <div class="card-body p-0">
+                    <div class="mb-4 pb-4 border-bottom border-anicare">
+                        <p class="page-eyebrow mb-2">Suivi vétérinaire</p>
 
-    {{ include('health_book_entry/_form.html.twig', {'button_label': 'Update'}) }}
+                        <h1 class="page-title mb-2">
+                            Modifier l’acte médical
+                        </h1>
 
-    <a href="{{ path('app_health_book_entry_index') }}">back to list</a>
+                        <p class="page-subtitle mb-0">
+                            Mettez à jour les informations du soin et ajoutez les documents associés.
+                        </p>
+                    </div>
 
-    {{ include('health_book_entry/_delete_form.html.twig') }}
+                    {{ include('health_book_entry/_form.html.twig', {
+                        'button_label': 'Enregistrer les modifications'
+                    }) }}
+
+                    <div class="mt-5 pt-4 border-top border-anicare">
+                        <h2 class="h5 page-title mb-3">
+                            Documents existants
+                        </h2>
+
+                        {% if health_book_entry.documents is empty %}
+                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                                Aucun document n’est encore associé à cet acte médical.
+                            </div>
+                        {% else %}
+                            <div class="document-list">
+                                {% for document in health_book_entry.documents %}
+                                    <a 
+                                        href="{{ asset('uploads/health-book-entries/' ~ document.fileName) }}" 
+                                        target="_blank" 
+                                        rel="noopener"
+                                        class="document-item"
+                                    >
+                                        <span class="document-name">
+                                            {{ document.originalName|default(document.fileName) }}
+                                        </span>
+
+                                        <span class="document-meta">
+                                            {% if document.size is defined %}
+                                                {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                            {% endif %}
+
+                                            {% if document.uploadedAt is defined %}
+                                                · {{ document.uploadedAt|date('d/m/Y') }}
+                                            {% endif %}
+                                        </span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-4 border-top border-anicare">
+                        <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
+                            Retour à la liste
+                        </a>
+
+                        {{ include('health_book_entry/_delete_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

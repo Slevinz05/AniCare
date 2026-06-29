@@ -1,113 +1,843 @@
+/* ==========================================================================
+   AniCare - Thème Bootstrap médical / vétérinaire
+   ========================================================================== */
+
 :root {
-    --primary-color: #0d9488; /* Vert Opale / Médical */
-    --secondary-color: #0f172a; /* Bleu très foncé / Texte */
-    --accent-color: #38bdf8; /* Bleu ciel / Liens et badges */
-    --bg-color: #f8fafc; /* Gris très clair / Fond */
+    /* Couleurs AniCare */
+    --primary-color: #0d9488;
+    --primary-hover: #0f766e;
+    --secondary-color: #0f172a;
+    --accent-color: #38bdf8;
+    --accent-hover: #0284c7;
+    --bg-color: #f8fafc;
     --card-bg: #ffffff;
-    --border-color: #e2e8f0;
+    --border-color: #ccfbf1;
+    --soft-teal: #f0fdfa;
+
     --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --danger-hover: #b91c1c;
+    --warning-color: #f59e0b;
+
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+
+    --shadow-subtle: 0 4px 12px rgba(13, 148, 136, 0.08);
+    --shadow-md: 0 12px 28px rgba(13, 148, 136, 0.12);
+
+    /* Mapping Bootstrap */
+    --bs-primary: #0d9488;
+    --bs-primary-rgb: 13, 148, 136;
+
+    --bs-info: #38bdf8;
+    --bs-info-rgb: 56, 189, 248;
+
+    --bs-success: #22c55e;
+    --bs-success-rgb: 34, 197, 94;
+
+    --bs-danger: #ef4444;
+    --bs-danger-rgb: 239, 68, 68;
+
+    --bs-warning: #f59e0b;
+    --bs-warning-rgb: 245, 158, 11;
+
+    --bs-body-bg: #f8fafc;
+    --bs-body-color: #0f172a;
+    --bs-border-color: #ccfbf1;
+
+    --bs-primary-bg-subtle: #f0fdfa;
+    --bs-primary-border-subtle: #ccfbf1;
+    --bs-primary-text-emphasis: #0f766e;
+
+    --bs-link-color: #0d9488;
+    --bs-link-hover-color: #0f766e;
 }
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(13, 148, 136, 0.10), transparent 32rem),
+        var(--bg-color);
     color: var(--secondary-color);
-    margin: 0;
-    padding: 0;
+    line-height: 1.5;
 }
 
-/* Base Layout */
 .container {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
 }
 
-/* Barre de Navigation */
-.navbar {
+a {
+    color: var(--primary-color);
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+.text-teal {
+    color: var(--primary-color) !important;
+}
+
+.bg-anicare-soft {
+    background-color: var(--soft-teal) !important;
+}
+
+.bg-anicare-white {
+    background-color: var(--card-bg) !important;
+}
+
+.border-anicare {
+    border-color: var(--border-color) !important;
+}
+
+.shadow-anicare {
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* ==========================================================================
+   Navbar Bootstrap personnalisée
+   ========================================================================== */
+
+.anicare-navbar {
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    border-bottom: 4px solid var(--primary-color) !important;
+    box-shadow: var(--shadow-subtle);
+}
+
+.navbar-brand {
+    color: var(--primary-color) !important;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.navbar-brand-icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background-color: var(--soft-teal);
+    border: 1px solid var(--border-color);
+}
+
+.navbar .nav-link {
+    color: var(--secondary-color) !important;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.55rem 0.85rem !important;
+    transition: all 0.2s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--primary-hover) !important;
+    background-color: var(--soft-teal);
+}
+
+.navbar-user {
+    background-color: var(--soft-teal);
+    border: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+}
+
+/* ==========================================================================
+   Boutons Bootstrap thémés AniCare
+   ========================================================================== */
+
+.btn {
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Bouton par défaut si tu utilises seulement class="btn" */
+.btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark) {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark):hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: #ffffff;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--primary-hover);
+    --bs-btn-hover-border-color: var(--primary-hover);
+    --bs-btn-active-bg: var(--primary-hover);
+    --bs-btn-active-border-color: var(--primary-hover);
+    --bs-btn-color: #ffffff;
+    --bs-btn-hover-color: #ffffff;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--soft-teal);
+    --bs-btn-hover-border-color: var(--primary-color);
+    --bs-btn-hover-color: var(--primary-hover);
+    --bs-btn-active-bg: var(--primary-color);
+    --bs-btn-active-border-color: var(--primary-color);
+}
+
+.btn-info {
+    --bs-btn-bg: var(--accent-color);
+    --bs-btn-border-color: var(--accent-color);
+    --bs-btn-hover-bg: var(--accent-hover);
+    --bs-btn-hover-border-color: var(--accent-hover);
+    --bs-btn-color: #ffffff;
+    --bs-btn-hover-color: #ffffff;
+}
+
+.btn-outline-info {
+    --bs-btn-color: var(--accent-hover);
+    --bs-btn-border-color: var(--accent-color);
+    --bs-btn-hover-bg: #e0f2fe;
+    --bs-btn-hover-border-color: var(--accent-color);
+    --bs-btn-hover-color: var(--accent-hover);
+}
+
+.btn-danger {
+    --bs-btn-bg: var(--danger-color);
+    --bs-btn-border-color: var(--danger-color);
+    --bs-btn-hover-bg: var(--danger-hover);
+    --bs-btn-hover-border-color: var(--danger-hover);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--danger-color);
+    --bs-btn-border-color: var(--danger-color);
+    --bs-btn-hover-bg: var(--danger-color);
+    --bs-btn-hover-border-color: var(--danger-color);
+    --bs-btn-hover-color: #ffffff;
+}
+
+.btn-secondary {
+    --bs-btn-bg: #e2e8f0;
+    --bs-btn-border-color: #e2e8f0;
+    --bs-btn-color: var(--secondary-color);
+    --bs-btn-hover-bg: #cbd5e1;
+    --bs-btn-hover-border-color: #cbd5e1;
+    --bs-btn-hover-color: var(--secondary-color);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: #475569;
+    --bs-btn-border-color: #cbd5e1;
+    --bs-btn-hover-bg: #f1f5f9;
+    --bs-btn-hover-border-color: #cbd5e1;
+    --bs-btn-hover-color: var(--secondary-color);
+}
+
+/* ==========================================================================
+   Formulaires Bootstrap
+   ========================================================================== */
+
+.form-label {
+    font-weight: 700;
+    color: var(--primary-hover);
+}
+
+.form-control,
+.form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    color: var(--secondary-color);
+    background-color: #ffffff;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.18);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-text {
+    color: #64748b;
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+}
+
+/* ==========================================================================
+   Cartes / panels
+   ========================================================================== */
+
+.anicare-card,
+.form-card,
+.animal-card {
     background-color: var(--card-bg);
-    border-bottom: 2px solid var(--primary-color);
-    padding: 15px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.form-card {
+    padding: 2rem;
+    border-top: 5px solid var(--primary-color);
+}
+
+.page-title {
+    color: var(--primary-color);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.page-subtitle {
+    color: #64748b;
+}
+
+.page-eyebrow {
+    color: var(--primary-hover);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.medical-header {
+    background: linear-gradient(135deg, #ffffff 0%, var(--soft-teal) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-hero {
+    background: linear-gradient(135deg, #ffffff 0%, var(--soft-teal) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+/* ==========================================================================
+   Carte animal
+   ========================================================================== */
+
+.animal-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-subtle);
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.animal-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(13, 148, 136, 0.35) !important;
+    box-shadow: var(--shadow-md);
+}
+
+.animal-card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.animal-card-kicker {
+    color: var(--primary-hover);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.animal-card-title {
+    color: var(--secondary-color);
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.animal-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.animal-info-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-.navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    text-decoration: none;
-}
-.navbar-menu a {
-    color: var(--secondary-color);
-    text-decoration: none;
-    margin-left: 20px;
-    font-weight: 500;
-}
-.navbar-menu a:hover {
-    color: var(--primary-color);
-}
-
-/* Boutons */
-.btn {
-    display: inline-block;
-    background-color: var(--primary-color);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.btn:hover {
-    background-color: #0f766e;
-}
-.btn-secondary {
-    background-color: #64748b;
-}
-.btn-secondary:hover {
-    background-color: #475569;
-}
-
-/* Tableaux */
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--card-bg);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.table th, .table td {
-    padding: 15px;
-    text-align: left;
+    gap: 1rem;
+    padding: 0.85rem 0;
     border-bottom: 1px solid var(--border-color);
 }
-.table th {
-    background-color: #f1f5f9;
+
+.animal-info-label {
+    color: #64748b;
+    font-size: 0.92rem;
     font-weight: 600;
 }
 
-/* Formulaires */
-form div {
-    margin-bottom: 15px;
+.animal-info-value {
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: right;
 }
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
+
+.animal-id {
+    color: var(--primary-hover);
+    font-family: monospace;
+    font-size: 0.9rem;
 }
-input[type="text"], input[type="number"], input[type="date"], textarea, select {
-    width: 100%;
-    padding: 10px;
+
+.animal-card .badge-medical {
+    background-color: var(--soft-teal);
+    color: var(--primary-hover);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    box-sizing: border-box;
 }
-/* Style Boutons Radio */
-input[type="radio"] {
-    margin-right: 8px;
+
+.animal-card .btn {
+    min-height: 38px;
+}
+
+/* ==========================================================================
+   Badges
+   ========================================================================== */
+
+.badge-medical {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.badge-male {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.badge-female {
+    background-color: #fce7f3;
+    color: #be185d;
+}
+
+.badge-vaccin {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-surgery {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-weight {
+    background-color: #ecfeff;
+    color: #0e7490;
+}
+
+.badge-id {
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+.badge-neutral {
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+/* ==========================================================================
+   Tableaux
+   ========================================================================== */
+
+.table-medical {
+    --bs-table-bg: #ffffff;
+    --bs-table-color: var(--secondary-color);
+    --bs-table-border-color: var(--border-color);
+    --bs-table-hover-bg: #f0fdfa;
+
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+}
+
+.table-medical thead th,
+.table-medical tbody th {
+    background-color: var(--soft-teal);
+    color: var(--primary-hover);
+    font-weight: 800;
+}
+
+.table-medical th,
+.table-medical td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-responsive {
+    border-radius: var(--radius-md);
+}
+
+/* ==========================================================================
+   États vides
+   ========================================================================== */
+
+.empty-state {
+    background: linear-gradient(135deg, #ffffff 0%, var(--soft-teal) 100%);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-subtle);
+}
+
+.empty-state-icon {
+    width: 76px;
+    height: 76px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24px;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-subtle);
+    font-size: 2rem;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.site-footer {
+    background-color: #ffffff;
+    border-top: 4px solid var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.footer-brand {
+    color: var(--primary-color);
+    font-weight: 800;
+}
+
+/* ==========================================================================
+   Calendrier AniCare
+   ========================================================================== */
+
+.calendar-weekdays,
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-day {
+    background-color: var(--card-bg);
+    transition: background-color 0.15s ease;
+}
+
+.calendar-day:hover:not(.day-empty) {
+    background-color: #f0fdfa;
+}
+
+.bg-teal-light {
+    background-color: rgba(13, 148, 136, 0.08) !important;
+}
+
+.bg-teal {
+    background-color: var(--primary-color) !important;
+}
+
+.event-item {
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.event-item:hover {
+    background-color: rgba(13, 148, 136, 0.18) !important;
+    transform: translateX(1px);
+}
+
+.style-scrollbar::-webkit-scrollbar {
+    width: 3px;
+}
+
+.style-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 10px;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .form-card {
+        padding: 1.35rem;
+    }
+
+    .page-hero {
+        padding: 1.35rem !important;
+    }
+
+    .medical-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    .table-medical th,
+    .table-medical td {
+        padding: 0.85rem;
+    }
+
+
+    /* ==========================================================================
+   Formulaire animal
+   ========================================================================== */
+
+    .anicare-form {
+        width: 100%;
+    }
+
+    .anicare-form .form-label {
+        margin-bottom: 0.45rem;
+        color: var(--primary-hover);
+        font-weight: 800;
+    }
+
+    .anicare-form .form-control,
+    .anicare-form .form-select {
+        min-height: 48px;
+        border: 2px solid #dbeafe;
+        border-radius: var(--radius-sm);
+        background-color: #ffffff;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+
+    .anicare-form .form-control::placeholder {
+        color: #94a3b8;
+    }
+
+    .anicare-form .form-control:focus,
+    .anicare-form .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
+    }
+
+    .anicare-form .input-group-text {
+        border: 2px solid #dbeafe;
+        border-left: 0;
+        background-color: var(--soft-teal);
+        color: var(--primary-hover);
+        font-weight: 800;
+    }
+
+    .anicare-radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .anicare-radio-item {
+        margin: 0;
+        padding: 0.85rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    .anicare-radio-item:hover {
+        background-color: var(--soft-teal);
+        border-color: var(--primary-color);
+    }
+
+    .anicare-radio-item .form-check-input {
+        margin-top: 0.2rem;
+        border-color: var(--primary-color);
+    }
+
+    .anicare-radio-item .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .anicare-radio-item .form-check-label {
+        color: var(--secondary-color);
+        font-weight: 700;
+    }
+
+    .anicare-form .invalid-feedback,
+    .anicare-form .form-error-message,
+    .anicare-form ul {
+        margin-top: 0.4rem;
+        color: var(--danger-color);
+        font-size: 0.875rem;
+    }
+
+    /* ==========================================================================
+   Health Book Entry - Actes médicaux
+   ========================================================================== */
+
+    .health-entry-form {
+        width: 100%;
+    }
+
+    .health-entry-form .form-label {
+        margin-bottom: 0.45rem;
+        color: var(--primary-hover);
+        font-weight: 800;
+    }
+
+    .health-entry-form .form-control,
+    .health-entry-form .form-select {
+        min-height: 48px;
+        border: 2px solid #dbeafe;
+        border-radius: var(--radius-sm);
+        background-color: #ffffff;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+
+    .health-entry-form textarea.form-control {
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    .health-entry-form .form-control::placeholder {
+        color: #94a3b8;
+    }
+
+    .health-entry-form .form-control:focus,
+    .health-entry-form .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
+    }
+
+    .health-entry-table .health-entry-title {
+        color: var(--secondary-color);
+        font-weight: 800;
+    }
+
+    .health-entry-description {
+        max-width: 420px;
+        margin-top: 0.2rem;
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .health-entry-note {
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        color: var(--secondary-color);
+        line-height: 1.6;
+    }
+
+    .badge-consultation {
+        background-color: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .health-entry-table .btn {
+        white-space: nowrap;
+    }
+
+    @media (max-width: 767.98px) {
+
+        .health-entry-table th,
+        .health-entry-table td {
+            white-space: nowrap;
+        }
+
+        .health-entry-description {
+            max-width: 260px;
+        }
+    }
+
+    /* ==========================================================================
+   Documents / pièces jointes
+   ========================================================================== */
+
+    .file-upload-card {
+        background-color: var(--soft-teal);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+    }
+
+    .file-upload-card .form-label {
+        color: var(--primary-hover);
+        font-weight: 800;
+    }
+
+    .file-upload-card .form-text {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .document-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .document-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--secondary-color);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .document-item:hover {
+        background-color: var(--soft-teal);
+        border-color: var(--primary-color);
+        color: var(--secondary-color);
+        transform: translateY(-1px);
+    }
+
+    .document-name {
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .document-meta {
+        flex-shrink: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .document-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .document-meta {
+            font-size: 0.8rem;
+        }
+    }
 }

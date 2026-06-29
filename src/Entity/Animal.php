@@ -218,4 +218,39 @@ class Animal
 
         return $this;
     }
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $documents = [];
+
+    public function getDocuments(): array
+    {
+        return $this->documents ?? [];
+    }
+
+    public function setDocuments(?array $documents): static
+    {
+        $this->documents = $documents ?? [];
+
+        return $this;
+    }
+
+    public function addDocument(array $document): static
+    {
+        $documents = $this->getDocuments();
+        $documents[] = $document;
+
+        $this->documents = $documents;
+
+        return $this;
+    }
+
+    public function removeDocument(string $fileName): static
+    {
+        $this->documents = array_values(array_filter(
+            $this->getDocuments(),
+            fn(array $document) => ($document['fileName'] ?? null) !== $fileName
+        ));
+
+        return $this;
+    }
 }

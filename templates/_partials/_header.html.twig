@@ -1,51 +1,97 @@
-{# templates/_partials/_header.html.twig ou directement inséré dans base.html.twig #}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
-            🐾 AniCare
+{% set current_route = app.request.attributes.get('_route') %}
+
+<nav class="navbar navbar-expand-xl navbar-light anicare-navbar sticky-top">
+    <div class="container-fluid container-xxl px-3 px-lg-4 py-2">
+
+        <a class="navbar-brand d-flex align-items-center gap-2 flex-shrink-0" href="{{ path('app_home') }}">
+            <span class="navbar-brand-icon">🐾</span>
+            <span class="navbar-brand-text">AniCare</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
+        <button
+            class="navbar-toggler ms-auto border-primary-subtle"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Ouvrir le menu"
+        >
             <span class="navbar-toggler-icon"></span>
         </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- Liens principaux à gauche (ou à droite selon préférences) -->
-            <ul class="navbar-nav me-auto">
+
+        <div class="collapse navbar-collapse mt-3 mt-xl-0" id="navbarNav">
+
+            <ul class="navbar-nav mx-xl-auto mb-3 mb-xl-0 gap-xl-1">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
+                    <a
+                        class="nav-link text-nowrap {{ current_route == 'app_home' ? 'active' : '' }}"
+                        href="{{ path('app_home') }}"
+                    >
+                        Accueil
+                    </a>
                 </li>
-                {# Ces liens peuvent être masqués si l'utilisateur n'est pas connecté pour éviter les erreurs ou frustrations UI #}
+
                 {% if app.user %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_animal_index') }}">Mes Animaux</a>
+                        <a
+                            class="nav-link text-nowrap {{ (current_route starts with 'app_animal_') and not (current_route starts with 'app_animal_share') ? 'active' : '' }}"
+                            href="{{ path('app_animal_index') }}"
+                        >
+                            Mes animaux
+                        </a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_animal_share_index') }}">Partages</a>
+                        <a
+                            class="nav-link text-nowrap {{ current_route starts with 'app_animal_share' ? 'active' : '' }}"
+                            href="{{ path('app_animal_share_index') }}"
+                        >
+                            Partages
+                        </a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_health_book_entry_index') }}">Activité Médicale</a>
+                        <a
+                            class="nav-link text-nowrap {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}"
+                            href="{{ path('app_health_book_entry_index') }}"
+                        >
+                            Activités médicales
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a
+                            class="nav-link text-nowrap {{ current_route == 'app_calendar' ? 'active' : '' }}"
+                            href="{{ path('app_calendar') }}"
+                        >
+                            📅 Planning
+                        </a>
                     </li>
                 {% endif %}
             </ul>
 
-            <!-- Zone d'authentification à droite -->
-            <ul class="navbar-nav ms-auto gap-2 align-items-center">
+            <div class="navbar-actions d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center gap-2 ms-xl-3">
                 {% if app.user %}
-                    <li class="nav-item text-light me-2">
-                        <small>Connecté en tant que <strong>{{ app.user.userIdentifier }}</strong></small>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light btn-sm" href="{{ path('app_logout') }}">Déconnexion</a>
-                    </li>
+                    <span class="navbar-user small d-none d-xxl-inline-flex text-nowrap">
+                        Bonjour, 
+                        <strong class="ms-1">{{ app.user.userIdentifier }}</strong>
+                    </span>
+
+                    <a class="btn btn-outline-danger btn-sm px-1 text-nowrap" href="{{ path('app_logout') }}">
+                        Déconnexion
+                    </a>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light btn-sm" href="{{ path('app_login') }}">Connexion</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-light text-primary btn-sm fw-bold" href="{{ path('app_register') }}">Inscription</a>
-                    </li>
+                    <a class="btn btn-outline-primary btn-sm px-3 text-nowrap" href="{{ path('app_login') }}">
+                        🔑 Connexion
+                    </a>
+
+                    <a class="btn btn-primary btn-sm px-3 shadow-sm text-nowrap" href="{{ path('app_register') }}">
+                        ✨ Inscription
+                    </a>
                 {% endif %}
-            </ul>
+            </div>
+
         </div>
     </div>
 </nav>

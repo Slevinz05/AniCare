@@ -1,0 +1,57 @@
+{# templates/_partials/_animal_card.html.twig #}
+
+<div class="card animal-card h-100 border-0">
+    <div class="card-header animal-card-header p-4">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+                <p class="animal-card-kicker mb-1">Dossier animal</p>
+
+                <h3 class="animal-card-title mb-0">
+                    {{ animal.name }}
+                </h3>
+            </div>
+
+            {{ include('_partials/_gender_badge.html.twig', {'gender': animal.gender}) }}
+        </div>
+    </div>
+
+    <div class="card-body p-4 d-flex flex-column">
+        <div class="animal-info-list mb-4">
+            <div class="animal-info-row">
+                <span class="animal-info-label">Espèce</span>
+                <span class="animal-info-value">{{ animal.species }}</span>
+            </div>
+
+            <div class="animal-info-row">
+                <span class="animal-info-label">Race</span>
+                <span class="animal-info-value">{{ animal.breed ?: 'Non renseignée' }}</span>
+            </div>
+
+            <div class="animal-info-row">
+                <span class="animal-info-label">Poids</span>
+                <span class="animal-info-value">
+                    {{ animal.weight ? animal.weight ~ ' kg' : 'Non renseigné' }}
+                </span>
+            </div>
+
+            {% if animal.identificationNumber %}
+                <div class="animal-info-row">
+                    <span class="animal-info-label">Identification</span>
+                    <span class="animal-info-value animal-id">
+                        {{ animal.identificationNumber }}
+                    </span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="d-flex gap-2 mt-auto">
+            <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm flex-fill">
+                Consulter
+            </a>
+
+            <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-primary btn-sm flex-fill">
+                Modifier
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,69 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {
+    'attr': {
+        'class': 'health-entry-form anicare-form needs-validation',
+        'novalidate': 'novalidate'
+    }
+}) }}
+
+    <div class="row g-4">
+        {% if form.animal is defined %}
+            <div class="col-12">
+                {{ form_label(form.animal, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.animal, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.animal) }}
+            </div>
+        {% endif %}
+
+        <div class="col-12 col-md-8">
+            {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.title) }}
+        </div>
+
+        <div class="col-12 col-md-4">
+            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.date, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.date) }}
+        </div>
+
+        <div class="col-12 col-md-6">
+            {{ form_label(form.veterinarianName, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.veterinarianName, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.veterinarianName) }}
+        </div>
+
+        <div class="col-12">
+            {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.description) }}
+        </div>
+
+        <div class="col-12">
+            <div class="file-upload-card">
+                {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.attachments, {'attr': {'class': 'form-control'}}) }}
+
+                {% if form.attachments.vars.help %}
+                    <div class="form-text">
+                        {{ form.attachments.vars.help }}
+                    </div>
+                {% endif %}
+
+                {{ form_errors(form.attachments) }}
+            </div>
+        </div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+        {{ button_label|default('Enregistrer l’acte médical') }}
+    </button>
+
 {{ form_end(form) }}

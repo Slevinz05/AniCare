@@ -1,47 +1,53 @@
+{# templates/animal/index.html.twig #}
+
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des animaux - AniCare{% endblock %}
+{% block title %}Mes animaux - AniCare{% endblock %}
 
 {% block body %}
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Mes Animaux</h1>
-        <a href="{{ path('app_animal_new') }}" class="btn">+ Ajouter un animal</a>
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Carnet de santé numérique</p>
+                <h1 class="page-title mb-2">🐾 Mes animaux</h1>
+                <p class="page-subtitle mb-0">
+                    Retrouvez les profils de vos compagnons et accédez rapidement à leur suivi médical.
+                </p>
+            </div>
+
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_animal_new') }}" class="btn btn-primary shadow-sm">
+                    ➕ Ajouter un compagnon
+                </a>
+            </div>
+        </div>
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Espèce</th>
-                <th>Race</th>
-                <th>Genre</th>
-                <th>Poids</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="row g-4">
         {% for animal in animals %}
-            <tr>
-                <td><strong>{{ animal.name }}</strong></td>
-                <td>{{ animal.species }}</td>
-                <td>{{ animal.breed ?: '-' }}</td>
-                <td>
-                    {# Appel du composant partiel #}
-                    {{ include('_partials/_gender_badge.html.twig', {'gender': animal.gender}) }}
-                </td>
-                <td>{{ animal.weight ? animal.weight ~ ' kg' : '-' }}</td>
-                <td>
-                    <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9rem;">Voir</a>
-                    <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn" style="padding: 5px 10px; font-size: 0.9rem; background-color: #64748b;">Modifier</a>
-                </td>
-            </tr>
+            <div class="col-12 col-md-6 col-lg-4">
+                {{ include('_partials/_animal_card.html.twig', {'animal': animal}) }}
+            </div>
         {% else %}
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">
-                    Aucun animal enregistré pour le moment.
-                </td>
-            </tr>
+            <div class="col-12">
+                <div class="empty-state text-center p-5">
+                    <span class="empty-state-icon mb-3">🐱🐶</span>
+
+                    <h2 class="h4 page-title mb-2">
+                        Aucun compagnon enregistré
+                    </h2>
+
+                    <p class="text-secondary mb-4">
+                        Commencez par ajouter un animal pour suivre son livret médical en ligne.
+                    </p>
+
+                    <a href="{{ path('app_animal_new') }}" class="btn btn-primary">
+                        Créer un premier profil
+                    </a>
+                </div>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
+    </div>
+</div>
 {% endblock %}

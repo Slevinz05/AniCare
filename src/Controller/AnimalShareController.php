@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/animal/share')]
 final class AnimalShareController extends AbstractController
 {
-    #[Route(name: 'app_animal_share_index', methods: ['GET'])]
+    #[Route('', name: 'app_animal_share_index', methods: ['GET'])]
     public function index(AnimalShareRepository $animalShareRepository): Response
     {
         return $this->render('animal_share/index.html.twig', [
@@ -71,7 +71,7 @@ final class AnimalShareController extends AbstractController
     #[Route('/{id}', name: 'app_animal_share_delete', methods: ['POST'])]
     public function delete(Request $request, AnimalShare $animalShare, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$animalShare->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $animalShare->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($animalShare);
             $entityManager->flush();
         }

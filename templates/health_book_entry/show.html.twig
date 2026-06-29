@@ -1,42 +1,174 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}HealthBookEntry{% endblock %}
+{% block title %}Détail de l’acte médical - AniCare{% endblock %}
 
 {% block body %}
-    <h1>HealthBookEntry</h1>
+{% set entry_type = health_book_entry.type|default('')|lower %}
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ health_book_entry.id }}</td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td>{{ health_book_entry.title }}</td>
-            </tr>
-            <tr>
-                <th>Type</th>
-                <td>{{ health_book_entry.type }}</td>
-            </tr>
-            <tr>
-                <th>Date</th>
-                <td>{{ health_book_entry.date ? health_book_entry.date|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ health_book_entry.description }}</td>
-            </tr>
-            <tr>
-                <th>VeterinarianName</th>
-                <td>{{ health_book_entry.veterinarianName }}</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="container py-4">
+    <div class="card anicare-card overflow-hidden">
+        <div class="card-header medical-header p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <p class="page-eyebrow mb-2">Détail de l’acte</p>
 
-    <a href="{{ path('app_health_book_entry_index') }}">back to list</a>
+                    <h1 class="page-title mb-1">
+                        {{ health_book_entry.title }}
+                    </h1>
 
-    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}">edit</a>
+                    <p class="page-subtitle mb-0">
+                        Acte médical n°{{ health_book_entry.id }}
+                    </p>
+                </div>
 
-    {{ include('health_book_entry/_delete_form.html.twig') }}
+                <div>
+                    {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
+                        <span class="badge-medical badge-vaccin">Vaccination</span>
+                    {% elseif entry_type == 'chirurgie' %}
+                        <span class="badge-medical badge-surgery">Chirurgie</span>
+                    {% elseif entry_type == 'consultation' %}
+                        <span class="badge-medical badge-consultation">Consultation</span>
+                    {% else %}
+                        <span class="badge-medical badge-neutral">
+                            {{ health_book_entry.type ?: 'Non renseigné' }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="table-responsive mb-5">
+                <table class="table table-hover table-medical align-middle mb-0">
+                    <tbody>
+                        <tr>
+                            <th style="width: 35%;">Animal concerné</th>
+                            <td>
+                                <strong class="text-teal">
+                                    {{ health_book_entry.animal.name ?? 'Non spécifié' }}
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Intitulé de l’acte</th>
+                            <td>{{ health_book_entry.title }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Type d’acte</th>
+                            <td>
+                                {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
+                                    <span class="badge-medical badge-vaccin">Vaccination</span>
+                                {% elseif entry_type == 'chirurgie' %}
+                                    <span class="badge-medical badge-surgery">Chirurgie</span>
+                                {% elseif entry_type == 'consultation' %}
+                                    <span class="badge-medical badge-consultation">Consultation</span>
+                                {% else %}
+                                    <span class="badge-medical badge-neutral">
+                                        {{ health_book_entry.type ?: 'Non renseigné' }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Date de l’acte</th>
+                            <td>
+                                {{ health_book_entry.date ? health_book_entry.date|date('d/m/Y') : 'Non renseignée' }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Vétérinaire référent</th>
+                            <td>
+                                {% if health_book_entry.veterinarianName %}
+                                    Dr. {{ health_book_entry.veterinarianName }}
+                                {% else %}
+                                    Non renseigné
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Description / observations</th>
+                            <td>
+                                {% if health_book_entry.description %}
+                                    <div class="health-entry-note">
+                                        {{ health_book_entry.description|nl2br }}
+                                    </div>
+                                {% else %}
+                                    <span class="text-secondary">
+                                        Aucune observation renseignée.
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <section class="mb-5">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                    <div>
+                        <p class="page-eyebrow mb-2">Documents</p>
+
+                        <h2 class="h4 page-title mb-0">
+                            Documents associés
+                        </h2>
+                    </div>
+
+                    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-outline-primary btn-sm">
+                        Ajouter un document
+                    </a>
+                </div>
+
+                {% if health_book_entry.documents is empty %}
+                    <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                        Aucun document n’est encore associé à cet acte médical.
+                    </div>
+                {% else %}
+                    <div class="document-list">
+                        {% for document in health_book_entry.documents %}
+                            <a 
+                                href="{{ asset('uploads/health-book-entries/' ~ document.fileName) }}" 
+                                target="_blank" 
+                                rel="noopener"
+                                class="document-item"
+                            >
+                                <span class="document-name">
+                                    {{ document.originalName|default(document.fileName) }}
+                                </span>
+
+                                <span class="document-meta">
+                                    {% if document.size is defined %}
+                                        {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                    {% endif %}
+
+                                    {% if document.uploadedAt is defined %}
+                                        · {{ document.uploadedAt|date('d/m/Y') }}
+                                    {% endif %}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </section>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-4 border-top border-anicare">
+                <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
+                    Retour à la liste
+                </a>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-primary">
+                        Modifier
+                    </a>
+
+                    {{ include('health_book_entry/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

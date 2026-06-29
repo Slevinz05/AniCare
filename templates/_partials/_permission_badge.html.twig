@@ -1,7 +1,16 @@
-{% if permission == 'READ' %}
-    <span class="badge bg-info text-dark">👁️ Lecture seule</span>
-{% elseif permission == 'WRITE' %}
-    <span class="badge bg-warning text-dark">✏️ Modification</span>
-{% else %}
-    <span class="badge bg-secondary">{{ permission }}</span>
-{% endif %}
+{# templates/animal_share/_permission_badge.html.twig #}
+<td>
+    {% if permission == 'READ' %}
+        <span class="badge-medical" style="background-color: #e0f2fe; color: #0369a1; font-weight: 600; padding: 4px 10px; border-radius: 50px;">
+            👁️ Lecture seule
+        </span>
+    {% elseif permission == 'WRITE' %}
+        <span class="badge-medical" style="background-color: #dcfce7; color: #15803d; font-weight: 600; padding: 4px 10px; border-radius: 50px;">
+            ✏️ Modification
+        </span>
+    {% else %}
+        <span class="badge-medical" style="background-color: #f1f5f9; color: #475569; font-weight: 600; padding: 4px 10px; border-radius: 50px;">
+            ❓ {{ permission }}
+        </span>
+    {% endif %}
+</td>

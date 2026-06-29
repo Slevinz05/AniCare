@@ -1,96 +1,219 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Animal
-{% endblock %}
+{% block title %}Fiche de {{ animal.name }} - AniCare{% endblock %}
 
 {% block body %}
-	<h1>Animal</h1>
+<div class="container py-4">
+    <div class="card anicare-card overflow-hidden">
+        <div class="card-header medical-header p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <p class="page-eyebrow mb-2">Fiche clinique</p>
 
-	<table class="table">
-		<tbody>
-			<tr>
-				<th>Id</th>
-				<td>{{ animal.id }}</td>
-			</tr>
-			<tr>
-				<th>Name</th>
-				<td>{{ animal.name }}</td>
-			</tr>
-			<tr>
-				<th>Species</th>
-				<td>{{ animal.species }}</td>
-			</tr>
-			<tr>
-				<th>Breed</th>
-				<td>{{ animal.breed }}</td>
-			</tr>
-			<tr>
-				<th>BirthDate</th>
-				<td>{{ animal.birthDate ? animal.birthDate|date('Y-m-d') : '' }}</td>
-			</tr>
-			<tr>
-				<th>Gender</th>
-				<td>{{ animal.gender }}</td>
-			</tr>
-			<tr>
-				<th>Weight</th>
-				<td>{{ animal.weight }}</td>
-			</tr>
-			<tr>
-				<th>BloodType</th>
-				<td>{{ animal.bloodType }}</td>
-			</tr>
-			<tr>
-				<th>IdentificationNumber</th>
-				<td>{{ animal.identificationNumber }}</td>
-			</tr>
-		</tbody>
-	</table>
+                    <h1 class="page-title mb-1">
+                        {{ animal.name }}
+                    </h1>
 
-	<hr class="my-5">
+                    <p class="page-subtitle mb-0">
+                        Identifiant dossier : #{{ animal.id }}
+                    </p>
+                </div>
 
-	<h2>📋 Carnet de santé de
-		{{ animal.name }}</h2>
+                <div>
+                    {{ include('_partials/_gender_badge.html.twig', {'gender': animal.gender}) }}
+                </div>
+            </div>
+        </div>
 
-	{% if animal.healthBookEntries is empty %}
-		<p class="text-muted">Aucune entrée pour le moment dans le carnet de santé.</p>
-	{% else %}
-		<table class="table table-striped mt-3">
-			<thead>
-				<tr>
-					<th>Date</th>
-					<th>Type</th>
-					<th>Titre</th>
-					<th>Vétérinaire</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for entry in animal.healthBookEntries %}
-					<tr>
-						<td>{{ entry.date|date('d/m/Y') }}</td>
-						<td>
-							<span class="badge bg-secondary">{{ entry.type }}</span>
-						</td>
-						<td>
-							<strong>{{ entry.title }}</strong>
-						</td>
-						<td>{{ entry.veterinarianName ?? 'Non spécifié' }}</td>
-						<td>
-							<a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
-							<a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
-						</td>
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	{% endif %}
+        <div class="card-body p-4">
+            <div class="table-responsive mb-5">
+                <table class="table table-hover table-medical align-middle mb-0">
+                    <tbody>
+                        <tr>
+                            <th style="width: 35%;">Numéro d’identification</th>
+                            <td>
+                                <strong class="text-teal">
+                                    {{ animal.identificationNumber ?: 'Non renseigné' }}
+                                </strong>
+                            </td>
+                        </tr>
 
-	<a href="{{ path('app_health_book_entry_new') }}" class="btn btn-success mt-2">➕ Ajouter un soin</a>
+                        <tr>
+                            <th>Espèce / Race</th>
+                            <td>
+                                {{ animal.species }}
+                                {% if animal.breed %}
+                                    <span class="text-secondary">({{ animal.breed }})</span>
+                                {% endif %}
+                            </td>
+                        </tr>
 
-	<a href="{{ path('app_animal_index') }}">back to list</a>
+                        <tr>
+                            <th>Date de naissance</th>
+                            <td>
+                                {{ animal.birthDate ? animal.birthDate|date('d/m/Y') : 'Non renseignée' }}
+                            </td>
+                        </tr>
 
-	<a href="{{ path('app_animal_edit', {'id': animal.id}) }}">edit</a>
+                        <tr>
+                            <th>Poids actuel</th>
+                            <td>
+                                <span class="badge-medical badge-weight">
+                                    {{ animal.weight ? animal.weight ~ ' kg' : 'Non renseigné' }}
+                                </span>
+                            </td>
+                        </tr>
 
-	{{ include('animal/_delete_form.html.twig') }}
+                        <tr>
+                            <th>Groupe sanguin</th>
+                            <td>
+                                {% if animal.bloodType %}
+                                    <span class="badge-medical badge-neutral">
+                                        {{ animal.bloodType }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-secondary">Non déterminé</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <section class="mb-5">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                    <div>
+                        <p class="page-eyebrow mb-2">Documents</p>
+                        <h2 class="h4 page-title mb-0">
+                            Documents de l’animal
+                        </h2>
+                    </div>
+
+                    <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">
+                        Ajouter un document
+                    </a>
+                </div>
+
+                {% if animal.documents is empty %}
+                    <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                        Aucun document n’est encore associé à cet animal.
+                    </div>
+                {% else %}
+                    <div class="document-list">
+                        {% for document in animal.documents %}
+                            <a 
+                                href="{{ asset('uploads/animals/' ~ document.fileName) }}" 
+                                target="_blank" 
+                                rel="noopener"
+                                class="document-item"
+                            >
+                                <span class="document-name">
+                                    {{ document.originalName|default(document.fileName) }}
+                                </span>
+
+                                <span class="document-meta">
+                                    {% if document.size is defined %}
+                                        {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                    {% endif %}
+
+                                    {% if document.uploadedAt is defined %}
+                                        · {{ document.uploadedAt|date('d/m/Y') }}
+                                    {% endif %}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </section>
+
+            <section>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                    <div>
+                        <p class="page-eyebrow mb-2">Suivi vétérinaire</p>
+
+                        <h2 class="h4 page-title mb-0">
+                            Historique médical
+                        </h2>
+                    </div>
+
+                    <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary btn-sm">
+                        Ajouter un acte
+                    </a>
+                </div>
+
+                {% if animal.healthBookEntries is empty %}
+                    <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                        Aucun acte médical n’est enregistré pour le moment.
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-medical align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date du soin</th>
+                                    <th>Type</th>
+                                    <th>Acte</th>
+                                    <th>Vétérinaire</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for entry in animal.healthBookEntries %}
+                                    {% set entry_type = entry.type|default('')|lower %}
+
+                                    <tr>
+                                        <td>
+                                            <strong>{{ entry.date|date('d/m/Y') }}</strong>
+                                        </td>
+
+                                        <td>
+                                            {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
+                                                <span class="badge-medical badge-vaccin">Vaccination</span>
+                                            {% elseif entry_type == 'chirurgie' %}
+                                                <span class="badge-medical badge-surgery">Chirurgie</span>
+                                            {% else %}
+                                                <span class="badge-medical badge-neutral">
+                                                    {{ entry.type }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            <strong class="text-teal">{{ entry.title }}</strong>
+                                        </td>
+
+                                        <td>
+                                            Dr. {{ entry.veterinarianName ?? 'Non renseigné' }}
+                                        </td>
+
+                                        <td class="text-end">
+                                            <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-outline-primary btn-sm">
+                                                Consulter
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </section>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-5 pt-4 border-top border-anicare">
+                <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary">
+                    Retour à la liste
+                </a>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-primary">
+                        Modifier le profil
+                    </a>
+
+                    {{ include('animal/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

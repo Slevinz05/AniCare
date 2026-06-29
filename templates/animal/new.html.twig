@@ -1,11 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Animal{% endblock %}
+{% block title %}Ajouter un animal - AniCare{% endblock %}
 
 {% block body %}
-    <h1>Create new Animal</h1>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card form-card">
+                <div class="card-body p-0">
 
-    {{ include('animal/_form.html.twig') }}
+                    <div class="mb-4 pb-4 border-bottom border-anicare">
+                        <p class="page-eyebrow mb-2">Nouveau compagnon</p>
 
-    <a href="{{ path('app_animal_index') }}">back to list</a>
+                        <h1 class="page-title mb-2">
+                            ➕ Ajouter un animal
+                        </h1>
+
+                        <p class="page-subtitle mb-0">
+                            Créez son profil pour commencer le suivi de son livret médical.
+                        </p>
+                    </div>
+
+                    {{ include('animal/_form.html.twig', {
+                        'button_label': 'Créer le profil'
+                    }) }}
+
+                    <div class="mt-4 pt-4 border-top border-anicare">
+                        <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary">
+                            ← Retour à la liste
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
