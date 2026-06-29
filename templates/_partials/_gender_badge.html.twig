@@ -1,0 +1,7 @@
+{% if gender == 'Mâle' %}
+    <span style="color: #0284c7; font-weight: bold;">♂ Mâle</span>
+{% elseif gender == 'Femelle' %}
+    <span style="color: #db2777; font-weight: bold;">♀ Femelle</span>
+{% else %}
+    <span>{{ gender }}</span>
+{% endif %}

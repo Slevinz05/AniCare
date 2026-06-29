@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}HealthBookEntry index{% endblock %}
+
+{% block body %}
+    <h1>HealthBookEntry index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>VeterinarianName</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for health_book_entry in health_book_entries %}
+            <tr>
+                <td>{{ health_book_entry.id }}</td>
+                <td>{{ animal_share.animal.name }}</td>
+                <td>{{ health_book_entry.title }}</td>
+                <td>{{ health_book_entry.type }}</td>
+                <td>{{ health_book_entry.date ? health_book_entry.date|date('Y-m-d') : '' }}</td>
+                <td>{{ health_book_entry.description }}</td>
+                <td>{{ health_book_entry.veterinarianName }}</td>
+                <td>
+                    <a href="{{ path('app_health_book_entry_show', {'id': health_book_entry.id}) }}">show</a>
+                    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_health_book_entry_new') }}">Create new</a>
+{% endblock %}

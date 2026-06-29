@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AnimalShare index{% endblock %}
+
+{% block body %}
+    <h1>AnimalShare index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>SharedWithEmail</th>
+                <th>PermissionLevel</th>
+                <th>CreatedAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for animal_share in animal_shares %}
+            <tr>
+                <td>{{ animal_share.id }}</td>
+                <td>{{ animal_share.animal.name }}</td>
+                <td>{{ animal_share.sharedWithEmail }}</td>
+                {{ include('animal_share/_permission_badge.html.twig', {'permission': animal_share.permissionLevel}) }}
+                <td>{{ animal_share.createdAt ? animal_share.createdAt|date('Y-m-d') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_animal_share_show', {'id': animal_share.id}) }}">show</a>
+                    <a href="{{ path('app_animal_share_edit', {'id': animal_share.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_animal_share_new') }}">Create new</a>
+{% endblock %}

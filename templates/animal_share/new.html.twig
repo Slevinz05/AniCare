@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New AnimalShare{% endblock %}
+
+{% block body %}
+    <h1>Create new AnimalShare</h1>
+
+    {{ include('animal_share/_form.html.twig') }}
+
+    <a href="{{ path('app_animal_share_index') }}">back to list</a>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit AnimalShare{% endblock %}
+
+{% block body %}
+    <h1>Edit AnimalShare</h1>
+
+    {{ include('animal_share/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_animal_share_index') }}">back to list</a>
+
+    {{ include('animal_share/_delete_form.html.twig') }}
+{% endblock %}

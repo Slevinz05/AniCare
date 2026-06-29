@@ -1,0 +1,7 @@
+{% if permission == 'READ' %}
+    <span class="badge bg-info text-dark">👁️ Lecture seule</span>
+{% elseif permission == 'WRITE' %}
+    <span class="badge bg-warning text-dark">✏️ Modification</span>
+{% else %}
+    <span class="badge bg-secondary">{{ permission }}</span>
+{% endif %}

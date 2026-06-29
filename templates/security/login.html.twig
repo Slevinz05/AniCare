@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - AniCare
+{% endblock %}
+
+{% block body %}
+	<div class="form-card auth-card mx-auto">
+		<form method="post" class="anicare-form">
+			{% if error %}
+				<div class="alert alert-danger">
+					{{ error.messageKey|trans(error.messageData, 'security') }}
+				</div>
+			{% endif %}
+
+			{% if app.user %}
+				<div class="alert alert-info mb-3">
+					Vous êtes connecté en tant que
+					<strong>{{ app.user.userIdentifier }}</strong>,
+					<a href="{{ logout_path() }}" class="alert-link">se déconnecter</a>.
+				</div>
+			{% endif %}
+
+			<div class="text-center mb-2">
+				<h1 class="page-title h3">Connexion à AniCare</h1>
+				<p class="page-subtitle">Accédez à votre espace personnel.</p>
+			</div>
+
+			<div class="form-field">
+				<label for="inputEmail" class="form-label">Adresse email</label>
+				<input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
+			</div>
+
+			<div class="form-field">
+				<label for="inputPassword" class="form-label">Mot de passe</label>
+				<input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+			</div>
+
+			<input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+			<div class="form-field d-flex align-items-center gap-2">
+				<input type="checkbox" name="_remember_me" id="_remember_me" class="form-check-input m-0">
+				<label class="form-check-label" for="_remember_me" style="cursor: pointer;">Se souvenir de moi</label>
+			</div>
+
+			<button class="btn btn-lg w-100" type="submit">Se connecter</button>
+		</form>
+	</div>
+{% endblock %}

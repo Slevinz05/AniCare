@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bienvenue sur AniCare !{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="jumbotron text-center bg-light p-5 rounded shadow-sm mb-5">
+        <h1 class="display-4 text-primary">🐾 Bienvenue sur AniCare</h1>
+        <p class="lead">Le livret médical numérique intelligent pour le suivi de santé de vos animaux de compagnie.</p>
+        <hr class="my-4">
+        <p>Gérez les fiches d'identité, suivez l'historique des soins et partagez les dossiers de santé en toute sécurité.</p>
+        <div class="mt-4">
+            <a href="{{ path('app_animal_index') }}" class="btn btn-primary btn-lg me-2">📋 Consulter les animaux</a>
+            <a href="{{ path('app_animal_new') }}" class="btn btn-outline-success btn-lg">➕ Enregistrer un animal</a>
+        </div>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-white shadow-sm">
+                <h3>🩺 Suivi Médical</h3>
+                <p class="text-muted">Consignez chaque traitement, vaccin ou consultation vétérinaire directement dans le carnet de santé électronique.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-white shadow-sm">
+                <h3>🤝 Partage Sécurisé</h3>
+                <p class="text-muted">Donnez des accès temporaires ou permanents en lecture ou écriture aux pet-sitters ou aux cliniques vétérinaires.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-white shadow-sm">
+                <h3>📇 Fiche d'Identité</h3>
+                <p class="text-muted">Centralisez les numéros d'identification (puce/tatouage), groupe sanguin, poids et spécificités de chaque compagnon.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
