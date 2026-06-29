@@ -1,0 +1,17 @@
+.git
+.gitignore
+.idea
+.vscode
+
+var/cache/*
+var/log/*
+
+vendor
+node_modules
+
+.env.local
+.env.*.local
+
+docker-compose.override.yml
+
+public/uploads/*

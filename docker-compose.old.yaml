@@ -14,16 +14,9 @@ services:
       APP_ENV: dev
       APP_DEBUG: "1"
       APP_SECRET: "change-me-for-local-dev"
-
-      DATABASE_URL: "mysql://anicare:anicare@database:3306/anicare?serverVersion=8.4.0&charset=utf8mb4"
-      DATABASE_HOST: database
-      DATABASE_PORT: 3306
-
-      MAILER_DSN: "smtp://mailer:1025"
-      RUN_MIGRATIONS: "0"
+      DATABASE_URL: "mysql://anicare:anicare@database:3306/anicare?serverVersion=8.4&charset=utf8mb4"
     depends_on:
       - database
-      - mailer
 
   database:
     image: mysql:8.4
@@ -39,15 +32,29 @@ services:
     volumes:
       - anicare_database_data:/var/lib/mysql
 
-  mailer:
-    image: axllent/mailpit
-    container_name: anicare_mailer
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: anicare_phpmyadmin
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "8081:80"
+    environment:
+      PMA_HOST: database
+      PMA_USER: anicare
+      PMA_PASSWORD: anicare
+    depends_on:
+      - database
 
 volumes:
   anicare_database_data:
   anicare_var:
   anicare_uploads:
+
+  environment:
+  APP_ENV: dev
+  APP_DEBUG: "1"
+  APP_SECRET: "change-me-for-local-dev"
+  DATABASE_URL: "mysql://anicare:anicare@database:3306/anicare?serverVersion=8.4&charset=utf8mb4"
+  DATABASE_HOST: database
+  DATABASE_PORT: 3306
+  RUN_MIGRATIONS: "0"
