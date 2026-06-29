@@ -1,3 +1,4 @@
+{# templates/_partials/_header.html.twig ou directement inséré dans base.html.twig #}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
@@ -6,20 +7,44 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+        
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+            <!-- Liens principaux à gauche (ou à droite selon préférences) -->
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_animal_index') }}">Mes Animaux</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_animal_share_index') }}">Partages</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_health_book_entry_index') }}">Activité Médicale</a>
-                </li>
+                {# Ces liens peuvent être masqués si l'utilisateur n'est pas connecté pour éviter les erreurs ou frustrations UI #}
+                {% if app.user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_animal_index') }}">Mes Animaux</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_animal_share_index') }}">Partages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_health_book_entry_index') }}">Activité Médicale</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <!-- Zone d'authentification à droite -->
+            <ul class="navbar-nav ms-auto gap-2 align-items-center">
+                {% if app.user %}
+                    <li class="nav-item text-light me-2">
+                        <small>Connecté en tant que <strong>{{ app.user.userIdentifier }}</strong></small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm" href="{{ path('app_logout') }}">Déconnexion</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm" href="{{ path('app_login') }}">Connexion</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light text-primary btn-sm fw-bold" href="{{ path('app_register') }}">Inscription</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
