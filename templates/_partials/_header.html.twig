@@ -1,3 +1,4 @@
+{# templates/_header.html.twig #}
 {% set current_route = app.request.attributes.get('_route') %}
 
 <nav class="navbar navbar-expand-xl navbar-light anicare-navbar sticky-top">
@@ -22,23 +23,50 @@
 
         <div class="collapse navbar-collapse mt-3 mt-xl-0" id="navbarNav">
 
-            <ul class="navbar-nav mx-xl-auto mb-3 mb-xl-0 gap-xl-1">
+            {# Changement de mx-xl-auto à me-xl-auto pour aligner la navigation à gauche après le logo #}
+            <ul class="navbar-nav me-xl-auto mb-3 mb-xl-0 gap-xl-1">
                 <li class="nav-item">
                     <a
                         class="nav-link text-nowrap {{ current_route == 'app_home' ? 'active' : '' }}"
-                        href="{{ path('app_home') }}"
-                    >
+                        href="{{ path('app_home') }}">
                         Accueil
                     </a>
                 </li>
 
+                {# ==========================================================================
+                   LIENS PUBLICS (Visibles connectés OU déconnectés)
+                   ========================================================================== #}
+                <li class="nav-item">
+                    <a
+                        class="nav-link text-nowrap {{ current_route == 'app_about' ? 'active' : '' }}"
+                        href="{{ path('app_about'|default('#')) }}">
+                        À propos
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link text-nowrap {{ current_route == 'app_contact' ? 'active' : '' }}"
+                        href="{{ path('app_contact'|default('#')) }}">
+                        Contact
+                    </a>
+                </li>
+
+                {# ==========================================================================
+                   LIENS MÉTIEER PRIVÉS (Visibles uniquement si connecté)
+                   ========================================================================== #}
                 {% if app.user %}
                     <li class="nav-item">
                         <a
                             class="nav-link text-nowrap {{ (current_route starts with 'app_animal_') and not (current_route starts with 'app_animal_share') ? 'active' : '' }}"
                             href="{{ path('app_animal_index') }}"
                         >
-                            Mes animaux
+                            {# Libellé dynamique selon le rôle de l'utilisateur #}
+                            {% if is_granted('ROLE_PRO') %}
+                                🩺 Animaux suivis
+                            {% else %}
+                                Mes animaux
+                            {% endif %}
                         </a>
                     </li>
 
@@ -73,21 +101,26 @@
 
             <div class="navbar-actions d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center gap-2 ms-xl-3">
                 {% if app.user %}
-                    <span class="navbar-user small d-none d-xxl-inline-flex text-nowrap">
+                    <span class="navbar-user small d-none d-xxl-inline-flex text-nowrap align-items-center">
                         Bonjour, 
                         <strong class="ms-1">{{ app.user.userIdentifier }}</strong>
+                        
+                        {# Badge distinctif pour les professionnels #}
+                        {% if is_granted('ROLE_PRO') %}
+                            <span class="badge bg-anicare-soft text-teal border-anicare ms-2" style="font-size: 0.7rem; font-weight: 800;">PRO</span>
+                        {% endif %}
                     </span>
 
-                    <a class="btn btn-outline-danger btn-sm px-1 text-nowrap" href="{{ path('app_logout') }}">
+                    <a class="btn btn-outline-danger btn-sm px-3 text-nowrap" href="{{ path('app_logout') }}">
                         Déconnexion
                     </a>
                 {% else %}
                     <a class="btn btn-outline-primary btn-sm px-3 text-nowrap" href="{{ path('app_login') }}">
-                        🔑 Connexion
+                        Connexion
                     </a>
 
                     <a class="btn btn-primary btn-sm px-3 shadow-sm text-nowrap" href="{{ path('app_register') }}">
-                        ✨ Inscription
+                        Inscription
                     </a>
                 {% endif %}
             </div>

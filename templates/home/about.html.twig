@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}À propos de {{ project_name }}{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-4 text-success fw-bold">À propos d'AniCare</h1>
+            <p class="lead text-muted mt-3">
+                AniCare est une plateforme dédiée au bien-être animal, conçue pour centraliser le suivi médical, les rendez-vous et le carnet de santé de vos compagnons.
+            </p>
+            <p>
+                Né de la volonté de simplifier le quotidien des propriétaires d'animaux et des professionnels de santé (vétérinaires, refuges), notre outil offre une interface intuitive et sécurisée pour ne plus jamais oublier un vaccin ou un rappel de soin.
+            </p>
+        </div>
+        <div class="col-md-6 text-center">
+            <!-- Emplacement pour une illustration vectorielle ou image de marque -->
+            <div class="p-5 bg-light rounded-3 border">
+                <i class="bi bi-heart-pulse text-success" style="font-size: 4rem;"></i>
+                <p class="mt-3 fw-semibold">Le carnet de santé réinventé.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

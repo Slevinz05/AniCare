@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AnimalRepository::class)]
 class Animal
@@ -51,6 +52,28 @@ class Animal
      */
     #[ORM\OneToMany(targetEntity: AnimalShare::class, mappedBy: 'animal')]
     private Collection $animalShares;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\All([
+        new Assert\File(
+            maxSize: '10M',
+            mimeTypes: [
+                'application/pdf',
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ],
+            maxSizeMessage: 'Le fichier est trop volumineux ({{ size }} {{ suffix }}). La taille maximale autorisée est {{ limit }} {{ suffix }}.',
+            mimeTypesMessage: 'Veuillez ajouter un fichier valide : PDF, image ou document Word.',
+        )
+    ])]
+    private ?array $documents = [];
+
+    #[ORM\ManyToOne(inversedBy: 'animals')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $owner = null;
 
     public function __construct()
     {
@@ -180,7 +203,6 @@ class Animal
     public function removeHealthBookEntry(HealthBookEntry $healthBookEntry): static
     {
         if ($this->healthBookEntries->removeElement($healthBookEntry)) {
-            // set the owning side to null (unless already changed)
             if ($healthBookEntry->getAnimal() === $this) {
                 $healthBookEntry->setAnimal(null);
             }
@@ -210,7 +232,6 @@ class Animal
     public function removeAnimalShare(AnimalShare $animalShare): static
     {
         if ($this->animalShares->removeElement($animalShare)) {
-            // set the owning side to null (unless already changed)
             if ($animalShare->getAnimal() === $this) {
                 $animalShare->setAnimal(null);
             }
@@ -218,9 +239,6 @@ class Animal
 
         return $this;
     }
-
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $documents = [];
 
     public function getDocuments(): array
     {
@@ -250,6 +268,18 @@ class Animal
             $this->getDocuments(),
             fn(array $document) => ($document['fileName'] ?? null) !== $fileName
         ));
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
 
         return $this;
     }

@@ -162,7 +162,6 @@ a:hover {
     transform: translateY(-1px);
 }
 
-/* Bouton par défaut si tu utilises seulement class="btn" */
 .btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark) {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
@@ -520,7 +519,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   Footer
+   Pied de page
    ========================================================================== */
 
 .site-footer {
@@ -580,7 +579,221 @@ a:hover {
 }
 
 /* ==========================================================================
-   Responsive
+   Formulaire Animal (Responsive et Général)
+   ========================================================================== */
+
+.anicare-form {
+    width: 100%;
+}
+
+.anicare-form .form-label {
+    margin-bottom: 0.45rem;
+    color: var(--primary-hover);
+    font-weight: 800;
+}
+
+.anicare-form .form-control,
+.anicare-form .form-select {
+    min-height: 48px;
+    border: 2px solid #dbeafe;
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.anicare-form .form-control::placeholder {
+    color: #94a3b8;
+}
+
+.anicare-form .form-control:focus,
+.anicare-form .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
+}
+
+.anicare-form .input-group-text {
+    border: 2px solid #dbeafe;
+    border-left: 0;
+    background-color: var(--soft-teal);
+    color: var(--primary-hover);
+    font-weight: 800;
+}
+
+.anicare-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.anicare-radio-item {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.anicare-radio-item:hover {
+    background-color: var(--soft-teal);
+    border-color: var(--primary-color);
+}
+
+.anicare-radio-item .form-check-input {
+    margin-top: 0.2rem;
+    border-color: var(--primary-color);
+}
+
+.anicare-radio-item .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.anicare-radio-item .form-check-label {
+    color: var(--secondary-color);
+    font-weight: 700;
+}
+
+.anicare-form .invalid-feedback,
+.anicare-form .form-error-message,
+.anicare-form ul {
+    margin-top: 0.4rem;
+    color: var(--danger-color);
+    font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   Carnet de Santé - Actes Médicaux
+   ========================================================================== */
+
+.health-entry-form {
+    width: 100%;
+}
+
+.health-entry-form .form-label {
+    margin-bottom: 0.45rem;
+    color: var(--primary-hover);
+    font-weight: 800;
+}
+
+.health-entry-form .form-control,
+.health-entry-form .form-select {
+    min-height: 48px;
+    border: 2px solid #dbeafe;
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.health-entry-form textarea.form-control {
+    min-height: 130px;
+    resize: vertical;
+}
+
+.health-entry-form .form-control::placeholder {
+    color: #94a3b8;
+}
+
+.health-entry-form .form-control:focus,
+.health-entry-form .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
+}
+
+.health-entry-table .health-entry-title {
+    color: var(--secondary-color);
+    font-weight: 800;
+}
+
+.health-entry-description {
+    max-width: 420px;
+    margin-top: 0.2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.health-entry-note {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.badge-consultation {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.health-entry-table .btn {
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Documents & Pièces Jointes
+   ========================================================================== */
+
+.file-upload-card {
+    background-color: var(--soft-teal);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+}
+
+.file-upload-card .form-label {
+    color: var(--primary-hover);
+    font-weight: 800;
+}
+
+.file-upload-card .form-text {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.document-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.document-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.document-item:hover {
+    background-color: var(--soft-teal);
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.document-name {
+    font-weight: 700;
+    word-break: break-word;
+}
+
+.document-meta {
+    flex-shrink: 0;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   Media Queries et Ajustements Mobiles
    ========================================================================== */
 
 @media (max-width: 768px) {
@@ -602,242 +815,26 @@ a:hover {
     .table-medical td {
         padding: 0.85rem;
     }
+}
 
-
-    /* ==========================================================================
-   Formulaire animal
-   ========================================================================== */
-
-    .anicare-form {
-        width: 100%;
-    }
-
-    .anicare-form .form-label {
-        margin-bottom: 0.45rem;
-        color: var(--primary-hover);
-        font-weight: 800;
-    }
-
-    .anicare-form .form-control,
-    .anicare-form .form-select {
-        min-height: 48px;
-        border: 2px solid #dbeafe;
-        border-radius: var(--radius-sm);
-        background-color: #ffffff;
-        color: var(--secondary-color);
-        font-weight: 500;
-    }
-
-    .anicare-form .form-control::placeholder {
-        color: #94a3b8;
-    }
-
-    .anicare-form .form-control:focus,
-    .anicare-form .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
-    }
-
-    .anicare-form .input-group-text {
-        border: 2px solid #dbeafe;
-        border-left: 0;
-        background-color: var(--soft-teal);
-        color: var(--primary-hover);
-        font-weight: 800;
-    }
-
-    .anicare-radio-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-
-    .anicare-radio-item {
-        margin: 0;
-        padding: 0.85rem 1rem;
-        border: 2px solid var(--border-color);
-        border-radius: var(--radius-sm);
-        background-color: #ffffff;
-        transition: all 0.2s ease;
-    }
-
-    .anicare-radio-item:hover {
-        background-color: var(--soft-teal);
-        border-color: var(--primary-color);
-    }
-
-    .anicare-radio-item .form-check-input {
-        margin-top: 0.2rem;
-        border-color: var(--primary-color);
-    }
-
-    .anicare-radio-item .form-check-input:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    .anicare-radio-item .form-check-label {
-        color: var(--secondary-color);
-        font-weight: 700;
-    }
-
-    .anicare-form .invalid-feedback,
-    .anicare-form .form-error-message,
-    .anicare-form ul {
-        margin-top: 0.4rem;
-        color: var(--danger-color);
-        font-size: 0.875rem;
-    }
-
-    /* ==========================================================================
-   Health Book Entry - Actes médicaux
-   ========================================================================== */
-
-    .health-entry-form {
-        width: 100%;
-    }
-
-    .health-entry-form .form-label {
-        margin-bottom: 0.45rem;
-        color: var(--primary-hover);
-        font-weight: 800;
-    }
-
-    .health-entry-form .form-control,
-    .health-entry-form .form-select {
-        min-height: 48px;
-        border: 2px solid #dbeafe;
-        border-radius: var(--radius-sm);
-        background-color: #ffffff;
-        color: var(--secondary-color);
-        font-weight: 500;
-    }
-
-    .health-entry-form textarea.form-control {
-        min-height: 130px;
-        resize: vertical;
-    }
-
-    .health-entry-form .form-control::placeholder {
-        color: #94a3b8;
-    }
-
-    .health-entry-form .form-control:focus,
-    .health-entry-form .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
-    }
-
-    .health-entry-table .health-entry-title {
-        color: var(--secondary-color);
-        font-weight: 800;
-    }
-
-    .health-entry-description {
-        max-width: 420px;
-        margin-top: 0.2rem;
-        color: #64748b;
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-
-    .health-entry-note {
-        background-color: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-sm);
-        padding: 1rem;
-        color: var(--secondary-color);
-        line-height: 1.6;
-    }
-
-    .badge-consultation {
-        background-color: #e0f2fe;
-        color: #0369a1;
-    }
-
-    .health-entry-table .btn {
+@media (max-width: 767.98px) {
+    .health-entry-table th,
+    .health-entry-table td {
         white-space: nowrap;
     }
 
-    @media (max-width: 767.98px) {
-
-        .health-entry-table th,
-        .health-entry-table td {
-            white-space: nowrap;
-        }
-
-        .health-entry-description {
-            max-width: 260px;
-        }
+    .health-entry-description {
+        max-width: 260px;
     }
+}
 
-    /* ==========================================================================
-   Documents / pièces jointes
-   ========================================================================== */
-
-    .file-upload-card {
-        background-color: var(--soft-teal);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        padding: 1.25rem;
-    }
-
-    .file-upload-card .form-label {
-        color: var(--primary-hover);
-        font-weight: 800;
-    }
-
-    .file-upload-card .form-text {
-        color: #64748b;
-        font-size: 0.9rem;
-    }
-
-    .document-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
+@media (max-width: 575.98px) {
     .document-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.9rem 1rem;
-        background-color: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-sm);
-        color: var(--secondary-color);
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-
-    .document-item:hover {
-        background-color: var(--soft-teal);
-        border-color: var(--primary-color);
-        color: var(--secondary-color);
-        transform: translateY(-1px);
-    }
-
-    .document-name {
-        font-weight: 700;
-        word-break: break-word;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .document-meta {
-        flex-shrink: 0;
-        color: #64748b;
-        font-size: 0.85rem;
-    }
-
-    @media (max-width: 575.98px) {
-        .document-item {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .document-meta {
-            font-size: 0.8rem;
-        }
+        font-size: 0.8rem;
     }
 }

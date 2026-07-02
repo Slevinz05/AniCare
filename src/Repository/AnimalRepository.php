@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Animal;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,7 +17,19 @@ class AnimalRepository extends ServiceEntityRepository
         parent::__construct($registry, Animal::class);
     }
 
-//    /**
+    public function findAccessibleAnimals(User $user): array
+    {
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.animalShares', 's')
+            ->where('a.owner = :user')             // Cas 1 : Il est le propriétaire
+            ->orWhere('s.sharedWithEmail = :email') // Cas 2 : L'animal lui est partagé
+            ->setParameter('user', $user)
+            ->setParameter('email', $user->getEmail())
+            ->getQuery()
+            ->getResult();
+    }
+
+    //    /**
 //     * @return Animal[] Returns an array of Animal objects
 //     */
 //    public function findByExampleField($value): array
@@ -31,7 +44,7 @@ class AnimalRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Animal
+    //    public function findOneBySomeField($value): ?Animal
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

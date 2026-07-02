@@ -1,19 +1,91 @@
+{# templates/registration/register.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Inscription - AniCare{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            
+            {# Carte de formulaire stylisée AniCare #}
+            <div class="form-card shadow-anicare p-4 p-md-5">
+                
+                <div class="text-center mb-4">
+                    <h1 class="page-title mt-2 mb-1">Créer un compte</h1>
+                    <p class="page-subtitle small">Rejoignez AniCare pour suivre au mieux la santé de vos animaux.</p>
+                </div>
 
-    {{ form_errors(registrationForm) }}
+                {# Gestion des erreurs globales du formulaire #}
+                {% if form_errors(registrationForm) %}
+                    <div class="alert alert-danger shadow-sm mb-4">
+                        {{ form_errors(registrationForm) }}
+                    </div>
+                {% endif %}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+                {{ form_start(registrationForm, {'attr': {'class': 'anicare-form'}}) }}
+                    
+                    {# Champ Adresse E-mail #}
+                    <div class="mb-4">
+                        {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                        <div class="invalid-feedback">{{ form_errors(registrationForm.email) }}</div>
+                    </div>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+                    {# Champ Mot de Passe #}
+                    <div class="mb-4">
+                        {{ form_label(registrationForm.plainPassword, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                        <div class="invalid-feedback">{{ form_errors(registrationForm.plainPassword) }}</div>
+                    </div>
+
+                    {# Champ Type de Profil (Boutons Radio intégrés) #}
+                    <div class="mb-4">
+                        {{ form_label(registrationForm.accountType, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="anicare-radio-group d-flex flex-column gap-2">
+                            {% for child in registrationForm.accountType %}
+                                <div class="anicare-radio-item d-flex align-items-center">
+                                    {{ form_widget(child, {'attr': {'class': 'form-check-input me-2 m-0'}}) }}
+                                    {{ form_label(child, null, {'label_attr': {'class': 'form-check-label w-100 style-pointer'}}) }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="invalid-feedback d-block">{{ form_errors(registrationForm.accountType) }}</div>
+                    </div>
+
+                    {# Case à cocher Conditions d'Utilisation #}
+                    <div class="form-check mb-4 d-flex align-items-center gap-2">
+                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input m-0'}}) }}
+                        {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label small text-secondary style-pointer'}}) }}
+                        <div class="invalid-feedback d-block">{{ form_errors(registrationForm.agreeTerms) }}</div>
+                    </div>
+
+                    {# Bouton de Soumission #}
+                    <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm text-uppercase letter-spacing-wide">
+                        S'inscrire
+                    </button>
+
+                {{ form_end(registrationForm) }}
+
+                <div class="text-center mt-4 pt-3 border-top border-light">
+                    <p class="text-muted small mb-0">
+                        Vous avez déjà un compte ? 
+                        <a href="{{ path('app_login') }}" class="fw-bold text-teal text-decoration-none">Connectez-vous</a>
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .style-pointer {
+        cursor: pointer;
+    }
+    .letter-spacing-wide {
+        letter-spacing: 0.05em;
+    }
+</style>
 {% endblock %}

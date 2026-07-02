@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Animal;
+use App\Entity\User;
 use App\Form\AnimalType;
 use App\Repository\AnimalRepository;
 use App\Service\DocumentUploader;
@@ -25,11 +26,23 @@ final class AnimalController extends AbstractController
     ) {
     }
 
-    #[Route(name: 'app_animal_index', methods: ['GET'])]
+    #[Route('/', name: 'app_animal_index', methods: ['GET'])]
     public function index(AnimalRepository $animalRepository): Response
     {
+        // 🔒 Récupère l'utilisateur connecté
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // 🛡️ Si l'utilisateur est un Administrateur, il peut tout voir (optionnel)
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $animals = $animalRepository->findAll();
+        } else {
+            // 🔑 Un utilisateur classique ne voit QUE ses animaux
+            $animals = $animalRepository->findBy(['owner' => $user]);
+        }
+
         return $this->render('animal/index.html.twig', [
-            'animals' => $animalRepository->findAll(),
+            'animals' => $animals,
         ]);
     }
 
@@ -38,23 +51,29 @@ final class AnimalController extends AbstractController
     {
         $animal = new Animal();
 
+        // 🔒 Sécurité : On récupère l'utilisateur connecté
+        /** @var User $user */
+        $user = $this->getUser();
+
         $form = $this->createForm(AnimalType::class, $animal);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleUploadedDocuments($form, $animal);
+            // 🔑 On associe l'animal à cet utilisateur précis
+            $animal->setOwner($user);
 
             $entityManager->persist($animal);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_animal_show', [
-                'id' => $animal->getId(),
-            ], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        // 💡 C'EST CE RETURN ICI QU'IL VOUS MANQUE :
+        // Il permet d'afficher la page du formulaire au premier chargement, 
+        // ou de réafficher le formulaire avec les erreurs si la validation a échoué.
         return $this->render('animal/new.html.twig', [
             'animal' => $animal,
-            'form' => $form,
+            'form' => $form->createView(), // ou '$form' selon votre version de Symfony
         ]);
     }
 

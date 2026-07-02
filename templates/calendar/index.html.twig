@@ -1,12 +1,10 @@
 {# templates/calendar/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Calendrier Médical - AniCare
-{% endblock %}
+{% block title %}Calendrier Médical - AniCare{% endblock %}
 
 {% block body %}
 <style>
-
 	.calendar-day-box:hover .add-action-indicator {
 		background-color: #0d9488 !important;
 		color: #ffffff !important;
@@ -98,52 +96,64 @@
 		<div class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm border">
 			<a href="{{ path('app_calendar', {'month': prevMonth, 'year': prevYear}) }}" class="btn btn-secondary btn-sm">◀</a>
 			<span class="fw-bold px-3 text-uppercase fs-6 text-teal" style="min-width: 165px; text-align: center;">
-				{{ currentMonthName }}
-				{{ currentYear }}
+				{{ currentMonthName }} {{ currentYear }}
 			</span>
 			<a href="{{ path('app_calendar', {'month': nextMonth, 'year': nextYear}) }}" class="btn btn-secondary btn-sm">▶</a>
 		</div>
 	</div>
 
-	<div class="calendar-days-grid">
-		{# 1. Cases vides du début de mois #}
-		{% if startOfWeekDay > 1 %}
-			{% for i in 1..(startOfWeekDay - 1) %}
-				<div class="calendar-day-box day-box-empty"></div>
+	{# Conteneur global du calendrier #}
+	<div class="calendar-container">
+		
+		{# Ligne d'en-tête pour le nom des colonnes #}
+		<div class="calendar-weekdays-grid">
+			<div>Lun</div>
+			<div>Mar</div>
+			<div>Mer</div>
+			<div>Jeu</div>
+			<div>Ven</div>
+			<div>Sam</div>
+			<div>Dim</div>
+		</div>
+
+		{# Grille principale contenant les cases des jours #}
+		<div class="calendar-days-grid">
+			
+			{# 1. Cases vides du début de mois #}
+			{% if startOfWeekDay > 1 %}
+				{% for i in 1..(startOfWeekDay - 1) %}
+					<div class="calendar-day-box day-box-empty"></div>
+				{% endfor %}
+			{% endif %}
+
+			{# 2. Cases réelles des jours #}
+			{% for day in 1..daysInMonth %}
+				{% set isToday = (day == 'now'|date('j') and currentMonth == 'now'|date('n') and currentYear == 'now'|date('Y')) %}
+				{% set targetDate = currentYear ~ '-' ~ (currentMonth < 10 ? '0' ~ currentMonth : currentMonth) ~ '-' ~ (day < 10 ? '0' ~ day : day) %}
+
+				<a href="{{ path('app_health_book_entry_new', {'preset_date': targetDate}) }}" class="calendar-day-box text-decoration-none text-dark position-relative {{ isToday ? 'current-today-box' : '' }}" style="cursor: pointer;">
+
+					<div class="d-flex justify-content-between align-items-center mb-1">
+						<span class="fw-bold small {{ isToday ? 'text-teal fs-6' : 'text-secondary' }}">
+							{{ day }}
+						</span>
+						<span class="add-action-indicator text-muted border rounded-circle d-flex align-items-center justify-content-center" style="width: 16px; height: 16px; font-size: 0.65rem; background-color: #f8fafc; font-weight: bold;">+</span>
+					</div>
+
+					<div class="day-events-list" onclick="event.stopPropagation();">
+						{% if entriesByDay[day] is defined %}
+							{% for entry in entriesByDay[day] %}
+								<a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="event-badge" title="{{ entry.animal.name ?? 'Animal' }} : {{ entry.title }}">
+									<strong>{{ entry.animal.name ?? 'Animal' }}</strong>: {{ entry.title }}
+								</a>
+							{% endfor %}
+						{% endif %}
+					</div>
+				</a>
 			{% endfor %}
-		{% endif %}
 
-		{# 2. ✅ Cases réelles des jours transformées en liens dynamiques #}
-		{% for day in 1..daysInMonth %}
-			{% set isToday = (day == 'now'|date('j') and currentMonth == 'now'|date('n') and currentYear == 'now'|date('Y')) %}
+		</div> {# Fin de .calendar-days-grid #}
+	</div> {# Fin de .calendar-container #}
+</div> {# Fin de .container #}
 
-			{# Construction de la date au format Y-m-d pour la passer en paramètre d'URL #}
-			{% set targetDate = currentYear ~ '-' ~ (currentMonth < 10 ? '0' ~ currentMonth : currentMonth) ~ '-' ~ (day < 10 ? '0' ~ day : day) %}
-
-			<a href="{{ path('app_health_book_entry_new', {'preset_date': targetDate}) }}" class="calendar-day-box text-decoration-none text-dark position-relative {{ isToday ? 'current-today-box' : '' }}" style="cursor: pointer;">
-
-				<div class="d-flex justify-content-between align-items-center mb-1">
-					<span class="fw-bold small {{ isToday ? 'text-teal fs-6' : 'text-secondary' }}">
-						{{ day }}
-					</span>
-
-					{# Petit bouton d'ajout discret qui apparaît au survol ou reste minimaliste #}
-					<span class="add-action-indicator text-muted border rounded-circle d-flex align-items-center justify-content-center" style="width: 16px; height: 16px; font-size: 0.65rem; background-color: #f8fafc; font-weight: bold;">+</span>
-				</div>
-
-				<div class="day-events-list" onclick="event.stopPropagation();">
-					{% if entriesByDay[day] is defined %}
-						{% for entry in entriesByDay[day] %}
-							<a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="event-badge" title="{{ entry.animal.name ?? 'Animal' }} : {{ entry.title }}">
-								<strong>{{ entry.animal.name ?? 'Animal' }}</strong>:
-								{{ entry.title }}
-							</a>
-						{% endfor %}
-					{% endif %}
-				</div>
-			</a>
-		{% endfor %}
-	</div>
-</div>
 {% endblock %}
-

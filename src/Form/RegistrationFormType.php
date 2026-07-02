@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -41,6 +42,22 @@ class RegistrationFormType extends AbstractType
                         min: 6,
                         minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.',
                         max: 4096,
+                    ),
+                ],
+            ])
+
+            // 🔘 AJOUT : Choix du type de compte (Boutons Radio)
+            ->add('accountType', ChoiceType::class, [
+                'label' => 'Type de profil',
+                'choices'  => [
+                    'Je suis un Particulier (Propriétaire d’animal)' => 'OWNER',
+                    'Je suis un Professionnel (Vétérinaire, Soignant, Éducateur...)' => 'PRO',
+                ],
+                'expanded' => true,  // true = boutons radio, false = liste déroulante <select>
+                'multiple' => false, // Choix unique obligatoire
+                'constraints' => [
+                    new NotBlank(
+                        message : 'Veuillez sélectionner un type de profil pour continuer.',
                     ),
                 ],
             ])

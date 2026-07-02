@@ -1,3 +1,4 @@
+# config/packages/security.yaml
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
@@ -41,8 +42,13 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+        # 🔒 Protection des fonctionnalités de l'application (Réservé aux comptes connectés)
+        - { path: ^/animal, roles: ROLE_USER }
+        - { path: ^/calendar, roles: ROLE_USER }
+        - { path: ^/health/book/entry, roles: ROLE_USER }
+
+        # Exemples optionnels pour la hiérarchie future :
         # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

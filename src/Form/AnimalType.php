@@ -11,8 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\All;
-use Symfony\Component\Validator\Constraints\File;
 
 class AnimalType extends AbstractType
 {
@@ -90,23 +88,7 @@ class AnimalType extends AbstractType
                 'attr' => [
                     'accept' => '.pdf,.jpg,.jpeg,.png,.webp,.doc,.docx',
                 ],
-                'help' => 'Vous pouvez ajouter un ou plusieurs fichiers : PDF, images ou documents Word.',
-                'constraints' => [
-                    new All([
-                        new File([
-                            'maxSize' => '5M',
-                            'mimeTypes' => [
-                                'application/pdf',
-                                'image/jpeg',
-                                'image/png',
-                                'image/webp',
-                                'application/msword',
-                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                            ],
-                            'mimeTypesMessage' => 'Veuillez ajouter un fichier valide : PDF, image ou document Word.',
-                        ]),
-                    ]),
-                ],
+                'help' => 'Vous pouvez ajouter un ou plusieurs fichiers (Taille max : 10 Mo par fichier).',
             ])
         ;
     }
