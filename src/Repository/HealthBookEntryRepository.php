@@ -71,4 +71,36 @@ class HealthBookEntryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findUpcomingReminders(int $daysAhead = 7): array
+    {
+        $today = new \DateTimeImmutable('today');
+        $threshold = $today->modify("+{$daysAhead} days");
+
+        return $this->createQueryBuilder('h')
+            ->join('h.animal', 'a')
+            ->join('a.owner', 'u')
+            ->where('h.nextReminderAt IS NOT NULL')
+            ->andWhere('h.nextReminderAt BETWEEN :today AND :threshold')
+            ->andWhere('u.acceptsNotifications = true')
+            ->setParameter('today', $today)
+            ->setParameter('threshold', $threshold)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOverdueReminders(): array
+    {
+        $today = new \DateTimeImmutable('today');
+
+        return $this->createQueryBuilder('h')
+            ->join('h.animal', 'a')
+            ->join('a.owner', 'u')
+            ->where('h.nextReminderAt IS NOT NULL')
+            ->andWhere('h.nextReminderAt < :today')
+            ->andWhere('u.acceptsNotifications = true')
+            ->setParameter('today', $today)
+            ->getQuery()
+            ->getResult();
+    }
 }

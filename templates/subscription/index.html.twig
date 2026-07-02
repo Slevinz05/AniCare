@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Abonnement professionnel - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Abonnement</p>
+                <h1 class="page-title mb-2">Espace professionnel</h1>
+                <p class="page-subtitle mb-0">Gérez votre abonnement et accédez aux fonctionnalités dédiées aux vétérinaires.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {# --- Statut actuel --- #}
+        {% if user.hasActiveSubscription() %}
+            <div class="col-12 col-lg-8">
+                <div class="card anicare-card">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                <span style="font-size: 1.5rem;">✅</span>
+                            </div>
+                            <div>
+                                <h2 class="h5 fw-bold mb-0">Abonnement actif</h2>
+                                <span class="text-secondary small">
+                                    {% if user.subscriptionStatus == 'canceled' and user.subscriptionEndsAt %}
+                                        Actif jusqu'au {{ user.subscriptionEndsAt|date('d/m/Y') }} (annulation programmée)
+                                    {% else %}
+                                        Votre abonnement professionnel est en cours.
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded-3 bg-anicare-soft text-center">
+                                    <div style="font-size: 1.3rem;">🩺</div>
+                                    <span class="small fw-bold">Mode PRO</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded-3 bg-anicare-soft text-center">
+                                    <div style="font-size: 1.3rem;">📋</div>
+                                    <span class="small fw-bold">Actes médicaux</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded-3 bg-anicare-soft text-center">
+                                    <div style="font-size: 1.3rem;">💬</div>
+                                    <span class="small fw-bold">Messagerie</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded-3 bg-anicare-soft text-center">
+                                    <div style="font-size: 1.3rem;">📅</div>
+                                    <span class="small fw-bold">Planning</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="post" action="{{ path('app_subscription_portal') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('subscription_portal') }}">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                Gérer mon abonnement (factures, moyen de paiement, annulation)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        {% elseif user.subscriptionStatus == 'past_due' %}
+            <div class="col-12 col-lg-8">
+                <div class="card anicare-card border-warning">
+                    <div class="card-body p-4 p-lg-5 text-center">
+                        <div class="mb-3" style="font-size: 3rem;">⚠️</div>
+                        <h2 class="h5 fw-bold mb-2">Paiement en attente</h2>
+                        <p class="text-secondary mb-4">Votre dernier paiement a échoué. Veuillez mettre à jour votre moyen de paiement pour conserver votre accès professionnel.</p>
+
+                        <form method="post" action="{{ path('app_subscription_portal') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('subscription_portal') }}">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                Mettre à jour mon paiement
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            {# --- Offre d'abonnement --- #}
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="card anicare-card h-100 text-center">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <div class="mb-3" style="font-size: 2.5rem;">🐾</div>
+                        <h2 class="h5 fw-bold mb-2">Gratuit</h2>
+                        <p class="text-secondary small mb-4">Pour les propriétaires d'animaux</p>
+
+                        <div class="mb-4">
+                            <span class="h2 fw-bold">0 €</span>
+                            <span class="text-secondary">/mois</span>
+                        </div>
+
+                        <ul class="list-unstyled text-start small mb-4">
+                            <li class="py-2 border-bottom border-light">✓ Enregistrer vos animaux</li>
+                            <li class="py-2 border-bottom border-light">✓ Carnet de santé</li>
+                            <li class="py-2 border-bottom border-light">✓ Courbe de poids</li>
+                            <li class="py-2 border-bottom border-light">✓ Partage de dossier</li>
+                            <li class="py-2 text-secondary">✗ Mode professionnel</li>
+                        </ul>
+
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-secondary w-100 disabled">Plan actuel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="card anicare-card h-100 text-center border-primary" style="box-shadow: var(--shadow-md);">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <div class="mb-3" style="font-size: 2.5rem;">🩺</div>
+                        <span class="badge bg-primary mb-2 align-self-center">Recommandé</span>
+                        <h2 class="h5 fw-bold mb-2">Professionnel</h2>
+                        <p class="text-secondary small mb-4">Pour les vétérinaires et cliniques</p>
+
+                        <div class="mb-4">
+                            <span class="h2 fw-bold">29 €</span>
+                            <span class="text-secondary">/mois</span>
+                        </div>
+
+                        <ul class="list-unstyled text-start small mb-4">
+                            <li class="py-2 border-bottom border-light">✓ Tout le plan gratuit</li>
+                            <li class="py-2 border-bottom border-light">✓ Mode professionnel (badge PRO)</li>
+                            <li class="py-2 border-bottom border-light">✓ Vue consolidée des patients</li>
+                            <li class="py-2 border-bottom border-light">✓ Messagerie avec les propriétaires</li>
+                            <li class="py-2">✓ Partage de documents sécurisé</li>
+                        </ul>
+
+                        <div class="mt-auto">
+                            <form method="post" action="{{ path('app_subscription_checkout') }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('subscription_checkout') }}">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                    S'abonner
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

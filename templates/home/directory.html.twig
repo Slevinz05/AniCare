@@ -31,13 +31,19 @@
                                     <span style="font-size: 1.5rem;">🩺</span>
                                 </div>
                                 <div>
-                                    <h3 class="h6 fw-bold mb-0">{{ pro.email }}</h3>
+                                    <h3 class="h6 fw-bold mb-0">{{ pro.fullName }}</h3>
                                     <span class="badge bg-anicare-soft text-teal border-anicare" style="font-size: 0.7rem; font-weight: 800;">PRO</span>
                                 </div>
                             </div>
 
                             <div class="text-secondary small mb-3">
-                                <span>{{ pro.animals|length }} animal{{ pro.animals|length > 1 ? 'x' : '' }} suivi{{ pro.animals|length > 1 ? 's' : '' }}</span>
+                                {% if pro.city %}
+                                    <span class="d-block">📍 {{ pro.city }}</span>
+                                {% endif %}
+                                {% if pro.bio %}
+                                    <span class="d-block mt-1">{{ pro.bio|length > 100 ? pro.bio|slice(0, 100) ~ '…' : pro.bio }}</span>
+                                {% endif %}
+                                <span class="d-block mt-1">{{ pro.animals|length }} animal{{ pro.animals|length > 1 ? 'x' : '' }} suivi{{ pro.animals|length > 1 ? 's' : '' }}</span>
                             </div>
 
                             {% if app.user %}

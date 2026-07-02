@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Compte</p>
+                <h1 class="page-title mb-2">Mon profil</h1>
+                <p class="page-subtitle mb-0">Gérez vos informations personnelles et vos paramètres.</p>
+            </div>
+            <div class="col-12 col-lg-auto d-flex gap-2">
+                <a href="{{ path('app_profile_edit') }}" class="btn btn-primary shadow-sm">Modifier le profil</a>
+                <a href="{{ path('app_profile_password') }}" class="btn btn-outline-primary">Changer le mot de passe</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card anicare-card">
+                <div class="card-body p-4">
+                    <p class="page-eyebrow mb-2">Informations personnelles</p>
+                    <h2 class="h5 page-title mb-4">Identité</h2>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-medical align-middle mb-0">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 35%;">Prénom</th>
+                                    <td>{{ app.user.firstName ?? 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Nom</th>
+                                    <td>{{ app.user.lastName ?? 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Adresse e-mail</th>
+                                    <td>{{ app.user.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Téléphone</th>
+                                    <td>{{ app.user.phone ?? 'Non renseigné' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ville</th>
+                                    <td>{{ app.user.city ?? 'Non renseigné' }}</td>
+                                </tr>
+                                {% if app.user.bio %}
+                                    <tr>
+                                        <th>Présentation</th>
+                                        <td>{{ app.user.bio|e('html')|nl2br }}</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card anicare-card h-100">
+                <div class="card-body p-4">
+                    <p class="page-eyebrow mb-2">Paramètres</p>
+                    <h2 class="h5 page-title mb-4">Compte</h2>
+
+                    <div class="mb-3">
+                        <span class="small fw-bold text-secondary d-block mb-1">Type de compte</span>
+                        {% if is_granted('ROLE_PRO') %}
+                            <span class="badge bg-anicare-soft text-teal border-anicare" style="font-weight: 800;">PRO</span>
+                        {% else %}
+                            <span class="badge bg-light text-secondary border">Particulier</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="small fw-bold text-secondary d-block mb-1">Notifications e-mail</span>
+                        {% if app.user.acceptsNotifications %}
+                            <span class="text-success small">Activées</span>
+                        {% else %}
+                            <span class="text-secondary small">Désactivées</span>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <span class="small fw-bold text-secondary d-block mb-1">Animaux</span>
+                        <span class="small">{{ app.user.animals|length }} enregistré{{ app.user.animals|length > 1 ? 's' : '' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-end">
+                <a href="{{ path('app_logout') }}" class="btn btn-outline-danger">
+                    Se déconnecter
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

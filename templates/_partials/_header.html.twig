@@ -108,18 +108,22 @@
 
             <div class="navbar-actions d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center gap-2 ms-xl-3">
                 {% if app.user %}
-                    <span class="navbar-user small d-none d-xxl-inline-flex text-nowrap align-items-center">
-                        Bonjour, 
-                        <strong class="ms-1">{{ app.user.userIdentifier }}</strong>
-                        
-                        {# Badge distinctif pour les professionnels #}
-                        {% if is_granted('ROLE_PRO') %}
-                            <span class="badge bg-anicare-soft text-teal border-anicare ms-2" style="font-size: 0.7rem; font-weight: 800;">PRO</span>
-                        {% endif %}
-                    </span>
+                    {% if stripe_enabled %}
+                        <a class="btn btn-sm px-3 text-nowrap {{ app.user.hasActiveSubscription() ? 'btn-outline-primary' : 'btn-primary shadow-sm' }}"
+                           href="{{ path('app_subscription') }}">
+                            {% if app.user.hasActiveSubscription() %}
+                                Mon abonnement
+                            {% else %}
+                                Passer PRO
+                            {% endif %}
+                        </a>
+                    {% endif %}
 
-                    <a class="btn btn-outline-danger btn-sm px-3 text-nowrap" href="{{ path('app_logout') }}">
-                        Déconnexion
+                    <a class="btn btn-outline-primary btn-sm px-3 text-nowrap" href="{{ path('app_profile') }}">
+                        {{ app.user.fullName }}
+                        {% if is_granted('ROLE_PRO') %}
+                            <span class="badge bg-anicare-soft text-teal border-anicare ms-1" style="font-size: 0.65rem; font-weight: 800;">PRO</span>
+                        {% endif %}
                     </a>
                 {% else %}
                     <a class="btn btn-outline-primary btn-sm px-3 text-nowrap" href="{{ path('app_login') }}">

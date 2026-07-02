@@ -110,26 +110,50 @@
                 {% else %}
                     <div class="document-list">
                         {% for document in animal.documents %}
-                            <a 
-                                href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
-                                target="_blank"
-                                rel="noopener"
-                                class="document-item"
-                            >
-                                <span class="document-name">
-                                    {{ document.originalName|default(document.fileName) }}
-                                </span>
+                            <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
+                                <div>
+                                    <a href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
+                                       target="_blank" rel="noopener" class="document-name text-decoration-none">
+                                        {{ document.originalName|default(document.fileName) }}
+                                    </a>
+                                    <span class="document-meta d-block small text-secondary">
+                                        {% if document.size is defined %}
+                                            {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                        {% endif %}
+                                        {% if document.uploadedAt is defined %}
+                                            · {{ document.uploadedAt|date('d/m/Y') }}
+                                        {% endif %}
+                                    </span>
+                                </div>
 
-                                <span class="document-meta">
-                                    {% if document.size is defined %}
-                                        {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                <div class="d-flex align-items-center gap-2">
+                                    {% set doc_status = document.status|default('pending') %}
+                                    {% if doc_status == 'approved' %}
+                                        <span class="badge bg-success">Validé</span>
+                                    {% elseif doc_status == 'rejected' %}
+                                        <span class="badge bg-danger">Refusé</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">En attente</span>
                                     {% endif %}
 
-                                    {% if document.uploadedAt is defined %}
-                                        · {{ document.uploadedAt|date('d/m/Y') }}
+                                    {% if is_granted('ANIMAL_EDIT', animal) and is_granted('ROLE_PRO') %}
+                                        {% if doc_status != 'approved' %}
+                                            <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
+                                                <input type="hidden" name="status" value="approved">
+                                                <button type="submit" class="btn btn-success btn-sm py-0 px-2">Valider</button>
+                                            </form>
+                                        {% endif %}
+                                        {% if doc_status != 'rejected' %}
+                                            <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
+                                                <input type="hidden" name="status" value="rejected">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2">Refuser</button>
+                                            </form>
+                                        {% endif %}
                                     {% endif %}
-                                </span>
-                            </a>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
                 {% endif %}

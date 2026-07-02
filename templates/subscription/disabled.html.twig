@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Abonnement - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card anicare-card text-center">
+                <div class="card-body p-5">
+                    <div class="mb-4" style="font-size: 3.5rem;">🎁</div>
+                    <h1 class="h3 page-title mb-3">Accès gratuit pour tous !</h1>
+                    <p class="text-secondary mb-2">
+                        AniCare est actuellement en phase de lancement.
+                        Toutes les fonctionnalités professionnelles sont accessibles gratuitement,
+                        y compris le mode vétérinaire, la messagerie et le partage de dossiers.
+                    </p>
+                    <p class="text-secondary mb-4">
+                        Profitez-en pour tester et nous faire vos retours !
+                    </p>
+
+                    <a href="{{ path('app_home') }}" class="btn btn-primary">Retour au tableau de bord</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

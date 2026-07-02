@@ -42,6 +42,7 @@ class DocumentUploader
                 'mimeType' => $mimeType,
                 'size' => $size,
                 'uploadedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+                'status' => 'pending',
             ];
         }
 

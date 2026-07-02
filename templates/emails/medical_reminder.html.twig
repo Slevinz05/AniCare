@@ -1,12 +1,26 @@
-<p>Bonjour {{ owner.userIdentifier }},</p>
+<p>Bonjour {{ owner.fullName }},</p>
 
 <p>Ceci est un rappel automatique d'<b>AniCare</b>.</p>
 
-<p>Le soin ou vaccin suivant est programmé pour <b>{{ animal.name }}</b> le {{ entry.date|date('d/m/Y') }} :</p>
+{% if urgency|default('') == 'Rappel en retard' %}
+    <p style="color: #ef4444; font-weight: bold;">
+        Attention : le soin suivant pour <b>{{ animal.name }}</b> est en retard (prévu le {{ entry.nextReminderAt|date('d/m/Y') }}) :
+    </p>
+{% else %}
+    <p>Le soin suivant pour <b>{{ animal.name }}</b> est prévu le {{ entry.nextReminderAt|date('d/m/Y') }} :</p>
+{% endif %}
 
 <ul>
-    <li><b>Activité :</b> {{ entry.title }}</li>
+    <li><b>Acte :</b> {{ entry.title }}</li>
     <li><b>Type :</b> {{ entry.type }}</li>
+    {% if entry.veterinarianName %}
+        <li><b>Vétérinaire :</b> Dr. {{ entry.veterinarianName }}</li>
+    {% endif %}
 </ul>
 
-<p>Prenez soin de vos compagnons !</p>
+<p>Connectez-vous sur AniCare pour consulter le dossier complet.</p>
+
+<p style="color: #999; font-size: 0.85em;">
+    Vous recevez cet e-mail car vous avez activé les notifications sur AniCare.
+    Vous pouvez les désactiver depuis votre profil.
+</p>

@@ -55,6 +55,8 @@ security:
         - { path: ^/message, roles: ROLE_USER }
         - { path: ^/emergency, roles: ROLE_USER }
         - { path: ^/download, roles: ROLE_USER }
+        - { path: ^/profil, roles: ROLE_USER }
+        - { path: ^/document, roles: ROLE_USER }
 
         # Exemples optionnels pour la hiérarchie future :
         # - { path: ^/admin, roles: ROLE_ADMIN }

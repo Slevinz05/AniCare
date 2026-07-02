@@ -13,7 +13,7 @@ use Symfony\Component\Mailer\MailerInterface;
 
 #[AsCommand(
     name: 'app:send-medical-reminders',
-    description: 'Envoie un e-mail de rappel aux propriétaires pour les soins médicaux de la semaine.',
+    description: 'Envoie les e-mails de rappel pour les soins médicaux à venir et en retard.',
 )]
 class SendMedicalReminderCommand extends Command
 {
@@ -27,35 +27,46 @@ class SendMedicalReminderCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $targetDate = new \DateTimeImmutable('+7 days');
-        $upcomingEntries = $this->healthBookRepository->findByDate($targetDate);
-
         $emailCount = 0;
 
+        $upcomingEntries = $this->healthBookRepository->findUpcomingReminders(7);
         foreach ($upcomingEntries as $entry) {
-            $animal = $entry->getAnimal();
-            $owner = $animal?->getOwner();
-
-            if ($owner && $owner->getUserIdentifier()) {
-                $email = (new TemplatedEmail())
-                    ->from('ne-pas-repondre@anicare.com')
-                    ->to($owner->getUserIdentifier())
-                    ->subject(sprintf('Rappel de soin pour %s', $animal->getName()))
-                    ->htmlTemplate('emails/medical_reminder.html.twig')
-                    ->context([
-                        'owner' => $owner,
-                        'animal' => $animal,
-                        'entry' => $entry,
-                    ]);
-
-                $this->mailer->send($email);
-                $emailCount++;
-            }
+            $this->sendReminder($entry, 'Rappel à venir');
+            $emailCount++;
         }
 
-        $io->success(sprintf('%d e-mail(s) de rappel ont été envoyés avec succès.', $emailCount));
+        $overdueEntries = $this->healthBookRepository->findOverdueReminders();
+        foreach ($overdueEntries as $entry) {
+            $this->sendReminder($entry, 'Rappel en retard');
+            $emailCount++;
+        }
+
+        $io->success(sprintf('%d e-mail(s) de rappel envoyé(s).', $emailCount));
 
         return Command::SUCCESS;
+    }
+
+    private function sendReminder(object $entry, string $urgency): void
+    {
+        $animal = $entry->getAnimal();
+        $owner = $animal?->getOwner();
+
+        if (!$owner?->getUserIdentifier()) {
+            return;
+        }
+
+        $email = (new TemplatedEmail())
+            ->from('ne-pas-repondre@anicare.com')
+            ->to($owner->getUserIdentifier())
+            ->subject(sprintf('%s : %s pour %s', $urgency, $entry->getTitle(), $animal->getName()))
+            ->htmlTemplate('emails/medical_reminder.html.twig')
+            ->context([
+                'owner' => $owner,
+                'animal' => $animal,
+                'entry' => $entry,
+                'urgency' => $urgency,
+            ]);
+
+        $this->mailer->send($email);
     }
 }

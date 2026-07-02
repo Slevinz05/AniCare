@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card anicare-card">
+                <div class="card-body p-4 p-lg-5">
+                    <p class="page-eyebrow mb-2">Compte</p>
+                    <h1 class="page-title mb-4">Modifier mon profil</h1>
+
+                    {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                        <div class="row g-4">
+                            <div class="col-12 col-md-6">
+                                {{ form_label(form.firstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.firstName) }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                {{ form_label(form.lastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.lastName) }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.phone) }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.city) }}
+                            </div>
+
+                            <div class="col-12">
+                                {{ form_label(form.bio, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.bio, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.bio) }}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    {{ form_widget(form.acceptsNotifications, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.acceptsNotifications, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {{ form_rest(form) }}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
+                            <a href="{{ path('app_profile') }}" class="btn btn-outline-primary btn-lg">Annuler</a>
+                        </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -53,6 +53,12 @@
                         <div class="invalid-feedback d-block">{{ form_errors(registrationForm.accountType) }}</div>
                     </div>
 
+                    {# Case à cocher Notifications #}
+                    <div class="form-check mb-3 d-flex align-items-center gap-2">
+                        {{ form_widget(registrationForm.acceptsNotifications, {'attr': {'class': 'form-check-input m-0'}}) }}
+                        {{ form_label(registrationForm.acceptsNotifications, null, {'label_attr': {'class': 'form-check-label small text-secondary style-pointer'}}) }}
+                    </div>
+
                     {# Case à cocher Conditions d'Utilisation #}
                     <div class="form-check mb-4 d-flex align-items-center gap-2">
                         {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input m-0'}}) }}

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -41,8 +42,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'owner', orphanRemoval: true)]
     private Collection $animals;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $phone = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $city = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $bio = null;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $acceptsNotifications = true;
+
     #[ORM\Column(length: 20)]
     private ?string $accountType = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeCustomerId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $stripeSubscriptionId = null;
+
+    #[ORM\Column(length: 20, options: ['default' => 'inactive'])]
+    private string $subscriptionStatus = 'inactive';
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $subscriptionEndsAt = null;
 
     public function __construct()
     {
@@ -160,6 +191,87 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): static
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): static
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getFullName(): string
+    {
+        if ($this->firstName && $this->lastName) {
+            return $this->firstName . ' ' . $this->lastName;
+        }
+
+        return $this->firstName ?? $this->lastName ?? $this->email;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): static
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    public function setBio(?string $bio): static
+    {
+        $this->bio = $bio;
+
+        return $this;
+    }
+
+    public function isAcceptsNotifications(): bool
+    {
+        return $this->acceptsNotifications;
+    }
+
+    public function setAcceptsNotifications(bool $acceptsNotifications): static
+    {
+        $this->acceptsNotifications = $acceptsNotifications;
+
+        return $this;
+    }
+
     public function getAccountType(): ?string
     {
         return $this->accountType;
@@ -170,5 +282,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->accountType = $accountType;
 
         return $this;
+    }
+
+    public function getStripeCustomerId(): ?string
+    {
+        return $this->stripeCustomerId;
+    }
+
+    public function setStripeCustomerId(?string $stripeCustomerId): static
+    {
+        $this->stripeCustomerId = $stripeCustomerId;
+
+        return $this;
+    }
+
+    public function getStripeSubscriptionId(): ?string
+    {
+        return $this->stripeSubscriptionId;
+    }
+
+    public function setStripeSubscriptionId(?string $stripeSubscriptionId): static
+    {
+        $this->stripeSubscriptionId = $stripeSubscriptionId;
+
+        return $this;
+    }
+
+    public function getSubscriptionStatus(): string
+    {
+        return $this->subscriptionStatus;
+    }
+
+    public function setSubscriptionStatus(string $subscriptionStatus): static
+    {
+        $this->subscriptionStatus = $subscriptionStatus;
+
+        return $this;
+    }
+
+    public function getSubscriptionEndsAt(): ?\DateTimeImmutable
+    {
+        return $this->subscriptionEndsAt;
+    }
+
+    public function setSubscriptionEndsAt(?\DateTimeImmutable $subscriptionEndsAt): static
+    {
+        $this->subscriptionEndsAt = $subscriptionEndsAt;
+
+        return $this;
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        if ($this->subscriptionStatus === 'active') {
+            return true;
+        }
+
+        if ($this->subscriptionStatus === 'canceled' && $this->subscriptionEndsAt && $this->subscriptionEndsAt > new \DateTimeImmutable()) {
+            return true;
+        }
+
+        return false;
     }
 }
