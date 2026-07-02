@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouvelle pesée - {{ animal.name }} - AniCare{% endblock %}
+{% block body %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-6">
+            <div class="card anicare-card">
+                <div class="card-header medical-header p-4">
+                    <p class="page-eyebrow mb-2">Courbe de poids</p>
+                    <h1 class="page-title mb-0">Nouvelle pesée — {{ animal.name }}</h1>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'anicare-form'}}) }}
+                        <div class="row g-4">
+                            <div class="col-12 col-md-6">{{ form_row(form.weight, {'attr': {'class': 'form-control'}}) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.recordedAt, {'attr': {'class': 'form-control'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.note, {'attr': {'class': 'form-control'}}) }}</div>
+                        </div>
+                        {{ form_rest(form) }}
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Enregistrer</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+            <a href="{{ path('app_weight_record_index', {'id': animal.id}) }}" class="btn btn-outline-primary mt-3">Retour</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

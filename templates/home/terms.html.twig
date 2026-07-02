@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+{% block title %}Conditions Générales d'Utilisation - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <article>
+                <div class="mb-5">
+                    <p class="page-eyebrow mb-2">Juridique</p>
+                    <h1 class="page-title" style="font-size: 2rem;">Conditions Générales d'Utilisation</h1>
+                    <p class="text-secondary">Dernière mise à jour : {{ 'now'|date('d/m/Y') }}</p>
+                </div>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 1 — Objet</h2>
+                    <p>
+                        Les présentes Conditions Générales d'Utilisation (ci-après « CGU ») ont pour objet de définir
+                        les modalités d'accès et d'utilisation du service AniCare, une plateforme web de gestion
+                        de carnets de santé numériques pour animaux de compagnie.
+                    </p>
+                    <p>
+                        L'inscription et l'utilisation du service impliquent l'acceptation pleine et entière des présentes CGU.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 2 — Description du service</h2>
+                    <p>AniCare propose les fonctionnalités suivantes :</p>
+                    <ul>
+                        <li>Création et gestion de fiches d'identité pour animaux de compagnie</li>
+                        <li>Enregistrement d'actes médicaux (consultations, vaccinations, chirurgies, traitements)</li>
+                        <li>Gestion des rappels de vaccins et de soins récurrents</li>
+                        <li>Suivi du poids avec historique et courbe d'évolution</li>
+                        <li>Enregistrement des allergies connues</li>
+                        <li>Génération d'une fiche d'urgence synthétique</li>
+                        <li>Gestion des rendez-vous vétérinaires</li>
+                        <li>Partage sécurisé du dossier médical avec des tiers (vétérinaires, proches)</li>
+                        <li>Messagerie interne liée au dossier de l'animal</li>
+                        <li>Stockage de documents médicaux (ordonnances, résultats d'analyses)</li>
+                    </ul>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 3 — Inscription et compte utilisateur</h2>
+                    <h3 class="h6 fw-bold mb-2">3.1 Création de compte</h3>
+                    <p>
+                        L'accès aux fonctionnalités du service nécessite la création d'un compte utilisateur.
+                        L'utilisateur s'engage à fournir des informations exactes et à les maintenir à jour.
+                        Le mot de passe doit comporter au minimum 12 caractères incluant au moins une majuscule,
+                        une minuscule et un chiffre.
+                    </p>
+
+                    <h3 class="h6 fw-bold mb-2">3.2 Profils utilisateurs</h3>
+                    <p>Deux profils sont disponibles :</p>
+                    <ul>
+                        <li><strong>Particulier</strong> : propriétaire d'animaux souhaitant gérer leur suivi médical</li>
+                        <li><strong>Professionnel</strong> : vétérinaire ou professionnel de la santé animale accédant aux dossiers partagés par ses clients</li>
+                    </ul>
+
+                    <h3 class="h6 fw-bold mb-2">3.3 Sécurité du compte</h3>
+                    <p>
+                        L'utilisateur est responsable de la confidentialité de ses identifiants de connexion.
+                        Toute activité réalisée depuis son compte est présumée effectuée par lui.
+                        En cas d'utilisation frauduleuse suspectée, l'utilisateur doit en informer immédiatement l'éditeur.
+                    </p>
+                    <p>
+                        Un mécanisme de limitation des tentatives de connexion (5 tentatives par tranche de 15 minutes)
+                        est mis en place pour protéger les comptes contre les attaques par force brute.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 4 — Données médicales animales</h2>
+                    <h3 class="h6 fw-bold mb-2">4.1 Nature des données</h3>
+                    <p>
+                        Les données saisies sur AniCare sont des données médicales relatives à des <strong>animaux</strong>.
+                        Elles ne sont pas soumises aux dispositions du Code de la santé publique relatives au secret médical humain
+                        (article L.1110-4 du CSP), mais restent protégées au titre des données personnelles de l'utilisateur
+                        qui les saisit.
+                    </p>
+
+                    <h3 class="h6 fw-bold mb-2">4.2 Responsabilité des données</h3>
+                    <p>
+                        L'utilisateur est seul responsable de l'exactitude et de l'exhaustivité des données médicales
+                        qu'il enregistre. AniCare ne vérifie pas et ne valide pas les informations saisies.
+                    </p>
+
+                    <h3 class="h6 fw-bold mb-2">4.3 Clause de non-substitution</h3>
+                    <div class="card border-warning">
+                        <div class="card-body p-4 bg-warning bg-opacity-10">
+                            <p class="fw-bold mb-2">AniCare ne remplace pas un vétérinaire.</p>
+                            <p class="mb-0">
+                                Le service est un outil de gestion et de suivi. Il ne fournit aucun conseil médical,
+                                diagnostic ou prescription. En cas de problème de santé de votre animal, consultez
+                                un vétérinaire diplômé. En cas d'urgence, contactez un service vétérinaire de garde.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 5 — Partage et confidentialité des dossiers</h2>
+                    <h3 class="h6 fw-bold mb-2">5.1 Mécanisme de partage</h3>
+                    <p>
+                        Le propriétaire d'un animal peut partager le dossier médical avec des tiers en renseignant
+                        leur adresse email. Deux niveaux d'accès sont disponibles :
+                    </p>
+                    <ul>
+                        <li><strong>Lecture seule</strong> : consultation du dossier sans possibilité de modification</li>
+                        <li><strong>Modification</strong> : consultation et ajout/modification d'actes médicaux</li>
+                    </ul>
+
+                    <h3 class="h6 fw-bold mb-2">5.2 Responsabilité du partage</h3>
+                    <p>
+                        Le propriétaire est responsable des accès qu'il accorde. Il peut révoquer un partage
+                        à tout moment depuis son espace personnel. Le partage ne transfère aucun droit de propriété
+                        sur le dossier.
+                    </p>
+
+                    <h3 class="h6 fw-bold mb-2">5.3 Obligations du destinataire</h3>
+                    <p>
+                        Toute personne accédant à un dossier partagé s'engage à utiliser les informations
+                        exclusivement dans le cadre du suivi médical de l'animal concerné et à ne pas les
+                        communiquer à des tiers non autorisés.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 6 — Documents et fichiers</h2>
+                    <p>
+                        L'utilisateur peut téléverser des documents (ordonnances, résultats d'analyses, photos)
+                        associés à un animal ou un acte médical. Les fichiers acceptés sont les suivants :
+                        PDF, JPEG, PNG, WebP, DOC et DOCX, dans la limite de 5 Mo par fichier.
+                    </p>
+                    <p>
+                        Les documents sont stockés de manière sécurisée en dehors du répertoire public
+                        et ne sont accessibles qu'aux utilisateurs autorisés (propriétaire et personnes ayant un partage actif).
+                    </p>
+                    <p>
+                        L'utilisateur s'interdit de téléverser tout contenu illicite, contrefait ou portant atteinte
+                        aux droits de tiers.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 7 — Obligations de l'utilisateur</h2>
+                    <p>L'utilisateur s'engage à :</p>
+                    <ul>
+                        <li>Utiliser le service conformément à sa destination (suivi médical animal)</li>
+                        <li>Ne pas saisir de données personnelles sensibles concernant des personnes physiques
+                            (numéro de sécurité sociale, données bancaires, etc.)</li>
+                        <li>Ne pas tenter d'accéder aux dossiers d'animaux sans autorisation</li>
+                        <li>Ne pas utiliser le service à des fins commerciales non autorisées</li>
+                        <li>Respecter les droits de propriété intellectuelle</li>
+                    </ul>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 8 — Limitation de responsabilité</h2>
+                    <p>
+                        L'éditeur met en oeuvre les moyens raisonnables pour assurer la disponibilité et la sécurité
+                        du service, mais ne garantit pas une disponibilité ininterrompue.
+                    </p>
+                    <p>
+                        L'éditeur ne saurait être tenu responsable :
+                    </p>
+                    <ul>
+                        <li>Des conséquences résultant d'informations médicales erronées saisies par l'utilisateur</li>
+                        <li>D'un retard de soin résultant d'un dysfonctionnement des rappels automatiques</li>
+                        <li>De l'utilisation qui est faite des données par les personnes avec lesquelles l'utilisateur a partagé un dossier</li>
+                        <li>D'un dommage résultant d'un accès non autorisé au compte de l'utilisateur lié à la négligence de ce dernier</li>
+                    </ul>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">Article 9 — Résiliation</h2>
+                    <p>
+                        L'utilisateur peut supprimer son compte à tout moment en contactant l'éditeur.
+                        La suppression entraîne l'effacement de l'ensemble des données associées au compte
+                        (fiches animaux, actes médicaux, documents, partages, messages).
+                    </p>
+                    <p>
+                        L'éditeur se réserve le droit de suspendre ou supprimer un compte en cas de violation
+                        des présentes CGU, après notification préalable lorsque les circonstances le permettent.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="h4 page-title mb-3">Article 10 — Modification des CGU</h2>
+                    <p>
+                        L'éditeur se réserve le droit de modifier les présentes CGU à tout moment.
+                        Les utilisateurs seront informés des modifications substantielles par email
+                        ou par notification sur le site. La poursuite de l'utilisation du service
+                        après notification vaut acceptation des nouvelles conditions.
+                    </p>
+                </section>
+            </article>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

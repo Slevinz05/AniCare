@@ -1,32 +1,39 @@
 {# templates/_partials/_animal_card.html.twig #}
 
-<div class="card animal-card h-100 border-0">
-    <div class="card-header animal-card-header p-4">
-        <div class="d-flex justify-content-between align-items-start gap-3">
-            <div>
-                <p class="animal-card-kicker mb-1">Dossier animal</p>
-
-                <h3 class="animal-card-title mb-0">
-                    {{ animal.name }}
-                </h3>
+<div class="card animal-card h-100 border-0 overflow-hidden">
+    {% if animal.photo %}
+        <a href="{{ path('app_animal_show', {'id': animal.id}) }}">
+            <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
+                 alt="Photo de {{ animal.name }}"
+                 class="card-img-top"
+                 style="height: 180px; object-fit: cover;">
+        </a>
+    {% else %}
+        <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="text-decoration-none">
+            <div class="d-flex align-items-center justify-content-center bg-light" style="height: 180px;">
+                <span style="font-size: 3.5rem; opacity: 0.4;">
+                    {% if animal.species|lower == 'chien' %}🐕
+                    {% elseif animal.species|lower == 'chat' %}🐈
+                    {% elseif animal.species|lower == 'cheval' %}🐴
+                    {% elseif animal.species|lower == 'lapin' %}🐇
+                    {% elseif animal.species|lower == 'oiseau' %}🐦
+                    {% else %}🐾
+                    {% endif %}
+                </span>
             </div>
-
-            {{ include('_partials/_gender_badge.html.twig', {'gender': animal.gender}) }}
-        </div>
-    </div>
+        </a>
+    {% endif %}
 
     <div class="card-body p-4 d-flex flex-column">
-        <div class="animal-info-list mb-4">
-            <div class="animal-info-row">
-                <span class="animal-info-label">Espèce</span>
-                <span class="animal-info-value">{{ animal.species }}</span>
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h3 class="animal-card-title mb-0">{{ animal.name }}</h3>
+                <span class="text-secondary small">{{ animal.species }}{% if animal.breed %} — {{ animal.breed }}{% endif %}</span>
             </div>
+            {{ include('_partials/_gender_badge.html.twig', {'gender': animal.gender}) }}
+        </div>
 
-            <div class="animal-info-row">
-                <span class="animal-info-label">Race</span>
-                <span class="animal-info-value">{{ animal.breed ?: 'Non renseignée' }}</span>
-            </div>
-
+        <div class="animal-info-list mb-3">
             <div class="animal-info-row">
                 <span class="animal-info-label">Poids</span>
                 <span class="animal-info-value">

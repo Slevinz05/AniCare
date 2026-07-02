@@ -1,26 +1,146 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}À propos de {{ project_name }}{% endblock %}
+{% block title %}À propos - AniCare{% endblock %}
 
 {% block body %}
-<div class="container my-5">
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <h1 class="display-4 text-success fw-bold">À propos d'AniCare</h1>
-            <p class="lead text-muted mt-3">
-                AniCare est une plateforme dédiée au bien-être animal, conçue pour centraliser le suivi médical, les rendez-vous et le carnet de santé de vos compagnons.
-            </p>
-            <p>
-                Né de la volonté de simplifier le quotidien des propriétaires d'animaux et des professionnels de santé (vétérinaires, refuges), notre outil offre une interface intuitive et sécurisée pour ne plus jamais oublier un vaccin ou un rappel de soin.
-            </p>
-        </div>
-        <div class="col-md-6 text-center">
-            <!-- Emplacement pour une illustration vectorielle ou image de marque -->
-            <div class="p-5 bg-light rounded-3 border">
-                <i class="bi bi-heart-pulse text-success" style="font-size: 4rem;"></i>
-                <p class="mt-3 fw-semibold">Le carnet de santé réinventé.</p>
+<div class="container py-5">
+
+    <article class="mb-5">
+        <div class="page-hero p-4 p-lg-5 mb-5">
+            <div class="row align-items-center gy-4">
+                <div class="col-12 col-lg-6">
+                    <p class="page-eyebrow mb-2">Notre mission</p>
+                    <h1 class="page-title mb-3" style="font-size: 2.4rem;">Le carnet de santé animal, enfin numérique</h1>
+                    <p class="page-subtitle mb-0">
+                        AniCare est né d'un constat simple : les propriétaires d'animaux perdent trop souvent la trace
+                        des vaccins, des traitements et des rendez-vous de leurs compagnons. Notre plateforme centralise
+                        toutes ces informations en un seul endroit, accessible à tout moment.
+                    </p>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <img src="{{ asset('images/hero-dog.jpg') }}"
+                         alt="Golden retriever heureux dans un champ"
+                         class="img-fluid rounded-3 shadow" loading="lazy">
+                </div>
             </div>
         </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-md-4">
+                <div class="card anicare-card h-100">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3" style="font-size: 2.5rem;">🩺</div>
+                        <h3 class="h5 page-title mb-2">Suivi médical complet</h3>
+                        <p class="text-secondary mb-0">
+                            Enregistrez chaque consultation, vaccination, traitement et chirurgie.
+                            Retrouvez l'historique complet de votre animal en un clic.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card anicare-card h-100">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3" style="font-size: 2.5rem;">🔔</div>
+                        <h3 class="h5 page-title mb-2">Rappels intelligents</h3>
+                        <p class="text-secondary mb-0">
+                            Plus jamais de vaccin oublié. AniCare calcule automatiquement les prochains rappels
+                            et vous alerte quand un soin approche.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card anicare-card h-100">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3" style="font-size: 2.5rem;">🤝</div>
+                        <h3 class="h5 page-title mb-2">Partage sécurisé</h3>
+                        <p class="text-secondary mb-0">
+                            Partagez le dossier de votre animal avec votre vétérinaire, un pet-sitter
+                            ou un membre de votre famille, en lecture ou en modification.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div class="row g-5 mb-5">
+        <div class="col-12 col-lg-7">
+            <article>
+                <p class="page-eyebrow mb-2">Comment ça marche</p>
+                <h2 class="h3 page-title mb-4">Simple pour les propriétaires, puissant pour les pros</h2>
+
+                <div class="mb-4">
+                    <h3 class="h6 fw-bold text-teal mb-1">1. Créez le profil de votre animal</h3>
+                    <p class="text-secondary">
+                        Renseignez son espèce, sa race, sa date de naissance, son poids et son numéro d'identification.
+                        Ajoutez une photo et les documents importants (carnet de santé, certificat d'identification).
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="h6 fw-bold text-teal mb-1">2. Enregistrez les actes médicaux</h3>
+                    <p class="text-secondary">
+                        Chaque visite vétérinaire, chaque vaccin, chaque traitement est consigné avec
+                        sa date, le nom du praticien, la posologie et les documents associés (ordonnance, résultat d'analyse).
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="h6 fw-bold text-teal mb-1">3. Suivez et partagez</h3>
+                    <p class="text-secondary">
+                        Consultez la courbe de poids, les allergies connues, la fiche d'urgence.
+                        Partagez le dossier avec les personnes de confiance qui s'occupent de votre animal.
+                    </p>
+                </div>
+            </article>
+        </div>
+
+        <aside class="col-12 col-lg-5">
+            <div class="card anicare-card overflow-hidden">
+                <img src="{{ asset('images/vet-cat.jpg') }}"
+                     alt="Vétérinaire examinant un chat"
+                     class="card-img-top" loading="lazy">
+                <div class="card-body p-4">
+                    <h3 class="h5 page-title mb-2">Conçu avec des vétérinaires</h3>
+                    <p class="text-secondary mb-3">
+                        AniCare a été développé en collaboration avec des professionnels de la santé animale
+                        pour garantir que chaque fonctionnalité répond à un besoin réel du terrain.
+                    </p>
+                    <p class="text-secondary mb-0">
+                        Le mode professionnel permet aux vétérinaires de consulter les dossiers partagés par
+                        leurs clients, d'ajouter des actes et de suivre les traitements en cours, le tout
+                        dans une interface adaptée à leur pratique.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card anicare-card mt-4">
+                <div class="card-body p-4">
+                    <h3 class="h5 page-title mb-2">Vos données sont protégées</h3>
+                    <p class="text-secondary mb-0">
+                        Chaque utilisateur n'accède qu'aux dossiers qui lui appartiennent ou qui lui ont été
+                        explicitement partagés. Les documents médicaux sont stockés de manière sécurisée
+                        et ne sont jamais accessibles publiquement.
+                    </p>
+                </div>
+            </div>
+        </aside>
     </div>
+
+    <section class="text-center py-5">
+        <div class="card anicare-card">
+            <div class="card-body p-5">
+                <h2 class="h3 page-title mb-3">Prêt à prendre soin de vos compagnons ?</h2>
+                <p class="text-secondary mb-4">Créez votre compte gratuitement et commencez le suivi médical de vos animaux dès aujourd'hui.</p>
+                {% if not app.user %}
+                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg px-5 shadow-sm">Créer mon compte</a>
+                {% else %}
+                    <a href="{{ path('app_animal_index') }}" class="btn btn-primary btn-lg px-5 shadow-sm">Voir mes animaux</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
 </div>
 {% endblock %}

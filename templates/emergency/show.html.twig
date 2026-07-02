@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+{% block title %}Fiche d'urgence - {{ animal.name }} - AniCare{% endblock %}
+{% block body %}
+<div class="container py-4">
+    <div class="card anicare-card overflow-hidden border-danger">
+        <div class="card-header p-4" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="mb-1 fw-bold text-uppercase small" style="letter-spacing: 0.1em; opacity: 0.9;">Fiche d'urgence</p>
+                    <h1 class="mb-1 fw-bold" style="font-size: 1.8rem;">{{ animal.name }}</h1>
+                    <p class="mb-0 small" style="opacity: 0.9;">
+                        {{ animal.species }}{% if animal.breed %} — {{ animal.breed }}{% endif %}
+                        {% if animal.gender %} | {{ animal.gender }}{% endif %}
+                        {% if animal.birthDate %} | Né(e) le {{ animal.birthDate|date('d/m/Y') }}{% endif %}
+                    </p>
+                </div>
+                <div class="text-end">
+                    {% if animal.identificationNumber %}
+                        <p class="mb-1 small fw-bold" style="opacity: 0.9;">ID</p>
+                        <p class="mb-0 fw-bold">{{ animal.identificationNumber }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-12 col-md-6">
+                    <div class="p-3 rounded-3 bg-light h-100">
+                        <h2 class="h6 text-uppercase text-danger fw-bold mb-3">Informations vitales</h2>
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <th>Poids</th>
+                                <td><strong>{{ animal.weight ? animal.weight ~ ' kg' : 'Inconnu' }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Groupe sanguin</th>
+                                <td><strong>{{ animal.bloodType ?: 'Non déterminé' }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Propriétaire</th>
+                                <td>{{ animal.owner.email }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="p-3 rounded-3 h-100 {{ allergies is not empty ? 'bg-danger bg-opacity-10 border border-danger' : 'bg-light' }}">
+                        <h2 class="h6 text-uppercase text-danger fw-bold mb-3">
+                            Allergies connues
+                            {% if allergies is not empty %}
+                                <span class="badge bg-danger ms-1">{{ allergies|length }}</span>
+                            {% endif %}
+                        </h2>
+                        {% if allergies is empty %}
+                            <p class="text-secondary mb-0">Aucune allergie connue.</p>
+                        {% else %}
+                            {% for a in allergies %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong>{{ a.name }}</strong>
+                                    {% if a.severity == 'SEVERE' %}
+                                        <span class="badge bg-danger">Sévère</span>
+                                    {% elseif a.severity == 'MODERATE' %}
+                                        <span class="badge bg-warning text-dark">Modérée</span>
+                                    {% else %}
+                                        <span class="badge bg-info text-dark">Légère</span>
+                                    {% endif %}
+                                </div>
+                                {% if a.symptoms %}
+                                    <p class="small text-secondary mb-2">{{ a.symptoms }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="p-3 rounded-3 bg-light">
+                        <h2 class="h6 text-uppercase text-danger fw-bold mb-3">Traitements en cours</h2>
+                        {% if active_treatments is empty %}
+                            <p class="text-secondary mb-0">Aucun traitement en cours.</p>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead><tr><th>Acte</th><th>Posologie</th><th>Fréquence</th><th>Depuis</th></tr></thead>
+                                    <tbody>
+                                        {% for t in active_treatments %}
+                                            <tr>
+                                                <td><strong>{{ t.title }}</strong></td>
+                                                <td>{{ t.dosage ?: '-' }}</td>
+                                                <td>{{ t.frequency ?: '-' }}</td>
+                                                <td>{{ t.date|date('d/m/Y') }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if overdue_reminders is not empty %}
+                    <div class="col-12">
+                        <div class="p-3 rounded-3 bg-warning bg-opacity-10 border border-warning">
+                            <h2 class="h6 text-uppercase text-warning fw-bold mb-3">Rappels en retard</h2>
+                            {% for entry in overdue_reminders %}
+                                <div class="mb-1">
+                                    <strong>{{ entry.title }}</strong>
+                                    <span class="text-secondary small">— rappel prévu le {{ entry.nextReminderAt|date('d/m/Y') }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-4 border-top">
+                <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="btn btn-outline-primary">Retour à la fiche</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

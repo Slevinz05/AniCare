@@ -44,16 +44,8 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a
-                        class="nav-link text-nowrap {{ current_route == 'app_contact' ? 'active' : '' }}"
-                        href="{{ path('app_contact'|default('#')) }}">
-                        Contact
-                    </a>
-                </li>
-
                 {# ==========================================================================
-                   LIENS MÉTIEER PRIVÉS (Visibles uniquement si connecté)
+                   LIENS MÉTIER PRIVÉS (Visibles uniquement si connecté)
                    ========================================================================== #}
                 {% if app.user %}
                     <li class="nav-item">
@@ -72,15 +64,6 @@
 
                     <li class="nav-item">
                         <a
-                            class="nav-link text-nowrap {{ current_route starts with 'app_animal_share' ? 'active' : '' }}"
-                            href="{{ path('app_animal_share_index') }}"
-                        >
-                            Partages
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a
                             class="nav-link text-nowrap {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}"
                             href="{{ path('app_health_book_entry_index') }}"
                         >
@@ -90,11 +73,35 @@
 
                     <li class="nav-item">
                         <a
-                            class="nav-link text-nowrap {{ current_route == 'app_calendar' ? 'active' : '' }}"
-                            href="{{ path('app_calendar') }}"
+                            class="nav-link text-nowrap {{ current_route starts with 'app_message' ? 'active' : '' }}"
+                            href="{{ path('app_message_index') }}"
+                        >
+                            💬 Messagerie
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle text-nowrap {{ current_route == 'app_calendar' or current_route starts with 'app_appointment' ? 'active' : '' }}"
+                            href="#"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
                         >
                             📅 Planning
                         </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ current_route == 'app_calendar' ? 'active' : '' }}" href="{{ path('app_calendar') }}">
+                                    Calendrier
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ current_route starts with 'app_appointment' ? 'active' : '' }}" href="{{ path('app_appointment_index') }}">
+                                    Rendez-vous
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 {% endif %}
             </ul>

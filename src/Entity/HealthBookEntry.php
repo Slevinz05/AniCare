@@ -29,9 +29,30 @@ class HealthBookEntry
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $veterinarianName = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $dosage = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $frequency = null;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $endDate = null;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $nextReminderAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $recurrenceMonths = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $batchNumber = null;
+
     #[ORM\ManyToOne(inversedBy: 'healthBookEntries')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Animal $animal = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $documents = [];
 
     public function getId(): ?int
     {
@@ -110,8 +131,108 @@ class HealthBookEntry
         return $this;
     }
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $documents = [];
+    public function getDosage(): ?string
+    {
+        return $this->dosage;
+    }
+
+    public function setDosage(?string $dosage): static
+    {
+        $this->dosage = $dosage;
+
+        return $this;
+    }
+
+    public function getFrequency(): ?string
+    {
+        return $this->frequency;
+    }
+
+    public function setFrequency(?string $frequency): static
+    {
+        $this->frequency = $frequency;
+
+        return $this;
+    }
+
+    public function getEndDate(): ?\DateTimeImmutable
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate(?\DateTimeImmutable $endDate): static
+    {
+        $this->endDate = $endDate;
+
+        return $this;
+    }
+
+    public function getNextReminderAt(): ?\DateTimeImmutable
+    {
+        return $this->nextReminderAt;
+    }
+
+    public function setNextReminderAt(?\DateTimeImmutable $nextReminderAt): static
+    {
+        $this->nextReminderAt = $nextReminderAt;
+
+        return $this;
+    }
+
+    public function getRecurrenceMonths(): ?int
+    {
+        return $this->recurrenceMonths;
+    }
+
+    public function setRecurrenceMonths(?int $recurrenceMonths): static
+    {
+        $this->recurrenceMonths = $recurrenceMonths;
+
+        if ($recurrenceMonths && $this->date) {
+            $this->nextReminderAt = $this->date->modify("+{$recurrenceMonths} months");
+        }
+
+        return $this;
+    }
+
+    public function getBatchNumber(): ?string
+    {
+        return $this->batchNumber;
+    }
+
+    public function setBatchNumber(?string $batchNumber): static
+    {
+        $this->batchNumber = $batchNumber;
+
+        return $this;
+    }
+
+    public function isActiveTreatment(): bool
+    {
+        if (!in_array($this->type, ['Traitement', 'Antiparasitaire'], true)) {
+            return false;
+        }
+
+        $today = new \DateTimeImmutable('today');
+        return $this->date <= $today && ($this->endDate === null || $this->endDate >= $today);
+    }
+
+    public function isOverdueReminder(): bool
+    {
+        return $this->nextReminderAt !== null && $this->nextReminderAt < new \DateTimeImmutable('today');
+    }
+
+    public function isDueSoon(int $days = 30): bool
+    {
+        if ($this->nextReminderAt === null) {
+            return false;
+        }
+
+        $today = new \DateTimeImmutable('today');
+        $threshold = $today->modify("+{$days} days");
+
+        return $this->nextReminderAt >= $today && $this->nextReminderAt <= $threshold;
+    }
 
     public function getDocuments(): array
     {

@@ -11,34 +11,39 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/animal')]
+#[IsGranted('ROLE_USER')]
 final class AnimalController extends AbstractController
 {
     public function __construct(
         private readonly DocumentUploader $documentUploader,
+        private readonly SluggerInterface $slugger,
 
-        #[Autowire('%kernel.project_dir%/public/uploads/animals')]
+        #[Autowire('%kernel.project_dir%/var/uploads/animals')]
         private readonly string $animalUploadsDirectory,
+
+        #[Autowire('%kernel.project_dir%/public/uploads/photos')]
+        private readonly string $photoDirectory,
     ) {
     }
 
     #[Route('/', name: 'app_animal_index', methods: ['GET'])]
     public function index(AnimalRepository $animalRepository): Response
     {
-        // 🔒 Récupère l'utilisateur connecté
         /** @var User $user */
         $user = $this->getUser();
 
-        // 🛡️ Si l'utilisateur est un Administrateur, il peut tout voir (optionnel)
         if ($this->isGranted('ROLE_ADMIN')) {
             $animals = $animalRepository->findAll();
         } else {
-            // 🔑 Un utilisateur classique ne voit QUE ses animaux
-            $animals = $animalRepository->findBy(['owner' => $user]);
+            $animals = $animalRepository->findAccessibleAnimals($user);
         }
 
         return $this->render('animal/index.html.twig', [
@@ -51,7 +56,6 @@ final class AnimalController extends AbstractController
     {
         $animal = new Animal();
 
-        // 🔒 Sécurité : On récupère l'utilisateur connecté
         /** @var User $user */
         $user = $this->getUser();
 
@@ -59,8 +63,10 @@ final class AnimalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // 🔑 On associe l'animal à cet utilisateur précis
             $animal->setOwner($user);
+
+            $this->handlePhotoUpload($form, $animal);
+            $this->handleUploadedDocuments($form, $animal);
 
             $entityManager->persist($animal);
             $entityManager->flush();
@@ -68,30 +74,32 @@ final class AnimalController extends AbstractController
             return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        // 💡 C'EST CE RETURN ICI QU'IL VOUS MANQUE :
-        // Il permet d'afficher la page du formulaire au premier chargement, 
-        // ou de réafficher le formulaire avec les erreurs si la validation a échoué.
         return $this->render('animal/new.html.twig', [
             'animal' => $animal,
-            'form' => $form->createView(), // ou '$form' selon votre version de Symfony
+            'form' => $form,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_animal_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_animal_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Animal $animal): Response
     {
+        $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
+
         return $this->render('animal/show.html.twig', [
             'animal' => $animal,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_animal_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_animal_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Request $request, Animal $animal, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+
         $form = $this->createForm(AnimalType::class, $animal);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handlePhotoUpload($form, $animal);
             $this->handleUploadedDocuments($form, $animal);
 
             $entityManager->flush();
@@ -107,10 +115,19 @@ final class AnimalController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_animal_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_animal_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, Animal $animal, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ANIMAL_DELETE', $animal);
+
         if ($this->isCsrfTokenValid('delete' . $animal->getId(), $request->getPayload()->getString('_token'))) {
+            if ($animal->getPhoto()) {
+                $photoPath = $this->photoDirectory . '/' . $animal->getPhoto();
+                if (is_file($photoPath)) {
+                    unlink($photoPath);
+                }
+            }
+
             $this->deletePhysicalDocuments($animal->getDocuments());
 
             $entityManager->remove($animal);
@@ -118,6 +135,33 @@ final class AnimalController extends AbstractController
         }
 
         return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    private function handlePhotoUpload(FormInterface $form, Animal $animal): void
+    {
+        /** @var UploadedFile|null $photoFile */
+        $photoFile = $form->get('photoFile')->getData();
+
+        if (!$photoFile) {
+            return;
+        }
+
+        if ($animal->getPhoto()) {
+            $oldPath = $this->photoDirectory . '/' . $animal->getPhoto();
+            if (is_file($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        if (!is_dir($this->photoDirectory)) {
+            mkdir($this->photoDirectory, 0775, true);
+        }
+
+        $safeFilename = $this->slugger->slug(pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME));
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+        $photoFile->move($this->photoDirectory, $newFilename);
+        $animal->setPhoto($newFilename);
     }
 
     private function handleUploadedDocuments(FormInterface $form, Animal $animal): void
@@ -132,10 +176,7 @@ final class AnimalController extends AbstractController
             return;
         }
 
-        $documents = $this->documentUploader->uploadMany(
-            $uploadedFiles,
-            $this->animalUploadsDirectory
-        );
+        $documents = $this->documentUploader->uploadMany($uploadedFiles, $this->animalUploadsDirectory);
 
         foreach ($documents as $document) {
             $animal->addDocument($document);

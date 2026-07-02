@@ -17,28 +17,52 @@ class HealthBookEntryRepository extends ServiceEntityRepository
         parent::__construct($registry, HealthBookEntry::class);
     }
 
-    /**
-     * Récupère les prochains rappels ou soins médicaux pour les animaux d'un propriétaire
-     */
+    public function findAccessibleByUser(User $user): array
+    {
+        return $this->createQueryBuilder('h')
+            ->innerJoin('h.animal', 'a')
+            ->leftJoin('a.animalShares', 's')
+            ->where('a.owner = :user')
+            ->orWhere('s.sharedWithEmail = :email')
+            ->setParameter('user', $user)
+            ->setParameter('email', $user->getEmail())
+            ->orderBy('h.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findUpcomingRemindersByOwner(User $user, int $limit = 3): array
     {
         return $this->createQueryBuilder('h')
             ->innerJoin('h.animal', 'a')
-            ->andWhere('a.owner = :user')
-            // Logique : Échéances à partir d'aujourd'hui
+            ->leftJoin('a.animalShares', 's')
+            ->where('a.owner = :user OR s.sharedWithEmail = :email')
             ->andWhere('h.date >= :today')
             ->setParameter('user', $user)
-            ->setParameter('today', new \DateTimeImmutable('today')) // Utilisation d'un DateTimeImmutable calé à 00:00:00
-            // Tri chronologique : le plus proche dans le temps en premier
+            ->setParameter('email', $user->getEmail())
+            ->setParameter('today', new \DateTimeImmutable('today'))
             ->orderBy('h.date', 'ASC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }
 
-    /**
-     * Trouve toutes les entrées médicales pour une date donnée (sans prendre en compte les heures)
-     */
+    public function findByMonthAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
+    {
+        return $this->createQueryBuilder('h')
+            ->join('h.animal', 'a')
+            ->leftJoin('a.animalShares', 's')
+            ->where('h.date BETWEEN :start AND :end')
+            ->andWhere('a.owner = :user OR s.sharedWithEmail = :email')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('user', $user)
+            ->setParameter('email', $user->getEmail())
+            ->orderBy('h.date', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findByDate(\DateTimeImmutable $date): array
     {
         return $this->createQueryBuilder('h')

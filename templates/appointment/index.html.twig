@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+{% block title %}Rendez-vous - AniCare{% endblock %}
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Organisation</p>
+                <h1 class="page-title mb-2">Rendez-vous</h1>
+                <p class="page-subtitle mb-0">Planifiez et suivez les rendez-vous vétérinaires de vos animaux.</p>
+            </div>
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_appointment_new') }}" class="btn btn-primary shadow-sm">Prendre rendez-vous</a>
+            </div>
+        </div>
+    </div>
+
+    {% if appointments is empty %}
+        <div class="empty-state text-center p-5">
+            <h2 class="h4 page-title mb-2">Aucun rendez-vous à venir</h2>
+            <p class="text-secondary mb-4">Vous n'avez pas encore de rendez-vous planifié.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ path('app_appointment_new') }}" class="btn btn-primary">Prendre rendez-vous</a>
+                <a href="{{ path('app_directory') }}" class="btn btn-outline-primary">Trouver un vétérinaire</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="card anicare-card overflow-hidden">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-medical align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date / Heure</th>
+                                <th>Animal</th>
+                                <th>Motif</th>
+                                <th>Lieu</th>
+                                <th>Statut</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ap in appointments %}
+                                <tr>
+                                    <td><strong>{{ ap.scheduledAt|date('d/m/Y H:i') }}</strong></td>
+                                    <td><strong class="text-teal">{{ ap.animal.name }}</strong></td>
+                                    <td>{{ ap.reason }}</td>
+                                    <td>{{ ap.location ?: '-' }}</td>
+                                    <td>
+                                        {% if ap.status == 'CONFIRMED' %}
+                                            <span class="badge bg-success">Confirmé</span>
+                                        {% elseif ap.status == 'CANCELLED' %}
+                                            <span class="badge bg-secondary">Annulé</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if ap.status == 'PENDING' %}
+                                            <form method="post" action="{{ path('app_appointment_confirm', {'id': ap.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ ap.id) }}">
+                                                <button class="btn btn-success btn-sm">Confirmer</button>
+                                            </form>
+                                            <form method="post" action="{{ path('app_appointment_cancel', {'id': ap.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ ap.id) }}">
+                                                <button class="btn btn-outline-danger btn-sm">Annuler</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

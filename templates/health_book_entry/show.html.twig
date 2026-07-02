@@ -90,12 +90,57 @@
                             </td>
                         </tr>
 
+                        {% if health_book_entry.dosage %}
+                            <tr>
+                                <th>Posologie</th>
+                                <td>{{ health_book_entry.dosage }}</td>
+                            </tr>
+                        {% endif %}
+
+                        {% if health_book_entry.frequency %}
+                            <tr>
+                                <th>Fréquence</th>
+                                <td>{{ health_book_entry.frequency }}</td>
+                            </tr>
+                        {% endif %}
+
+                        {% if health_book_entry.endDate %}
+                            <tr>
+                                <th>Date de fin</th>
+                                <td>{{ health_book_entry.endDate|date('d/m/Y') }}</td>
+                            </tr>
+                        {% endif %}
+
+                        {% if health_book_entry.batchNumber %}
+                            <tr>
+                                <th>Numéro de lot</th>
+                                <td>{{ health_book_entry.batchNumber }}</td>
+                            </tr>
+                        {% endif %}
+
+                        {% if health_book_entry.nextReminderAt %}
+                            <tr>
+                                <th>Prochain rappel</th>
+                                <td>
+                                    {{ health_book_entry.nextReminderAt|date('d/m/Y') }}
+                                    {% if health_book_entry.isOverdueReminder %}
+                                        <span class="badge bg-danger ms-2">En retard</span>
+                                    {% elseif health_book_entry.isDueSoon %}
+                                        <span class="badge bg-warning text-dark ms-2">Bientôt</span>
+                                    {% endif %}
+                                    {% if health_book_entry.recurrenceMonths %}
+                                        <span class="text-secondary small ms-2">(tous les {{ health_book_entry.recurrenceMonths }} mois)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+
                         <tr>
                             <th>Description / observations</th>
                             <td>
                                 {% if health_book_entry.description %}
                                     <div class="health-entry-note">
-                                        {{ health_book_entry.description|nl2br }}
+                                        {{ health_book_entry.description|e('html')|nl2br }}
                                     </div>
                                 {% else %}
                                     <span class="text-secondary">
@@ -131,8 +176,8 @@
                     <div class="document-list">
                         {% for document in health_book_entry.documents %}
                             <a 
-                                href="{{ asset('uploads/health-book-entries/' ~ document.fileName) }}" 
-                                target="_blank" 
+                                href="{{ path('app_document_download_health_entry', {'entryId': health_book_entry.id, 'fileName': document.fileName}) }}"
+                                target="_blank"
                                 rel="noopener"
                                 class="document-item"
                             >

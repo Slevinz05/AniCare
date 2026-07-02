@@ -11,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\All;
+use Symfony\Component\Validator\Constraints\File;
 
 class AnimalType extends AbstractType
 {
@@ -18,7 +20,7 @@ class AnimalType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nom de l’animal',
+                'label' => 'Nom de l\'animal',
                 'attr' => [
                     'placeholder' => 'Ex : Hatchi',
                 ],
@@ -73,15 +75,36 @@ class AnimalType extends AbstractType
             ])
 
             ->add('identificationNumber', TextType::class, [
-                'label' => 'Numéro d’identification',
+                'label' => 'Numéro d\'identification',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Numéro de puce électronique ou de tatouage',
                 ],
             ])
 
+            ->add('photoFile', FileType::class, [
+                'label' => 'Photo de l\'animal',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'accept' => 'image/jpeg,image/png,image/webp',
+                ],
+                'help' => 'Format accepté : JPG, PNG ou WebP (max 5 Mo).',
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez ajouter une image valide (JPG, PNG ou WebP).',
+                    ]),
+                ],
+            ])
+
             ->add('attachments', FileType::class, [
-                'label' => 'Documents de l’animal',
+                'label' => 'Documents de l\'animal',
                 'mapped' => false,
                 'required' => false,
                 'multiple' => true,
@@ -89,6 +112,22 @@ class AnimalType extends AbstractType
                     'accept' => '.pdf,.jpg,.jpeg,.png,.webp,.doc,.docx',
                 ],
                 'help' => 'Vous pouvez ajouter un ou plusieurs fichiers (Taille max : 10 Mo par fichier).',
+                'constraints' => [
+                    new All([
+                        new File([
+                            'maxSize' => '10M',
+                            'mimeTypes' => [
+                                'application/pdf',
+                                'image/jpeg',
+                                'image/png',
+                                'image/webp',
+                                'application/msword',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            ],
+                            'mimeTypesMessage' => 'Veuillez ajouter un fichier valide : PDF, image ou document Word.',
+                        ]),
+                    ]),
+                ],
             ])
         ;
     }

@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle conversation - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Messagerie</p>
+                <h1 class="page-title mb-2">Nouvelle conversation</h1>
+                <p class="page-subtitle mb-0">Choisissez un animal pour démarrer une discussion avec les personnes ayant accès à son dossier.</p>
+            </div>
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_message_index') }}" class="btn btn-outline-primary">Retour à la messagerie</a>
+            </div>
+        </div>
+    </div>
+
+    {% if animals is empty %}
+        <div class="empty-state text-center p-5">
+            <div class="mb-3" style="font-size: 3rem; opacity: 0.4;">🐾</div>
+            <h2 class="h4 page-title mb-2">Aucun animal disponible</h2>
+            <p class="text-secondary mb-4">Vous n'avez aucun animal enregistré ou partagé avec vous.</p>
+            <a href="{{ path('app_animal_new') }}" class="btn btn-primary">Enregistrer un animal</a>
+        </div>
+    {% else %}
+        <div class="row g-3">
+            {% for animal in animals %}
+                {% set has_messages = animal.id in animalsWithMessages %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="{{ path('app_message_thread', {'id': animal.id}) }}" class="text-decoration-none">
+                        <div class="card anicare-card h-100" style="transition: all 0.15s ease;">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    {% if animal.photo %}
+                                        <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
+                                             alt="{{ animal.name }}"
+                                             class="rounded-circle"
+                                             style="width: 56px; height: 56px; object-fit: cover; flex-shrink: 0;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-anicare-soft border-anicare d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; flex-shrink: 0;">
+                                            <span style="font-size: 1.5rem;">
+                                                {% if animal.species|lower == 'chien' %}🐕{% elseif animal.species|lower == 'chat' %}🐈{% elseif animal.species|lower == 'cheval' %}🐴{% else %}🐾{% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h3 class="h6 fw-bold mb-0 text-dark">{{ animal.name }}</h3>
+                                        <span class="text-secondary small">{{ animal.species }}{% if animal.breed %} — {{ animal.breed }}{% endif %}</span>
+                                    </div>
+                                </div>
+
+                                <div class="small text-secondary mb-3">
+                                    {% set share_count = animal.animalShares|length %}
+                                    {% if animal.owner == app.user %}
+                                        <span class="badge bg-anicare-soft text-teal border-anicare">Propriétaire</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-secondary border">Partagé avec vous</span>
+                                    {% endif %}
+                                    {% if share_count > 0 %}
+                                        <span class="ms-1">· {{ share_count }} partage{{ share_count > 1 ? 's' : '' }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mt-auto">
+                                    {% if has_messages %}
+                                        <span class="btn btn-outline-primary btn-sm w-100">Reprendre la conversation</span>
+                                    {% else %}
+                                        <span class="btn btn-primary btn-sm w-100">Démarrer une conversation</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

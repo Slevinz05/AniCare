@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mentions légales - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <article>
+                <div class="mb-5">
+                    <p class="page-eyebrow mb-2">Juridique</p>
+                    <h1 class="page-title" style="font-size: 2rem;">Mentions légales</h1>
+                    <p class="text-secondary">Dernière mise à jour : {{ 'now'|date('d/m/Y') }}</p>
+                </div>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">1. Éditeur du site</h2>
+                    <div class="card anicare-card">
+                        <div class="card-body p-4">
+                            <p class="mb-1"><strong>Nom du projet :</strong> AniCare</p>
+                            <p class="mb-1"><strong>Nature :</strong> Projet réalisé dans le cadre du Titre Professionnel Développeur Web et Web Mobile (TP DWWM)</p>
+                            <p class="mb-1"><strong>Responsable de la publication :</strong> Pierre Renault</p>
+                            <p class="mb-1"><strong>Contact :</strong> contact@anicare.fr</p>
+                            <p class="mb-0"><strong>Statut :</strong> Projet à vocation pédagogique et démonstrative</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">2. Hébergement</h2>
+                    <p>Le site AniCare est hébergé par :</p>
+                    <div class="card anicare-card">
+                        <div class="card-body p-4">
+                            <p class="mb-1"><strong>Hébergeur :</strong> [Nom de l'hébergeur]</p>
+                            <p class="mb-1"><strong>Adresse :</strong> [Adresse de l'hébergeur]</p>
+                            <p class="mb-0"><strong>Contact :</strong> [Contact de l'hébergeur]</p>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mt-2">Ces informations seront complétées lors de la mise en production.</p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">3. Propriété intellectuelle</h2>
+                    <p>
+                        L'ensemble du contenu du site AniCare (textes, images, graphismes, logo, icônes, structure générale)
+                        est la propriété exclusive de l'éditeur ou fait l'objet d'une autorisation d'utilisation.
+                    </p>
+                    <p>
+                        Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site,
+                        quel que soit le moyen ou le procédé utilisé, est interdite sans l'autorisation écrite préalable de l'éditeur.
+                    </p>
+                    <p>
+                        Le site utilise le framework Symfony, distribué sous licence MIT.
+                        Les photographies d'illustration proviennent d'Unsplash et sont utilisées conformément à leur licence.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">4. Nature des données traitées</h2>
+                    <p>
+                        AniCare est une application de gestion de carnets de santé pour animaux de compagnie.
+                        Les données médicales traitées concernent exclusivement des <strong>animaux</strong> et ne relèvent
+                        pas du cadre de la santé humaine au sens du Code de la santé publique.
+                    </p>
+                    <p>
+                        Néanmoins, les données personnelles des utilisateurs (email, nom) sont traitées conformément
+                        au Règlement Général sur la Protection des Données (RGPD - Règlement UE 2016/679) et à la
+                        loi Informatique et Libertés du 6 janvier 1978 modifiée.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">5. Responsabilité</h2>
+                    <p>
+                        AniCare est un outil d'aide à la gestion et au suivi médical animal. Il ne se substitue en aucun cas
+                        à l'avis, au diagnostic ou au traitement d'un vétérinaire diplômé.
+                    </p>
+                    <p>
+                        Les informations fournies par les utilisateurs (actes médicaux, posologies, rappels) sont saisies
+                        sous leur responsabilité. L'éditeur ne garantit pas l'exactitude, la complétude ou l'actualité
+                        des informations enregistrées par les utilisateurs.
+                    </p>
+                    <p>
+                        En cas d'urgence médicale concernant un animal, contactez immédiatement un vétérinaire.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">6. Cookies</h2>
+                    <p>
+                        Le site AniCare utilise uniquement des cookies strictement nécessaires au fonctionnement
+                        de l'application (cookie de session, jeton CSRF). Aucun cookie publicitaire, de suivi
+                        ou d'analyse n'est déposé.
+                    </p>
+                    <p>
+                        Conformément à l'article 82 de la loi Informatique et Libertés, les cookies strictement
+                        nécessaires sont exemptés du recueil de consentement.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="h4 page-title mb-3">7. Droit applicable</h2>
+                    <p>
+                        Les présentes mentions légales sont régies par le droit français. En cas de litige,
+                        et après tentative de résolution amiable, les tribunaux français seront seuls compétents.
+                    </p>
+                </section>
+            </article>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+<p>Bonjour {{ owner.userIdentifier }},</p>
+
+<p>Ceci est un rappel automatique d'<b>AniCare</b>.</p>
+
+<p>Le soin ou vaccin suivant est programmé pour <b>{{ animal.name }}</b> le {{ entry.date|date('d/m/Y') }} :</p>
+
+<ul>
+    <li><b>Activité :</b> {{ entry.title }}</li>
+    <li><b>Type :</b> {{ entry.type }}</li>
+</ul>
+
+<p>Prenez soin de vos compagnons !</p>

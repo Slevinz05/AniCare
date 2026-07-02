@@ -65,6 +65,7 @@ body {
         var(--bg-color);
     color: var(--secondary-color);
     line-height: 1.5;
+    overflow-x: hidden;
 }
 
 .container {
@@ -138,6 +139,39 @@ a:hover {
 .navbar .nav-link.active {
     color: var(--primary-hover) !important;
     background-color: var(--soft-teal);
+}
+
+.navbar .dropdown-menu {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    padding: 0.4rem;
+    min-width: 12rem;
+    background-color: var(--card-bg);
+}
+
+.navbar .dropdown-item {
+    font-weight: 600;
+    color: var(--secondary-color);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.85rem;
+    transition: all 0.15s ease;
+}
+
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+    color: var(--primary-hover);
+    background-color: var(--soft-teal);
+}
+
+.navbar .dropdown-item.active {
+    color: var(--primary-hover);
+    background-color: var(--soft-teal);
+}
+
+.navbar .dropdown-toggle::after {
+    margin-left: 0.35rem;
+    vertical-align: 0.15em;
 }
 
 .navbar-user {

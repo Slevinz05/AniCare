@@ -3,13 +3,13 @@
 namespace App\Command;
 
 use App\Repository\HealthBookEntryRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 #[AsCommand(
     name: 'app:send-medical-reminders',
@@ -17,14 +17,10 @@ use Symfony\Component\Mime\Email;
 )]
 class SendMedicalReminderCommand extends Command
 {
-    private HealthBookEntryRepository $healthBookRepository;
-    private MailerInterface $mailer;
-
-    public function __construct(HealthBookEntryRepository $healthBookRepository, MailerInterface $mailer)
-    {
-        $this->healthBookRepository = $healthBookRepository;
-        $this->mailer = $mailer;
-
+    public function __construct(
+        private readonly HealthBookEntryRepository $healthBookRepository,
+        private readonly MailerInterface $mailer,
+    ) {
         parent::__construct();
     }
 
@@ -32,38 +28,26 @@ class SendMedicalReminderCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        // 1. On récupère les rappels prévus par exemple dans exactement 7 jours
         $targetDate = new \DateTimeImmutable('+7 days');
-        // On va créer une méthode spécifique dans le Repository (voir Étape B)
         $upcomingEntries = $this->healthBookRepository->findByDate($targetDate);
 
         $emailCount = 0;
 
         foreach ($upcomingEntries as $entry) {
             $animal = $entry->getAnimal();
-            $owner = $animal ? $animal->getOwner() : null;
+            $owner = $animal?->getOwner();
 
             if ($owner && $owner->getUserIdentifier()) {
-                // 2. Création et envoi de l'e-mail
-                $email = (new Email())
+                $email = (new TemplatedEmail())
                     ->from('ne-pas-repondre@anicare.com')
-                    ->to($owner->getUserIdentifier()) // L'adresse email de l'utilisateur
-                    ->subject(sprintf('⚠️ Rappel de soin pour %s', $animal->getName()))
-                    ->html(sprintf(
-                        '<p>Bonjour %s,</p>
-                        <p>Ceci est un rappel automatique d\'<b>AniCare</b>.</p>
-                        <p>Le soin ou vaccin suivant est programmé pour <b>%s</b> le %s :</p>
-                        <ul>
-                            <li><b>Activité :</b> %s</li>
-                            <li><b>Type :</b> %s</li>
-                        </ul>
-                        <p>Prenez soin de vos compagnons !</p>',
-                        $owner->getUserIdentifier(),
-                        $animal->getName(),
-                        $entry->getDate()->format('d/m/Y'),
-                        $entry->getTitle(),
-                        $entry->getType()
-                    ));
+                    ->to($owner->getUserIdentifier())
+                    ->subject(sprintf('Rappel de soin pour %s', $animal->getName()))
+                    ->htmlTemplate('emails/medical_reminder.html.twig')
+                    ->context([
+                        'owner' => $owner,
+                        'animal' => $animal,
+                        'entry' => $entry,
+                    ]);
 
                 $this->mailer->send($email);
                 $emailCount++;

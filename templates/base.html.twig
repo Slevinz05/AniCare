@@ -21,6 +21,16 @@
         {{ include('_partials/_header.html.twig') }}
 
         <main class="flex-grow-1">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="container mt-3">
+                        <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'danger' : 'info') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
             {% block body %}{% endblock %}
         </main>
 

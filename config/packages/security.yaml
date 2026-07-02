@@ -21,6 +21,9 @@ security:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\AppAuthenticator
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -46,6 +49,12 @@ security:
         - { path: ^/animal, roles: ROLE_USER }
         - { path: ^/calendar, roles: ROLE_USER }
         - { path: ^/health/book/entry, roles: ROLE_USER }
+        - { path: ^/weight, roles: ROLE_USER }
+        - { path: ^/allergy, roles: ROLE_USER }
+        - { path: ^/appointment, roles: ROLE_USER }
+        - { path: ^/message, roles: ROLE_USER }
+        - { path: ^/emergency, roles: ROLE_USER }
+        - { path: ^/download, roles: ROLE_USER }
 
         # Exemples optionnels pour la hiérarchie future :
         # - { path: ^/admin, roles: ROLE_ADMIN }

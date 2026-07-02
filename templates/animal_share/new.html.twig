@@ -1,11 +1,31 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}New AnimalShare{% endblock %}
+{% block title %}Partager un dossier - AniCare{% endblock %}
 
 {% block body %}
-    <h1>Create new AnimalShare</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-7">
+            <div class="card anicare-card">
+                <div class="card-header medical-header p-4">
+                    <p class="page-eyebrow mb-2">Collaboration</p>
+                    <h1 class="page-title mb-0">Partager un dossier animal</h1>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-secondary mb-4">Donnez accès au dossier médical de votre animal à un vétérinaire, un proche ou un pet-sitter.</p>
 
-    {{ include('animal_share/_form.html.twig') }}
-
-    <a href="{{ path('app_animal_share_index') }}">back to list</a>
+                    {{ form_start(form, {'attr': {'class': 'anicare-form'}}) }}
+                        <div class="row g-4">
+                            <div class="col-12">{{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.sharedWithEmail, {'attr': {'class': 'form-control', 'placeholder': 'adresse@email.com'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.permissionLevel, {'attr': {'class': 'form-select'}}) }}</div>
+                        </div>
+                        {{ form_rest(form) }}
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Partager le dossier</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+            <a href="{{ path('app_animal_share_index') }}" class="btn btn-outline-primary mt-3">Retour aux partages</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

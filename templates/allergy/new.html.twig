@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouvelle allergie - AniCare{% endblock %}
+{% block body %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-6">
+            <div class="card anicare-card">
+                <div class="card-header medical-header p-4">
+                    <p class="page-eyebrow mb-2">Antécédents</p>
+                    <h1 class="page-title mb-0">Ajouter une allergie — {{ animal.name }}</h1>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'anicare-form'}}) }}
+                        <div class="row g-4">
+                            <div class="col-12 col-md-6">{{ form_row(form.name, {'attr': {'class': 'form-control'}}) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.severity, {'attr': {'class': 'form-select'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.symptoms, {'attr': {'class': 'form-control'}}) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.diagnosedAt, {'attr': {'class': 'form-control'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.notes, {'attr': {'class': 'form-control'}}) }}</div>
+                        </div>
+                        {{ form_rest(form) }}
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Enregistrer</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+            <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary mt-3">Retour</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

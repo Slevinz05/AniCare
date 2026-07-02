@@ -1,13 +1,35 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Edit AnimalShare{% endblock %}
+{% block title %}Modifier le partage - AniCare{% endblock %}
 
 {% block body %}
-    <h1>Edit AnimalShare</h1>
-
-    {{ include('animal_share/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_animal_share_index') }}">back to list</a>
-
-    {{ include('animal_share/_delete_form.html.twig') }}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-7">
+            <div class="card anicare-card">
+                <div class="card-header medical-header p-4">
+                    <p class="page-eyebrow mb-2">Collaboration</p>
+                    <h1 class="page-title mb-0">Modifier le partage</h1>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'anicare-form'}}) }}
+                        <div class="row g-4">
+                            <div class="col-12">{{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.sharedWithEmail, {'attr': {'class': 'form-control'}}) }}</div>
+                            <div class="col-12">{{ form_row(form.permissionLevel, {'attr': {'class': 'form-select'}}) }}</div>
+                        </div>
+                        {{ form_rest(form) }}
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Enregistrer</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <a href="{{ path('app_animal_share_index') }}" class="btn btn-outline-primary">Retour</a>
+                <form method="post" action="{{ path('app_animal_share_delete', {'id': animal_share.id}) }}" onsubmit="return confirm('Supprimer ce partage ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ animal_share.id) }}">
+                    <button class="btn btn-outline-danger">Supprimer ce partage</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,41 +1,70 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}AnimalShare index
-{% endblock %}
+{% block title %}Mes partages - AniCare{% endblock %}
 
 {% block body %}
-	<h1>AnimalShare index</h1>
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Collaboration</p>
+                <h1 class="page-title mb-2">Mes partages</h1>
+                <p class="page-subtitle mb-0">Gérez les accès que vous avez accordés sur les dossiers de vos animaux.</p>
+            </div>
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_animal_share_new') }}" class="btn btn-primary shadow-sm">Nouveau partage</a>
+            </div>
+        </div>
+    </div>
 
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Id</th>
-				<th>SharedWithEmail</th>
-				<th>PermissionLevel</th>
-				<th>CreatedAt</th>
-				<th>actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for animal_share in animal_shares %}
-				<tr>
-					<td>{{ animal_share.id }}</td>
-					<td>{{ animal_share.animal.name }}</td>
-					<td>{{ animal_share.sharedWithEmail }}</td>
-					{{ include('animal_share/_permission_badge.html.twig', {'permission': animal_share.permissionLevel}) }}
-					<td>{{ animal_share.createdAt ? animal_share.createdAt|date('d/m/Y') : '' }}</td>
-					<td>
-						<a href="{{ path('app_animal_share_show', {'id': animal_share.id}) }}">show</a>
-						<a href="{{ path('app_animal_share_edit', {'id': animal_share.id}) }}">edit</a>
-					</td>
-				</tr>
-			{% else %}
-				<tr>
-					<td colspan="5">no records found</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-
-	<a href="{{ path('app_animal_share_new') }}">Create new</a>
+    {% if animal_shares is empty %}
+        <div class="empty-state text-center p-5">
+            <h2 class="h4 page-title mb-2">Aucun partage actif</h2>
+            <p class="text-secondary mb-4">Partagez le dossier d'un animal avec un vétérinaire ou un proche.</p>
+            <a href="{{ path('app_animal_share_new') }}" class="btn btn-primary">Partager un dossier</a>
+        </div>
+    {% else %}
+        <div class="card anicare-card overflow-hidden">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-medical align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Animal</th>
+                                <th>Partagé avec</th>
+                                <th>Permission</th>
+                                <th>Depuis le</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for share in animal_shares %}
+                                <tr>
+                                    <td><strong class="text-teal">{{ share.animal.name }}</strong></td>
+                                    <td>{{ share.sharedWithEmail }}</td>
+                                    <td>
+                                        {% if share.permissionLevel == 'WRITE' %}
+                                            <span class="badge bg-success">Modification</span>
+                                        {% else %}
+                                            <span class="badge bg-info text-dark">Lecture seule</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ share.createdAt ? share.createdAt|date('d/m/Y') : '-' }}</td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ path('app_animal_share_edit', {'id': share.id}) }}" class="btn btn-outline-primary btn-sm">Modifier</a>
+                                            <form method="post" action="{{ path('app_animal_share_delete', {'id': share.id}) }}" onsubmit="return confirm('Supprimer ce partage ?');" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ share.id) }}">
+                                                <button class="btn btn-outline-danger btn-sm">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

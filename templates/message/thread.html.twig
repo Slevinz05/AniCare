@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+{% block title %}Messages - {{ animal.name }} - AniCare{% endblock %}
+{% block body %}
+<div class="container py-4">
+    <div class="card anicare-card overflow-hidden">
+        <div class="card-header medical-header p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    {% if animal.photo %}
+                        <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
+                             alt="{{ animal.name }}"
+                             class="rounded-circle"
+                             style="width: 44px; height: 44px; object-fit: cover;">
+                    {% endif %}
+                    <div>
+                        <p class="page-eyebrow mb-1">Messagerie</p>
+                        <h1 class="page-title mb-0">{{ animal.name }}</h1>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_message_index') }}" class="btn btn-outline-primary btn-sm">Toutes les conversations</a>
+                    <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Fiche animal</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="message-thread mb-4" style="max-height: 500px; overflow-y: auto;">
+                {% if messages is empty %}
+                    <div class="text-center text-secondary py-5">
+                        <div class="mb-2" style="font-size: 2.5rem; opacity: 0.4;">💬</div>
+                        <p>Aucun message pour le moment.</p>
+                        <p class="small">Échangez avec les personnes ayant accès au dossier de {{ animal.name }}.</p>
+                    </div>
+                {% else %}
+                    {% for msg in messages %}
+                        {% set is_mine = msg.sender == app.user %}
+                        <div class="d-flex mb-3 {{ is_mine ? 'justify-content-end' : 'justify-content-start' }}">
+                            <div class="p-3 rounded-3 {{ is_mine ? 'bg-anicare-soft' : 'bg-light' }}" style="max-width: 75%;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small {{ is_mine ? 'text-teal' : 'text-dark' }}">
+                                        {{ msg.sender.email }}
+                                    </strong>
+                                    <span class="text-secondary small ms-3">
+                                        {{ msg.createdAt|date('d/m H:i') }}
+                                    </span>
+                                </div>
+                                {% if msg.content %}
+                                    <p class="mb-0">{{ msg.content|e('html')|nl2br }}</p>
+                                {% endif %}
+                                {% if msg.attachmentFilename %}
+                                    <div class="mt-2 p-2 rounded bg-white border d-inline-flex align-items-center gap-2">
+                                        <span>📎</span>
+                                        <a href="{{ path('app_message_download', {'id': msg.id}) }}" class="small text-teal fw-bold text-decoration-none">
+                                            {{ msg.attachmentOriginalName ?? msg.attachmentFilename }}
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="border-top border-anicare pt-4">
+                {{ form_start(form, {'attr': {'class': 'anicare-form', 'enctype': 'multipart/form-data'}}) }}
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                            {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': 2, 'placeholder': 'Votre message...'}}) }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Envoyer</button>
+                    </div>
+                    <div class="mt-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-secondary small">📎</span>
+                            {{ form_widget(form.attachmentFile) }}
+                        </div>
+                    </div>
+                    {{ form_rest(form) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -70,6 +70,30 @@
 
         <div class="col-12">
             <div class="file-upload-card">
+                {{ form_label(form.photoFile, null, {'label_attr': {'class': 'form-label'}}) }}
+
+                {% if form.vars.data.photo is defined and form.vars.data.photo %}
+                    <div class="mb-2">
+                        <img src="{{ asset('uploads/photos/' ~ form.vars.data.photo) }}"
+                             alt="Photo actuelle"
+                             class="rounded-3 border"
+                             style="max-height: 120px; object-fit: cover;">
+                        <span class="text-secondary small d-block mt-1">Photo actuelle — sélectionnez un fichier pour la remplacer.</span>
+                    </div>
+                {% endif %}
+
+                {{ form_widget(form.photoFile, {'attr': {'class': 'form-control'}}) }}
+
+                {% if form.photoFile.vars.help %}
+                    <div class="form-text">{{ form.photoFile.vars.help }}</div>
+                {% endif %}
+
+                {{ form_errors(form.photoFile) }}
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="file-upload-card">
                 {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(form.attachments, {'attr': {'class': 'form-control'}}) }}
 

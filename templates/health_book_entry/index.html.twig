@@ -103,6 +103,11 @@
 
                                     <td>
                                         {{ health_book_entry.date ? health_book_entry.date|date('d/m/Y') : 'Non renseignée' }}
+                                        {% if health_book_entry.isOverdueReminder %}
+                                            <span class="badge bg-danger ms-1">Rappel en retard</span>
+                                        {% elseif health_book_entry.isDueSoon %}
+                                            <span class="badge bg-warning text-dark ms-1">Rappel bientôt</span>
+                                        {% endif %}
                                     </td>
 
                                     <td>

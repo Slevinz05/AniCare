@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Annuaire des professionnels - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Annuaire</p>
+                <h1 class="page-title mb-2">Professionnels vétérinaires</h1>
+                <p class="page-subtitle mb-0">Retrouvez les vétérinaires et professionnels inscrits sur AniCare.</p>
+            </div>
+        </div>
+    </div>
+
+    {% if professionals is empty %}
+        <div class="empty-state text-center p-5">
+            <div class="mb-3" style="font-size: 3rem; opacity: 0.4;">🩺</div>
+            <h2 class="h4 page-title mb-2">Aucun professionnel inscrit</h2>
+            <p class="text-secondary mb-0">Il n'y a pas encore de vétérinaire enregistré sur la plateforme.</p>
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for pro in professionals %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card anicare-card h-100">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle bg-anicare-soft border-anicare d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; flex-shrink: 0;">
+                                    <span style="font-size: 1.5rem;">🩺</span>
+                                </div>
+                                <div>
+                                    <h3 class="h6 fw-bold mb-0">{{ pro.email }}</h3>
+                                    <span class="badge bg-anicare-soft text-teal border-anicare" style="font-size: 0.7rem; font-weight: 800;">PRO</span>
+                                </div>
+                            </div>
+
+                            <div class="text-secondary small mb-3">
+                                <span>{{ pro.animals|length }} animal{{ pro.animals|length > 1 ? 'x' : '' }} suivi{{ pro.animals|length > 1 ? 's' : '' }}</span>
+                            </div>
+
+                            {% if app.user %}
+                                <div class="mt-auto">
+                                    <a href="{{ path('app_animal_share_new') }}" class="btn btn-outline-primary btn-sm w-100">
+                                        Partager un animal
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">Retour à l'accueil</a>
+    </div>
+</div>
+{% endblock %}

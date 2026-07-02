@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi de poids - {{ animal.name }} - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Courbe de poids</p>
+                <h1 class="page-title mb-2">{{ animal.name }}</h1>
+                <p class="page-subtitle mb-0">Poids actuel : {{ animal.weight ? animal.weight ~ ' kg' : 'Non renseigné' }}</p>
+            </div>
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_weight_record_new', {'id': animal.id}) }}" class="btn btn-primary shadow-sm">Ajouter une pesée</a>
+            </div>
+        </div>
+    </div>
+
+    {% if records is not empty %}
+        <div class="card anicare-card mb-4">
+            <div class="card-body p-4">
+                <canvas id="weightChart" height="80"></canvas>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if records is empty %}
+        <div class="empty-state text-center p-5">
+            <h2 class="h4 page-title mb-2">Aucune pesée enregistrée</h2>
+            <p class="text-secondary mb-4">Enregistrez la première pesée pour démarrer le suivi.</p>
+            <a href="{{ path('app_weight_record_new', {'id': animal.id}) }}" class="btn btn-primary">Enregistrer une pesée</a>
+        </div>
+    {% else %}
+        <div class="card anicare-card overflow-hidden">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-medical align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Poids</th>
+                                <th>Note</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in records|reverse %}
+                                <tr>
+                                    <td>{{ r.recordedAt|date('d/m/Y') }}</td>
+                                    <td><strong>{{ r.weight }} kg</strong></td>
+                                    <td>{{ r.note ?: '-' }}</td>
+                                    <td class="text-end">
+                                        <form method="post" action="{{ path('app_weight_record_delete', {'id': r.id}) }}" style="display:inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ r.id) }}">
+                                            <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Supprimer cette pesée ?')">Supprimer</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="btn btn-outline-primary mt-3">Retour à la fiche</a>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{% if records is not empty %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+    fetch('{{ path('app_weight_record_chart_data', {'id': animal.id}) }}')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(document.getElementById('weightChart'), {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: 'Poids (kg)',
+                        data: data.map(d => d.weight),
+                        borderColor: '#2a9d8f',
+                        backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#2a9d8f',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: false, title: { display: true, text: 'kg' } },
+                        x: { title: { display: true, text: 'Date' } }
+                    }
+                }
+            });
+        });
+</script>
+{% endif %}
+{% endblock %}

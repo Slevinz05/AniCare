@@ -26,11 +26,20 @@
         </div>
 
         <div class="card-body p-4">
+            {% if animal.photo %}
+                <div class="text-center mb-4">
+                    <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
+                         alt="Photo de {{ animal.name }}"
+                         class="rounded-3 shadow"
+                         style="max-height: 280px; max-width: 100%; object-fit: cover;">
+                </div>
+            {% endif %}
+
             <div class="table-responsive mb-5">
                 <table class="table table-hover table-medical align-middle mb-0">
                     <tbody>
                         <tr>
-                            <th style="width: 35%;">Numéro d’identification</th>
+                            <th style="width: 35%;">Numéro d'identification</th>
                             <td>
                                 <strong class="text-teal">
                                     {{ animal.identificationNumber ?: 'Non renseigné' }}
@@ -85,7 +94,7 @@
                     <div>
                         <p class="page-eyebrow mb-2">Documents</p>
                         <h2 class="h4 page-title mb-0">
-                            Documents de l’animal
+                            Documents de l'animal
                         </h2>
                     </div>
 
@@ -96,14 +105,14 @@
 
                 {% if animal.documents is empty %}
                     <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun document n’est encore associé à cet animal.
+                        Aucun document n'est encore associé à cet animal.
                     </div>
                 {% else %}
                     <div class="document-list">
                         {% for document in animal.documents %}
                             <a 
-                                href="{{ asset('uploads/animals/' ~ document.fileName) }}" 
-                                target="_blank" 
+                                href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
+                                target="_blank"
                                 rel="noopener"
                                 class="document-item"
                             >
@@ -126,6 +135,38 @@
                 {% endif %}
             </section>
 
+            <section class="mb-5">
+                <div class="mb-3">
+                    <p class="page-eyebrow mb-2">Accès rapide</p>
+                    <h2 class="h4 page-title mb-3">Dossier complet</h2>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary w-100 py-3">
+                            Allergies
+                            {% if animal.allergies|length > 0 %}
+                                <span class="badge bg-danger ms-1">{{ animal.allergies|length }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{{ path('app_weight_record_index', {'id': animal.id}) }}" class="btn btn-outline-primary w-100 py-3">
+                            Courbe de poids
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{{ path('app_message_thread', {'id': animal.id}) }}" class="btn btn-outline-primary w-100 py-3">
+                            Messages
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a href="{{ path('app_emergency_card', {'id': animal.id}) }}" class="btn btn-danger w-100 py-3">
+                            Fiche d'urgence
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             <section>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
                     <div>
@@ -143,7 +184,7 @@
 
                 {% if animal.healthBookEntries is empty %}
                     <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun acte médical n’est enregistré pour le moment.
+                        Aucun acte médical n'est enregistré pour le moment.
                     </div>
                 {% else %}
                     <div class="table-responsive">
@@ -206,6 +247,10 @@
                 </a>
 
                 <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ path('app_animal_share_new') }}" class="btn btn-outline-primary">
+                        Partager
+                    </a>
+
                     <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-primary">
                         Modifier le profil
                     </a>

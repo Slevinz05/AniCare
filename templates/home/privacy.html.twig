@@ -1,0 +1,279 @@
+{% extends 'base.html.twig' %}
+{% block title %}Politique de confidentialité - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <article>
+                <div class="mb-5">
+                    <p class="page-eyebrow mb-2">Juridique</p>
+                    <h1 class="page-title" style="font-size: 2rem;">Politique de confidentialité</h1>
+                    <p class="text-secondary">Dernière mise à jour : {{ 'now'|date('d/m/Y') }}</p>
+                </div>
+
+                <div class="card border-info mb-5">
+                    <div class="card-body p-4 bg-info bg-opacity-10">
+                        <p class="fw-bold mb-2">Engagement de transparence</p>
+                        <p class="mb-0">
+                            AniCare s'engage à protéger la vie privée de ses utilisateurs conformément au
+                            Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679)
+                            et à la loi n°78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers
+                            et aux libertés, dans sa version en vigueur.
+                        </p>
+                    </div>
+                </div>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">1. Responsable du traitement</h2>
+                    <p>
+                        Le responsable du traitement des données à caractère personnel collectées
+                        sur le site AniCare est :
+                    </p>
+                    <div class="card anicare-card">
+                        <div class="card-body p-4">
+                            <p class="mb-1"><strong>Responsable :</strong> Pierre Renault</p>
+                            <p class="mb-0"><strong>Contact :</strong> contact@anicare.fr</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">2. Données collectées</h2>
+
+                    <h3 class="h6 fw-bold mb-2">2.1 Données personnelles des utilisateurs</h3>
+                    <div class="table-responsive">
+                        <table class="table table-medical align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Donnée</th>
+                                    <th>Finalité</th>
+                                    <th>Base légale</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Adresse email</td>
+                                    <td>Identification, connexion, notifications</td>
+                                    <td>Exécution du contrat (art. 6.1.b RGPD)</td>
+                                </tr>
+                                <tr>
+                                    <td>Mot de passe (haché)</td>
+                                    <td>Authentification sécurisée</td>
+                                    <td>Exécution du contrat (art. 6.1.b RGPD)</td>
+                                </tr>
+                                <tr>
+                                    <td>Rôle (Particulier / Professionnel)</td>
+                                    <td>Personnalisation de l'interface</td>
+                                    <td>Exécution du contrat (art. 6.1.b RGPD)</td>
+                                </tr>
+                                <tr>
+                                    <td>Adresse IP, données de connexion</td>
+                                    <td>Sécurité, protection anti brute-force</td>
+                                    <td>Intérêt légitime (art. 6.1.f RGPD)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="h6 fw-bold mb-2 mt-4">2.2 Données relatives aux animaux</h3>
+                    <p>Les données suivantes sont collectées dans le cadre du suivi médical animal :</p>
+                    <ul>
+                        <li>Identité de l'animal (nom, espèce, race, date de naissance, sexe, numéro d'identification)</li>
+                        <li>Données biométriques (poids, groupe sanguin)</li>
+                        <li>Historique médical (actes, vaccinations, traitements, posologies, dates de rappel)</li>
+                        <li>Allergies et antécédents</li>
+                        <li>Documents associés (ordonnances, résultats d'analyses)</li>
+                        <li>Rendez-vous vétérinaires</li>
+                        <li>Messages échangés dans le cadre du suivi de l'animal</li>
+                    </ul>
+                    <p>
+                        Ces données concernent des animaux et ne constituent pas des données de santé au sens
+                        de l'article 9 du RGPD. Elles sont néanmoins traitées avec le même niveau de précaution.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">3. Finalités du traitement</h2>
+                    <p>Les données sont traitées pour les finalités suivantes :</p>
+                    <ul>
+                        <li>Gestion des comptes utilisateurs et authentification</li>
+                        <li>Fourniture du service de carnet de santé numérique</li>
+                        <li>Gestion des partages de dossiers entre utilisateurs</li>
+                        <li>Envoi de notifications par email (rappels médicaux, partages)</li>
+                        <li>Sécurisation de l'accès au service (limitation des tentatives de connexion)</li>
+                    </ul>
+                    <p>
+                        Aucune donnée n'est utilisée à des fins publicitaires, de profilage ou de revente à des tiers.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">4. Destinataires des données</h2>
+                    <p>Les données personnelles sont accessibles uniquement :</p>
+                    <ul>
+                        <li>Au propriétaire du compte (ses propres données et celles de ses animaux)</li>
+                        <li>Aux personnes avec lesquelles le propriétaire a explicitement partagé un dossier animal</li>
+                        <li>À l'administrateur du site, dans le cadre de la maintenance technique</li>
+                    </ul>
+                    <p>
+                        Aucune donnée n'est transmise à des sous-traitants tiers, à l'exception de l'hébergeur
+                        du site (pour le stockage technique) et du prestataire d'envoi d'emails le cas échéant.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">5. Sécurité des données</h2>
+                    <p>AniCare met en oeuvre les mesures de sécurité suivantes :</p>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <div class="card anicare-card h-100">
+                                <div class="card-body p-3">
+                                    <h4 class="h6 fw-bold text-teal mb-2">Authentification</h4>
+                                    <ul class="small mb-0">
+                                        <li>Mots de passe hachés (bcrypt/argon2)</li>
+                                        <li>Politique de mot de passe forte (12 caractères minimum)</li>
+                                        <li>Protection anti brute-force (5 tentatives / 15 min)</li>
+                                        <li>Protection CSRF sur tous les formulaires</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card anicare-card h-100">
+                                <div class="card-body p-3">
+                                    <h4 class="h6 fw-bold text-teal mb-2">Contrôle d'accès</h4>
+                                    <ul class="small mb-0">
+                                        <li>Système de permissions par dossier (Voter Symfony)</li>
+                                        <li>Vérification de propriété ou de partage sur chaque requête</li>
+                                        <li>Documents stockés hors répertoire public</li>
+                                        <li>Téléchargement authentifié avec vérification des droits</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">6. Durée de conservation</h2>
+                    <div class="table-responsive">
+                        <table class="table table-medical align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Type de donnée</th>
+                                    <th>Durée de conservation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Compte utilisateur et données associées</td>
+                                    <td>Jusqu'à la suppression du compte par l'utilisateur</td>
+                                </tr>
+                                <tr>
+                                    <td>Dossiers animaux et actes médicaux</td>
+                                    <td>Jusqu'à la suppression par le propriétaire</td>
+                                </tr>
+                                <tr>
+                                    <td>Documents téléversés</td>
+                                    <td>Jusqu'à la suppression de l'acte ou de l'animal associé</td>
+                                </tr>
+                                <tr>
+                                    <td>Messages internes</td>
+                                    <td>Jusqu'à la suppression de l'animal concerné</td>
+                                </tr>
+                                <tr>
+                                    <td>Logs de sécurité (tentatives de connexion)</td>
+                                    <td>15 minutes (limitation de débit uniquement)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">7. Cookies</h2>
+                    <p>AniCare utilise exclusivement des cookies techniques strictement nécessaires :</p>
+                    <div class="table-responsive">
+                        <table class="table table-medical align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Cookie</th>
+                                    <th>Finalité</th>
+                                    <th>Durée</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>PHPSESSID</code></td>
+                                    <td>Maintien de la session utilisateur</td>
+                                    <td>Session (supprimé à la fermeture du navigateur)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>REMEMBERME</code></td>
+                                    <td>Connexion persistante (si activée)</td>
+                                    <td>7 jours</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>
+                        Aucun cookie tiers, publicitaire ou analytique n'est utilisé.
+                        Conformément à l'article 82 de la loi Informatique et Libertés, ces cookies
+                        techniques ne nécessitent pas le consentement de l'utilisateur.
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h2 class="h4 page-title mb-3">8. Droits des utilisateurs</h2>
+                    <p>
+                        Conformément au RGPD (articles 15 à 22), vous disposez des droits suivants
+                        concernant vos données personnelles :
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <ul>
+                                <li><strong>Droit d'accès</strong> : obtenir une copie de vos données</li>
+                                <li><strong>Droit de rectification</strong> : corriger des données inexactes</li>
+                                <li><strong>Droit à l'effacement</strong> : demander la suppression de vos données</li>
+                                <li><strong>Droit à la portabilité</strong> : récupérer vos données dans un format structuré</li>
+                            </ul>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <ul>
+                                <li><strong>Droit d'opposition</strong> : vous opposer à un traitement</li>
+                                <li><strong>Droit à la limitation</strong> : restreindre temporairement le traitement</li>
+                                <li><strong>Droit de retirer votre consentement</strong> à tout moment</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>
+                        Pour exercer ces droits, adressez votre demande à <strong>contact@anicare.fr</strong>
+                        en précisant votre identité. Une réponse vous sera apportée dans un délai maximum de 30 jours.
+                    </p>
+                    <p>
+                        Vous disposez également du droit d'introduire une réclamation auprès de la
+                        <strong>Commission Nationale de l'Informatique et des Libertés (CNIL)</strong> :
+                        <a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="h4 page-title mb-3">9. Transfert de données hors UE</h2>
+                    <p>
+                        Aucune donnée personnelle n'est transférée en dehors de l'Union européenne.
+                        L'ensemble des données est stocké sur des serveurs situés en France ou dans l'UE.
+                    </p>
+                    <p>
+                        Si un transfert hors UE devait être nécessaire à l'avenir (par exemple en cas de changement
+                        d'hébergeur), il ne serait effectué que vers des pays offrant un niveau de protection adéquat
+                        ou dans le cadre de garanties appropriées (clauses contractuelles types de la Commission européenne).
+                    </p>
+                </section>
+            </article>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

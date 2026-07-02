@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+{% block title %}Allergies - {{ animal.name }} - AniCare{% endblock %}
+{% block body %}
+<div class="container py-4">
+    <div class="page-hero p-4 p-lg-5 mb-5">
+        <div class="row align-items-center gy-3">
+            <div class="col-12 col-lg">
+                <p class="page-eyebrow mb-2">Antécédents</p>
+                <h1 class="page-title mb-2">Allergies — {{ animal.name }}</h1>
+                <p class="page-subtitle mb-0">Liste des allergènes connus pour cet animal.</p>
+            </div>
+            <div class="col-12 col-lg-auto">
+                <a href="{{ path('app_allergy_new', {'id': animal.id}) }}" class="btn btn-primary shadow-sm">Ajouter une allergie</a>
+            </div>
+        </div>
+    </div>
+
+    {% if allergies is empty %}
+        <div class="empty-state text-center p-5">
+            <h2 class="h4 page-title mb-2">Aucune allergie enregistrée</h2>
+            <p class="text-secondary mb-4">C'est une bonne nouvelle !</p>
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for a in allergies %}
+                <div class="col-12 col-md-6">
+                    <div class="card anicare-card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h3 class="h5 page-title mb-0">{{ a.name }}</h3>
+                                {% if a.severity == 'SEVERE' %}
+                                    <span class="badge bg-danger">Sévère</span>
+                                {% elseif a.severity == 'MODERATE' %}
+                                    <span class="badge bg-warning text-dark">Modérée</span>
+                                {% else %}
+                                    <span class="badge-medical badge-neutral">Légère</span>
+                                {% endif %}
+                            </div>
+                            {% if a.symptoms %}
+                                <p class="text-secondary small mb-2">{{ a.symptoms }}</p>
+                            {% endif %}
+                            {% if a.diagnosedAt %}
+                                <p class="text-secondary small mb-0">Diagnostiquée le {{ a.diagnosedAt|date('d/m/Y') }}</p>
+                            {% endif %}
+                            <div class="mt-3">
+                                <a href="{{ path('app_allergy_edit', {'id': a.id}) }}" class="btn btn-outline-primary btn-sm">Modifier</a>
+                                <form method="post" action="{{ path('app_allergy_delete', {'id': a.id}) }}" style="display:inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ a.id) }}">
+                                    <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Supprimer cette allergie ?')">Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <a href="{{ path('app_animal_show', {'id': animal.id}) }}" class="btn btn-outline-primary mt-4">Retour à la fiche</a>
+</div>
+{% endblock %}

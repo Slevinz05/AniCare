@@ -13,6 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class RegistrationFormType extends AbstractType
 {
@@ -31,7 +32,7 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Mot de passe',
                 'mapped' => false,
                 'attr' => [
-                    'placeholder' => 'Choisissez un mot de passe',
+                    'placeholder' => 'Choisissez un mot de passe sécurisé',
                     'autocomplete' => 'new-password',
                 ],
                 'constraints' => [
@@ -39,35 +40,38 @@ class RegistrationFormType extends AbstractType
                         message: 'Veuillez saisir un mot de passe.',
                     ),
                     new Length(
-                        min: 6,
+                        min: 12,
                         minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.',
                         max: 4096,
+                    ),
+                    new Regex(
+                        pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/',
+                        message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
                     ),
                 ],
             ])
 
-            // 🔘 AJOUT : Choix du type de compte (Boutons Radio)
             ->add('accountType', ChoiceType::class, [
                 'label' => 'Type de profil',
                 'choices'  => [
-                    'Je suis un Particulier (Propriétaire d’animal)' => 'OWNER',
+                    'Je suis un Particulier (Propriétaire d\'animal)' => 'OWNER',
                     'Je suis un Professionnel (Vétérinaire, Soignant, Éducateur...)' => 'PRO',
                 ],
-                'expanded' => true,  // true = boutons radio, false = liste déroulante <select>
-                'multiple' => false, // Choix unique obligatoire
+                'expanded' => true,
+                'multiple' => false,
                 'constraints' => [
                     new NotBlank(
-                        message : 'Veuillez sélectionner un type de profil pour continuer.',
+                        message: 'Veuillez sélectionner un type de profil pour continuer.',
                     ),
                 ],
             ])
 
             ->add('agreeTerms', CheckboxType::class, [
-                'label' => 'J’accepte les conditions d’utilisation',
+                'label' => 'J\'accepte les conditions d\'utilisation',
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue(
-                        message: 'Vous devez accepter les conditions d’utilisation.',
+                        message: 'Vous devez accepter les conditions d\'utilisation.',
                     ),
                 ],
             ])

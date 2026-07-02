@@ -41,44 +41,38 @@ class Animal
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $identificationNumber = null;
 
-    /**
-     * @var Collection<int, HealthBookEntry>
-     */
-    #[ORM\OneToMany(targetEntity: HealthBookEntry::class, mappedBy: 'animal')]
-    private Collection $healthBookEntries;
-
-    /**
-     * @var Collection<int, AnimalShare>
-     */
-    #[ORM\OneToMany(targetEntity: AnimalShare::class, mappedBy: 'animal')]
-    private Collection $animalShares;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $photo = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    #[Assert\All([
-        new Assert\File(
-            maxSize: '10M',
-            mimeTypes: [
-                'application/pdf',
-                'image/jpeg',
-                'image/png',
-                'image/webp',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            ],
-            maxSizeMessage: 'Le fichier est trop volumineux ({{ size }} {{ suffix }}). La taille maximale autorisée est {{ limit }} {{ suffix }}.',
-            mimeTypesMessage: 'Veuillez ajouter un fichier valide : PDF, image ou document Word.',
-        )
-    ])]
     private ?array $documents = [];
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
+    /** @var Collection<int, HealthBookEntry> */
+    #[ORM\OneToMany(targetEntity: HealthBookEntry::class, mappedBy: 'animal')]
+    private Collection $healthBookEntries;
+
+    /** @var Collection<int, AnimalShare> */
+    #[ORM\OneToMany(targetEntity: AnimalShare::class, mappedBy: 'animal')]
+    private Collection $animalShares;
+
+    /** @var Collection<int, WeightRecord> */
+    #[ORM\OneToMany(targetEntity: WeightRecord::class, mappedBy: 'animal', orphanRemoval: true)]
+    private Collection $weightRecords;
+
+    /** @var Collection<int, Allergy> */
+    #[ORM\OneToMany(targetEntity: Allergy::class, mappedBy: 'animal', orphanRemoval: true)]
+    private Collection $allergies;
+
     public function __construct()
     {
         $this->healthBookEntries = new ArrayCollection();
         $this->animalShares = new ArrayCollection();
+        $this->weightRecords = new ArrayCollection();
+        $this->allergies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -182,60 +176,14 @@ class Animal
         return $this;
     }
 
-    /**
-     * @return Collection<int, HealthBookEntry>
-     */
-    public function getHealthBookEntries(): Collection
+    public function getPhoto(): ?string
     {
-        return $this->healthBookEntries;
+        return $this->photo;
     }
 
-    public function addHealthBookEntry(HealthBookEntry $healthBookEntry): static
+    public function setPhoto(?string $photo): static
     {
-        if (!$this->healthBookEntries->contains($healthBookEntry)) {
-            $this->healthBookEntries->add($healthBookEntry);
-            $healthBookEntry->setAnimal($this);
-        }
-
-        return $this;
-    }
-
-    public function removeHealthBookEntry(HealthBookEntry $healthBookEntry): static
-    {
-        if ($this->healthBookEntries->removeElement($healthBookEntry)) {
-            if ($healthBookEntry->getAnimal() === $this) {
-                $healthBookEntry->setAnimal(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, AnimalShare>
-     */
-    public function getAnimalShares(): Collection
-    {
-        return $this->animalShares;
-    }
-
-    public function addAnimalShare(AnimalShare $animalShare): static
-    {
-        if (!$this->animalShares->contains($animalShare)) {
-            $this->animalShares->add($animalShare);
-            $animalShare->setAnimal($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAnimalShare(AnimalShare $animalShare): static
-    {
-        if ($this->animalShares->removeElement($animalShare)) {
-            if ($animalShare->getAnimal() === $this) {
-                $animalShare->setAnimal(null);
-            }
-        }
+        $this->photo = $photo;
 
         return $this;
     }
@@ -256,7 +204,6 @@ class Animal
     {
         $documents = $this->getDocuments();
         $documents[] = $document;
-
         $this->documents = $documents;
 
         return $this;
@@ -282,5 +229,123 @@ class Animal
         $this->owner = $owner;
 
         return $this;
+    }
+
+    /** @return Collection<int, HealthBookEntry> */
+    public function getHealthBookEntries(): Collection
+    {
+        return $this->healthBookEntries;
+    }
+
+    public function addHealthBookEntry(HealthBookEntry $entry): static
+    {
+        if (!$this->healthBookEntries->contains($entry)) {
+            $this->healthBookEntries->add($entry);
+            $entry->setAnimal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHealthBookEntry(HealthBookEntry $entry): static
+    {
+        if ($this->healthBookEntries->removeElement($entry)) {
+            if ($entry->getAnimal() === $this) {
+                $entry->setAnimal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /** @return Collection<int, AnimalShare> */
+    public function getAnimalShares(): Collection
+    {
+        return $this->animalShares;
+    }
+
+    public function addAnimalShare(AnimalShare $share): static
+    {
+        if (!$this->animalShares->contains($share)) {
+            $this->animalShares->add($share);
+            $share->setAnimal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnimalShare(AnimalShare $share): static
+    {
+        if ($this->animalShares->removeElement($share)) {
+            if ($share->getAnimal() === $this) {
+                $share->setAnimal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /** @return Collection<int, WeightRecord> */
+    public function getWeightRecords(): Collection
+    {
+        return $this->weightRecords;
+    }
+
+    public function addWeightRecord(WeightRecord $record): static
+    {
+        if (!$this->weightRecords->contains($record)) {
+            $this->weightRecords->add($record);
+            $record->setAnimal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWeightRecord(WeightRecord $record): static
+    {
+        if ($this->weightRecords->removeElement($record)) {
+            if ($record->getAnimal() === $this) {
+                $record->setAnimal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /** @return Collection<int, Allergy> */
+    public function getAllergies(): Collection
+    {
+        return $this->allergies;
+    }
+
+    public function addAllergy(Allergy $allergy): static
+    {
+        if (!$this->allergies->contains($allergy)) {
+            $this->allergies->add($allergy);
+            $allergy->setAnimal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAllergy(Allergy $allergy): static
+    {
+        if ($this->allergies->removeElement($allergy)) {
+            if ($allergy->getAnimal() === $this) {
+                $allergy->setAnimal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getActiveTreatments(): array
+    {
+        return $this->healthBookEntries->filter(fn(HealthBookEntry $e) => $e->isActiveTreatment())->toArray();
+    }
+
+    public function getOverdueReminders(): array
+    {
+        return $this->healthBookEntries->filter(fn(HealthBookEntry $e) => $e->isOverdueReminder())->toArray();
     }
 }
