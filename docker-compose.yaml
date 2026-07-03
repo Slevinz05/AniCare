@@ -15,6 +15,9 @@ services:
       APP_DEBUG: "1"
       APP_SECRET: "change-me-for-local-dev"
       DATABASE_URL: "mysql://anicare:anicare@database:3306/anicare?serverVersion=8.4&charset=utf8mb4"
+      DATABASE_HOST: database
+      DATABASE_PORT: 3306
+      RUN_MIGRATIONS: "0"
     depends_on:
       - database
 
