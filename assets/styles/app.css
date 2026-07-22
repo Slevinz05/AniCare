@@ -1,37 +1,39 @@
 /* ==========================================================================
-   AniCare - Thème Bootstrap médical / vétérinaire
+   AniCare - Thème équestre Sellerie & Paddock
    ========================================================================== */
 
 :root {
     /* Couleurs AniCare */
     --primary-color: #0d9488;
     --primary-hover: #0f766e;
-    --secondary-color: #0f172a;
-    --accent-color: #38bdf8;
-    --accent-hover: #0284c7;
-    --bg-color: #f8fafc;
+    --secondary-color: #4A3F33;
+    --accent-color: #C8973E;
+    --accent-hover: #A67B3C;
+    --bg-color: #F7F3ED;
     --card-bg: #ffffff;
-    --border-color: #ccfbf1;
+    --border-color: #EDE6DB;
     --soft-teal: #f0fdfa;
+    --soft-warm: #FFF0CC;
+    --taupe: #9C8B75;
 
     --success-color: #22c55e;
     --danger-color: #ef4444;
     --danger-hover: #b91c1c;
-    --warning-color: #f59e0b;
+    --warning-color: #E5A63E;
 
     --radius-sm: 0.5rem;
     --radius-md: 1rem;
     --radius-lg: 1.5rem;
 
-    --shadow-subtle: 0 4px 12px rgba(13, 148, 136, 0.08);
-    --shadow-md: 0 12px 28px rgba(13, 148, 136, 0.12);
+    --shadow-subtle: 0 4px 12px rgba(74, 63, 51, 0.06);
+    --shadow-md: 0 12px 28px rgba(74, 63, 51, 0.10);
 
     /* Mapping Bootstrap */
     --bs-primary: #0d9488;
     --bs-primary-rgb: 13, 148, 136;
 
-    --bs-info: #38bdf8;
-    --bs-info-rgb: 56, 189, 248;
+    --bs-info: #C8973E;
+    --bs-info-rgb: 200, 151, 62;
 
     --bs-success: #22c55e;
     --bs-success-rgb: 34, 197, 94;
@@ -39,15 +41,15 @@
     --bs-danger: #ef4444;
     --bs-danger-rgb: 239, 68, 68;
 
-    --bs-warning: #f59e0b;
-    --bs-warning-rgb: 245, 158, 11;
+    --bs-warning: #E5A63E;
+    --bs-warning-rgb: 229, 166, 62;
 
-    --bs-body-bg: #f8fafc;
-    --bs-body-color: #0f172a;
-    --bs-border-color: #ccfbf1;
+    --bs-body-bg: #F7F3ED;
+    --bs-body-color: #4A3F33;
+    --bs-border-color: #EDE6DB;
 
     --bs-primary-bg-subtle: #f0fdfa;
-    --bs-primary-border-subtle: #ccfbf1;
+    --bs-primary-border-subtle: #EDE6DB;
     --bs-primary-text-emphasis: #0f766e;
 
     --bs-link-color: #0d9488;
@@ -61,7 +63,7 @@
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background:
-        radial-gradient(circle at top left, rgba(13, 148, 136, 0.10), transparent 32rem),
+        radial-gradient(circle at top left, rgba(13, 148, 136, 0.06), transparent 32rem),
         var(--bg-color);
     color: var(--secondary-color);
     line-height: 1.5;
@@ -84,6 +86,10 @@ a:hover {
     color: var(--primary-color) !important;
 }
 
+.text-secondary {
+    color: var(--taupe) !important;
+}
+
 .bg-anicare-soft {
     background-color: var(--soft-teal) !important;
 }
@@ -101,44 +107,42 @@ a:hover {
 }
 
 /* ==========================================================================
-   Navbar Bootstrap personnalisée
+   Navbar — Fond émeraude, texte blanc, accent doré
    ========================================================================== */
 
 .anicare-navbar {
-    background-color: rgba(255, 255, 255, 0.96) !important;
-    border-bottom: 4px solid var(--primary-color) !important;
-    box-shadow: var(--shadow-subtle);
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+    border-bottom: none !important;
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.25);
 }
 
 .navbar-brand {
-    color: var(--primary-color) !important;
+    color: #ffffff !important;
     font-weight: 800;
+    font-size: 1.25rem;
     letter-spacing: -0.03em;
 }
 
-.navbar-brand-icon {
-    width: 42px;
-    height: 42px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 14px;
-    background-color: var(--soft-teal);
-    border: 1px solid var(--border-color);
-}
-
 .navbar .nav-link {
-    color: var(--secondary-color) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
     font-weight: 600;
-    border-radius: 999px;
+    border-radius: 0;
     padding: 0.55rem 0.85rem !important;
+    border-bottom: 2px solid transparent;
     transition: all 0.2s ease;
 }
 
-.navbar .nav-link:hover,
+.navbar .nav-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
 .navbar .nav-link.active {
-    color: var(--primary-hover) !important;
-    background-color: var(--soft-teal);
+    color: #ffffff !important;
+    font-weight: 700;
+    background-color: transparent;
+    border-bottom-color: var(--accent-color);
 }
 
 .navbar .dropdown-menu {
@@ -174,12 +178,28 @@ a:hover {
     vertical-align: 0.15em;
 }
 
-.navbar-user {
-    background-color: var(--soft-teal);
-    border: 1px solid var(--border-color);
-    color: var(--secondary-color);
-    border-radius: 999px;
-    padding: 0.45rem 0.8rem;
+.btn-navbar-outline {
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    background: transparent !important;
+    font-weight: 700;
+}
+
+.btn-navbar-outline:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: #ffffff !important;
+}
+
+.btn-navbar-accent {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.btn-navbar-accent:hover {
+    background-color: var(--accent-hover) !important;
+    border-color: var(--accent-hover) !important;
 }
 
 /* ==========================================================================
@@ -196,13 +216,13 @@ a:hover {
     transform: translateY(-1px);
 }
 
-.btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark) {
+.btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark):not(.btn-warning):not(.btn-outline-warning):not(.btn-success):not(.btn-outline-success) {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
     color: #ffffff;
 }
 
-.btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark):hover {
+.btn:not(.btn-primary):not(.btn-outline-primary):not(.btn-secondary):not(.btn-outline-secondary):not(.btn-danger):not(.btn-outline-danger):not(.btn-info):not(.btn-outline-info):not(.btn-light):not(.btn-dark):not(.btn-warning):not(.btn-outline-warning):not(.btn-success):not(.btn-outline-success):hover {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
     color: #ffffff;
@@ -241,9 +261,18 @@ a:hover {
 .btn-outline-info {
     --bs-btn-color: var(--accent-hover);
     --bs-btn-border-color: var(--accent-color);
-    --bs-btn-hover-bg: #e0f2fe;
+    --bs-btn-hover-bg: var(--soft-warm);
     --bs-btn-hover-border-color: var(--accent-color);
     --bs-btn-hover-color: var(--accent-hover);
+}
+
+.btn-warning {
+    --bs-btn-bg: var(--warning-color);
+    --bs-btn-border-color: var(--warning-color);
+    --bs-btn-hover-bg: #C8912E;
+    --bs-btn-hover-border-color: #C8912E;
+    --bs-btn-color: #1a1a1a;
+    --bs-btn-hover-color: #1a1a1a;
 }
 
 .btn-danger {
@@ -262,19 +291,19 @@ a:hover {
 }
 
 .btn-secondary {
-    --bs-btn-bg: #e2e8f0;
-    --bs-btn-border-color: #e2e8f0;
+    --bs-btn-bg: var(--border-color);
+    --bs-btn-border-color: var(--border-color);
     --bs-btn-color: var(--secondary-color);
-    --bs-btn-hover-bg: #cbd5e1;
-    --bs-btn-hover-border-color: #cbd5e1;
+    --bs-btn-hover-bg: #DDD5C8;
+    --bs-btn-hover-border-color: #DDD5C8;
     --bs-btn-hover-color: var(--secondary-color);
 }
 
 .btn-outline-secondary {
-    --bs-btn-color: #475569;
-    --bs-btn-border-color: #cbd5e1;
-    --bs-btn-hover-bg: #f1f5f9;
-    --bs-btn-hover-border-color: #cbd5e1;
+    --bs-btn-color: var(--taupe);
+    --bs-btn-border-color: var(--border-color);
+    --bs-btn-hover-bg: var(--bg-color);
+    --bs-btn-hover-border-color: var(--border-color);
     --bs-btn-hover-color: var(--secondary-color);
 }
 
@@ -284,12 +313,12 @@ a:hover {
 
 .form-label {
     font-weight: 700;
-    color: var(--primary-hover);
+    color: var(--secondary-color);
 }
 
 .form-control,
 .form-select {
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--secondary-color);
     background-color: #ffffff;
@@ -307,7 +336,7 @@ a:hover {
 }
 
 .form-text {
-    color: #64748b;
+    color: var(--taupe);
 }
 
 .invalid-feedback {
@@ -329,21 +358,21 @@ a:hover {
 
 .form-card {
     padding: 2rem;
-    border-top: 5px solid var(--primary-color);
+    border-top: 4px solid var(--primary-color);
 }
 
 .page-title {
-    color: var(--primary-color);
+    color: var(--secondary-color);
     font-weight: 800;
     letter-spacing: -0.03em;
 }
 
 .page-subtitle {
-    color: #64748b;
+    color: var(--taupe);
 }
 
 .page-eyebrow {
-    color: var(--primary-hover);
+    color: var(--taupe);
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -351,12 +380,12 @@ a:hover {
 }
 
 .medical-header {
-    background: linear-gradient(135deg, #ffffff 0%, var(--soft-teal) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, var(--bg-color) 100%);
     border-bottom: 1px solid var(--border-color);
 }
 
 .page-hero {
-    background: linear-gradient(135deg, #ffffff 0%, var(--soft-teal) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, var(--bg-color) 100%);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
@@ -377,7 +406,7 @@ a:hover {
 
 .animal-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(13, 148, 136, 0.35) !important;
+    border-color: var(--accent-color) !important;
     box-shadow: var(--shadow-md);
 }
 
@@ -387,7 +416,7 @@ a:hover {
 }
 
 .animal-card-kicker {
-    color: var(--primary-hover);
+    color: var(--taupe);
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -418,7 +447,7 @@ a:hover {
 }
 
 .animal-info-label {
-    color: #64748b;
+    color: var(--taupe);
     font-size: 0.92rem;
     font-weight: 600;
 }
@@ -481,18 +510,18 @@ a:hover {
 }
 
 .badge-weight {
-    background-color: #ecfeff;
+    background-color: var(--soft-teal);
     color: #0e7490;
 }
 
 .badge-id {
-    background-color: #f1f5f9;
-    color: #334155;
+    background-color: var(--bg-color);
+    color: var(--secondary-color);
 }
 
 .badge-neutral {
-    background-color: #f1f5f9;
-    color: #334155;
+    background-color: var(--bg-color);
+    color: var(--secondary-color);
 }
 
 /* ==========================================================================
@@ -503,7 +532,7 @@ a:hover {
     --bs-table-bg: #ffffff;
     --bs-table-color: var(--secondary-color);
     --bs-table-border-color: var(--border-color);
-    --bs-table-hover-bg: #f0fdfa;
+    --bs-table-hover-bg: var(--bg-color);
 
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -513,8 +542,8 @@ a:hover {
 
 .table-medical thead th,
 .table-medical tbody th {
-    background-color: var(--soft-teal);
-    color: var(--primary-hover);
+    background-color: var(--bg-color);
+    color: var(--taupe);
     font-weight: 800;
 }
 
@@ -533,7 +562,7 @@ a:hover {
    ========================================================================== */
 
 .empty-state {
-    background: linear-gradient(135deg, #ffffff 0%, var(--soft-teal) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, var(--bg-color) 100%);
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-subtle);
@@ -583,7 +612,7 @@ a:hover {
 }
 
 .calendar-day:hover:not(.day-empty) {
-    background-color: #f0fdfa;
+    background-color: var(--bg-color);
 }
 
 .bg-teal-light {
@@ -622,36 +651,46 @@ a:hover {
 
 .anicare-form .form-label {
     margin-bottom: 0.45rem;
-    color: var(--primary-hover);
+    color: var(--secondary-color);
     font-weight: 800;
+    font-size: 0.88rem;
 }
 
 .anicare-form .form-control,
 .anicare-form .form-select {
     min-height: 48px;
-    border: 2px solid #dbeafe;
+    border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
     background-color: #ffffff;
     color: var(--secondary-color);
     font-weight: 500;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .anicare-form .form-control::placeholder {
-    color: #94a3b8;
+    color: #b0a494;
 }
 
 .anicare-form .form-control:focus,
 .anicare-form .form-select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.16);
+    background-color: #ffffff;
 }
 
 .anicare-form .input-group-text {
-    border: 2px solid #dbeafe;
+    border: 2px solid var(--border-color);
     border-left: 0;
     background-color: var(--soft-teal);
-    color: var(--primary-hover);
+    color: var(--primary-color);
     font-weight: 800;
+}
+
+.anicare-form .page-eyebrow {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem !important;
 }
 
 .anicare-radio-group {
@@ -707,14 +746,14 @@ a:hover {
 
 .health-entry-form .form-label {
     margin-bottom: 0.45rem;
-    color: var(--primary-hover);
+    color: var(--secondary-color);
     font-weight: 800;
 }
 
 .health-entry-form .form-control,
 .health-entry-form .form-select {
     min-height: 48px;
-    border: 2px solid #dbeafe;
+    border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
     background-color: #ffffff;
     color: var(--secondary-color);
@@ -727,7 +766,7 @@ a:hover {
 }
 
 .health-entry-form .form-control::placeholder {
-    color: #94a3b8;
+    color: #b0a494;
 }
 
 .health-entry-form .form-control:focus,
@@ -744,7 +783,7 @@ a:hover {
 .health-entry-description {
     max-width: 420px;
     margin-top: 0.2rem;
-    color: #64748b;
+    color: var(--taupe);
     font-size: 0.9rem;
     line-height: 1.4;
 }
@@ -759,8 +798,8 @@ a:hover {
 }
 
 .badge-consultation {
-    background-color: #e0f2fe;
-    color: #0369a1;
+    background-color: var(--soft-warm);
+    color: var(--accent-hover);
 }
 
 .health-entry-table .btn {
@@ -772,19 +811,24 @@ a:hover {
    ========================================================================== */
 
 .file-upload-card {
-    background-color: var(--soft-teal);
-    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    border: 2px dashed var(--border-color);
     border-radius: var(--radius-md);
     padding: 1.25rem;
+    transition: border-color 0.2s ease;
+}
+
+.file-upload-card:hover {
+    border-color: var(--primary-color);
 }
 
 .file-upload-card .form-label {
-    color: var(--primary-hover);
+    color: var(--secondary-color);
     font-weight: 800;
 }
 
 .file-upload-card .form-text {
-    color: #64748b;
+    color: var(--taupe);
     font-size: 0.9rem;
 }
 
@@ -809,8 +853,8 @@ a:hover {
 }
 
 .document-item:hover {
-    background-color: var(--soft-teal);
-    border-color: var(--primary-color);
+    background-color: var(--bg-color);
+    border-color: var(--accent-color);
     color: var(--secondary-color);
     transform: translateY(-1px);
 }
@@ -822,7 +866,7 @@ a:hover {
 
 .document-meta {
     flex-shrink: 0;
-    color: #64748b;
+    color: var(--taupe);
     font-size: 0.85rem;
 }
 

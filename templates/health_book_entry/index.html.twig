@@ -2,7 +2,7 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Activité médicale - AniCare{% endblock %}
+{% block title %}Historique des consultations - AniCare{% endblock %}
 
 {% block body %}
 <div class="container py-4">
@@ -10,20 +10,20 @@
     <div class="page-hero p-4 p-lg-5 mb-5">
         <div class="row align-items-center gy-3">
             <div class="col-12 col-lg">
-                <p class="page-eyebrow mb-2">Suivi vétérinaire</p>
+                <p class="page-eyebrow mb-2">Consultations</p>
 
                 <h1 class="page-title mb-2">
-                    Activité médicale
+                    Historique des consultations
                 </h1>
 
                 <p class="page-subtitle mb-0">
-                    Consultez l’ensemble des actes médicaux enregistrés pour vos animaux.
+                    Consultez l'ensemble des consultations enregistrées pour vos chevaux.
                 </p>
             </div>
 
             <div class="col-12 col-lg-auto">
                 <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary shadow-sm">
-                    Enregistrer un acte
+                    Enregistrer une consultation
                 </a>
             </div>
         </div>
@@ -34,15 +34,15 @@
             <span class="empty-state-icon mb-3">AM</span>
 
             <h2 class="h4 page-title mb-2">
-                Aucun acte médical enregistré
+                Aucune consultation enregistrée
             </h2>
 
             <p class="text-secondary mb-4">
-                Ajoutez un premier acte pour commencer le suivi médical de vos animaux.
+                Ajoutez une première consultation pour commencer le suivi médical de vos chevaux.
             </p>
 
             <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary">
-                Créer un premier acte
+                Créer une première consultation
             </a>
         </div>
     {% else %}
@@ -52,8 +52,8 @@
                     <table class="table table-hover table-medical health-entry-table align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>Animal</th>
-                                <th>Acte médical</th>
+                                <th>Cheval</th>
+                                <th>Consultation</th>
                                 <th>Type</th>
                                 <th>Date</th>
                                 <th>Vétérinaire</th>
@@ -79,9 +79,9 @@
 
                                         {% if health_book_entry.description %}
                                             <div class="health-entry-description">
-                                                {{ health_book_entry.description|length > 90 
-                                                    ? health_book_entry.description|slice(0, 90) ~ '…' 
-                                                    : health_book_entry.description 
+                                                {{ health_book_entry.description|length > 90
+                                                    ? health_book_entry.description|slice(0, 90) ~ '…'
+                                                    : health_book_entry.description
                                                 }}
                                             </div>
                                         {% endif %}

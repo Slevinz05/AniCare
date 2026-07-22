@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail de l’acte médical - AniCare{% endblock %}
+{% block title %}Détail de la consultation - AniCare{% endblock %}
 
 {% block body %}
 {% set entry_type = health_book_entry.type|default('')|lower %}
@@ -10,14 +10,14 @@
         <div class="card-header medical-header p-4">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
-                    <p class="page-eyebrow mb-2">Détail de l’acte</p>
+                    <p class="page-eyebrow mb-2">Détail de la consultation</p>
 
                     <h1 class="page-title mb-1">
                         {{ health_book_entry.title }}
                     </h1>
 
                     <p class="page-subtitle mb-0">
-                        Acte médical n°{{ health_book_entry.id }}
+                        Consultation n°{{ health_book_entry.id }}
                     </p>
                 </div>
 
@@ -42,7 +42,7 @@
                 <table class="table table-hover table-medical align-middle mb-0">
                     <tbody>
                         <tr>
-                            <th style="width: 35%;">Animal concerné</th>
+                            <th style="width: 35%;">Cheval concerné</th>
                             <td>
                                 <strong class="text-teal">
                                     {{ health_book_entry.animal.name ?? 'Non spécifié' }}
@@ -51,12 +51,12 @@
                         </tr>
 
                         <tr>
-                            <th>Intitulé de l’acte</th>
+                            <th>Intitulé de la consultation</th>
                             <td>{{ health_book_entry.title }}</td>
                         </tr>
 
                         <tr>
-                            <th>Type d’acte</th>
+                            <th>Type de consultation</th>
                             <td>
                                 {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
                                     <span class="badge-medical badge-vaccin">Vaccination</span>
@@ -73,7 +73,7 @@
                         </tr>
 
                         <tr>
-                            <th>Date de l’acte</th>
+                            <th>Date de la consultation</th>
                             <td>
                                 {{ health_book_entry.date ? health_book_entry.date|date('d/m/Y') : 'Non renseignée' }}
                             </td>
@@ -170,12 +170,12 @@
 
                 {% if health_book_entry.documents is empty %}
                     <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun document n’est encore associé à cet acte médical.
+                        Aucun document n'est encore associé à cette consultation.
                     </div>
                 {% else %}
                     <div class="document-list">
                         {% for document in health_book_entry.documents %}
-                            <a 
+                            <a
                                 href="{{ path('app_document_download_health_entry', {'entryId': health_book_entry.id, 'fileName': document.fileName}) }}"
                                 target="_blank"
                                 rel="noopener"
@@ -202,7 +202,7 @@
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-4 border-top border-anicare">
                 <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
-                    Retour à la liste
+                    Retour
                 </a>
 
                 <div class="d-flex gap-2 flex-wrap">

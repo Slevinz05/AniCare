@@ -8,7 +8,7 @@
             <div class="col-12 col-lg">
                 <p class="page-eyebrow mb-2">Collaboration</p>
                 <h1 class="page-title mb-2">Mes partages</h1>
-                <p class="page-subtitle mb-0">Gérez les accès que vous avez accordés sur les dossiers de vos animaux.</p>
+                <p class="page-subtitle mb-0">Gérez les accès que vous avez accordés sur les dossiers de vos chevaux.</p>
             </div>
             <div class="col-12 col-lg-auto">
                 <a href="{{ path('app_animal_share_new') }}" class="btn btn-primary shadow-sm">Nouveau partage</a>
@@ -19,7 +19,7 @@
     {% if animal_shares is empty %}
         <div class="empty-state text-center p-5">
             <h2 class="h4 page-title mb-2">Aucun partage actif</h2>
-            <p class="text-secondary mb-4">Partagez le dossier d'un animal avec un vétérinaire ou un proche.</p>
+            <p class="text-secondary mb-4">Partagez le dossier d'un cheval avec un vétérinaire ou un proche.</p>
             <a href="{{ path('app_animal_share_new') }}" class="btn btn-primary">Partager un dossier</a>
         </div>
     {% else %}

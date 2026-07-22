@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouvel acte médical - AniCare{% endblock %}
+{% block title %}Nouvelle consultation - AniCare{% endblock %}
 
 {% block body %}
 <div class="container py-5">
@@ -10,10 +10,10 @@
                 <div class="card-body p-0">
 
                     <div class="mb-4 pb-4 border-bottom border-anicare">
-                        <p class="page-eyebrow mb-2">Suivi vétérinaire</p>
+                        <p class="page-eyebrow mb-2">Consultations</p>
 
                         <h1 class="page-title mb-2">
-                            Nouvel acte médical
+                            Nouvelle consultation
                         </h1>
 
                         <p class="page-subtitle mb-0">
@@ -22,12 +22,12 @@
                     </div>
 
                     {{ include('health_book_entry/_form.html.twig', {
-                        'button_label': 'Enregistrer l’acte médical'
+                        'button_label': 'Enregistrer la consultation'
                     }) }}
 
                     <div class="mt-4 pt-4 border-top border-anicare">
                         <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
-                            Retour à la liste
+                            Retour
                         </a>
                     </div>
 

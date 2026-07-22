@@ -13,7 +13,7 @@
                 
                 <div class="text-center mb-4">
                     <h1 class="page-title mt-2 mb-1">Créer un compte</h1>
-                    <p class="page-subtitle small">Rejoignez AniCare pour suivre au mieux la santé de vos animaux.</p>
+                    <p class="page-subtitle small">Rejoignez AniCare pour suivre au mieux la santé de vos chevaux.</p>
                 </div>
 
                 {# Gestion des erreurs globales du formulaire #}
@@ -28,15 +28,20 @@
                     {# Champ Adresse E-mail #}
                     <div class="mb-4">
                         {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
-                        <div class="invalid-feedback">{{ form_errors(registrationForm.email) }}</div>
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control' ~ (registrationForm.email.vars.errors|length ? ' is-invalid' : '')}}) }}
+                        {% if registrationForm.email.vars.errors|length %}
+                            <div class="text-danger small mt-1">{{ form_errors(registrationForm.email) }}</div>
+                        {% endif %}
                     </div>
 
                     {# Champ Mot de Passe #}
                     <div class="mb-4">
                         {{ form_label(registrationForm.plainPassword, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
-                        <div class="invalid-feedback">{{ form_errors(registrationForm.plainPassword) }}</div>
+                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control' ~ (registrationForm.plainPassword.vars.errors|length ? ' is-invalid' : '')}}) }}
+                        {% if registrationForm.plainPassword.vars.errors|length %}
+                            <div class="text-danger small mt-1">{{ form_errors(registrationForm.plainPassword) }}</div>
+                        {% endif %}
+                        <div class="form-text text-secondary">Minimum 12 caractères, une majuscule, une minuscule et un chiffre.</div>
                     </div>
 
                     {# Champ Type de Profil (Boutons Radio intégrés) #}
@@ -50,7 +55,9 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <div class="invalid-feedback d-block">{{ form_errors(registrationForm.accountType) }}</div>
+                        {% if registrationForm.accountType.vars.errors|length %}
+                            <div class="text-danger small mt-1">{{ form_errors(registrationForm.accountType) }}</div>
+                        {% endif %}
                     </div>
 
                     {# Case à cocher Notifications #}
@@ -63,7 +70,9 @@
                     <div class="form-check mb-4 d-flex align-items-center gap-2">
                         {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input m-0'}}) }}
                         {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label small text-secondary style-pointer'}}) }}
-                        <div class="invalid-feedback d-block">{{ form_errors(registrationForm.agreeTerms) }}</div>
+                        {% if registrationForm.agreeTerms.vars.errors|length %}
+                            <div class="text-danger small mt-1">{{ form_errors(registrationForm.agreeTerms) }}</div>
+                        {% endif %}
                     </div>
 
                     {# Bouton de Soumission #}

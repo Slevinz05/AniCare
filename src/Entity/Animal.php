@@ -18,10 +18,12 @@ class Animal
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Veuillez saisir le nom du cheval.')]
+    #[Assert\Length(max: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 100)]
-    private ?string $species = null;
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $species = 'Cheval';
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $breed = null;
@@ -30,6 +32,7 @@ class Animal
     private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column(length: 10)]
+    #[Assert\NotBlank(message: 'Veuillez sélectionner le sexe du cheval.')]
     private ?string $gender = null;
 
     #[ORM\Column(nullable: true)]
@@ -40,6 +43,48 @@ class Animal
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $identificationNumber = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $height = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $coat = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $averageWeight = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $microchipNumber = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $livingPlaceName = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $livingPlaceManagerLastName = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $livingPlaceManagerFirstName = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $livingPlaceManagerPhone = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $livingPlaceManagerEmail = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $livingPlaceStreet = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $livingPlaceComplement = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $livingPlacePostalCode = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $livingPlaceCity = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $livingPlaceCountry = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
@@ -97,7 +142,7 @@ class Animal
         return $this->species;
     }
 
-    public function setSpecies(string $species): static
+    public function setSpecies(?string $species): static
     {
         $this->species = $species;
 
@@ -174,6 +219,183 @@ class Animal
         $this->identificationNumber = $identificationNumber;
 
         return $this;
+    }
+
+    public function getHeight(): ?float
+    {
+        return $this->height;
+    }
+
+    public function setHeight(?float $height): static
+    {
+        $this->height = $height;
+
+        return $this;
+    }
+
+    public function getCoat(): ?string
+    {
+        return $this->coat;
+    }
+
+    public function setCoat(?string $coat): static
+    {
+        $this->coat = $coat;
+
+        return $this;
+    }
+
+    public function getAverageWeight(): ?float
+    {
+        return $this->averageWeight;
+    }
+
+    public function setAverageWeight(?float $averageWeight): static
+    {
+        $this->averageWeight = $averageWeight;
+
+        return $this;
+    }
+
+    public function getMicrochipNumber(): ?string
+    {
+        return $this->microchipNumber;
+    }
+
+    public function setMicrochipNumber(?string $microchipNumber): static
+    {
+        $this->microchipNumber = $microchipNumber;
+
+        return $this;
+    }
+
+    public function getLivingPlaceName(): ?string
+    {
+        return $this->livingPlaceName;
+    }
+
+    public function setLivingPlaceName(?string $livingPlaceName): static
+    {
+        $this->livingPlaceName = $livingPlaceName;
+
+        return $this;
+    }
+
+    public function getLivingPlaceManagerLastName(): ?string
+    {
+        return $this->livingPlaceManagerLastName;
+    }
+
+    public function setLivingPlaceManagerLastName(?string $livingPlaceManagerLastName): static
+    {
+        $this->livingPlaceManagerLastName = $livingPlaceManagerLastName;
+
+        return $this;
+    }
+
+    public function getLivingPlaceManagerFirstName(): ?string
+    {
+        return $this->livingPlaceManagerFirstName;
+    }
+
+    public function setLivingPlaceManagerFirstName(?string $livingPlaceManagerFirstName): static
+    {
+        $this->livingPlaceManagerFirstName = $livingPlaceManagerFirstName;
+
+        return $this;
+    }
+
+    public function getLivingPlaceManagerPhone(): ?string
+    {
+        return $this->livingPlaceManagerPhone;
+    }
+
+    public function setLivingPlaceManagerPhone(?string $livingPlaceManagerPhone): static
+    {
+        $this->livingPlaceManagerPhone = $livingPlaceManagerPhone;
+
+        return $this;
+    }
+
+    public function getLivingPlaceManagerEmail(): ?string
+    {
+        return $this->livingPlaceManagerEmail;
+    }
+
+    public function setLivingPlaceManagerEmail(?string $livingPlaceManagerEmail): static
+    {
+        $this->livingPlaceManagerEmail = $livingPlaceManagerEmail;
+
+        return $this;
+    }
+
+    public function getLivingPlaceStreet(): ?string
+    {
+        return $this->livingPlaceStreet;
+    }
+
+    public function setLivingPlaceStreet(?string $livingPlaceStreet): static
+    {
+        $this->livingPlaceStreet = $livingPlaceStreet;
+
+        return $this;
+    }
+
+    public function getLivingPlaceComplement(): ?string
+    {
+        return $this->livingPlaceComplement;
+    }
+
+    public function setLivingPlaceComplement(?string $livingPlaceComplement): static
+    {
+        $this->livingPlaceComplement = $livingPlaceComplement;
+
+        return $this;
+    }
+
+    public function getLivingPlacePostalCode(): ?string
+    {
+        return $this->livingPlacePostalCode;
+    }
+
+    public function setLivingPlacePostalCode(?string $livingPlacePostalCode): static
+    {
+        $this->livingPlacePostalCode = $livingPlacePostalCode;
+
+        return $this;
+    }
+
+    public function getLivingPlaceCity(): ?string
+    {
+        return $this->livingPlaceCity;
+    }
+
+    public function setLivingPlaceCity(?string $livingPlaceCity): static
+    {
+        $this->livingPlaceCity = $livingPlaceCity;
+
+        return $this;
+    }
+
+    public function getLivingPlaceCountry(): ?string
+    {
+        return $this->livingPlaceCountry;
+    }
+
+    public function setLivingPlaceCountry(?string $livingPlaceCountry): static
+    {
+        $this->livingPlaceCountry = $livingPlaceCountry;
+
+        return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        if (!$this->birthDate) {
+            return null;
+        }
+
+        return $this->birthDate->diff(new \DateTimeImmutable())->y;
     }
 
     public function getPhoto(): ?string

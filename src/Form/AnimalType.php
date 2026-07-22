@@ -5,9 +5,13 @@ namespace App\Form;
 use App\Entity\Animal;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CountryType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,16 +24,9 @@ class AnimalType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nom de l\'animal',
+                'label' => 'Nom du cheval',
                 'attr' => [
-                    'placeholder' => 'Ex : Hatchi',
-                ],
-            ])
-
-            ->add('species', TextType::class, [
-                'label' => 'Espèce',
-                'attr' => [
-                    'placeholder' => 'Ex : Chien, chat, lapin...',
+                    'placeholder' => 'Ex : Ourasi',
                 ],
             ])
 
@@ -37,7 +34,32 @@ class AnimalType extends AbstractType
                 'label' => 'Race',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Ex : Shiba Inu, Européen...',
+                    'placeholder' => 'Ex : Selle Français, Pur-sang, Trotteur...',
+                ],
+            ])
+
+            ->add('coat', ChoiceType::class, [
+                'label' => 'Robe',
+                'required' => false,
+                'placeholder' => 'Sélectionner une robe',
+                'choices' => [
+                    'Alezan' => 'Alezan',
+                    'Bai' => 'Bai',
+                    'Gris' => 'Gris',
+                    'Noir' => 'Noir',
+                    'Blanc' => 'Blanc',
+                    'Palomino' => 'Palomino',
+                    'Pie' => 'Pie',
+                    'Autre' => 'Autre',
+                ],
+            ])
+
+            ->add('coatCustom', TextType::class, [
+                'label' => 'Précisez la robe',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Isabelle, Cremello...',
                 ],
             ])
 
@@ -47,43 +69,153 @@ class AnimalType extends AbstractType
                 'required' => false,
             ])
 
+            ->add('age', IntegerType::class, [
+                'label' => 'Âge (années)',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : 8',
+                    'min' => 0,
+                    'max' => 50,
+                ],
+            ])
+
             ->add('gender', ChoiceType::class, [
                 'label' => 'Sexe',
                 'choices' => [
-                    'Mâle' => 'Mâle',
-                    'Femelle' => 'Femelle',
+                    'Hongre' => 'Hongre',
+                    'Entier' => 'Entier',
+                    'Jument' => 'Jument',
                 ],
                 'expanded' => true,
                 'multiple' => false,
             ])
 
-            ->add('weight', NumberType::class, [
-                'label' => 'Poids',
+            ->add('height', NumberType::class, [
+                'label' => 'Taille',
                 'required' => false,
                 'scale' => 2,
                 'attr' => [
-                    'placeholder' => 'Ex : 12.5',
+                    'placeholder' => 'Ex : 1.65',
                 ],
             ])
 
-            ->add('bloodType', TextType::class, [
-                'label' => 'Groupe sanguin',
+            ->add('weight', NumberType::class, [
+                'label' => 'Poids actuel',
                 'required' => false,
+                'scale' => 2,
                 'attr' => [
-                    'placeholder' => 'Ex : DEA 1.1, A, B...',
+                    'placeholder' => 'Ex : 520',
+                ],
+            ])
+
+            ->add('averageWeight', NumberType::class, [
+                'label' => 'Poids moyen',
+                'required' => false,
+                'scale' => 2,
+                'attr' => [
+                    'placeholder' => 'Ex : 500',
                 ],
             ])
 
             ->add('identificationNumber', TextType::class, [
-                'label' => 'Numéro d\'identification',
+                'label' => 'Numéro de SIRE',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Numéro de puce électronique ou de tatouage',
+                    'placeholder' => 'Ex : 00123456789A',
                 ],
             ])
 
+            ->add('microchipNumber', TextType::class, [
+                'label' => 'Numéro de puce',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : 250269xxxxxxxxx',
+                ],
+            ])
+
+            // --- Lieu de vie (EVO-014 à EVO-017) ---
+            ->add('livingPlaceName', TextType::class, [
+                'label' => 'Nom de la structure',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Écurie du Bois Joli',
+                ],
+            ])
+
+            ->add('livingPlaceManagerLastName', TextType::class, [
+                'label' => 'Nom du gérant',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Dupont',
+                ],
+            ])
+
+            ->add('livingPlaceManagerFirstName', TextType::class, [
+                'label' => 'Prénom du gérant',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Jean',
+                ],
+            ])
+
+            ->add('livingPlaceManagerPhone', TelType::class, [
+                'label' => 'Téléphone du gérant',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : 06 12 34 56 78',
+                ],
+            ])
+
+            ->add('livingPlaceManagerEmail', EmailType::class, [
+                'label' => 'E-mail du gérant',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : gerant@ecurie.fr',
+                ],
+            ])
+
+            ->add('livingPlaceStreet', TextType::class, [
+                'label' => 'Rue',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : 12 chemin des Prés',
+                ],
+            ])
+
+            ->add('livingPlaceComplement', TextType::class, [
+                'label' => 'Complément d\'adresse',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Lieu-dit, bâtiment...',
+                ],
+            ])
+
+            ->add('livingPlacePostalCode', TextType::class, [
+                'label' => 'Code postal',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : 33000',
+                ],
+            ])
+
+            ->add('livingPlaceCity', TextType::class, [
+                'label' => 'Ville',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Bordeaux',
+                ],
+            ])
+
+            ->add('livingPlaceCountry', CountryType::class, [
+                'label' => 'Pays',
+                'required' => false,
+                'placeholder' => 'Sélectionner un pays',
+                'preferred_choices' => ['FR'],
+            ])
+
             ->add('photoFile', FileType::class, [
-                'label' => 'Photo de l\'animal',
+                'label' => 'Photo du cheval',
                 'mapped' => false,
                 'required' => false,
                 'attr' => [
@@ -104,7 +236,7 @@ class AnimalType extends AbstractType
             ])
 
             ->add('attachments', FileType::class, [
-                'label' => 'Documents de l\'animal',
+                'label' => 'Documents du cheval',
                 'mapped' => false,
                 'required' => false,
                 'multiple' => true,

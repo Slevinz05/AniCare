@@ -28,10 +28,10 @@ class HealthBookEntryType extends AbstractType
 
         $builder
             ->add('animal', EntityType::class, [
-                'label' => 'Animal concerné',
+                'label' => 'Cheval concerné',
                 'class' => Animal::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Sélectionner un animal',
+                'placeholder' => 'Sélectionner un cheval',
                 'query_builder' => fn (AnimalRepository $repo) => $repo->createQueryBuilder('a')
                     ->leftJoin('a.animalShares', 's')
                     ->where('a.owner = :user')
@@ -41,15 +41,15 @@ class HealthBookEntryType extends AbstractType
             ])
 
             ->add('title', TextType::class, [
-                'label' => 'Intitulé de l\'acte',
+                'label' => 'Intitulé de la consultation',
                 'attr' => [
                     'placeholder' => 'Ex : Vaccin annuel, consultation, chirurgie...',
                 ],
             ])
 
             ->add('type', ChoiceType::class, [
-                'label' => 'Type d\'acte',
-                'placeholder' => 'Sélectionner un type d\'acte',
+                'label' => 'Type de consultation',
+                'placeholder' => 'Sélectionner un type',
                 'choices' => [
                     'Consultation' => 'Consultation',
                     'Vaccination' => 'Vaccination',
@@ -62,7 +62,7 @@ class HealthBookEntryType extends AbstractType
             ])
 
             ->add('date', DateType::class, [
-                'label' => 'Date de l\'acte',
+                'label' => 'Date de la consultation',
                 'widget' => 'single_text',
             ])
 
@@ -127,7 +127,7 @@ class HealthBookEntryType extends AbstractType
             ])
 
             ->add('attachments', FileType::class, [
-                'label' => 'Documents liés à l\'acte médical',
+                'label' => 'Documents liés à la consultation',
                 'mapped' => false,
                 'required' => false,
                 'multiple' => true,

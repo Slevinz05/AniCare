@@ -29,4 +29,20 @@ class AppointmentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByPeriodAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
+    {
+        return $this->createQueryBuilder('ap')
+            ->join('ap.animal', 'a')
+            ->leftJoin('a.animalShares', 's')
+            ->where('ap.scheduledAt BETWEEN :start AND :end')
+            ->andWhere('a.owner = :user OR s.sharedWithEmail = :email OR ap.createdBy = :user')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('user', $user)
+            ->setParameter('email', $user->getEmail())
+            ->orderBy('ap.scheduledAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

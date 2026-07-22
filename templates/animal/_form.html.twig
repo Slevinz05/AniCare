@@ -5,113 +5,291 @@
     }
 }) }}
 
-    <div class="row g-4">
-        <div class="col-12 col-md-6">
-            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.name) }}
-        </div>
+{% if form_errors(form) %}
+    <div class="alert alert-danger shadow-sm mb-4">
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
 
-        <div class="col-12 col-md-6">
-            {{ form_label(form.species, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.species, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.species) }}
-        </div>
+{# Macro pour un champ avec gestion d'erreur inline #}
+{% macro field(f, class, extra_attr) %}
+    {% set has_error = f.vars.errors|length %}
+    {% set css = (class|default('form-control')) ~ (has_error ? ' is-invalid' : '') %}
+    {{ form_widget(f, {'attr': (extra_attr|default({}))|merge({'class': css})}) }}
+    {% if has_error %}
+        <div class="text-danger small mt-1">{{ form_errors(f) }}</div>
+    {% endif %}
+{% endmacro %}
 
-        <div class="col-12 col-md-6">
-            {{ form_label(form.breed, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.breed, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.breed) }}
-        </div>
+{# Macro pour un label avec étoile rouge si requis #}
+{% macro label(f, required) %}
+    <label class="form-label" for="{{ f.vars.id }}">
+        {{ f.vars.label }}{% if required|default(false) %} <span class="text-danger">*</span>{% endif %}
+    </label>
+{% endmacro %}
 
-        <div class="col-12 col-md-6">
-            {{ form_label(form.birthDate, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.birthDate, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.birthDate) }}
-        </div>
+<div class="row g-4">
+    {# ══════════════════════════════════════════════════════════
+       COLONNE GAUCHE — Le cheval
+       ══════════════════════════════════════════════════════════ #}
+    <div class="col-12 col-lg-7">
+        <div class="p-4 rounded-3" style="background-color: #F7F3ED; border-left: 4px solid #0d9488;">
+            {# ── Identité ── #}
+            <p class="page-eyebrow mb-2">Identité</p>
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                    {{ _self.label(form.name, true) }}
+                    {{ _self.field(form.name) }}
+                </div>
 
-        <div class="col-12">
-            {{ form_label(form.gender, null, {'label_attr': {'class': 'form-label'}}) }}
+                <div class="col-12 col-md-6">
+                    {{ form_label(form.breed, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ _self.field(form.breed) }}
+                </div>
 
-            <div class="anicare-radio-group">
-                {% for choice in form.gender %}
-                    <div class="form-check form-check-inline anicare-radio-item">
-                        {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
-                        {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                <div class="col-12 col-md-6">
+                    {{ form_label(form.coat, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ _self.field(form.coat, 'form-select') }}
+                </div>
+
+                <div class="col-12 col-md-6" id="coatCustomGroup" style="{{ form.coat.vars.data != 'Autre' ? 'display:none;' : '' }}">
+                    {{ form_label(form.coatCustom, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ _self.field(form.coatCustom) }}
+                </div>
+
+                <div class="col-12 col-md-3">
+                    {{ form_label(form.birthDate, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ _self.field(form.birthDate) }}
+                    <div class="form-text text-secondary">Remplir la date ou l'âge.</div>
+                </div>
+
+                <div class="col-12 col-md-3">
+                    {{ form_label(form.age, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-group">
+                        {{ _self.field(form.age) }}
+                        <span class="input-group-text">ans</span>
                     </div>
-                {% endfor %}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">{{ form.gender.vars.label }} <span class="text-danger">*</span></label>
+                    <div class="anicare-radio-group">
+                        {% for choice in form.gender %}
+                            <div class="form-check form-check-inline anicare-radio-item">
+                                {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                                {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.gender.vars.errors|length %}
+                        <div class="text-danger small mt-1">{{ form_errors(form.gender) }}</div>
+                    {% endif %}
+                </div>
             </div>
 
-            {{ form_errors(form.gender) }}
-        </div>
+            {# ── Mensurations ── #}
+            <p class="page-eyebrow mb-2">Mensurations</p>
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-4">
+                    {{ form_label(form.height, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-group">
+                        {{ _self.field(form.height) }}
+                        <span class="input-group-text">m</span>
+                    </div>
+                </div>
 
-        <div class="col-12 col-md-6">
-            {{ form_label(form.weight, null, {'label_attr': {'class': 'form-label'}}) }}
+                <div class="col-12 col-md-4">
+                    {{ form_label(form.weight, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-group">
+                        {{ _self.field(form.weight) }}
+                        <span class="input-group-text">kg</span>
+                    </div>
+                </div>
 
-            <div class="input-group">
-                {{ form_widget(form.weight, {'attr': {'class': 'form-control'}}) }}
-                <span class="input-group-text">kg</span>
+                <div class="col-12 col-md-4">
+                    {{ form_label(form.averageWeight, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-group">
+                        {{ _self.field(form.averageWeight) }}
+                        <span class="input-group-text">kg</span>
+                    </div>
+                </div>
             </div>
 
-            {{ form_errors(form.weight) }}
-        </div>
+            {# ── Identification ── #}
+            <p class="page-eyebrow mb-2">Identification</p>
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                    {{ form_label(form.identificationNumber, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ _self.field(form.identificationNumber) }}
+                </div>
 
-        <div class="col-12 col-md-6">
-            {{ form_label(form.bloodType, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.bloodType, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.bloodType) }}
-        </div>
-
-        <div class="col-12">
-            {{ form_label(form.identificationNumber, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.identificationNumber, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.identificationNumber) }}
-        </div>
-
-        <div class="col-12">
-            <div class="file-upload-card">
-                {{ form_label(form.photoFile, null, {'label_attr': {'class': 'form-label'}}) }}
-
-                {% if form.vars.data.photo is defined and form.vars.data.photo %}
-                    <div class="mb-2">
-                        <img src="{{ asset('uploads/photos/' ~ form.vars.data.photo) }}"
-                             alt="Photo actuelle"
-                             class="rounded-3 border"
-                             style="max-height: 120px; object-fit: cover;">
-                        <span class="text-secondary small d-block mt-1">Photo actuelle — sélectionnez un fichier pour la remplacer.</span>
-                    </div>
-                {% endif %}
-
-                {{ form_widget(form.photoFile, {'attr': {'class': 'form-control'}}) }}
-
-                {% if form.photoFile.vars.help %}
-                    <div class="form-text">{{ form.photoFile.vars.help }}</div>
-                {% endif %}
-
-                {{ form_errors(form.photoFile) }}
+                <div class="col-12 col-md-6">
+                    {{ form_label(form.microchipNumber, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ _self.field(form.microchipNumber) }}
+                </div>
             </div>
-        </div>
 
-        <div class="col-12">
-            <div class="file-upload-card">
-                {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.attachments, {'attr': {'class': 'form-control'}}) }}
+            {# ── Photo & Documents ── #}
+            <p class="page-eyebrow mb-2">Photo & Documents</p>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="file-upload-card">
+                        {{ form_label(form.photoFile, null, {'label_attr': {'class': 'form-label'}}) }}
 
-                {% if form.attachments.vars.help %}
-                    <div class="form-text">
-                        {{ form.attachments.vars.help }}
+                        {% if form.vars.data.photo is defined and form.vars.data.photo %}
+                            <div class="mb-2">
+                                <img src="{{ asset('uploads/photos/' ~ form.vars.data.photo) }}"
+                                     alt="Photo actuelle"
+                                     class="rounded-3 border"
+                                     style="max-height: 120px; object-fit: cover;">
+                                <span class="text-secondary small d-block mt-1">Photo actuelle — sélectionnez un fichier pour la remplacer.</span>
+                            </div>
+                        {% endif %}
+
+                        {{ _self.field(form.photoFile) }}
+
+                        {% if form.photoFile.vars.help %}
+                            <div class="form-text">{{ form.photoFile.vars.help }}</div>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
 
-                {{ form_errors(form.attachments) }}
+                <div class="col-12">
+                    <div class="file-upload-card">
+                        {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.attachments) }}
+
+                        {% if form.attachments.vars.help %}
+                            <div class="form-text">{{ form.attachments.vars.help }}</div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    {{ form_rest(form) }}
+    {# ══════════════════════════════════════════════════════════
+       COLONNE DROITE — Lieu de vie
+       ══════════════════════════════════════════════════════════ #}
+    <div class="col-12 col-lg-5">
+        <div class="d-flex flex-column gap-4">
+            <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #C8973E !important;">
+                <p class="page-eyebrow mb-2" style="color: #C8973E; border-bottom-color: #C8973E;">Lieu de vie</p>
+                <div class="row g-3">
+                    <div class="col-12">
+                        {{ form_label(form.livingPlaceName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceName) }}
+                    </div>
 
-    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
-        {{ button_label|default('Enregistrer') }}
-    </button>
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.livingPlaceManagerLastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceManagerLastName) }}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.livingPlaceManagerFirstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceManagerFirstName) }}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.livingPlaceManagerPhone, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceManagerPhone) }}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.livingPlaceManagerEmail, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceManagerEmail) }}
+                    </div>
+
+                    <div class="col-12">
+                        {{ form_label(form.livingPlaceStreet, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceStreet) }}
+                    </div>
+
+                    <div class="col-12">
+                        {{ form_label(form.livingPlaceComplement, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceComplement) }}
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.livingPlacePostalCode, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlacePostalCode) }}
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.livingPlaceCity, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceCity) }}
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.livingPlaceCountry, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.livingPlaceCountry, 'form-select') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ form_rest(form) }}
+
+<button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+    {{ button_label|default('Enregistrer') }}
+</button>
 
 {{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Robe "Autre" toggle
+    const coatSelect = document.getElementById('{{ form.coat.vars.id }}');
+    const coatCustomGroup = document.getElementById('coatCustomGroup');
+    if (coatSelect && coatCustomGroup) {
+        coatSelect.addEventListener('change', function () {
+            coatCustomGroup.style.display = this.value === 'Autre' ? '' : 'none';
+        });
+    }
+
+    // Synchronisation date de naissance ↔ âge
+    const birthDateInput = document.getElementById('{{ form.birthDate.vars.id }}');
+    const ageInput = document.getElementById('{{ form.age.vars.id }}');
+
+    if (birthDateInput && ageInput) {
+        let syncing = false;
+
+        birthDateInput.addEventListener('change', function () {
+            if (syncing) return;
+            syncing = true;
+            if (this.value) {
+                const birth = new Date(this.value);
+                const today = new Date();
+                let age = today.getFullYear() - birth.getFullYear();
+                const m = today.getMonth() - birth.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+                ageInput.value = Math.max(0, age);
+            } else {
+                ageInput.value = '';
+            }
+            syncing = false;
+        });
+
+        ageInput.addEventListener('input', function () {
+            if (syncing) return;
+            syncing = true;
+            if (this.value !== '' && !isNaN(this.value)) {
+                const age = parseInt(this.value, 10);
+                const year = new Date().getFullYear() - age;
+                birthDateInput.value = year + '-01-01';
+            } else {
+                birthDateInput.value = '';
+            }
+            syncing = false;
+        });
+
+        // Pré-remplir l'âge si la date est déjà renseignée à l'ouverture
+        if (birthDateInput.value && !ageInput.value) {
+            birthDateInput.dispatchEvent(new Event('change'));
+        }
+    }
+});
+</script>

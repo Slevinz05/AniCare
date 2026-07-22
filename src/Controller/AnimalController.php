@@ -64,6 +64,13 @@ final class AnimalController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $animal->setOwner($user);
+            $animal->setSpecies('Cheval');
+
+            $this->syncAgeAndBirthDate($form, $animal);
+
+            if ($animal->getCoat() === 'Autre' && $form->get('coatCustom')->getData()) {
+                $animal->setCoat($form->get('coatCustom')->getData());
+            }
 
             $this->handlePhotoUpload($form, $animal);
             $this->handleUploadedDocuments($form, $animal);
@@ -99,6 +106,12 @@ final class AnimalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->syncAgeAndBirthDate($form, $animal);
+
+            if ($animal->getCoat() === 'Autre' && $form->get('coatCustom')->getData()) {
+                $animal->setCoat($form->get('coatCustom')->getData());
+            }
+
             $this->handlePhotoUpload($form, $animal);
             $this->handleUploadedDocuments($form, $animal);
 
@@ -135,6 +148,17 @@ final class AnimalController extends AbstractController
         }
 
         return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    private function syncAgeAndBirthDate(FormInterface $form, Animal $animal): void
+    {
+        $age = $form->get('age')->getData();
+
+        if (!$animal->getBirthDate() && $age !== null) {
+            $animal->setBirthDate(
+                new \DateTimeImmutable(sprintf('%d-01-01', (int) date('Y') - (int) $age))
+            );
+        }
     }
 
     private function handlePhotoUpload(FormInterface $form, Animal $animal): void

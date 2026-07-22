@@ -1,13 +1,14 @@
 {# templates/_partials/_gender_badge.html.twig #}
 {% set gender_clean = gender|lower|trim %}
 
-{# On ajoute la vérification de 'malle' à la condition #}
-{% if gender_clean == 'mâle' or gender_clean == 'male' or gender_clean == 'malle' %}
-    <span class="badge-medical badge-male">♂ Mâle</span>
-{% elseif gender_clean == 'femelle' %}
-    <span class="badge-medical badge-female">♀ Femelle</span>
+{% if gender_clean == 'hongre' %}
+    <span class="badge-medical badge-male">Hongre</span>
+{% elseif gender_clean == 'entier' or gender_clean == 'mâle' or gender_clean == 'male' or gender_clean == 'malle' %}
+    <span class="badge-medical badge-male">♂ Entier</span>
+{% elseif gender_clean == 'jument' or gender_clean == 'femelle' %}
+    <span class="badge-medical badge-female">♀ Jument</span>
 {% else %}
     <span class="badge-medical" style="background-color: #f1f5f9; color: var(--secondary-color);">
-        ❓ {{ gender ?: 'Non renseigné' }}
+        {{ gender ?: 'Non renseigné' }}
     </span>
 {% endif %}

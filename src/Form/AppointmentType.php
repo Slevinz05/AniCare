@@ -23,10 +23,10 @@ class AppointmentType extends AbstractType
 
         $builder
             ->add('animal', EntityType::class, [
-                'label' => 'Animal concerné',
+                'label' => 'Cheval concerné',
                 'class' => Animal::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Sélectionner un animal',
+                'placeholder' => 'Sélectionner un cheval',
                 'query_builder' => fn (AnimalRepository $repo) => $repo->createQueryBuilder('a')
                     ->leftJoin('a.animalShares', 's')
                     ->where('a.owner = :user')

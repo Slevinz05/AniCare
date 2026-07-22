@@ -1,10 +1,10 @@
-<footer class="site-footer mt-5 py-5" style="background-color: #0f172a; color: #94a3b8;">
+<footer class="site-footer mt-5 py-5" style="background-color: #4A3F33; color: #c4b8a8;">
     <div class="container">
         <div class="row gy-4">
             <div class="col-12 col-md-4">
                 <p class="fw-bold text-white mb-2" style="font-size: 1.2rem;">🐾 AniCare</p>
                 <p class="small mb-0">
-                    Le carnet de santé numérique pour vos animaux de compagnie.
+                    Le carnet de santé numérique pour vos chevaux.
                     Suivez leurs vaccins, traitements et rendez-vous en toute simplicité.
                 </p>
             </div>
@@ -12,9 +12,9 @@
             <div class="col-6 col-md-2">
                 <p class="fw-bold text-white small text-uppercase mb-2">Navigation</p>
                 <ul class="list-unstyled small">
-                    <li class="mb-1"><a href="{{ path('app_home') }}" class="text-decoration-none" style="color: #94a3b8;">Accueil</a></li>
-                    <li class="mb-1"><a href="{{ path('app_about') }}" class="text-decoration-none" style="color: #94a3b8;">A propos</a></li>
-                    <li class="mb-1"><a href="{{ path('app_contact') }}" class="text-decoration-none" style="color: #94a3b8;">Contact</a></li>
+                    <li class="mb-1"><a href="{{ path('app_home') }}" class="text-decoration-none" style="color: #c4b8a8;">Accueil</a></li>
+                    <li class="mb-1"><a href="{{ path('app_about') }}" class="text-decoration-none" style="color: #c4b8a8;">A propos</a></li>
+                    <li class="mb-1"><a href="{{ path('app_contact') }}" class="text-decoration-none" style="color: #c4b8a8;">Contact</a></li>
                 </ul>
             </div>
 
@@ -22,13 +22,13 @@
                 <p class="fw-bold text-white small text-uppercase mb-2">Fonctionnalités</p>
                 <ul class="list-unstyled small">
                     {% if app.user %}
-                        <li class="mb-1"><a href="{{ path('app_animal_index') }}" class="text-decoration-none" style="color: #94a3b8;">Mes animaux</a></li>
-                        <li class="mb-1"><a href="{{ path('app_health_book_entry_index') }}" class="text-decoration-none" style="color: #94a3b8;">Carnet de santé</a></li>
-                        <li class="mb-1"><a href="{{ path('app_appointment_index') }}" class="text-decoration-none" style="color: #94a3b8;">Rendez-vous</a></li>
-                        <li class="mb-1"><a href="{{ path('app_calendar') }}" class="text-decoration-none" style="color: #94a3b8;">Planning</a></li>
+                        <li class="mb-1"><a href="{{ path('app_animal_index') }}" class="text-decoration-none" style="color: #c4b8a8;">Mes chevaux</a></li>
+                        <li class="mb-1"><a href="{{ path('app_health_book_entry_index') }}" class="text-decoration-none" style="color: #c4b8a8;">Carnet de santé</a></li>
+                        <li class="mb-1"><a href="{{ path('app_appointment_index') }}" class="text-decoration-none" style="color: #c4b8a8;">Rendez-vous</a></li>
+                        <li class="mb-1"><a href="{{ path('app_calendar') }}" class="text-decoration-none" style="color: #c4b8a8;">Planning</a></li>
                     {% else %}
-                        <li class="mb-1"><a href="{{ path('app_register') }}" class="text-decoration-none" style="color: #94a3b8;">Créer un compte</a></li>
-                        <li class="mb-1"><a href="{{ path('app_login') }}" class="text-decoration-none" style="color: #94a3b8;">Se connecter</a></li>
+                        <li class="mb-1"><a href="{{ path('app_register') }}" class="text-decoration-none" style="color: #c4b8a8;">Créer un compte</a></li>
+                        <li class="mb-1"><a href="{{ path('app_login') }}" class="text-decoration-none" style="color: #c4b8a8;">Se connecter</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -36,21 +36,21 @@
             <div class="col-12 col-md-3">
                 <p class="fw-bold text-white small text-uppercase mb-2">Informations</p>
                 <ul class="list-unstyled small">
-                    <li class="mb-1"><a href="{{ path('app_legal') }}" class="text-decoration-none" style="color: #94a3b8;">Mentions légales</a></li>
-                    <li class="mb-1"><a href="{{ path('app_terms') }}" class="text-decoration-none" style="color: #94a3b8;">Conditions Générales d'Utilisation</a></li>
-                    <li class="mb-1"><a href="{{ path('app_privacy') }}" class="text-decoration-none" style="color: #94a3b8;">Politique de confidentialité</a></li>
+                    <li class="mb-1"><a href="{{ path('app_legal') }}" class="text-decoration-none" style="color: #c4b8a8;">Mentions légales</a></li>
+                    <li class="mb-1"><a href="{{ path('app_terms') }}" class="text-decoration-none" style="color: #c4b8a8;">Conditions Générales d'Utilisation</a></li>
+                    <li class="mb-1"><a href="{{ path('app_privacy') }}" class="text-decoration-none" style="color: #c4b8a8;">Politique de confidentialité</a></li>
                 </ul>
             </div>
         </div>
 
-        <hr style="border-color: #1e293b;" class="my-4">
+        <hr style="border-color: #5C4A32;" class="my-4">
 
         <div class="row align-items-center">
             <div class="col-12 col-md-6 text-center text-md-start">
                 <p class="small mb-0">&copy; {{ 'now'|date('Y') }} AniCare — Tous droits réservés.</p>
             </div>
             <div class="col-12 col-md-6 text-center text-md-end">
-                <p class="small mb-0">Fait avec soin pour nos compagnons à quatre pattes.</p>
+                <p class="small mb-0">Fait avec soin pour vos chevaux.</p>
             </div>
         </div>
     </div>

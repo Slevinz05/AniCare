@@ -9,15 +9,20 @@
                     <p class="mb-1 fw-bold text-uppercase small" style="letter-spacing: 0.1em; opacity: 0.9;">Fiche d'urgence</p>
                     <h1 class="mb-1 fw-bold" style="font-size: 1.8rem;">{{ animal.name }}</h1>
                     <p class="mb-0 small" style="opacity: 0.9;">
-                        {{ animal.species }}{% if animal.breed %} — {{ animal.breed }}{% endif %}
+                        {{ animal.breed ?: 'Race non renseignée' }}
                         {% if animal.gender %} | {{ animal.gender }}{% endif %}
-                        {% if animal.birthDate %} | Né(e) le {{ animal.birthDate|date('d/m/Y') }}{% endif %}
+                        {% if animal.age is not null %} | {{ animal.age }} an{{ animal.age > 1 ? 's' : '' }}{% endif %}
+                        {% if animal.birthDate %} ({{ animal.birthDate|date('d/m/Y') }}){% endif %}
                     </p>
                 </div>
                 <div class="text-end">
                     {% if animal.identificationNumber %}
-                        <p class="mb-1 small fw-bold" style="opacity: 0.9;">ID</p>
+                        <p class="mb-1 small fw-bold" style="opacity: 0.9;">SIRE</p>
                         <p class="mb-0 fw-bold">{{ animal.identificationNumber }}</p>
+                    {% endif %}
+                    {% if animal.microchipNumber %}
+                        <p class="mb-1 small fw-bold mt-2" style="opacity: 0.9;">Puce</p>
+                        <p class="mb-0 fw-bold">{{ animal.microchipNumber }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -33,14 +38,33 @@
                                 <th>Poids</th>
                                 <td><strong>{{ animal.weight ? animal.weight ~ ' kg' : 'Inconnu' }}</strong></td>
                             </tr>
-                            <tr>
-                                <th>Groupe sanguin</th>
-                                <td><strong>{{ animal.bloodType ?: 'Non déterminé' }}</strong></td>
-                            </tr>
+                            {% if animal.height %}
+                                <tr>
+                                    <th>Taille</th>
+                                    <td><strong>{{ animal.height }} m</strong></td>
+                                </tr>
+                            {% endif %}
                             <tr>
                                 <th>Propriétaire</th>
-                                <td>{{ animal.owner.email }}</td>
+                                <td>
+                                    {{ animal.owner.fullName }}
+                                    {% if animal.owner.phone %}
+                                        <br><a href="tel:{{ animal.owner.phone }}" class="small">{{ animal.owner.phone }}</a>
+                                    {% endif %}
+                                    <br><a href="mailto:{{ animal.owner.email }}" class="small">{{ animal.owner.email }}</a>
+                                </td>
                             </tr>
+                            {% if animal.livingPlaceName %}
+                                <tr>
+                                    <th>Lieu de vie</th>
+                                    <td>
+                                        <strong>{{ animal.livingPlaceName }}</strong>
+                                        {% if animal.livingPlaceManagerPhone %}
+                                            <br><a href="tel:{{ animal.livingPlaceManagerPhone }}" class="small">{{ animal.livingPlaceManagerPhone }}</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
                         </table>
                     </div>
                 </div>

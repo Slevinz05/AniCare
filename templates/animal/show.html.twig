@@ -26,67 +26,175 @@
         </div>
 
         <div class="card-body p-4">
-            {% if animal.photo %}
-                <div class="text-center mb-4">
-                    <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
-                         alt="Photo de {{ animal.name }}"
-                         class="rounded-3 shadow"
-                         style="max-height: 280px; max-width: 100%; object-fit: cover;">
+            <div class="row g-4 mb-5">
+                {# ── Colonne gauche : Le cheval ── #}
+                <div class="col-12 col-lg-7">
+                    <div class="p-4 rounded-3 bg-light h-100">
+                        <p class="page-eyebrow mb-3">Le cheval</p>
+
+                        {% if animal.photo %}
+                            <div class="text-center mb-4">
+                                <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
+                                     alt="Photo de {{ animal.name }}"
+                                     class="rounded-3 shadow"
+                                     style="max-height: 240px; max-width: 100%; object-fit: cover;">
+                            </div>
+                        {% endif %}
+
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 35%;" class="text-secondary">Race</th>
+                                        <td>{{ animal.breed ?: 'Non renseignée' }}</td>
+                                    </tr>
+                                    {% if animal.coat %}
+                                        <tr>
+                                            <th class="text-secondary">Robe</th>
+                                            <td>{{ animal.coat }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <th class="text-secondary">Date de naissance</th>
+                                        <td>
+                                            {{ animal.birthDate ? animal.birthDate|date('d/m/Y') : 'Non renseignée' }}
+                                            {% if animal.age is not null %}
+                                                <span class="text-secondary ms-1">({{ animal.age }} an{{ animal.age > 1 ? 's' : '' }})</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if animal.height %}
+                                        <tr>
+                                            <th class="text-secondary">Taille</th>
+                                            <td>{{ animal.height }} m</td>
+                                        </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <th class="text-secondary">Poids actuel</th>
+                                        <td>
+                                            <span class="badge-medical badge-weight">
+                                                {{ animal.weight ? animal.weight ~ ' kg' : 'Non renseigné' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% if animal.averageWeight %}
+                                        <tr>
+                                            <th class="text-secondary">Poids moyen</th>
+                                            <td>{{ animal.averageWeight }} kg</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p class="page-eyebrow mb-2">Identification</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 35%;" class="text-secondary">Numéro de SIRE</th>
+                                        <td>
+                                            <strong class="text-teal">
+                                                {{ animal.identificationNumber ?: 'Non renseigné' }}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    {% if animal.microchipNumber %}
+                                        <tr>
+                                            <th class="text-secondary">Numéro de puce</th>
+                                            <td>{{ animal.microchipNumber }}</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
 
-            <div class="table-responsive mb-5">
-                <table class="table table-hover table-medical align-middle mb-0">
-                    <tbody>
-                        <tr>
-                            <th style="width: 35%;">Numéro d'identification</th>
-                            <td>
-                                <strong class="text-teal">
-                                    {{ animal.identificationNumber ?: 'Non renseigné' }}
-                                </strong>
-                            </td>
-                        </tr>
+                {# ── Colonne droite : Propriétaire & Lieu de vie ── #}
+                <div class="col-12 col-lg-5">
+                    <div class="d-flex flex-column gap-4 h-100">
+                        {# Propriétaire #}
+                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0">
+                            <p class="page-eyebrow mb-3">Propriétaire</p>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle bg-anicare-soft d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+                                    <span style="font-size: 1.2rem;">👤</span>
+                                </div>
+                                <div>
+                                    <strong class="d-block">{{ animal.owner.fullName }}</strong>
+                                    <span class="text-secondary small">{{ animal.owner.email }}</span>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless align-middle mb-0">
+                                    <tbody>
+                                        {% if animal.owner.phone %}
+                                            <tr>
+                                                <th style="width: 35%;" class="text-secondary">Téléphone</th>
+                                                <td><a href="tel:{{ animal.owner.phone }}">{{ animal.owner.phone }}</a></td>
+                                            </tr>
+                                        {% endif %}
+                                        {% if animal.owner.city %}
+                                            <tr>
+                                                <th class="text-secondary">Ville</th>
+                                                <td>{{ animal.owner.city }}</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                        <tr>
-                            <th>Espèce / Race</th>
-                            <td>
-                                {{ animal.species }}
-                                {% if animal.breed %}
-                                    <span class="text-secondary">({{ animal.breed }})</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Date de naissance</th>
-                            <td>
-                                {{ animal.birthDate ? animal.birthDate|date('d/m/Y') : 'Non renseignée' }}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Poids actuel</th>
-                            <td>
-                                <span class="badge-medical badge-weight">
-                                    {{ animal.weight ? animal.weight ~ ' kg' : 'Non renseigné' }}
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Groupe sanguin</th>
-                            <td>
-                                {% if animal.bloodType %}
-                                    <span class="badge-medical badge-neutral">
-                                        {{ animal.bloodType }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-secondary">Non déterminé</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        {# Lieu de vie #}
+                        {% if animal.livingPlaceName or animal.livingPlaceCity or animal.livingPlaceManagerLastName %}
+                            <div class="p-4 rounded-3 border border-anicare bg-white flex-grow-1">
+                                <p class="page-eyebrow mb-3">Lieu de vie</p>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless align-middle mb-0">
+                                        <tbody>
+                                            {% if animal.livingPlaceName %}
+                                                <tr>
+                                                    <th style="width: 35%;" class="text-secondary">Structure</th>
+                                                    <td><strong>{{ animal.livingPlaceName }}</strong></td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if animal.livingPlaceManagerLastName or animal.livingPlaceManagerFirstName %}
+                                                <tr>
+                                                    <th class="text-secondary">Gérant</th>
+                                                    <td>{{ animal.livingPlaceManagerFirstName }} {{ animal.livingPlaceManagerLastName }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if animal.livingPlaceManagerPhone %}
+                                                <tr>
+                                                    <th class="text-secondary">Téléphone</th>
+                                                    <td><a href="tel:{{ animal.livingPlaceManagerPhone }}">{{ animal.livingPlaceManagerPhone }}</a></td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if animal.livingPlaceManagerEmail %}
+                                                <tr>
+                                                    <th class="text-secondary">E-mail</th>
+                                                    <td><a href="mailto:{{ animal.livingPlaceManagerEmail }}">{{ animal.livingPlaceManagerEmail }}</a></td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if animal.livingPlaceStreet or animal.livingPlaceCity %}
+                                                <tr>
+                                                    <th class="text-secondary">Adresse</th>
+                                                    <td>
+                                                        {% if animal.livingPlaceStreet %}{{ animal.livingPlaceStreet }}<br>{% endif %}
+                                                        {% if animal.livingPlaceComplement %}{{ animal.livingPlaceComplement }}<br>{% endif %}
+                                                        {% if animal.livingPlacePostalCode %}{{ animal.livingPlacePostalCode }} {% endif %}{{ animal.livingPlaceCity }}
+                                                        {% if animal.livingPlaceCountry %}<br>{{ animal.livingPlaceCountry }}{% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
             <section class="mb-5">
@@ -94,7 +202,7 @@
                     <div>
                         <p class="page-eyebrow mb-2">Documents</p>
                         <h2 class="h4 page-title mb-0">
-                            Documents de l'animal
+                            Documents du cheval
                         </h2>
                     </div>
 
@@ -105,7 +213,7 @@
 
                 {% if animal.documents is empty %}
                     <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun document n'est encore associé à cet animal.
+                        Aucun document n'est encore associé à ce cheval.
                     </div>
                 {% else %}
                     <div class="document-list">
@@ -194,21 +302,21 @@
             <section>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
                     <div>
-                        <p class="page-eyebrow mb-2">Suivi vétérinaire</p>
+                        <p class="page-eyebrow mb-2">Consultations</p>
 
                         <h2 class="h4 page-title mb-0">
-                            Historique médical
+                            Historique des consultations
                         </h2>
                     </div>
 
                     <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary btn-sm">
-                        Ajouter un acte
+                        Ajouter une consultation
                     </a>
                 </div>
 
                 {% if animal.healthBookEntries is empty %}
                     <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun acte médical n'est enregistré pour le moment.
+                        Aucune consultation enregistrée pour le moment.
                     </div>
                 {% else %}
                     <div class="table-responsive">
@@ -217,7 +325,7 @@
                                 <tr>
                                     <th>Date du soin</th>
                                     <th>Type</th>
-                                    <th>Acte</th>
+                                    <th>Consultation</th>
                                     <th>Vétérinaire</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
@@ -267,7 +375,7 @@
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-5 pt-4 border-top border-anicare">
                 <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary">
-                    Retour à la liste
+                    Retour
                 </a>
 
                 <div class="d-flex gap-2 flex-wrap">

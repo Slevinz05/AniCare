@@ -2,7 +2,7 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Mes animaux - AniCare{% endblock %}
+{% block title %}Mes chevaux - AniCare{% endblock %}
 
 {% block body %}
 <div class="container py-4">
@@ -10,15 +10,15 @@
         <div class="row align-items-center gy-3">
             <div class="col-12 col-lg">
                 <p class="page-eyebrow mb-2">Carnet de santé numérique</p>
-                <h1 class="page-title mb-2">🐾 Mes animaux</h1>
+                <h1 class="page-title mb-2">🐴 Mes chevaux</h1>
                 <p class="page-subtitle mb-0">
-                    Retrouvez les profils de vos compagnons et accédez rapidement à leur suivi médical.
+                    Retrouvez les profils de vos chevaux et accédez rapidement à leur suivi médical.
                 </p>
             </div>
 
             <div class="col-12 col-lg-auto">
                 <a href="{{ path('app_animal_new') }}" class="btn btn-primary shadow-sm">
-                    ➕ Ajouter un compagnon
+                    ➕ Ajouter un cheval
                 </a>
             </div>
         </div>
@@ -32,14 +32,14 @@
         {% else %}
             <div class="col-12">
                 <div class="empty-state text-center p-5">
-                    <span class="empty-state-icon mb-3">🐱🐶</span>
+                    <span class="empty-state-icon mb-3">🐴</span>
 
                     <h2 class="h4 page-title mb-2">
-                        Aucun compagnon enregistré
+                        Aucun cheval enregistré
                     </h2>
 
                     <p class="text-secondary mb-4">
-                        Commencez par ajouter un animal pour suivre son livret médical en ligne.
+                        Commencez par ajouter un cheval pour suivre son carnet de santé en ligne.
                     </p>
 
                     <a href="{{ path('app_animal_new') }}" class="btn btn-primary">

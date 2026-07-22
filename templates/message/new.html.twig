@@ -9,7 +9,7 @@
             <div class="col-12 col-lg">
                 <p class="page-eyebrow mb-2">Messagerie</p>
                 <h1 class="page-title mb-2">Nouvelle conversation</h1>
-                <p class="page-subtitle mb-0">Choisissez un animal pour démarrer une discussion avec les personnes ayant accès à son dossier.</p>
+                <p class="page-subtitle mb-0">Choisissez un cheval pour démarrer une discussion avec les personnes ayant accès à son dossier.</p>
             </div>
             <div class="col-12 col-lg-auto">
                 <a href="{{ path('app_message_index') }}" class="btn btn-outline-primary">Retour à la messagerie</a>
@@ -20,9 +20,9 @@
     {% if animals is empty %}
         <div class="empty-state text-center p-5">
             <div class="mb-3" style="font-size: 3rem; opacity: 0.4;">🐾</div>
-            <h2 class="h4 page-title mb-2">Aucun animal disponible</h2>
-            <p class="text-secondary mb-4">Vous n'avez aucun animal enregistré ou partagé avec vous.</p>
-            <a href="{{ path('app_animal_new') }}" class="btn btn-primary">Enregistrer un animal</a>
+            <h2 class="h4 page-title mb-2">Aucun cheval disponible</h2>
+            <p class="text-secondary mb-4">Vous n'avez aucun cheval enregistré ou partagé avec vous.</p>
+            <a href="{{ path('app_animal_new') }}" class="btn btn-primary">Enregistrer un cheval</a>
         </div>
     {% else %}
         <div class="row g-3">
@@ -41,13 +41,13 @@
                                     {% else %}
                                         <div class="rounded-circle bg-anicare-soft border-anicare d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; flex-shrink: 0;">
                                             <span style="font-size: 1.5rem;">
-                                                {% if animal.species|lower == 'chien' %}🐕{% elseif animal.species|lower == 'chat' %}🐈{% elseif animal.species|lower == 'cheval' %}🐴{% else %}🐾{% endif %}
+                                                🐴
                                             </span>
                                         </div>
                                     {% endif %}
                                     <div>
                                         <h3 class="h6 fw-bold mb-0 text-dark">{{ animal.name }}</h3>
-                                        <span class="text-secondary small">{{ animal.species }}{% if animal.breed %} — {{ animal.breed }}{% endif %}</span>
+                                        <span class="text-secondary small">{{ animal.breed ?: 'Race non renseignée' }}</span>
                                     </div>
                                 </div>
 

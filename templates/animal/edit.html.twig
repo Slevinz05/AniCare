@@ -5,22 +5,22 @@
 {% block body %}
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
+        <div class="col-12 col-xl-11">
             <div class="card form-card">
                 <div class="card-body p-0">
-                    <div class="mb-4 pb-4 border-bottom border-anicare">
-                        <p class="page-eyebrow mb-2">Profil animal</p>
-                        <h1 class="page-title mb-2">✏️ Modifier le dossier médical</h1>
+                    <div class="mb-4 pb-4 border-bottom" style="border-color: var(--border-color) !important;">
+                        <p class="page-eyebrow mb-2" style="color: var(--accent-color);">Profil du cheval</p>
+                        <h1 class="page-title mb-2">Modifier le dossier médical</h1>
                         <p class="page-subtitle mb-0">
-                            Mettez à jour les informations d’identification, les constantes et les données de santé de l’animal.
+                            Mettez à jour les informations d'identification, les constantes et les données de santé du cheval.
                         </p>
                     </div>
 
                     {{ include('animal/_form.html.twig', {'button_label': 'Appliquer les modifications'}) }}
 
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-4 border-top border-anicare">
-                        <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary">
-                            ← Annuler
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-4 border-top" style="border-color: var(--border-color) !important;">
+                        <a href="{{ path('app_animal_index') }}" class="btn btn-outline-secondary">
+                            Retour
                         </a>
 
                         {{ include('animal/_delete_form.html.twig') }}

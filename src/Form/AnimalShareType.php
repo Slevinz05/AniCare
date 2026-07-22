@@ -22,10 +22,10 @@ class AnimalShareType extends AbstractType
 
         $builder
             ->add('animal', EntityType::class, [
-                'label' => 'Animal à partager',
+                'label' => 'Cheval à partager',
                 'class' => Animal::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Sélectionner un animal',
+                'placeholder' => 'Sélectionner un cheval',
                 'query_builder' => fn (AnimalRepository $repo) => $repo->createQueryBuilder('a')
                     ->where('a.owner = :user')
                     ->setParameter('user', $user),

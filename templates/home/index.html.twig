@@ -28,9 +28,9 @@
                 </div>
                 <div class="col-12 col-lg-auto d-flex gap-2 flex-wrap">
                     {% if is_granted('ROLE_PRO') %}
-                        <a href="{{ path('app_animal_index') }}" class="btn btn-primary shadow-sm">Animaux suivis</a>
+                        <a href="{{ path('app_animal_index') }}" class="btn btn-primary shadow-sm">Chevaux suivis</a>
                     {% else %}
-                        <a href="{{ path('app_animal_new') }}" class="btn btn-primary shadow-sm">Enregistrer un animal</a>
+                        <a href="{{ path('app_animal_new') }}" class="btn btn-primary shadow-sm">Enregistrer un cheval</a>
                     {% endif %}
                 </div>
             </div>
@@ -41,7 +41,7 @@
             <div class="col-6 col-md-3">
                 <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary w-100 py-3 shadow-sm">
                     <span style="font-size: 1.3rem; display: block;">📋</span>
-                    Nouvel acte
+                    Nouvelle consultation
                 </a>
             </div>
             <div class="col-6 col-md-3">
@@ -65,21 +65,21 @@
         </div>
 
         <div class="row g-4">
-            {# --- Mes compagnons --- #}
+            {# --- Mes chevaux --- #}
             <div class="col-12 col-lg-7">
                 <div class="card anicare-card h-100">
                     <div class="card-body p-4">
-                        <p class="page-eyebrow mb-2">Mes animaux</p>
+                        <p class="page-eyebrow mb-2">Mes chevaux</p>
                         <h2 class="h5 page-title mb-3">
                             {% if is_granted('ROLE_PRO') %}
-                                Animaux suivis
+                                Chevaux suivis
                             {% else %}
-                                Mes compagnons
+                                Mes chevaux
                             {% endif %}
                         </h2>
 
                         {% if animals is empty %}
-                            <p class="text-secondary">Aucun animal enregistré pour le moment.</p>
+                            <p class="text-secondary">Aucun cheval enregistré pour le moment.</p>
                         {% else %}
                             <div class="row row-cols-1 row-cols-sm-2 g-3 mb-3">
                                 {% for animal in animals %}
@@ -93,14 +93,15 @@
                                                          style="width: 50px; height: 50px; object-fit: cover; flex-shrink: 0;">
                                                 {% else %}
                                                     <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; flex-shrink: 0;">
-                                                        <span style="font-size: 1.3rem;">
-                                                            {% if animal.species|lower == 'chien' %}🐕{% elseif animal.species|lower == 'chat' %}🐈{% elseif animal.species|lower == 'cheval' %}🐴{% else %}🐾{% endif %}
-                                                        </span>
+                                                        <span style="font-size: 1.3rem;">🐴</span>
                                                     </div>
                                                 {% endif %}
                                                 <div>
                                                     <h4 class="h6 fw-bold text-dark mb-0">{{ animal.name }}</h4>
-                                                    <span class="text-secondary small">{{ animal.species }}{% if animal.breed %} — {{ animal.breed }}{% endif %}</span>
+                                                    <span class="text-secondary small">
+                                                        {{ animal.breed ?: 'Race non renseignée' }}
+                                                        {% if animal.age is not null %} · {{ animal.age }} an{{ animal.age > 1 ? 's' : '' }}{% endif %}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </a>
@@ -110,7 +111,7 @@
                         {% endif %}
 
                         <div class="d-flex gap-2 mt-auto">
-                            <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary btn-sm">Tous les animaux</a>
+                            <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary btn-sm">Tous les chevaux</a>
                             <a href="{{ path('app_animal_share_index') }}" class="btn btn-outline-primary btn-sm">Mes partages</a>
                         </div>
                     </div>
@@ -158,11 +159,11 @@
             <div class="row align-items-center gy-5">
                 <div class="col-12 col-lg-6">
                     <h1 class="fw-bold mb-3" style="font-size: 2.8rem; line-height: 1.15;">
-                        Le carnet de santé <span class="text-teal">de vos animaux</span>, toujours avec vous
+                        Le carnet de santé <span class="text-teal">de vos chevaux</span>, toujours avec vous
                     </h1>
                     <p class="lead text-secondary mb-4">
                         AniCare centralise le suivi médical, les vaccins, les traitements et les rendez-vous
-                        de vos compagnons. Partagez leur dossier avec votre vétérinaire en un clic.
+                        de vos chevaux. Partagez leur dossier avec votre vétérinaire en un clic.
                     </p>
                     <div class="d-flex gap-3 flex-wrap">
                         <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg px-4 shadow-sm">Créer mon compte</a>
@@ -181,7 +182,7 @@
         <section class="py-5">
             <div class="text-center mb-5">
                 <p class="page-eyebrow mb-2">Fonctionnalités</p>
-                <h2 class="h3 page-title">Tout ce dont vos animaux ont besoin</h2>
+                <h2 class="h3 page-title">Tout ce dont vos chevaux ont besoin</h2>
             </div>
 
             <div class="row g-4">
@@ -199,7 +200,7 @@
                         <div class="card-body p-4">
                             <div class="mb-3" style="font-size: 2rem;">📊</div>
                             <h3 class="h6 fw-bold mb-2">Courbe de poids</h3>
-                            <p class="text-secondary small mb-0">Suivez l'évolution du poids de votre animal avec un graphique interactif.</p>
+                            <p class="text-secondary small mb-0">Suivez l'évolution du poids de votre cheval avec un graphique interactif.</p>
                         </div>
                     </div>
                 </div>
@@ -242,7 +243,7 @@
                         </p>
                         <p class="text-secondary">
                             AniCare résout ces problèmes en centralisant tout au même endroit.
-                            Enregistrez un acte médical, définissez un rappel, et retrouvez
+                            Enregistrez une consultation, définissez un rappel, et retrouvez
                             l'information instantanément quand vous en avez besoin.
                         </p>
                     </article>
@@ -258,11 +259,11 @@
                         <h2 class="h3 page-title mb-3">Un outil adapté à votre pratique</h2>
                         <p class="text-secondary">
                             Les vétérinaires, cliniques et refuges bénéficient d'un espace dédié.
-                            Consultez les dossiers partagés par vos clients, ajoutez des actes médicaux,
+                            Consultez les dossiers partagés par vos clients, ajoutez des consultations,
                             et suivez les traitements en cours depuis une interface pensée pour le terrain.
                         </p>
                         <p class="text-secondary">
-                            Le mode professionnel affiche une vue consolidée de tous les animaux
+                            Le mode professionnel affiche une vue consolidée de tous les chevaux
                             que vous suivez, avec un accès direct au planning et aux rappels.
                         </p>
                     </aside>

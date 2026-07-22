@@ -2,7 +2,7 @@
     method="post" 
     action="{{ path('app_health_book_entry_delete', {'id': health_book_entry.id}) }}" 
     class="d-inline"
-    onsubmit="return confirm('Confirmez-vous la suppression de cet acte médical ? Cette action est irréversible.');"
+    onsubmit="return confirm('Confirmez-vous la suppression de cette consultation ? Cette action est irréversible.');"
 >
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ health_book_entry.id) }}">
 
