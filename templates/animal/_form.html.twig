@@ -250,6 +250,52 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════
+   LIGNE PLEINE LARGEUR — Professionnel & Rappels
+   ══════════════════════════════════════════════════════════ #}
+<div class="row g-4 mt-0">
+    {# ── Inviter un professionnel ── #}
+    <div class="col-12 col-lg-6">
+        <div class="p-4 rounded-3 border border-anicare bg-white h-100" style="border-left: 4px solid var(--primary-color) !important;">
+            <p class="page-eyebrow mb-2" style="color: var(--primary-color);">Inviter un professionnel</p>
+            <p class="text-secondary small mb-3">Recherchez dans l'annuaire pour partager la fiche du cheval avec un professionnel.</p>
+
+            <div class="position-relative mb-2">
+                <input type="text" id="proSearchInput" class="form-control" placeholder="Rechercher un professionnel..." autocomplete="off">
+                <div id="proSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; display: none; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+
+            <div id="proSelected" style="display: none;">
+                <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background-color: var(--soft-teal);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <div class="flex-grow-1">
+                        <strong id="proSelectedName" class="small" style="color: var(--primary-hover);"></strong>
+                        <span id="proSelectedInfo" class="d-block small text-secondary"></span>
+                    </div>
+                    <button type="button" id="proRemoveBtn" class="btn btn-sm btn-outline-danger border-0" style="font-size: 0.8rem;">&#10005;</button>
+                </div>
+                <input type="hidden" name="professional_id" id="proIdInput" value="">
+            </div>
+        </div>
+    </div>
+
+    {# ── Rappels ── #}
+    <div class="col-12 col-lg-6">
+        <div class="p-4 rounded-3 border border-anicare bg-white h-100" style="border-left: 4px solid var(--warning-color) !important;">
+            <p class="page-eyebrow mb-2" style="color: var(--warning-color);">Rappels</p>
+            <p class="text-secondary small mb-3">Planifiez des rappels qui apparaitront dans votre agenda.</p>
+
+            <div id="remindersContainer"></div>
+
+            <button type="button" id="addReminderBtn" class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un rappel
+            </button>
         </div>
     </div>
 </div>
@@ -309,10 +355,113 @@ document.addEventListener('DOMContentLoaded', function () {
             syncing = false;
         });
 
-        // Pré-remplir l'âge si la date est déjà renseignée à l'ouverture
         if (birthDateInput.value && !ageInput.value) {
             birthDateInput.dispatchEvent(new Event('change'));
         }
+    }
+
+    // ── Recherche professionnel (autocomplete) ──
+    const proInput = document.getElementById('proSearchInput');
+    const proResults = document.getElementById('proSearchResults');
+    const proSelected = document.getElementById('proSelected');
+    const proIdInput = document.getElementById('proIdInput');
+    const proSelectedName = document.getElementById('proSelectedName');
+    const proSelectedInfo = document.getElementById('proSelectedInfo');
+    const proRemoveBtn = document.getElementById('proRemoveBtn');
+    let proDebounce = null;
+
+    if (proInput) {
+        proInput.addEventListener('input', function () {
+            clearTimeout(proDebounce);
+            const q = this.value.trim();
+            if (q.length < 2) { proResults.style.display = 'none'; return; }
+
+            proDebounce = setTimeout(function () {
+                fetch('{{ path("api_professionals_search") }}?q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        proResults.innerHTML = '';
+                        if (data.length === 0) {
+                            proResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun professionnel trouve.</div>';
+                        } else {
+                            data.forEach(function (pro) {
+                                var item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                item.innerHTML = '<strong>' + pro.fullName + '</strong><br><span class="small text-secondary">' + pro.email + (pro.city ? ' — ' + pro.city : '') + '</span>';
+                                item.addEventListener('click', function () {
+                                    proIdInput.value = pro.id;
+                                    proSelectedName.textContent = pro.fullName;
+                                    proSelectedInfo.textContent = pro.email + (pro.city ? ' — ' + pro.city : '');
+                                    proSelected.style.display = 'block';
+                                    proInput.style.display = 'none';
+                                    proResults.style.display = 'none';
+                                });
+                                proResults.appendChild(item);
+                            });
+                        }
+                        proResults.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        proRemoveBtn.addEventListener('click', function () {
+            proIdInput.value = '';
+            proSelected.style.display = 'none';
+            proInput.style.display = 'block';
+            proInput.value = '';
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!proInput.contains(e.target) && !proResults.contains(e.target)) {
+                proResults.style.display = 'none';
+            }
+        });
+    }
+
+    // ── Rappels dynamiques ──
+    var reminderIdx = 0;
+    var container = document.getElementById('remindersContainer');
+    var addBtn = document.getElementById('addReminderBtn');
+
+    if (addBtn && container) {
+        addBtn.addEventListener('click', function () {
+            var row = document.createElement('div');
+            row.className = 'reminder-row border rounded-3 p-3 mb-2';
+            row.style.backgroundColor = '#fffdf5';
+            row.innerHTML =
+                '<div class="row g-2 align-items-end">' +
+                    '<div class="col-12 col-md-5">' +
+                        '<label class="form-label small fw-bold">Motif</label>' +
+                        '<input type="text" name="reminder_title[]" class="form-control form-control-sm" placeholder="Ex : Vaccin, Vermifuge..." required>' +
+                    '</div>' +
+                    '<div class="col-6 col-md-3">' +
+                        '<label class="form-label small fw-bold">Date</label>' +
+                        '<input type="datetime-local" name="reminder_date[]" class="form-control form-control-sm" required>' +
+                    '</div>' +
+                    '<div class="col-6 col-md-3">' +
+                        '<label class="form-label small fw-bold">Recurrence</label>' +
+                        '<select name="reminder_recurrence[]" class="form-select form-select-sm">' +
+                            '<option value="">Aucune</option>' +
+                            '<option value="weekly">Hebdomadaire</option>' +
+                            '<option value="monthly">Mensuel</option>' +
+                            '<option value="quarterly">Trimestriel</option>' +
+                            '<option value="biannual">Semestriel</option>' +
+                            '<option value="annual">Annuel</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="col-auto col-md-1 d-flex align-items-end">' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm remove-reminder-btn" title="Supprimer">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>';
+            container.appendChild(row);
+
+            row.querySelector('.remove-reminder-btn').addEventListener('click', function () {
+                row.remove();
+            });
+        });
     }
 });
 </script>

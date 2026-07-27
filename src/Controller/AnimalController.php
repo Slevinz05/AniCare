@@ -3,9 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Animal;
+use App\Entity\AnimalShare;
+use App\Entity\Reminder;
 use App\Entity\User;
 use App\Form\AnimalType;
 use App\Repository\AnimalRepository;
+use App\Repository\UserRepository;
 use App\Service\DocumentUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -52,7 +55,7 @@ final class AnimalController extends AbstractController
     }
 
     #[Route('/new', name: 'app_animal_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
     {
         $animal = new Animal();
 
@@ -76,6 +79,10 @@ final class AnimalController extends AbstractController
             $this->handleUploadedDocuments($form, $animal);
 
             $entityManager->persist($animal);
+
+            $this->handleProfessionalInvitation($request, $animal, $userRepository, $entityManager);
+            $this->handleReminders($request, $animal, $user, $entityManager);
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
@@ -88,19 +95,36 @@ final class AnimalController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_animal_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Animal $animal): Response
+    public function show(Animal $animal, UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
 
+        $professionals = [];
+        foreach ($animal->getAnimalShares() as $share) {
+            $user = $userRepository->findOneBy(['email' => $share->getSharedWithEmail()]);
+            if ($user && $user->getAccountType() === 'PRO') {
+                $professionals[] = [
+                    'user' => $user,
+                    'permission' => $share->getPermissionLevel(),
+                    'since' => $share->getCreatedAt(),
+                    'shareId' => $share->getId(),
+                ];
+            }
+        }
+
         return $this->render('animal/show.html.twig', [
             'animal' => $animal,
+            'professionals' => $professionals,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_animal_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-    public function edit(Request $request, Animal $animal, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Animal $animal, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+
+        /** @var User $user */
+        $user = $this->getUser();
 
         $form = $this->createForm(AnimalType::class, $animal);
         $form->handleRequest($request);
@@ -115,6 +139,9 @@ final class AnimalController extends AbstractController
             $this->handlePhotoUpload($form, $animal);
             $this->handleUploadedDocuments($form, $animal);
 
+            $this->handleProfessionalInvitation($request, $animal, $userRepository, $entityManager);
+            $this->handleReminders($request, $animal, $user, $entityManager);
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_animal_show', [
@@ -126,6 +153,39 @@ final class AnimalController extends AbstractController
             'animal' => $animal,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/invite-pro', name: 'app_animal_invite_pro', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function inviteProfessional(Request $request, Animal $animal, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+
+        if (!$this->isCsrfTokenValid('invite_pro' . $animal->getId(), $request->request->get('_token'))) {
+            return $this->redirectToRoute('app_animal_show', ['id' => $animal->getId()]);
+        }
+
+        $proId = $request->request->get('professional_id');
+        if ($proId) {
+            $professional = $userRepository->find((int) $proId);
+            if ($professional && $professional->getAccountType() === 'PRO') {
+                $existing = $entityManager->getRepository(AnimalShare::class)->findOneBy([
+                    'animal' => $animal,
+                    'sharedWithEmail' => $professional->getEmail(),
+                ]);
+
+                if (!$existing) {
+                    $share = new AnimalShare();
+                    $share->setSharedWithEmail($professional->getEmail());
+                    $share->setPermissionLevel('VIEW');
+                    $share->setAnimal($animal);
+                    $share->setCreatedAt(new \DateTimeImmutable());
+                    $entityManager->persist($share);
+                    $entityManager->flush();
+                }
+            }
+        }
+
+        return $this->redirectToRoute('app_animal_show', ['id' => $animal->getId()]);
     }
 
     #[Route('/{id}', name: 'app_animal_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -204,6 +264,65 @@ final class AnimalController extends AbstractController
 
         foreach ($documents as $document) {
             $animal->addDocument($document);
+        }
+    }
+
+    private function handleProfessionalInvitation(Request $request, Animal $animal, UserRepository $userRepository, EntityManagerInterface $entityManager): void
+    {
+        $proId = $request->request->get('professional_id');
+
+        if (!$proId) {
+            return;
+        }
+
+        $professional = $userRepository->find((int) $proId);
+
+        if (!$professional) {
+            return;
+        }
+
+        $share = new AnimalShare();
+        $share->setSharedWithEmail($professional->getEmail());
+        $share->setPermissionLevel('VIEW');
+        $share->setAnimal($animal);
+        $share->setCreatedAt(new \DateTimeImmutable());
+
+        $entityManager->persist($share);
+    }
+
+    private function handleReminders(Request $request, Animal $animal, User $user, EntityManagerInterface $entityManager): void
+    {
+        $titles = $request->request->all('reminder_title');
+        $dates = $request->request->all('reminder_date');
+        $recurrences = $request->request->all('reminder_recurrence');
+
+        if (empty($titles)) {
+            return;
+        }
+
+        foreach ($titles as $i => $title) {
+            $title = trim($title);
+            $dateStr = $dates[$i] ?? '';
+
+            if ($title === '' || $dateStr === '') {
+                continue;
+            }
+
+            try {
+                $scheduledAt = new \DateTimeImmutable($dateStr);
+            } catch (\Exception) {
+                continue;
+            }
+
+            $reminder = new Reminder();
+            $reminder->setTitle($title);
+            $reminder->setScheduledAt($scheduledAt);
+            $reminder->setRecurrence($recurrences[$i] ?? null ?: null);
+            $reminder->setAnimal($animal);
+            $reminder->setOwner($user);
+            $reminder->computeNextOccurrence();
+
+            $entityManager->persist($reminder);
         }
     }
 

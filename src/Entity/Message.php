@@ -23,8 +23,10 @@ class Message
     private ?User $sender = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
     private ?Animal $animal = null;
+
+    #[ORM\ManyToOne]
+    private ?User $recipient = null;
 
     #[ORM\Column]
     private bool $isRead = false;
@@ -99,6 +101,18 @@ class Message
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getRecipient(): ?User
+    {
+        return $this->recipient;
+    }
+
+    public function setRecipient(?User $recipient): static
+    {
+        $this->recipient = $recipient;
+
+        return $this;
     }
 
     public function getAttachmentFilename(): ?string

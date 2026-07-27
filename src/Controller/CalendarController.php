@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\AppointmentRepository;
 use App\Repository\HealthBookEntryRepository;
+use App\Repository\ReminderRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +27,7 @@ final class CalendarController extends AbstractController
         Request $request,
         HealthBookEntryRepository $healthRepo,
         AppointmentRepository $appointmentRepo,
+        ReminderRepository $reminderRepo,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -36,17 +38,17 @@ final class CalendarController extends AbstractController
         $day = (int) $request->query->get('day', date('j'));
 
         if ($view === 'day') {
-            return $this->dayView($user, $year, $month, $day, $healthRepo, $appointmentRepo);
+            return $this->dayView($user, $year, $month, $day, $healthRepo, $appointmentRepo, $reminderRepo);
         }
 
         if ($view === 'week') {
-            return $this->weekView($user, $year, $month, $day, $healthRepo, $appointmentRepo);
+            return $this->weekView($user, $year, $month, $day, $healthRepo, $appointmentRepo, $reminderRepo);
         }
 
-        return $this->monthView($user, $year, $month, $healthRepo, $appointmentRepo);
+        return $this->monthView($user, $year, $month, $healthRepo, $appointmentRepo, $reminderRepo);
     }
 
-    private function monthView(User $user, int $year, int $month, HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo): Response
+    private function monthView(User $user, int $year, int $month, HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo, ReminderRepository $reminderRepo): Response
     {
         $firstDayOfMonth = new \DateTime("$year-$month-01");
         $daysInMonth = (int) $firstDayOfMonth->format('t');
@@ -55,7 +57,7 @@ final class CalendarController extends AbstractController
         $startPeriod = new \DateTimeImmutable("$year-$month-01 00:00:00");
         $endPeriod = $startPeriod->modify('last day of this month')->setTime(23, 59, 59);
 
-        $events = $this->mergeEvents($healthRepo, $appointmentRepo, $startPeriod, $endPeriod, $user);
+        $events = $this->mergeEvents($healthRepo, $appointmentRepo, $reminderRepo, $startPeriod, $endPeriod, $user);
 
         $eventsByDay = [];
         foreach ($events as $event) {
@@ -84,14 +86,14 @@ final class CalendarController extends AbstractController
         ]);
     }
 
-    private function weekView(User $user, int $year, int $month, int $day, HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo): Response
+    private function weekView(User $user, int $year, int $month, int $day, HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo, ReminderRepository $reminderRepo): Response
     {
         $current = new \DateTimeImmutable("$year-$month-$day");
         $dayOfWeek = (int) $current->format('N');
         $monday = $current->modify('-' . ($dayOfWeek - 1) . ' days');
         $sunday = $monday->modify('+6 days')->setTime(23, 59, 59);
 
-        $events = $this->mergeEvents($healthRepo, $appointmentRepo, $monday, $sunday, $user);
+        $events = $this->mergeEvents($healthRepo, $appointmentRepo, $reminderRepo, $monday, $sunday, $user);
 
         $weekDays = [];
         for ($i = 0; $i < 7; $i++) {
@@ -131,13 +133,13 @@ final class CalendarController extends AbstractController
         ]);
     }
 
-    private function dayView(User $user, int $year, int $month, int $day, HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo): Response
+    private function dayView(User $user, int $year, int $month, int $day, HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo, ReminderRepository $reminderRepo): Response
     {
         $current = new \DateTimeImmutable("$year-$month-$day");
         $startOfDay = $current->setTime(0, 0, 0);
         $endOfDay = $current->setTime(23, 59, 59);
 
-        $events = $this->mergeEvents($healthRepo, $appointmentRepo, $startOfDay, $endOfDay, $user);
+        $events = $this->mergeEvents($healthRepo, $appointmentRepo, $reminderRepo, $startOfDay, $endOfDay, $user);
 
         $prevDay = $current->modify('-1 day');
         $nextDay = $current->modify('+1 day');
@@ -156,8 +158,7 @@ final class CalendarController extends AbstractController
         ]);
     }
 
-    /** @return array<array{type: string, title: string, date: \DateTimeImmutable, animal: string, professional: string|null, link: string, id: int, status: string|null}> */
-    private function mergeEvents(HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo, \DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
+    private function mergeEvents(HealthBookEntryRepository $healthRepo, AppointmentRepository $appointmentRepo, ReminderRepository $reminderRepo, \DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
     {
         $events = [];
 
@@ -184,6 +185,19 @@ final class CalendarController extends AbstractController
                 'link' => 'app_appointment_index',
                 'id' => $appointment->getId(),
                 'status' => $appointment->getStatus(),
+            ];
+        }
+
+        foreach ($reminderRepo->findByPeriodAndUser($start, $end, $user) as $reminder) {
+            $events[] = [
+                'type' => 'reminder',
+                'title' => $reminder->getTitle(),
+                'date' => $reminder->getNextOccurrence() ?? $reminder->getScheduledAt(),
+                'animal' => $reminder->getAnimal()?->getName() ?? 'Cheval',
+                'professional' => null,
+                'link' => 'app_animal_show',
+                'id' => $reminder->getAnimal()?->getId() ?? 0,
+                'status' => $reminder->getRecurrence(),
             ];
         }
 

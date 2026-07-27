@@ -6,6 +6,7 @@ use App\Entity\Animal;
 use App\Entity\HealthBookEntry;
 use App\Entity\User;
 use App\Repository\AnimalRepository;
+use App\Repository\UserRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -80,12 +81,16 @@ class HealthBookEntryType extends AbstractType
                 'widget' => 'single_text',
             ])
 
-            ->add('veterinarianName', TextType::class, [
-                'label' => 'Vétérinaire référent',
+            ->add('veterinarian', EntityType::class, [
+                'label' => 'Intervenant',
+                'class' => User::class,
+                'choice_label' => fn (User $u) => $u->getFullName() . ($u->getSpecialty() ? ' (' . $u->getSpecialty() . ')' : ''),
+                'placeholder' => 'Selectionner un intervenant',
                 'required' => false,
-                'attr' => [
-                    'placeholder' => 'Ex : Dupont',
-                ],
+                'query_builder' => fn (UserRepository $repo) => $repo->createQueryBuilder('u')
+                    ->where('u.accountType = :type')
+                    ->setParameter('type', 'PRO')
+                    ->orderBy('u.lastName', 'ASC'),
             ])
 
             ->add('description', TextareaType::class, [

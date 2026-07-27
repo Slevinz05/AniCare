@@ -7,6 +7,7 @@ use App\Repository\AnimalRepository;
 use App\Repository\HealthBookEntryRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -45,10 +46,23 @@ class HomeController extends AbstractController
     }
 
     #[Route('/annuaire', name: 'app_directory', methods: ['GET'])]
-    public function directory(UserRepository $userRepository): Response
+    public function directory(Request $request, UserRepository $userRepository): Response
     {
+        $specialty = $request->query->get('specialty');
+        $department = $request->query->get('department');
+        $query = $request->query->get('q');
+
+        $hasFilters = $specialty || $department || $query;
+
+        $professionals = $hasFilters
+            ? $userRepository->findProfessionalsFiltered($specialty, $department, $query)
+            : $userRepository->findProfessionals();
+
         return $this->render('home/directory.html.twig', [
-            'professionals' => $userRepository->findProfessionals(),
+            'professionals' => $professionals,
+            'current_specialty' => $specialty,
+            'current_department' => $department,
+            'current_query' => $query,
         ]);
     }
 

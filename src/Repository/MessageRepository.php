@@ -70,6 +70,55 @@ class MessageRepository extends ServiceEntityRepository
         return $conversations;
     }
 
+    public function findDirectMessages(User $user1, User $user2): array
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.animal IS NULL')
+            ->andWhere(
+                '(m.sender = :u1 AND m.recipient = :u2) OR (m.sender = :u2 AND m.recipient = :u1)'
+            )
+            ->setParameter('u1', $user1)
+            ->setParameter('u2', $user2)
+            ->orderBy('m.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return array<int, array{user: User, lastMessage: Message, unreadCount: int}>
+     */
+    public function findDirectConversationsByUser(User $user): array
+    {
+        $messages = $this->createQueryBuilder('m')
+            ->where('m.animal IS NULL')
+            ->andWhere('m.sender = :user OR m.recipient = :user')
+            ->setParameter('user', $user)
+            ->orderBy('m.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $convos = [];
+        foreach ($messages as $msg) {
+            $other = $msg->getSender() === $user ? $msg->getRecipient() : $msg->getSender();
+            if (!$other) {
+                continue;
+            }
+            $key = $other->getId();
+            if (!isset($convos[$key])) {
+                $convos[$key] = [
+                    'user' => $other,
+                    'lastMessage' => $msg,
+                    'unreadCount' => 0,
+                ];
+            }
+            if ($msg->getSender() !== $user && !$msg->isRead()) {
+                $convos[$key]['unreadCount']++;
+            }
+        }
+
+        return array_values($convos);
+    }
+
     public function countUnreadByUser(User $user): int
     {
         return (int) $this->createQueryBuilder('m')

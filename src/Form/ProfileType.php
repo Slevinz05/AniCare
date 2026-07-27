@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -40,6 +41,28 @@ class ProfileType extends AbstractType
                 'label' => 'Ville',
                 'required' => false,
                 'attr' => ['placeholder' => 'Votre ville'],
+            ])
+            ->add('postalCode', TextType::class, [
+                'label' => 'Code postal',
+                'required' => false,
+                'attr' => ['placeholder' => '75000', 'maxlength' => 5],
+            ])
+            ->add('specialty', ChoiceType::class, [
+                'label' => 'Specialite',
+                'required' => false,
+                'placeholder' => 'Selectionnez votre specialite',
+                'choices' => [
+                    'Veterinaire' => 'Veterinaire',
+                    'Dentiste' => 'Dentiste',
+                    'Osteopathe' => 'Osteopathe',
+                    'Marechal-ferrant' => 'Marechal-ferrant',
+                    'Shiatsu' => 'Shiatsu',
+                    'Massotherapeute' => 'Massotherapeute',
+                    'Physiotherapeute' => 'Physiotherapeute',
+                    'Nutritionniste' => 'Nutritionniste',
+                    'Comportementaliste' => 'Comportementaliste',
+                    'Autre' => 'Autre',
+                ],
             ])
             ->add('bio', TextareaType::class, [
                 'label' => 'Présentation',

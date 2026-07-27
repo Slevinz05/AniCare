@@ -51,6 +51,9 @@ class HealthBookEntry
     #[ORM\JoinColumn(nullable: false)]
     private ?Animal $animal = null;
 
+    #[ORM\ManyToOne]
+    private ?User $veterinarian = null;
+
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $documents = [];
 
@@ -115,6 +118,18 @@ class HealthBookEntry
     public function setVeterinarianName(?string $veterinarianName): static
     {
         $this->veterinarianName = $veterinarianName;
+
+        return $this;
+    }
+
+    public function getVeterinarian(): ?User
+    {
+        return $this->veterinarian;
+    }
+
+    public function setVeterinarian(?User $veterinarian): static
+    {
+        $this->veterinarian = $veterinarian;
 
         return $this;
     }

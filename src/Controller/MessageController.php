@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Form\MessageType;
 use App\Repository\AnimalRepository;
 use App\Repository\MessageRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -39,6 +40,7 @@ final class MessageController extends AbstractController
 
         return $this->render('message/index.html.twig', [
             'conversations' => $repository->findConversationsByUser($user),
+            'directConversations' => $repository->findDirectConversationsByUser($user),
         ]);
     }
 
@@ -122,6 +124,70 @@ final class MessageController extends AbstractController
 
         return $this->render('message/thread.html.twig', [
             'animal' => $animal,
+            'messages' => $messages,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/contact/{id}', name: 'app_message_contact', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    public function contact(Request $request, User $recipient, MessageRepository $repository, EntityManagerInterface $em): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($user === $recipient) {
+            return $this->redirectToRoute('app_message_index');
+        }
+
+        $messages = $repository->findDirectMessages($user, $recipient);
+
+        foreach ($messages as $msg) {
+            if ($msg->getSender() !== $user && !$msg->isRead()) {
+                $msg->setIsRead(true);
+            }
+        }
+        $em->flush();
+
+        $newMessage = new Message();
+        $form = $this->createForm(MessageType::class, $newMessage);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \Symfony\Component\HttpFoundation\File\UploadedFile|null $attachmentFile */
+            $attachmentFile = $form->get('attachmentFile')->getData();
+
+            if (!$newMessage->getContent() && !$attachmentFile) {
+                $this->addFlash('warning', 'Veuillez saisir un message ou joindre un fichier.');
+                return $this->redirectToRoute('app_message_contact', ['id' => $recipient->getId()]);
+            }
+
+            if ($attachmentFile) {
+                if (!is_dir($this->messageUploadsDirectory)) {
+                    mkdir($this->messageUploadsDirectory, 0775, true);
+                }
+                $originalName = $attachmentFile->getClientOriginalName();
+                $safeFilename = $this->slugger->slug(pathinfo($originalName, PATHINFO_FILENAME));
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $attachmentFile->guessExtension();
+                $attachmentFile->move($this->messageUploadsDirectory, $newFilename);
+                $newMessage->setAttachmentFilename($newFilename);
+                $newMessage->setAttachmentOriginalName($originalName);
+            }
+
+            if (!$newMessage->getContent()) {
+                $newMessage->setContent('');
+            }
+
+            $newMessage->setSender($user);
+            $newMessage->setRecipient($recipient);
+
+            $em->persist($newMessage);
+            $em->flush();
+
+            return $this->redirectToRoute('app_message_contact', ['id' => $recipient->getId()]);
+        }
+
+        return $this->render('message/direct.html.twig', [
+            'recipient' => $recipient,
             'messages' => $messages,
             'form' => $form,
         ]);

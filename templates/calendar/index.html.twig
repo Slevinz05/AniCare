@@ -70,6 +70,8 @@
     .event-consultation:hover { background-color: rgba(13, 148, 136, 0.2); color: #0d9488; }
     .event-appointment { background-color: var(--soft-warm); color: var(--accent-hover); border-left: 3px solid var(--accent-color); }
     .event-appointment:hover { background-color: #FFE8A8; color: var(--accent-hover); }
+    .event-reminder { background-color: rgba(229, 166, 62, 0.12); color: #92600a; border-left: 3px solid var(--warning-color); }
+    .event-reminder:hover { background-color: rgba(229, 166, 62, 0.22); color: #7a5008; }
     .event-cancelled { opacity: 0.5; text-decoration: line-through; }
 
     .view-switcher .btn { min-width: 44px; }
@@ -131,6 +133,7 @@
     .time-event:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.18); z-index: 3; }
     .time-event.type-consultation { background-color: rgba(13, 148, 136, 0.15); border-left: 3px solid #0d9488; color: #0f766e; }
     .time-event.type-appointment { background-color: var(--soft-warm); border-left: 3px solid var(--accent-color); color: var(--accent-hover); }
+    .time-event.type-reminder { background-color: rgba(229, 166, 62, 0.12); border-left: 3px solid var(--warning-color); color: #92600a; }
     .time-event .event-time { font-size: 0.65rem; opacity: 0.8; }
     .time-event .event-title { font-weight: 700; }
 
@@ -280,6 +283,10 @@
         <span class="d-flex align-items-center gap-2 small" style="color: var(--taupe);">
             <span style="width:14px; height:14px; border-radius:3px; background: var(--soft-warm); border-left: 3px solid var(--accent-color); display:inline-block;"></span>
             Rendez-vous
+        </span>
+        <span class="d-flex align-items-center gap-2 small" style="color: var(--taupe);">
+            <span style="width:14px; height:14px; border-radius:3px; background: rgba(229,166,62,0.12); border-left: 3px solid var(--warning-color); display:inline-block;"></span>
+            Rappel
         </span>
     </div>
 

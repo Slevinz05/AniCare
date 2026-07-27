@@ -9,16 +9,119 @@
             <div class="col-12 col-lg">
                 <p class="page-eyebrow mb-2">Annuaire</p>
                 <h1 class="page-title mb-2">Intervenants</h1>
-                <p class="page-subtitle mb-0">Retrouvez les vétérinaires et professionnels inscrits sur AniCare.</p>
+                <p class="page-subtitle mb-0">Retrouvez les professionnels equins inscrits sur AniCare.</p>
             </div>
+            {% if professionals is not empty %}
+                <div class="col-12 col-lg-auto">
+                    <span class="badge rounded-pill fs-6" style="background-color: var(--primary-color);">{{ professionals|length }} professionnel{{ professionals|length > 1 ? 's' : '' }}</span>
+                </div>
+            {% endif %}
         </div>
     </div>
 
+    {# ── Filtres ── #}
+    <div class="card anicare-card mb-4">
+        <div class="card-body p-4">
+            <form method="get" action="{{ path('app_directory') }}" id="directoryFilters">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label for="filter-specialty" class="form-label small fw-bold mb-1">Type d'intervention</label>
+                        <select id="filter-specialty" name="specialty" class="form-select form-select-sm">
+                            <option value="">Toutes les specialites</option>
+                            {% set specialties = [
+                                'Veterinaire',
+                                'Dentiste',
+                                'Osteopathe',
+                                'Marechal-ferrant',
+                                'Shiatsu',
+                                'Massotherapeute',
+                                'Physiotherapeute',
+                                'Nutritionniste',
+                                'Comportementaliste',
+                                'Autre'
+                            ] %}
+                            {% for s in specialties %}
+                                <option value="{{ s }}" {{ current_specialty == s ? 'selected' : '' }}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label for="filter-department" class="form-label small fw-bold mb-1">Departement</label>
+                        <input type="text"
+                               id="filter-department"
+                               name="department"
+                               class="form-select form-select-sm"
+                               placeholder="Ex : 75, 33, 69..."
+                               value="{{ current_department }}"
+                               maxlength="3"
+                               pattern="[0-9]{2,3}">
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label for="filter-query" class="form-label small fw-bold mb-1">Recherche libre</label>
+                        <input type="text"
+                               id="filter-query"
+                               name="q"
+                               class="form-control form-control-sm"
+                               placeholder="Nom, ville..."
+                               value="{{ current_query }}">
+                    </div>
+
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Filtrer
+                        </button>
+                        {% if current_specialty or current_department or current_query %}
+                            <a href="{{ path('app_directory') }}" class="btn btn-outline-secondary btn-sm" title="Reinitialiser">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ── Tags filtres actifs ── #}
+    {% if current_specialty or current_department or current_query %}
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            {% if current_specialty %}
+                <span class="badge bg-anicare-soft text-teal border border-anicare px-3 py-2">
+                    {{ current_specialty }}
+                    <a href="{{ path('app_directory', {department: current_department, q: current_query}) }}" class="text-teal ms-1 text-decoration-none">&times;</a>
+                </span>
+            {% endif %}
+            {% if current_department %}
+                <span class="badge bg-anicare-soft text-teal border border-anicare px-3 py-2">
+                    Dept. {{ current_department }}
+                    <a href="{{ path('app_directory', {specialty: current_specialty, q: current_query}) }}" class="text-teal ms-1 text-decoration-none">&times;</a>
+                </span>
+            {% endif %}
+            {% if current_query %}
+                <span class="badge bg-anicare-soft text-teal border border-anicare px-3 py-2">
+                    "{{ current_query }}"
+                    <a href="{{ path('app_directory', {specialty: current_specialty, department: current_department}) }}" class="text-teal ms-1 text-decoration-none">&times;</a>
+                </span>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# ── Liste ── #}
     {% if professionals is empty %}
         <div class="empty-state text-center p-5">
-            <div class="mb-3" style="font-size: 3rem; opacity: 0.4;">🩺</div>
-            <h2 class="h4 page-title mb-2">Aucun professionnel inscrit</h2>
-            <p class="text-secondary mb-0">Il n'y a pas encore de vétérinaire enregistré sur la plateforme.</p>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-secondary mb-3" style="opacity: 0.4;">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            {% if current_specialty or current_department or current_query %}
+                <h2 class="h4 page-title mb-2">Aucun resultat</h2>
+                <p class="text-secondary mb-3">Aucun professionnel ne correspond a vos criteres de recherche.</p>
+                <a href="{{ path('app_directory') }}" class="btn btn-outline-primary btn-sm">Reinitialiser les filtres</a>
+            {% else %}
+                <h2 class="h4 page-title mb-2">Aucun professionnel inscrit</h2>
+                <p class="text-secondary mb-0">Il n'y a pas encore de professionnel enregistre sur la plateforme.</p>
+            {% endif %}
         </div>
     {% else %}
         <div class="row g-4">
@@ -27,32 +130,57 @@
                     <div class="card anicare-card h-100">
                         <div class="card-body p-4 d-flex flex-column">
                             <div class="d-flex align-items-center gap-3 mb-3">
-                                <div class="rounded-circle bg-anicare-soft border-anicare d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; flex-shrink: 0;">
-                                    <span style="font-size: 1.5rem;">🩺</span>
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px; background-color: var(--primary-color); color: #fff; font-weight: 700; font-size: 1.1rem;">
+                                    {{ pro.firstName|first|upper }}{{ pro.lastName|first|upper }}
                                 </div>
                                 <div>
-                                    <h3 class="h6 fw-bold mb-0">{{ pro.fullName }}</h3>
-                                    <span class="badge bg-anicare-soft text-teal border-anicare" style="font-size: 0.7rem; font-weight: 800;">PRO</span>
+                                    <h3 class="h6 fw-bold mb-1">{{ pro.fullName }}</h3>
+                                    {% if pro.specialty %}
+                                        <span class="badge" style="background-color: var(--primary-color); font-size: 0.7rem;">{{ pro.specialty }}</span>
+                                    {% else %}
+                                        <span class="badge bg-anicare-soft text-teal border-anicare" style="font-size: 0.7rem;">PRO</span>
+                                    {% endif %}
                                 </div>
                             </div>
 
                             <div class="text-secondary small mb-3">
-                                {% if pro.city %}
-                                    <span class="d-block">📍 {{ pro.city }}</span>
+                                {% if pro.city or pro.postalCode %}
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                        <span>{% if pro.postalCode %}{{ pro.postalCode }} {% endif %}{{ pro.city }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if pro.phone %}
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                        <a href="tel:{{ pro.phone }}" class="text-decoration-none text-secondary">{{ pro.phone }}</a>
+                                    </div>
+                                {% endif %}
+                                {% if pro.email %}
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                        <a href="mailto:{{ pro.email }}" class="text-decoration-none text-secondary">{{ pro.email }}</a>
+                                    </div>
                                 {% endif %}
                                 {% if pro.bio %}
-                                    <span class="d-block mt-1">{{ pro.bio|length > 100 ? pro.bio|slice(0, 100) ~ '…' : pro.bio }}</span>
+                                    <p class="mt-2 mb-0" style="line-height: 1.4;">{{ pro.bio|length > 120 ? pro.bio|slice(0, 120) ~ '...' : pro.bio }}</p>
                                 {% endif %}
-                                <span class="d-block mt-1">{{ pro.animals|length }} cheval{{ pro.animals|length > 1 ? 'ux' : '' }} suivi{{ pro.animals|length > 1 ? 's' : '' }}</span>
                             </div>
 
-                            {% if app.user %}
-                                <div class="mt-auto">
-                                    <a href="{{ path('app_animal_share_new') }}" class="btn btn-outline-primary btn-sm w-100">
-                                        Partager un cheval
-                                    </a>
+                            <div class="mt-auto pt-2 border-top border-light">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="small text-secondary">{{ pro.animals|length }} cheval{{ pro.animals|length > 1 ? 'ux' : '' }} suivi{{ pro.animals|length > 1 ? 's' : '' }}</span>
+                                    {% if app.user %}
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ path('app_message_contact', {'id': pro.id}) }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                                Contacter
+                                            </a>
+                                            <a href="{{ path('app_animal_share_new', {'email': pro.email}) }}" class="btn btn-primary btn-sm">Partager</a>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -61,7 +189,7 @@
     {% endif %}
 
     <div class="mt-4">
-        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">Retour à l'accueil</a>
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">Retour a l'accueil</a>
     </div>
 </div>
 {% endblock %}

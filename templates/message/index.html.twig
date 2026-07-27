@@ -17,68 +17,114 @@
         </div>
     </div>
 
-    {% if conversations is empty %}
+    {% if conversations is empty and directConversations is empty %}
         <div class="empty-state text-center p-5">
-            <div class="mb-3" style="font-size: 3rem; opacity: 0.4;">💬</div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" class="mb-3 text-secondary" style="opacity: 0.4;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <h2 class="h4 page-title mb-2">Aucune conversation</h2>
-            <p class="text-secondary mb-4">Vous n'avez pas encore échangé de messages. Démarrez une conversation autour d'un de vos chevaux.</p>
+            <p class="text-secondary mb-4">Vous n'avez pas encore echange de messages.</p>
             <a href="{{ path('app_message_new') }}" class="btn btn-primary">Nouvelle conversation</a>
         </div>
     {% else %}
-        <div class="row g-3">
-            {% for conv in conversations %}
-                <div class="col-12">
-                    <a href="{{ path('app_message_thread', {'id': conv.animal.id}) }}" class="text-decoration-none">
-                        <div class="card anicare-card border {{ conv.unreadCount > 0 ? 'border-primary' : '' }}" style="transition: all 0.15s ease;">
-                            <div class="card-body p-3 p-md-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    {% if conv.animal.photo %}
-                                        <img src="{{ asset('uploads/photos/' ~ conv.animal.photo) }}"
-                                             alt="{{ conv.animal.name }}"
-                                             class="rounded-circle flex-shrink-0"
-                                             style="width: 52px; height: 52px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="rounded-circle bg-anicare-soft border-anicare d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px;">
-                                            <span style="font-size: 1.4rem;">
-                                                🐴
-                                            </span>
+        {# ── Conversations directes ── #}
+        {% if directConversations is not empty %}
+            <p class="page-eyebrow mb-3">Messages directs</p>
+            <div class="row g-3 mb-5">
+                {% for conv in directConversations %}
+                    <div class="col-12">
+                        <a href="{{ path('app_message_contact', {'id': conv.user.id}) }}" class="text-decoration-none">
+                            <div class="card anicare-card border {{ conv.unreadCount > 0 ? 'border-primary' : '' }}" style="transition: all 0.15s ease;">
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px; background-color: var(--primary-color); color: #fff; font-weight: 700; font-size: 1.1rem;">
+                                            {{ conv.user.firstName|first|upper }}{{ conv.user.lastName|first|upper }}
                                         </div>
-                                    {% endif %}
-
-                                    <div class="flex-grow-1 min-width-0">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <h3 class="h6 fw-bold mb-0 text-dark">{{ conv.animal.name }}</h3>
-                                            <span class="text-secondary small flex-shrink-0 ms-2">
-                                                {{ conv.lastMessage.createdAt|date('d/m/Y H:i') }}
-                                            </span>
-                                        </div>
-
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="text-secondary small text-truncate" style="max-width: 80%;">
-                                                <strong class="text-dark">{{ conv.lastMessage.sender.email|split('@')[0] }}</strong>
-                                                —
-                                                {% if conv.lastMessage.content %}
-                                                    {{ conv.lastMessage.content|length > 80 ? conv.lastMessage.content|slice(0, 80) ~ '…' : conv.lastMessage.content }}
-                                                {% elseif conv.lastMessage.attachmentOriginalName %}
-                                                    📎 {{ conv.lastMessage.attachmentOriginalName }}
-                                                {% endif %}
+                                        <div class="flex-grow-1 min-width-0">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h3 class="h6 fw-bold mb-0 text-dark">{{ conv.user.fullName }}</h3>
+                                                <span class="text-secondary small flex-shrink-0 ms-2">
+                                                    {{ conv.lastMessage.createdAt|date('d/m/Y H:i') }}
+                                                </span>
                                             </div>
-
-                                            <div class="flex-shrink-0 ms-2 d-flex align-items-center gap-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="text-secondary small text-truncate" style="max-width: 80%;">
+                                                    {% if conv.lastMessage.content %}
+                                                        {{ conv.lastMessage.content|length > 80 ? conv.lastMessage.content|slice(0, 80) ~ '...' : conv.lastMessage.content }}
+                                                    {% elseif conv.lastMessage.attachmentOriginalName %}
+                                                        {{ conv.lastMessage.attachmentOriginalName }}
+                                                    {% endif %}
+                                                </div>
                                                 {% if conv.unreadCount > 0 %}
-                                                    <span class="badge bg-primary rounded-pill">{{ conv.unreadCount }}</span>
+                                                    <span class="badge bg-primary rounded-pill flex-shrink-0 ms-2">{{ conv.unreadCount }}</span>
                                                 {% endif %}
-                                                <span class="text-secondary small">{{ conv.messageCount }} msg</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
-        </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {# ── Conversations par animal ── #}
+        {% if conversations is not empty %}
+            <p class="page-eyebrow mb-3">Conversations par animal</p>
+            <div class="row g-3">
+                {% for conv in conversations %}
+                    <div class="col-12">
+                        <a href="{{ path('app_message_thread', {'id': conv.animal.id}) }}" class="text-decoration-none">
+                            <div class="card anicare-card border {{ conv.unreadCount > 0 ? 'border-primary' : '' }}" style="transition: all 0.15s ease;">
+                                <div class="card-body p-3 p-md-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if conv.animal.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ conv.animal.photo) }}"
+                                                 alt="{{ conv.animal.name }}"
+                                                 class="rounded-circle flex-shrink-0"
+                                                 style="width: 52px; height: 52px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-anicare-soft border-anicare d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px;">
+                                                <span style="font-size: 1.4rem;">
+                                                    🐴
+                                                </span>
+                                            </div>
+                                        {% endif %}
+
+                                        <div class="flex-grow-1 min-width-0">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h3 class="h6 fw-bold mb-0 text-dark">{{ conv.animal.name }}</h3>
+                                                <span class="text-secondary small flex-shrink-0 ms-2">
+                                                    {{ conv.lastMessage.createdAt|date('d/m/Y H:i') }}
+                                                </span>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="text-secondary small text-truncate" style="max-width: 80%;">
+                                                    <strong class="text-dark">{{ conv.lastMessage.sender.email|split('@')[0] }}</strong>
+                                                    —
+                                                    {% if conv.lastMessage.content %}
+                                                        {{ conv.lastMessage.content|length > 80 ? conv.lastMessage.content|slice(0, 80) ~ '...' : conv.lastMessage.content }}
+                                                    {% elseif conv.lastMessage.attachmentOriginalName %}
+                                                        {{ conv.lastMessage.attachmentOriginalName }}
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="flex-shrink-0 ms-2 d-flex align-items-center gap-2">
+                                                    {% if conv.unreadCount > 0 %}
+                                                        <span class="badge bg-primary rounded-pill">{{ conv.unreadCount }}</span>
+                                                    {% endif %}
+                                                    <span class="text-secondary small">{{ conv.messageCount }} msg</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}

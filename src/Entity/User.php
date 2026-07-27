@@ -69,6 +69,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $accountType = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $specialty = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeCustomerId = null;
 
@@ -360,6 +363,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->postalCode = $postalCode;
 
         return $this;
+    }
+
+    public function getSpecialty(): ?string
+    {
+        return $this->specialty;
+    }
+
+    public function setSpecialty(?string $specialty): static
+    {
+        $this->specialty = $specialty;
+
+        return $this;
+    }
+
+    public function getDepartment(): ?string
+    {
+        if ($this->postalCode && strlen($this->postalCode) >= 2) {
+            return substr($this->postalCode, 0, 2);
+        }
+
+        return null;
     }
 
     public function getFullAddress(): ?string

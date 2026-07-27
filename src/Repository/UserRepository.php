@@ -40,8 +40,51 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         return $this->createQueryBuilder('u')
             ->where('u.accountType = :type')
-            ->setParameter('type', 'professionnel')
+            ->setParameter('type', 'PRO')
             ->orderBy('u.email', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findProfessionalsFiltered(?string $specialty, ?string $department, ?string $query): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->where('u.accountType = :type')
+            ->setParameter('type', 'PRO');
+
+        if ($specialty) {
+            $qb->andWhere('u.specialty = :specialty')
+               ->setParameter('specialty', $specialty);
+        }
+
+        if ($department) {
+            $qb->andWhere('u.postalCode LIKE :dept')
+               ->setParameter('dept', $department . '%');
+        }
+
+        if ($query) {
+            $qb->andWhere('u.firstName LIKE :q OR u.lastName LIKE :q OR u.city LIKE :q')
+               ->setParameter('q', '%' . $query . '%');
+        }
+
+        return $qb->orderBy('u.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return User[] */
+    public function searchProfessionals(string $query, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.accountType = :type')
+            ->andWhere('u.firstName LIKE :q OR u.lastName LIKE :q OR u.email LIKE :q')
+            ->setParameter('type', 'PRO')
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('u.lastName', 'ASC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }

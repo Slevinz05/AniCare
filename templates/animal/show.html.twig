@@ -111,7 +111,7 @@
                     </div>
                 </div>
 
-                {# ── Colonne droite : Propriétaire & Lieu de vie ── #}
+                {# ── Colonne droite : Propriétaire, Lieu de vie & Professionnels ── #}
                 <div class="col-12 col-lg-5">
                     <div class="d-flex flex-column gap-4 h-100">
                         {# Propriétaire #}
@@ -193,184 +193,344 @@
                                 </div>
                             </div>
                         {% endif %}
+
+                        {# Professionnels #}
+                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="page-eyebrow mb-0">Professionnels</p>
+                                {% if professionals is defined and professionals|length > 0 %}
+                                    <span class="badge rounded-pill" style="background-color: var(--primary-color);">{{ professionals|length }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if professionals is defined and professionals|length > 0 %}
+                                {% for pro in professionals %}
+                                    <div class="d-flex align-items-center gap-3 {{ not loop.last ? 'mb-3 pb-3 border-bottom border-light' : '' }}">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.85rem;">
+                                            {{ pro.user.firstName|first|upper }}{{ pro.user.lastName|first|upper }}
+                                        </div>
+                                        <div class="flex-grow-1 min-width-0">
+                                            <strong class="d-block text-truncate">{{ pro.user.fullName }}</strong>
+                                            <span class="small text-secondary">{{ pro.user.email }}</span>
+                                            {% if pro.user.phone %}
+                                                <br><a href="tel:{{ pro.user.phone }}" class="small text-decoration-none">{{ pro.user.phone }}</a>
+                                            {% endif %}
+                                        </div>
+                                        {% set perm_label = {
+                                            'VIEW': 'Lecture',
+                                            'WRITE': 'Modification',
+                                            'ADMIN': 'Administration'
+                                        } %}
+                                        <span class="badge bg-anicare-soft text-secondary" style="font-size: 0.7rem;">{{ perm_label[pro.permission]|default(pro.permission) }}</span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-secondary mb-2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <line x1="19" y1="8" x2="19" y2="14"/>
+                                        <line x1="22" y1="11" x2="16" y2="11"/>
+                                    </svg>
+                                    <p class="small text-secondary mb-3">Aucun professionnel associe</p>
+                                </div>
+                            {% endif %}
+
+                            {# Formulaire d'invitation #}
+                            <div class="mt-3 pt-3 {{ professionals is defined and professionals|length > 0 ? 'border-top border-light' : '' }}">
+                                <form method="post" action="{{ path('app_animal_invite_pro', {'id': animal.id}) }}" id="inviteProForm">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('invite_pro' ~ animal.id) }}">
+                                    <input type="hidden" name="professional_id" id="invite_pro_id" value="">
+                                    <label class="form-label small fw-bold mb-1">Inviter un professionnel</label>
+                                    <div class="position-relative">
+                                        <input type="text"
+                                               id="invite_pro_search"
+                                               class="form-control form-control-sm"
+                                               placeholder="Rechercher par nom ou email..."
+                                               autocomplete="off">
+                                        <div id="invite_pro_results" class="position-absolute w-100 bg-white border rounded-2 shadow-sm mt-1 d-none" style="z-index: 10; max-height: 200px; overflow-y: auto;"></div>
+                                    </div>
+                                    <div id="invite_pro_selected" class="d-none mt-2">
+                                        <div class="d-flex align-items-center gap-2 p-2 rounded-2 bg-anicare-soft">
+                                            <span id="invite_pro_name" class="small fw-bold flex-grow-1"></span>
+                                            <button type="button" class="btn btn-sm btn-link text-danger p-0" id="invite_pro_clear" title="Retirer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                                            </button>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Envoyer l'invitation</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <section class="mb-5">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                    <div>
-                        <p class="page-eyebrow mb-2">Documents</p>
-                        <h2 class="h4 page-title mb-0">
-                            Documents du cheval
-                        </h2>
-                    </div>
-
-                    <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">
-                        Ajouter un document
-                    </a>
-                </div>
-
-                {% if animal.documents is empty %}
-                    <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun document n'est encore associé à ce cheval.
-                    </div>
-                {% else %}
-                    <div class="document-list">
-                        {% for document in animal.documents %}
-                            <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
-                                <div>
-                                    <a href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
-                                       target="_blank" rel="noopener" class="document-name text-decoration-none">
-                                        {{ document.originalName|default(document.fileName) }}
-                                    </a>
-                                    <span class="document-meta d-block small text-secondary">
-                                        {% if document.size is defined %}
-                                            {{ (document.size / 1024)|round(0, 'ceil') }} Ko
-                                        {% endif %}
-                                        {% if document.uploadedAt is defined %}
-                                            · {{ document.uploadedAt|date('d/m/Y') }}
-                                        {% endif %}
-                                    </span>
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2">
-                                    {% set doc_status = document.status|default('pending') %}
-                                    {% if doc_status == 'approved' %}
-                                        <span class="badge bg-success">Validé</span>
-                                    {% elseif doc_status == 'rejected' %}
-                                        <span class="badge bg-danger">Refusé</span>
-                                    {% else %}
-                                        <span class="badge bg-warning text-dark">En attente</span>
-                                    {% endif %}
-
-                                    {% if is_granted('ANIMAL_EDIT', animal) and is_granted('ROLE_PRO') %}
-                                        {% if doc_status != 'approved' %}
-                                            <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
-                                                <input type="hidden" name="status" value="approved">
-                                                <button type="submit" class="btn btn-success btn-sm py-0 px-2">Valider</button>
-                                            </form>
-                                        {% endif %}
-                                        {% if doc_status != 'rejected' %}
-                                            <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
-                                                <input type="hidden" name="status" value="rejected">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2">Refuser</button>
-                                            </form>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </section>
-
-            <section class="mb-5">
+            <section>
                 <div class="mb-3">
-                    <p class="page-eyebrow mb-2">Accès rapide</p>
-                    <h2 class="h4 page-title mb-3">Dossier complet</h2>
+                    <p class="page-eyebrow mb-2">Dossier complet</p>
+                    <h2 class="h4 page-title mb-0">{{ animal.name }}</h2>
                 </div>
-                <div class="row g-3">
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary w-100 py-3">
+
+                {# ── Onglets ── #}
+                <ul class="nav nav-tabs" id="dossierTabs" role="tablist" style="border-bottom-color: var(--border-color);">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold" id="tab-historique" data-bs-toggle="tab" data-bs-target="#panel-historique" type="button" role="tab" style="color: var(--primary-color);">
+                            Historique
+                            {% if animal.healthBookEntries|length > 0 %}
+                                <span class="badge rounded-pill ms-1" style="background-color: var(--primary-color);">{{ animal.healthBookEntries|length }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold" id="tab-documents" data-bs-toggle="tab" data-bs-target="#panel-documents" type="button" role="tab" style="color: var(--secondary-color);">
+                            Documents
+                            {% if animal.documents|length > 0 %}
+                                <span class="badge rounded-pill bg-secondary ms-1">{{ animal.documents|length }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold" id="tab-allergies" data-bs-toggle="tab" data-bs-target="#panel-allergies" type="button" role="tab" style="color: var(--secondary-color);">
                             Allergies
                             {% if animal.allergies|length > 0 %}
-                                <span class="badge bg-danger ms-1">{{ animal.allergies|length }}</span>
+                                <span class="badge rounded-pill bg-danger ms-1">{{ animal.allergies|length }}</span>
                             {% endif %}
-                        </a>
-                    </div>
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <a href="{{ path('app_weight_record_index', {'id': animal.id}) }}" class="btn btn-outline-primary w-100 py-3">
-                            Courbe de poids
-                        </a>
-                    </div>
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <a href="{{ path('app_message_thread', {'id': animal.id}) }}" class="btn btn-outline-primary w-100 py-3">
-                            Messages
-                        </a>
-                    </div>
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <a href="{{ path('app_emergency_card', {'id': animal.id}) }}" class="btn btn-danger w-100 py-3">
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link fw-bold" href="{{ path('app_emergency_card', {'id': animal.id}) }}" style="color: #dc3545;">
                             Fiche d'urgence
                         </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-4" id="dossierTabsContent">
+
+                    {# ── HISTORIQUE ── #}
+                    <div class="tab-pane fade show active" id="panel-historique" role="tabpanel">
+                        <div class="d-flex justify-content-end mb-3">
+                            <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
+                        </div>
+
+                        {% if animal.healthBookEntries is empty %}
+                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                                Aucune consultation enregistree pour le moment.
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-medical align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Date du soin</th>
+                                            <th>Acte</th>
+                                            <th>Intervenant</th>
+                                            <th>Note</th>
+                                            <th>Documents</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in animal.healthBookEntries %}
+                                            {% set entry_type = entry.type|default('')|lower %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="text-decoration-none">
+                                                        <strong>{{ entry.date|date('d/m/Y') }}</strong>
+                                                        {% if entry.date|date('H:i') != '00:00' %}
+                                                            <br><span class="small text-secondary">{{ entry.date|date('H:i') }}</span>
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
+                                                        <span class="badge-medical badge-vaccin">Vaccin</span>
+                                                    {% elseif entry_type == 'vermifuge' %}
+                                                        <span class="badge-medical badge-neutral">Vermifuge</span>
+                                                    {% elseif entry_type == 'bilan sanguin' %}
+                                                        <span class="badge-medical badge-neutral">Bilan sanguin</span>
+                                                    {% elseif entry_type == 'chirurgie' %}
+                                                        <span class="badge-medical badge-surgery">Chirurgie</span>
+                                                    {% else %}
+                                                        <span class="badge-medical badge-neutral">{{ entry.type }}</span>
+                                                    {% endif %}
+                                                    {% if entry.title %}
+                                                        <br><span class="small text-secondary">{{ entry.title }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if entry.veterinarian %}
+                                                        <div class="intervenant-popover-wrapper position-relative d-inline-block">
+                                                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold text-start intervenant-toggle" style="color: var(--primary-color);">
+                                                                {{ entry.veterinarian.fullName }}
+                                                                {% if entry.veterinarian.specialty %}
+                                                                    <br><span class="small fw-normal text-secondary">{{ entry.veterinarian.specialty }}</span>
+                                                                {% endif %}
+                                                            </button>
+                                                            <div class="intervenant-popover d-none position-absolute bg-white border rounded-3 shadow p-3" style="z-index: 20; min-width: 260px; top: 100%; left: 0;">
+                                                                <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
+                                                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.8rem;">
+                                                                        {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong class="d-block small">{{ entry.veterinarian.fullName }}</strong>
+                                                                        {% if entry.veterinarian.specialty %}
+                                                                            <span class="badge" style="background-color: var(--primary-color); font-size: 0.65rem;">{{ entry.veterinarian.specialty }}</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                                {% if entry.veterinarian.phone %}
+                                                                    <div class="small mb-1">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                                                        <a href="tel:{{ entry.veterinarian.phone }}" class="text-decoration-none">{{ entry.veterinarian.phone }}</a>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {% if entry.veterinarian.email %}
+                                                                    <div class="small mb-1">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                                                        <a href="mailto:{{ entry.veterinarian.email }}" class="text-decoration-none">{{ entry.veterinarian.email }}</a>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {% if entry.veterinarian.city %}
+                                                                    <div class="small">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                                                        {% if entry.veterinarian.postalCode %}{{ entry.veterinarian.postalCode }} {% endif %}{{ entry.veterinarian.city }}
+                                                                    </div>
+                                                                {% endif %}
+                                                                <a href="{{ path('app_directory') }}" class="btn btn-outline-primary btn-sm w-100 mt-2">Voir dans l'annuaire</a>
+                                                            </div>
+                                                        </div>
+                                                    {% elseif entry.veterinarianName %}
+                                                        <span class="text-secondary">{{ entry.veterinarianName }}</span>
+                                                    {% else %}
+                                                        <span class="text-secondary fst-italic">Non renseigne</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if entry.description %}
+                                                        <span class="small" title="{{ entry.description }}">{{ entry.description|length > 60 ? entry.description|slice(0, 60) ~ '...' : entry.description }}</span>
+                                                    {% else %}
+                                                        <span class="text-secondary fst-italic small">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% set docs = entry.documents %}
+                                                    {% if docs|length > 0 %}
+                                                        {% for doc in docs %}
+                                                            <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="badge bg-anicare-soft text-teal border border-anicare text-decoration-none me-1 mb-1" title="{{ doc.originalName|default(doc.fileName) }}">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                                {{ doc.originalName|default(doc.fileName)|length > 15 ? doc.originalName|default(doc.fileName)|slice(0, 12) ~ '...' : doc.originalName|default(doc.fileName) }}
+                                                            </a>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <span class="text-secondary fst-italic small">-</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
                     </div>
-                </div>
-            </section>
 
-            <section>
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                    <div>
-                        <p class="page-eyebrow mb-2">Consultations</p>
+                    {# ── DOCUMENTS ── #}
+                    <div class="tab-pane fade" id="panel-documents" role="tabpanel">
+                        <div class="d-flex justify-content-end mb-3">
+                            <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Ajouter un document</a>
+                        </div>
 
-                        <h2 class="h4 page-title mb-0">
-                            Historique des consultations
-                        </h2>
-                    </div>
-
-                    <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary btn-sm">
-                        Ajouter une consultation
-                    </a>
-                </div>
-
-                {% if animal.healthBookEntries is empty %}
-                    <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucune consultation enregistrée pour le moment.
-                    </div>
-                {% else %}
-                    <div class="table-responsive">
-                        <table class="table table-hover table-medical align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Date du soin</th>
-                                    <th>Type</th>
-                                    <th>Consultation</th>
-                                    <th>Vétérinaire</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {% for entry in animal.healthBookEntries %}
-                                    {% set entry_type = entry.type|default('')|lower %}
-
-                                    <tr>
-                                        <td>
-                                            <strong>{{ entry.date|date('d/m/Y') }}</strong>
-                                        </td>
-
-                                        <td>
-                                            {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
-                                                <span class="badge-medical badge-vaccin">Vaccination</span>
-                                            {% elseif entry_type == 'chirurgie' %}
-                                                <span class="badge-medical badge-surgery">Chirurgie</span>
-                                            {% else %}
-                                                <span class="badge-medical badge-neutral">
-                                                    {{ entry.type }}
-                                                </span>
-                                            {% endif %}
-                                        </td>
-
-                                        <td>
-                                            <strong class="text-teal">{{ entry.title }}</strong>
-                                        </td>
-
-                                        <td>
-                                            Dr. {{ entry.veterinarianName ?? 'Non renseigné' }}
-                                        </td>
-
-                                        <td class="text-end">
-                                            <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-outline-primary btn-sm">
-                                                Consulter
+                        {% if animal.documents is empty %}
+                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                                Aucun document n'est encore associe a ce cheval.
+                            </div>
+                        {% else %}
+                            <div class="document-list">
+                                {% for document in animal.documents %}
+                                    <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
+                                        <div>
+                                            <a href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
+                                               target="_blank" rel="noopener" class="document-name text-decoration-none">
+                                                {{ document.originalName|default(document.fileName) }}
                                             </a>
-                                        </td>
-                                    </tr>
+                                            <span class="document-meta d-block small text-secondary">
+                                                {% if document.size is defined %}
+                                                    {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                                {% endif %}
+                                                {% if document.uploadedAt is defined %}
+                                                    · {{ document.uploadedAt|date('d/m/Y') }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% set doc_status = document.status|default('pending') %}
+                                            {% if doc_status == 'approved' %}
+                                                <span class="badge bg-success">Valide</span>
+                                            {% elseif doc_status == 'rejected' %}
+                                                <span class="badge bg-danger">Refuse</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">En attente</span>
+                                            {% endif %}
+
+                                            {% if is_granted('ANIMAL_EDIT', animal) and is_granted('ROLE_PRO') %}
+                                                {% if doc_status != 'approved' %}
+                                                    <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
+                                                        <input type="hidden" name="status" value="approved">
+                                                        <button type="submit" class="btn btn-success btn-sm py-0 px-2">Valider</button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if doc_status != 'rejected' %}
+                                                    <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
+                                                        <input type="hidden" name="status" value="rejected">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2">Refuser</button>
+                                                    </form>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+
+                    {# ── ALLERGIES ── #}
+                    <div class="tab-pane fade" id="panel-allergies" role="tabpanel">
+                        <div class="d-flex justify-content-end mb-3">
+                            <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Gerer les allergies</a>
+                        </div>
+
+                        {% if animal.allergies is empty %}
+                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
+                                Aucune allergie connue pour ce cheval.
+                            </div>
+                        {% else %}
+                            <div class="row g-3">
+                                {% for allergy in animal.allergies %}
+                                    <div class="col-12 col-md-6">
+                                        <div class="p-3 rounded-3 border {{ allergy.severity == 'SEVERE' ? 'border-danger bg-danger bg-opacity-10' : 'border-anicare bg-white' }}">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <strong>{{ allergy.name }}</strong>
+                                                {% if allergy.severity == 'SEVERE' %}
+                                                    <span class="badge bg-danger">Severe</span>
+                                                {% elseif allergy.severity == 'MODERATE' %}
+                                                    <span class="badge bg-warning text-dark">Moderee</span>
+                                                {% else %}
+                                                    <span class="badge bg-info text-dark">Legere</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if allergy.symptoms %}
+                                                <p class="small text-secondary mb-0">{{ allergy.symptoms }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
             </section>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-5 pt-4 border-top border-anicare">
@@ -393,4 +553,88 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    const searchInput = document.getElementById('invite_pro_search');
+    const resultsDiv = document.getElementById('invite_pro_results');
+    const selectedDiv = document.getElementById('invite_pro_selected');
+    const hiddenId = document.getElementById('invite_pro_id');
+    const nameSpan = document.getElementById('invite_pro_name');
+    const clearBtn = document.getElementById('invite_pro_clear');
+
+    if (!searchInput) return;
+
+    let debounce;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounce);
+        const q = this.value.trim();
+        if (q.length < 2) { resultsDiv.classList.add('d-none'); return; }
+        debounce = setTimeout(() => {
+            fetch('/api/professionals/search?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = '<div class="p-2 small text-secondary">Aucun resultat</div>';
+                    } else {
+                        resultsDiv.innerHTML = data.map(p =>
+                            '<div class="invite-pro-result p-2 border-bottom" style="cursor:pointer;" data-id="' + p.id + '" data-name="' + p.fullName + ' (' + p.email + ')">' +
+                            '<strong class="small">' + p.fullName + '</strong><br><span class="small text-secondary">' + p.email + (p.phone ? ' - ' + p.phone : '') + '</span></div>'
+                        ).join('');
+                    }
+                    resultsDiv.classList.remove('d-none');
+                });
+        }, 300);
+    });
+
+    resultsDiv.addEventListener('click', function(e) {
+        const item = e.target.closest('.invite-pro-result');
+        if (!item) return;
+        hiddenId.value = item.dataset.id;
+        nameSpan.textContent = item.dataset.name;
+        searchInput.classList.add('d-none');
+        resultsDiv.classList.add('d-none');
+        selectedDiv.classList.remove('d-none');
+    });
+
+    clearBtn.addEventListener('click', function() {
+        hiddenId.value = '';
+        nameSpan.textContent = '';
+        searchInput.value = '';
+        searchInput.classList.remove('d-none');
+        selectedDiv.classList.add('d-none');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!resultsDiv.contains(e.target) && e.target !== searchInput) {
+            resultsDiv.classList.add('d-none');
+        }
+    });
+})();
+
+// Popover intervenants
+(function() {
+    document.querySelectorAll('.intervenant-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var popover = this.nextElementSibling;
+            document.querySelectorAll('.intervenant-popover').forEach(function(p) {
+                if (p !== popover) p.classList.add('d-none');
+            });
+            popover.classList.toggle('d-none');
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.intervenant-popover-wrapper')) {
+            document.querySelectorAll('.intervenant-popover').forEach(function(p) {
+                p.classList.add('d-none');
+            });
+        }
+    });
+})();
+</script>
 {% endblock %}

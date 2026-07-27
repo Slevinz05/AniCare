@@ -5,70 +5,126 @@
     }
 }) }}
 
-    <div class="row g-4">
-        {% if form.animal is defined %}
+    {# ── Section 1 : Informations principales ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Informations principales</legend>
+        <div class="row g-3">
+            {% if form.animal is defined %}
+                <div class="col-12">
+                    {{ form_label(form.animal, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.animal, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.animal) }}
+                </div>
+            {% endif %}
+
+            <div class="col-12 col-md-6">
+                {{ form_label(form.type, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select', 'id': 'health_type_select'}}) }}
+                {{ form_errors(form.type) }}
+            </div>
+
+            <div class="col-12 col-md-6" id="typeCustomGroup" style="{{ form.type.vars.data != 'Autre' ? 'display:none;' : '' }}">
+                {{ form_label(form.typeCustom, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.typeCustom, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.typeCustom) }}
+            </div>
+
             <div class="col-12">
-                {{ form_label(form.animal, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.animal, {'attr': {'class': 'form-select'}}) }}
-                {{ form_errors(form.animal) }}
+                {{ form_label(form.title, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.title) }}
             </div>
-        {% endif %}
 
-        <div class="col-12 col-md-8">
-            {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.title) }}
-        </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.date, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.date) }}
+            </div>
 
-        <div class="col-12 col-md-4">
-            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.type, {'attr': {'class': 'form-select', 'id': 'health_type_select'}}) }}
-            {{ form_errors(form.type) }}
-        </div>
-
-        <div class="col-12 col-md-4" id="typeCustomGroup" style="{{ form.type.vars.data != 'Autre' ? 'display:none;' : '' }}">
-            {{ form_label(form.typeCustom, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.typeCustom, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.typeCustom) }}
-        </div>
-
-        <div class="col-12 col-md-6">
-            {{ form_label(form.date, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.date) }}
-        </div>
-
-        <div class="col-12 col-md-6">
-            {{ form_label(form.veterinarianName, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.veterinarianName, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.veterinarianName) }}
-        </div>
-
-        <div class="col-12">
-            {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.description) }}
-        </div>
-
-        <div class="col-12">
-            <div class="file-upload-card">
-                {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.attachments, {'attr': {'class': 'form-control'}}) }}
-
-                {% if form.attachments.vars.help %}
-                    <div class="form-text">
-                        {{ form.attachments.vars.help }}
-                    </div>
-                {% endif %}
-
-                {{ form_errors(form.attachments) }}
+            <div class="col-12 col-md-6">
+                {{ form_label(form.veterinarian, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.veterinarian, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.veterinarian) }}
             </div>
         </div>
-    </div>
+    </fieldset>
+
+    {# ── Section 2 : Observations ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Observations</legend>
+        <div class="row g-3">
+            <div class="col-12">
+                {{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.description) }}
+            </div>
+        </div>
+    </fieldset>
+
+    {# ── Section 3 : Traitement ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Traitement</legend>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                {{ form_label(form.dosage, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.dosage, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dosage) }}
+            </div>
+
+            <div class="col-12 col-md-6">
+                {{ form_label(form.frequency, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.frequency, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.frequency) }}
+            </div>
+
+            <div class="col-12 col-md-4">
+                {{ form_label(form.endDate, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.endDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.endDate) }}
+            </div>
+
+            <div class="col-12 col-md-4">
+                {{ form_label(form.batchNumber, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.batchNumber, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.batchNumber) }}
+            </div>
+        </div>
+    </fieldset>
+
+    {# ── Section 4 : Rappels ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Rappels</legend>
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                {{ form_label(form.nextReminderAt, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.nextReminderAt, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.nextReminderAt) }}
+            </div>
+
+            <div class="col-12 col-md-6">
+                {{ form_label(form.recurrenceMonths, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.recurrenceMonths, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.recurrenceMonths) }}
+            </div>
+        </div>
+    </fieldset>
+
+    {# ── Section 5 : Documents ── #}
+    <fieldset class="mb-4">
+        <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Documents</legend>
+        <div class="file-upload-card p-3 rounded-3 border border-dashed bg-light">
+            {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.attachments, {'attr': {'class': 'form-control'}}) }}
+            {% if form.attachments.vars.help %}
+                <div class="form-text mt-1">{{ form.attachments.vars.help }}</div>
+            {% endif %}
+            {{ form_errors(form.attachments) }}
+        </div>
+    </fieldset>
 
     {{ form_rest(form) }}
 
-    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">
         {{ button_label|default('Enregistrer la consultation') }}
     </button>
 

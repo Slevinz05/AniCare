@@ -38,6 +38,12 @@ final class AnimalShareController extends AbstractController
         $user = $this->getUser();
 
         $animalShare = new AnimalShare();
+
+        $prefillEmail = $request->query->get('email');
+        if ($prefillEmail) {
+            $animalShare->setSharedWithEmail($prefillEmail);
+        }
+
         $form = $this->createForm(AnimalShareType::class, $animalShare, [
             'user' => $user,
         ]);
