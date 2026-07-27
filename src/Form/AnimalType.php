@@ -214,6 +214,31 @@ class AnimalType extends AbstractType
                 'preferred_choices' => ['FR'],
             ])
 
+            // --- Contact de confiance (EVO-024) ---
+            ->add('trustedContactFirstName', TextType::class, [
+                'label' => 'Prénom',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Marie',
+                ],
+            ])
+
+            ->add('trustedContactLastName', TextType::class, [
+                'label' => 'Nom',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Martin',
+                ],
+            ])
+
+            ->add('trustedContactPhone', TelType::class, [
+                'label' => 'Téléphone',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : 06 12 34 56 78',
+                ],
+            ])
+
             ->add('photoFile', FileType::class, [
                 'label' => 'Photo du cheval',
                 'mapped' => false,

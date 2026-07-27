@@ -173,6 +173,29 @@
        ══════════════════════════════════════════════════════════ #}
     <div class="col-12 col-lg-5">
         <div class="d-flex flex-column gap-4">
+            {# ── Contact de confiance ── #}
+            <div class="p-4 rounded-3 border border-anicare bg-white mb-4" style="border-left: 4px solid #dc3545 !important;">
+                <p class="page-eyebrow mb-2" style="color: #dc3545;">Contact de confiance</p>
+                <p class="text-secondary small mb-3">Personne à contacter en cas d'urgence concernant ce cheval.</p>
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.trustedContactLastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.trustedContactLastName) }}
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.trustedContactFirstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.trustedContactFirstName) }}
+                    </div>
+
+                    <div class="col-12">
+                        {{ form_label(form.trustedContactPhone, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ _self.field(form.trustedContactPhone) }}
+                    </div>
+                </div>
+            </div>
+
+            {# ── Lieu de vie ── #}
             <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #C8973E !important;">
                 <p class="page-eyebrow mb-2" style="color: #C8973E; border-bottom-color: #C8973E;">Lieu de vie</p>
                 <div class="row g-3">

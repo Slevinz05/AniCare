@@ -21,6 +21,7 @@ final class EmergencyCardController extends AbstractController
             'allergies' => $animal->getAllergies(),
             'active_treatments' => $animal->getActiveTreatments(),
             'overdue_reminders' => $animal->getOverdueReminders(),
+            'blood_tests' => $animal->getBloodTestEntries(),
         ]);
     }
 }

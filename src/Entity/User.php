@@ -54,6 +54,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 150, nullable: true)]
     private ?string $city = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $address = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $postalCode = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $bio = null;
 
@@ -330,6 +336,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->subscriptionEndsAt = $subscriptionEndsAt;
 
         return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): static
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    public function getPostalCode(): ?string
+    {
+        return $this->postalCode;
+    }
+
+    public function setPostalCode(?string $postalCode): static
+    {
+        $this->postalCode = $postalCode;
+
+        return $this;
+    }
+
+    public function getFullAddress(): ?string
+    {
+        $parts = array_filter([$this->address, $this->postalCode, $this->city]);
+
+        return $parts ? implode(', ', $parts) : null;
     }
 
     public function hasActiveSubscription(): bool

@@ -86,6 +86,15 @@ class Animal
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $livingPlaceCountry = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $trustedContactFirstName = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $trustedContactLastName = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $trustedContactPhone = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
@@ -561,6 +570,49 @@ class Animal
         return $this;
     }
 
+    public function getTrustedContactFirstName(): ?string
+    {
+        return $this->trustedContactFirstName;
+    }
+
+    public function setTrustedContactFirstName(?string $trustedContactFirstName): static
+    {
+        $this->trustedContactFirstName = $trustedContactFirstName;
+
+        return $this;
+    }
+
+    public function getTrustedContactLastName(): ?string
+    {
+        return $this->trustedContactLastName;
+    }
+
+    public function setTrustedContactLastName(?string $trustedContactLastName): static
+    {
+        $this->trustedContactLastName = $trustedContactLastName;
+
+        return $this;
+    }
+
+    public function getTrustedContactPhone(): ?string
+    {
+        return $this->trustedContactPhone;
+    }
+
+    public function setTrustedContactPhone(?string $trustedContactPhone): static
+    {
+        $this->trustedContactPhone = $trustedContactPhone;
+
+        return $this;
+    }
+
+    public function getTrustedContactFullName(): ?string
+    {
+        $parts = array_filter([$this->trustedContactFirstName, $this->trustedContactLastName]);
+
+        return $parts ? implode(' ', $parts) : null;
+    }
+
     public function getActiveTreatments(): array
     {
         return $this->healthBookEntries->filter(fn(HealthBookEntry $e) => $e->isActiveTreatment())->toArray();
@@ -569,5 +621,12 @@ class Animal
     public function getOverdueReminders(): array
     {
         return $this->healthBookEntries->filter(fn(HealthBookEntry $e) => $e->isOverdueReminder())->toArray();
+    }
+
+    public function getBloodTestEntries(): array
+    {
+        return $this->healthBookEntries->filter(
+            fn(HealthBookEntry $e) => stripos($e->getTitle() ?? '', 'bilan sanguin') !== false
+        )->toArray();
     }
 }

@@ -63,6 +63,7 @@ final class HealthBookEntryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->syncTypeCustom($form, $healthBookEntry);
             $this->handleUploadedDocuments($form, $healthBookEntry);
 
             $entityManager->persist($healthBookEntry);
@@ -103,6 +104,7 @@ final class HealthBookEntryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->syncTypeCustom($form, $healthBookEntry);
             $this->handleUploadedDocuments($form, $healthBookEntry);
 
             $entityManager->flush();
@@ -131,6 +133,16 @@ final class HealthBookEntryController extends AbstractController
         }
 
         return $this->redirectToRoute('app_health_book_entry_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    private function syncTypeCustom(FormInterface $form, HealthBookEntry $healthBookEntry): void
+    {
+        if ($healthBookEntry->getType() === 'Autre') {
+            $custom = $form->get('typeCustom')->getData();
+            if ($custom) {
+                $healthBookEntry->setType($custom);
+            }
+        }
     }
 
     private function handleUploadedDocuments(FormInterface $form, HealthBookEntry $healthBookEntry): void

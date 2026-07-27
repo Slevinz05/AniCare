@@ -9,6 +9,7 @@ use App\Repository\AnimalRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -48,21 +49,34 @@ class HealthBookEntryType extends AbstractType
             ])
 
             ->add('type', ChoiceType::class, [
-                'label' => 'Type de consultation',
-                'placeholder' => 'Sélectionner un type',
+                'label' => "Type d'acte",
+                'placeholder' => "Sélectionner un type d'acte",
                 'choices' => [
-                    'Consultation' => 'Consultation',
-                    'Vaccination' => 'Vaccination',
-                    'Traitement' => 'Traitement',
-                    'Chirurgie' => 'Chirurgie',
-                    'Traitement antiparasitaire' => 'Antiparasitaire',
-                    'Analyse / examen' => 'Analyse',
+                    'Vaccin' => 'Vaccin',
+                    'Vermifuge' => 'Vermifuge',
+                    'Visite d\'achat' => 'Visite d\'achat',
+                    'Bilan sanguin' => 'Bilan sanguin',
+                    'Ostéopathe' => 'Ostéopathe',
+                    'Dentiste' => 'Dentiste',
+                    'Vétérinaire' => 'Vétérinaire',
+                    'Shiatsu' => 'Shiatsu',
+                    'Massothérapeute' => 'Massothérapeute',
+                    'Physiothérapeute' => 'Physiothérapeute',
                     'Autre' => 'Autre',
                 ],
             ])
 
-            ->add('date', DateType::class, [
-                'label' => 'Date de la consultation',
+            ->add('typeCustom', TextType::class, [
+                'label' => "Précisez le type d'acte",
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Ex : Maréchal-ferrant, Chiropracteur...',
+                ],
+            ])
+
+            ->add('date', DateTimeType::class, [
+                'label' => 'Date et heure',
                 'widget' => 'single_text',
             ])
 

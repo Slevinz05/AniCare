@@ -27,9 +27,7 @@
         letter-spacing: 0.05em;
     }
 
-    .calendar-weekdays-grid div {
-        padding: 12px 0;
-    }
+    .calendar-weekdays-grid div { padding: 12px 0; }
 
     .calendar-days-grid {
         display: grid !important;
@@ -45,21 +43,13 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+        cursor: pointer;
+        transition: background-color 0.1s;
     }
 
-    .calendar-day-box:hover:not(.day-box-empty) {
-        background-color: var(--bg-color);
-    }
-
-    .day-box-empty {
-        background-color: var(--bg-color) !important;
-        opacity: 0.5;
-    }
-
-    .current-today-box {
-        background-color: rgba(13, 148, 136, 0.05) !important;
-        box-shadow: inset 0 0 0 2px var(--primary-color);
-    }
+    .calendar-day-box:hover:not(.day-box-empty) { background-color: var(--bg-color); }
+    .day-box-empty { background-color: var(--bg-color) !important; opacity: 0.5; cursor: default; }
+    .current-today-box { background-color: rgba(13, 148, 136, 0.05) !important; box-shadow: inset 0 0 0 2px var(--primary-color); }
 
     .event-badge {
         display: block;
@@ -76,120 +66,164 @@
         line-height: 1.3;
     }
 
-    .event-consultation {
-        background-color: rgba(13, 148, 136, 0.1);
-        color: #0f766e;
-        border-left: 3px solid #0d9488;
-    }
+    .event-consultation { background-color: rgba(13, 148, 136, 0.1); color: #0f766e; border-left: 3px solid #0d9488; }
+    .event-consultation:hover { background-color: rgba(13, 148, 136, 0.2); color: #0d9488; }
+    .event-appointment { background-color: var(--soft-warm); color: var(--accent-hover); border-left: 3px solid var(--accent-color); }
+    .event-appointment:hover { background-color: #FFE8A8; color: var(--accent-hover); }
+    .event-cancelled { opacity: 0.5; text-decoration: line-through; }
 
-    .event-consultation:hover {
-        background-color: rgba(13, 148, 136, 0.2);
-        color: #0d9488;
-    }
-
-    .event-appointment {
-        background-color: var(--soft-warm);
-        color: var(--accent-hover);
-        border-left: 3px solid var(--accent-color);
-    }
-
-    .event-appointment:hover {
-        background-color: #FFE8A8;
-        color: var(--accent-hover);
-    }
-
-    .event-cancelled {
-        opacity: 0.5;
-        text-decoration: line-through;
-    }
-
-    .calendar-day-box:hover .add-action-indicator {
-        background-color: var(--primary-color) !important;
-        color: #ffffff !important;
-    }
-
-    .view-switcher .btn {
-        min-width: 44px;
-    }
+    .view-switcher .btn { min-width: 44px; }
     .view-switcher .btn.active-view {
         background-color: var(--primary-color) !important;
         border-color: var(--primary-color) !important;
         color: #ffffff !important;
     }
 
-    /* Week view */
-    .week-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 1px;
-        background-color: var(--border-color);
+    /* ========================================
+       Grille horaire (semaine & jour)
+       ======================================== */
+    .time-grid {
+        background: #ffffff;
         border: 1px solid var(--border-color);
         border-radius: 12px;
         overflow: hidden;
+        box-shadow: var(--shadow-subtle);
     }
 
-    .week-day-col {
-        background: #ffffff;
-        min-height: 300px;
-        padding: 12px;
+    .time-grid-header { display: grid; background-color: var(--bg-color); border-bottom: 1px solid var(--border-color); }
+    .time-grid-header-cell { text-align: center; padding: 10px 4px; border-left: 1px solid var(--border-color); }
+    .time-grid-header-cell:first-child { border-left: none; }
+    .time-grid-header-cell .header-day-name { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--taupe); }
+    .time-grid-header-cell .header-day-num { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; font-size: 1.1rem; font-weight: 800; color: var(--secondary-color); border-radius: 50%; }
+    .time-grid-header-cell.is-today .header-day-num { background-color: var(--primary-color); color: #ffffff; }
+
+    .time-grid-body { display: grid; position: relative; }
+    .time-label { padding: 0 8px; font-size: 0.7rem; font-weight: 600; color: var(--taupe); text-align: right; position: relative; height: 48px; border-bottom: 1px solid var(--border-color); display: flex; align-items: flex-start; justify-content: flex-end; }
+    .time-label span { transform: translateY(-8px); }
+
+    .time-col {
+        position: relative;
+        border-left: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        height: 48px;
+        cursor: pointer;
+        transition: background-color 0.1s;
+    }
+    .time-col:hover { background-color: rgba(13, 148, 136, 0.06); }
+    .time-col.is-today-col { background-color: rgba(13, 148, 136, 0.03); }
+
+    .time-event {
+        position: absolute;
+        left: 2px;
+        right: 2px;
+        border-radius: 4px;
+        padding: 3px 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        line-height: 1.3;
+        overflow: hidden;
+        text-decoration: none;
+        z-index: 2;
+        min-height: 22px;
+        transition: box-shadow 0.15s ease;
+        cursor: pointer;
+    }
+    .time-event:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.18); z-index: 3; }
+    .time-event.type-consultation { background-color: rgba(13, 148, 136, 0.15); border-left: 3px solid #0d9488; color: #0f766e; }
+    .time-event.type-appointment { background-color: var(--soft-warm); border-left: 3px solid var(--accent-color); color: var(--accent-hover); }
+    .time-event .event-time { font-size: 0.65rem; opacity: 0.8; }
+    .time-event .event-title { font-weight: 700; }
+
+    .time-now-line { position: absolute; left: 0; right: 0; height: 2px; background-color: #dc3545; z-index: 5; pointer-events: none; }
+    .time-now-line::before { content: ''; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background-color: #dc3545; }
+
+    .allday-bar { border-bottom: 1px solid var(--border-color); display: grid; min-height: 32px; }
+    .allday-cell { border-left: 1px solid var(--border-color); padding: 2px 4px; }
+    .allday-cell:first-child { border-left: none; }
+    .allday-label { font-size: 0.65rem; font-weight: 600; color: var(--taupe); padding: 0 8px; display: flex; align-items: center; }
+
+    .day-time-grid .time-grid-header { grid-template-columns: 56px 1fr; }
+    .day-time-grid .time-grid-body { grid-template-columns: 56px 1fr; }
+    .day-time-grid .allday-bar { grid-template-columns: 56px 1fr; }
+
+    .week-time-grid .time-grid-header { grid-template-columns: 56px repeat(7, 1fr); }
+    .week-time-grid .time-grid-body { grid-template-columns: 56px repeat(7, 1fr); }
+    .week-time-grid .allday-bar { grid-template-columns: 56px repeat(7, 1fr); }
+
+    .scroll-time-grid { max-height: 720px; overflow-y: auto; }
+
+    /* Bouton flottant + */
+    .fab-add {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: #ffffff;
+        border: none;
+        font-size: 1.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+        cursor: pointer;
+        z-index: 100;
+        transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+    }
+    .fab-add:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5); background-color: var(--primary-hover); }
+    .fab-add.open { transform: rotate(45deg); }
+
+    .fab-menu {
+        position: fixed;
+        bottom: 92px;
+        right: 28px;
+        z-index: 99;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+    }
+    .fab-menu.show { display: flex; }
+
+    .fab-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        animation: fabSlideUp 0.2s ease forwards;
+        opacity: 0;
+    }
+    .fab-menu-item:nth-child(1) { animation-delay: 0s; }
+    .fab-menu-item:nth-child(2) { animation-delay: 0.06s; }
+
+    .fab-menu-label {
+        background: var(--secondary-color);
+        color: #ffffff;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
-    .week-day-col.is-today {
-        background: rgba(13, 148, 136, 0.04);
+    .fab-menu-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
-    .week-day-header {
-        text-align: center;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    .week-day-header .day-name {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--taupe);
-    }
-
-    .week-day-header .day-num {
-        display: block;
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: var(--secondary-color);
-    }
-
-    .week-day-col.is-today .week-day-header .day-num {
-        color: var(--primary-color);
-    }
-
-    .week-day-col.is-today .week-day-header {
-        border-bottom-color: var(--primary-color);
-    }
-
-    /* Day view */
-    .day-event-card {
-        padding: 16px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        background: #ffffff;
-        margin-bottom: 12px;
-        transition: all 0.15s ease;
-    }
-
-    .day-event-card:hover {
-        box-shadow: var(--shadow-md);
-        transform: translateY(-2px);
-    }
-
-    .day-event-card.type-consultation {
-        border-left: 4px solid var(--primary-color);
-    }
-
-    .day-event-card.type-appointment {
-        border-left: 4px solid var(--accent-color);
+    @keyframes fabSlideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
@@ -198,11 +232,10 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <p class="page-eyebrow mb-1" style="color: var(--primary-color);">Agenda</p>
-            <h1 class="page-title m-0">Planning & Activités</h1>
+            <h1 class="page-title m-0">Planning & Activites</h1>
         </div>
 
         <div class="d-flex gap-3 align-items-center flex-wrap">
-            {# View switcher #}
             <div class="view-switcher btn-group" role="group">
                 <a href="{{ path('app_calendar', {view: 'day', day: currentDay, month: currentMonth, year: currentYear}) }}"
                    class="btn btn-outline-secondary btn-sm {{ view == 'day' ? 'active-view' : '' }}">Jour</a>
@@ -212,26 +245,25 @@
                    class="btn btn-outline-secondary btn-sm {{ view == 'month' ? 'active-view' : '' }}">Mois</a>
             </div>
 
-            {# Navigation #}
             <div class="d-flex gap-2 align-items-center bg-white p-2 rounded-3 border" style="border-color: var(--border-color) !important;">
                 {% if view == 'month' %}
-                    <a href="{{ path('app_calendar', {view: 'month', month: prevMonth, year: prevYear}) }}" class="btn btn-outline-secondary btn-sm px-2">◀</a>
+                    <a href="{{ path('app_calendar', {view: 'month', month: prevMonth, year: prevYear}) }}" class="btn btn-outline-secondary btn-sm px-2">&#9664;</a>
                     <span class="fw-bold px-3 text-uppercase" style="min-width: 165px; text-align: center; color: var(--secondary-color);">
                         {{ currentMonthName }} {{ currentYear }}
                     </span>
-                    <a href="{{ path('app_calendar', {view: 'month', month: nextMonth, year: nextYear}) }}" class="btn btn-outline-secondary btn-sm px-2">▶</a>
+                    <a href="{{ path('app_calendar', {view: 'month', month: nextMonth, year: nextYear}) }}" class="btn btn-outline-secondary btn-sm px-2">&#9654;</a>
                 {% elseif view == 'week' %}
-                    <a href="{{ path('app_calendar', {view: 'week', day: prevWeek|date('j'), month: prevWeek|date('n'), year: prevWeek|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">◀</a>
+                    <a href="{{ path('app_calendar', {view: 'week', day: prevWeek|date('j'), month: prevWeek|date('n'), year: prevWeek|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">&#9664;</a>
                     <span class="fw-bold px-3" style="min-width: 200px; text-align: center; color: var(--secondary-color);">
                         {{ monday|date('d') }} — {{ sunday|date('d') }} {{ currentMonthName }} {{ currentYear }}
                     </span>
-                    <a href="{{ path('app_calendar', {view: 'week', day: nextWeek|date('j'), month: nextWeek|date('n'), year: nextWeek|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">▶</a>
+                    <a href="{{ path('app_calendar', {view: 'week', day: nextWeek|date('j'), month: nextWeek|date('n'), year: nextWeek|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">&#9654;</a>
                 {% else %}
-                    <a href="{{ path('app_calendar', {view: 'day', day: prevDay|date('j'), month: prevDay|date('n'), year: prevDay|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">◀</a>
+                    <a href="{{ path('app_calendar', {view: 'day', day: prevDay|date('j'), month: prevDay|date('n'), year: prevDay|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">&#9664;</a>
                     <span class="fw-bold px-3" style="min-width: 220px; text-align: center; color: var(--secondary-color);">
                         {{ dayName }} {{ currentDay }} {{ currentMonthName }} {{ currentYear }}
                     </span>
-                    <a href="{{ path('app_calendar', {view: 'day', day: nextDay|date('j'), month: nextDay|date('n'), year: nextDay|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">▶</a>
+                    <a href="{{ path('app_calendar', {view: 'day', day: nextDay|date('j'), month: nextDay|date('n'), year: nextDay|date('Y')}) }}" class="btn btn-outline-secondary btn-sm px-2">&#9654;</a>
                 {% endif %}
             </div>
 
@@ -239,7 +271,7 @@
         </div>
     </div>
 
-    {# ── Légende ── #}
+    {# ── Legende ── #}
     <div class="d-flex gap-4 mb-3">
         <span class="d-flex align-items-center gap-2 small" style="color: var(--taupe);">
             <span style="width:14px; height:14px; border-radius:3px; background: rgba(13,148,136,0.15); border-left: 3px solid #0d9488; display:inline-block;"></span>
@@ -269,30 +301,29 @@
 
                 {% for day in 1..daysInMonth %}
                     {% set isToday = (day == 'now'|date('j')|number_format and currentMonth == 'now'|date('n')|number_format and currentYear == 'now'|date('Y')|number_format) %}
-                    {% set targetDate = currentYear ~ '-' ~ (currentMonth < 10 ? '0' ~ currentMonth : currentMonth) ~ '-' ~ (day < 10 ? '0' ~ day : day) %}
+                    {% set isoDate = currentYear ~ '-' ~ (currentMonth < 10 ? '0' ~ currentMonth : currentMonth) ~ '-' ~ (day < 10 ? '0' ~ day : day) ~ 'T09:00' %}
 
-                    <a href="{{ path('app_calendar', {view: 'day', day: day, month: currentMonth, year: currentYear}) }}"
-                       class="calendar-day-box text-decoration-none text-dark position-relative {{ isToday ? 'current-today-box' : '' }}" style="cursor: pointer;">
-
+                    <div class="calendar-day-box position-relative {{ isToday ? 'current-today-box' : '' }}"
+                         onclick="window.location='{{ path('app_health_book_entry_new', {preset_date: isoDate}) }}'">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="fw-bold small {{ isToday ? 'text-teal fs-6' : '' }}" style="{{ not isToday ? 'color: var(--secondary-color);' : '' }}">
                                 {{ day }}
                             </span>
-                            <span class="add-action-indicator rounded-circle d-flex align-items-center justify-content-center"
-                                  style="width: 16px; height: 16px; font-size: 0.65rem; background-color: var(--bg-color); color: var(--taupe); font-weight: bold;">+</span>
+                            <span class="rounded-circle d-flex align-items-center justify-content-center"
+                                  style="width: 18px; height: 18px; font-size: 0.7rem; background-color: var(--bg-color); color: var(--taupe); font-weight: bold;">+</span>
                         </div>
 
-                        <div class="day-events-list" onclick="event.stopPropagation();">
-                            {% if eventsByDay[day] is defined %}
-                                {% for event in eventsByDay[day] %}
-                                    <span class="event-badge event-{{ event.type }} {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }}"
-                                          title="{{ event.animal }} — {{ event.title }}{% if event.professional %} (Dr. {{ event.professional }}){% endif %}">
-                                        {{ event.animal }} · {{ event.title }}
-                                    </span>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                    </a>
+                        {% if eventsByDay[day] is defined %}
+                            {% for event in eventsByDay[day] %}
+                                <a href="{{ path(event.link, {id: event.id}) }}"
+                                   class="event-badge event-{{ event.type }} {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }} text-decoration-none"
+                                   title="{{ event.animal }} — {{ event.title }}{% if event.professional %} (Dr. {{ event.professional }}){% endif %}"
+                                   onclick="event.stopPropagation();">
+                                    {{ event.animal }} · {{ event.title }}
+                                </a>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -301,87 +332,172 @@
        VUE HEBDOMADAIRE
        ══════════════════════════════════════ #}
     {% elseif view == 'week' %}
-        <div class="week-grid">
-            {% for wd in weekDays %}
-                <div class="week-day-col {{ wd.isToday ? 'is-today' : '' }}">
-                    <div class="week-day-header">
-                        <span class="day-name">{{ wd.dayName }}</span>
-                        <span class="day-num">{{ wd.dayNum }}</span>
+        <div class="time-grid week-time-grid">
+            <div class="time-grid-header">
+                <div class="time-grid-header-cell" style="border-left: none;"></div>
+                {% for wd in weekDays %}
+                    <div class="time-grid-header-cell {{ wd.isToday ? 'is-today' : '' }}">
+                        <span class="header-day-name">{{ wd.dayName|slice(0, 3) }}</span>
+                        <span class="header-day-num">{{ wd.dayNum }}</span>
                     </div>
+                {% endfor %}
+            </div>
 
-                    {% for event in wd.events %}
-                        <a href="{{ path(event.link, {id: event.id}) }}"
-                           class="event-badge event-{{ event.type }} {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }} mb-2 d-block text-decoration-none"
-                           style="white-space: normal; font-size: 0.75rem;">
-                            <strong>{{ event.animal }}</strong><br>
-                            {{ event.title }}
-                            {% if event.professional %}
-                                <br><span style="opacity: 0.75;">Dr. {{ event.professional }}</span>
+            <div class="allday-bar">
+                <div class="allday-label">Journ.</div>
+                {% for wd in weekDays %}
+                    <div class="allday-cell {{ wd.isToday ? 'is-today-col' : '' }}">
+                        {% for event in wd.events %}
+                            {% if event.date|date('H:i') == '00:00' %}
+                                <a href="{{ path(event.link, {id: event.id}) }}"
+                                   class="event-badge event-{{ event.type }} text-decoration-none mb-1 {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }}"
+                                   style="font-size: 0.65rem;">
+                                    {{ event.animal }} · {{ event.title|length > 12 ? event.title|slice(0, 12) ~ '...' : event.title }}
+                                </a>
                             {% endif %}
-                        </a>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
 
-                    {% if wd.events is empty %}
-                        <p class="text-center small mt-4" style="color: var(--taupe); opacity: 0.5;">—</p>
-                    {% endif %}
+            <div class="scroll-time-grid" id="weekScrollGrid">
+                <div class="time-grid-body">
+                    {% for hour in 6..21 %}
+                        <div class="time-label"><span>{{ hour < 10 ? '0' ~ hour : hour }}:00</span></div>
+                        {% for colIdx in 0..6 %}
+                            {% set colDate = weekDays[colIdx].date|date('Y-m-d') ~ 'T' ~ (hour < 10 ? '0' ~ hour : hour) ~ ':00' %}
+                            <div class="time-col {{ weekDays[colIdx].isToday ? 'is-today-col' : '' }}"
+                                 data-hour="{{ hour }}" data-col="{{ colIdx }}"
+                                 onclick="window.location='{{ path('app_health_book_entry_new', {preset_date: colDate}) }}'">
+                                {% for event in weekDays[colIdx].events %}
+                                    {% set evHour = event.date|date('G')|number_format %}
+                                    {% if evHour == hour and event.date|date('H:i') != '00:00' %}
+                                        {% set evMinutes = event.date|date('i')|number_format %}
+                                        {% set topPx = (evMinutes / 60) * 48 %}
+                                        <a href="{{ path(event.link, {id: event.id}) }}"
+                                           class="time-event type-{{ event.type }} text-decoration-none {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }}"
+                                           style="top: {{ topPx }}px; min-height: 44px;"
+                                           title="{{ event.animal }} — {{ event.title }}{% if event.professional %} (Dr. {{ event.professional }}){% endif %}"
+                                           onclick="event.stopPropagation();">
+                                            <span class="event-time">{{ event.date|date('H:i') }}</span>
+                                            <span class="event-title d-block">{{ event.animal }}</span>
+                                            <span class="d-block" style="font-size: 0.65rem;">{{ event.title|length > 18 ? event.title|slice(0, 18) ~ '...' : event.title }}</span>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
         </div>
 
     {# ══════════════════════════════════════
-       VUE JOURNALIÈRE
+       VUE JOURNALIERE
        ══════════════════════════════════════ #}
     {% elseif view == 'day' %}
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-8">
-                {% if events is empty %}
-                    <div class="text-center py-5">
-                        <div class="mb-3" style="font-size: 3rem; opacity: 0.3;">📅</div>
-                        <p style="color: var(--taupe);">Aucun événement prévu ce jour.</p>
-                        <div class="d-flex gap-2 justify-content-center">
-                            <a href="{{ path('app_health_book_entry_new', {preset_date: currentDate|date('Y-m-d')}) }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
-                            <a href="{{ path('app_appointment_new') }}" class="btn btn-outline-info btn-sm">Prendre rendez-vous</a>
-                        </div>
-                    </div>
-                {% else %}
+        <div class="time-grid day-time-grid">
+            <div class="time-grid-header">
+                <div class="time-grid-header-cell" style="border-left: none;"></div>
+                <div class="time-grid-header-cell is-today">
+                    <span class="header-day-name">{{ dayName }}</span>
+                    <span class="header-day-num">{{ currentDay }}</span>
+                </div>
+            </div>
+
+            <div class="allday-bar">
+                <div class="allday-label">Journ.</div>
+                <div class="allday-cell">
                     {% for event in events %}
-                        <a href="{{ path(event.link, {id: event.id}) }}" class="day-event-card d-block text-decoration-none type-{{ event.type }}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <span class="badge mb-2 {{ event.type == 'consultation' ? 'badge-vaccin' : '' }}"
-                                          style="{{ event.type == 'appointment' ? 'background-color: var(--soft-warm); color: var(--accent-hover);' : '' }}">
-                                        {{ event.type == 'consultation' ? 'Consultation' : 'Rendez-vous' }}
-                                    </span>
-                                    {% if event.status == 'CANCELLED' %}
-                                        <span class="badge bg-danger ms-1">Annulé</span>
-                                    {% elseif event.status == 'CONFIRMED' %}
-                                        <span class="badge bg-success ms-1">Confirmé</span>
-                                    {% elseif event.status == 'PENDING' %}
-                                        <span class="badge bg-warning text-dark ms-1">En attente</span>
-                                    {% endif %}
-
-                                    <h3 class="h6 fw-bold mb-1" style="color: var(--secondary-color);">{{ event.title }}</h3>
-                                    <p class="mb-0 small" style="color: var(--taupe);">
-                                        🐴 {{ event.animal }}
-                                        {% if event.professional %}
-                                            · Dr. {{ event.professional }}
-                                        {% endif %}
-                                    </p>
-                                </div>
-                                <span class="small fw-bold" style="color: var(--taupe);">
-                                    {{ event.date|date('H:i') != '00:00' ? event.date|date('H:i') : 'Journée' }}
-                                </span>
-                            </div>
-                        </a>
+                        {% if event.date|date('H:i') == '00:00' %}
+                            <a href="{{ path(event.link, {id: event.id}) }}"
+                               class="event-badge event-{{ event.type }} text-decoration-none mb-1 {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }}">
+                                {{ event.animal }} · {{ event.title }}
+                                {% if event.professional %} — Dr. {{ event.professional }}{% endif %}
+                            </a>
+                        {% endif %}
                     {% endfor %}
+                </div>
+            </div>
 
-                    <div class="d-flex gap-2 mt-4">
-                        <a href="{{ path('app_health_book_entry_new', {preset_date: currentDate|date('Y-m-d')}) }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
-                        <a href="{{ path('app_appointment_new') }}" class="btn btn-outline-info btn-sm">Prendre rendez-vous</a>
-                    </div>
-                {% endif %}
+            <div class="scroll-time-grid" id="dayScrollGrid">
+                <div class="time-grid-body">
+                    {% for hour in 6..21 %}
+                        {% set slotDate = currentDate|date('Y-m-d') ~ 'T' ~ (hour < 10 ? '0' ~ hour : hour) ~ ':00' %}
+                        <div class="time-label"><span>{{ hour < 10 ? '0' ~ hour : hour }}:00</span></div>
+                        <div class="time-col is-today-col" data-hour="{{ hour }}"
+                             onclick="window.location='{{ path('app_health_book_entry_new', {preset_date: slotDate}) }}'">
+                            {% for event in events %}
+                                {% set evHour = event.date|date('G')|number_format %}
+                                {% if evHour == hour and event.date|date('H:i') != '00:00' %}
+                                    {% set evMinutes = event.date|date('i')|number_format %}
+                                    {% set topPx = (evMinutes / 60) * 48 %}
+                                    <a href="{{ path(event.link, {id: event.id}) }}"
+                                       class="time-event type-{{ event.type }} text-decoration-none {{ event.status == 'CANCELLED' ? 'event-cancelled' : '' }}"
+                                       style="top: {{ topPx }}px; min-height: 44px;"
+                                       title="{{ event.animal }} — {{ event.title }}{% if event.professional %} (Dr. {{ event.professional }}){% endif %}"
+                                       onclick="event.stopPropagation();">
+                                        <span class="event-time">{{ event.date|date('H:i') }}</span>
+                                        <span class="event-title d-block">{{ event.animal }}</span>
+                                        <span class="d-block" style="font-size: 0.75rem;">{{ event.title }}</span>
+                                        {% if event.professional %}
+                                            <span class="d-block" style="font-size: 0.65rem; opacity: 0.75;">Dr. {{ event.professional }}</span>
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     {% endif %}
 </div>
+
+{# ── Bouton flottant "+" ── #}
+<div class="fab-menu" id="fabMenu">
+    <a href="{{ path('app_health_book_entry_new') }}" class="fab-menu-item">
+        <span class="fab-menu-label">Nouvelle consultation</span>
+        <span class="fab-menu-icon" style="background-color: var(--primary-color);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </span>
+    </a>
+    <a href="{{ path('app_appointment_new') }}" class="fab-menu-item">
+        <span class="fab-menu-label">Nouveau rendez-vous</span>
+        <span class="fab-menu-icon" style="background-color: var(--accent-color);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+    </a>
+</div>
+<button class="fab-add" id="fabBtn" aria-label="Ajouter" title="Ajouter">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Auto-scroll vers l'heure actuelle
+    var grid = document.getElementById('weekScrollGrid') || document.getElementById('dayScrollGrid');
+    if (grid) {
+        var now = new Date();
+        grid.scrollTop = Math.max(0, (now.getHours() - 7) * 48);
+    }
+
+    // FAB menu toggle
+    var fabBtn = document.getElementById('fabBtn');
+    var fabMenu = document.getElementById('fabMenu');
+    if (fabBtn && fabMenu) {
+        fabBtn.addEventListener('click', function () {
+            fabBtn.classList.toggle('open');
+            fabMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!fabBtn.contains(e.target) && !fabMenu.contains(e.target)) {
+                fabBtn.classList.remove('open');
+                fabMenu.classList.remove('show');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

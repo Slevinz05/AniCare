@@ -465,6 +465,64 @@ a:hover {
     font-size: 0.9rem;
 }
 
+.animal-card-photo-wrapper {
+    position: relative;
+}
+
+.animal-card-default-photo {
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #F7F3ED 0%, #EDE6DB 100%);
+    transition: background 0.2s ease;
+}
+
+.animal-card-placeholder-icon {
+    color: var(--taupe);
+    opacity: 0.4;
+}
+
+.animal-card-placeholder-text {
+    color: var(--taupe);
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.6;
+}
+
+.animal-card-default-photo:hover .animal-card-placeholder-icon,
+.animal-card-default-photo:hover .animal-card-placeholder-text {
+    opacity: 0.8;
+    color: var(--primary-color);
+}
+
+.animal-card-camera-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+    z-index: 2;
+}
+
+.animal-card-camera-btn:hover {
+    background-color: var(--primary-hover);
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
 .animal-card .badge-medical {
     background-color: var(--soft-teal);
     color: var(--primary-hover);
