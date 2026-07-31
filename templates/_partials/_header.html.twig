@@ -24,60 +24,140 @@
 
             <ul class="navbar-nav me-xl-auto mb-3 mb-xl-0 gap-xl-1">
                 {% if app.user %}
-                    <li class="nav-item">
-                        <a
-                            class="nav-link text-nowrap {{ (current_route starts with 'app_animal_') and not (current_route starts with 'app_animal_share') ? 'active' : '' }}"
-                            href="{{ path('app_animal_index') }}"
-                        >
-                            {% if is_granted('ROLE_PRO') %}
-                                Chevaux suivis
-                            {% else %}
+                    {% if is_granted('ROLE_PRO') %}
+                        {# ── Menu Professionnel ── #}
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}"
+                                href="{{ path('app_health_book_entry_index') }}"
+                            >
+                                Consultations
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route == 'app_calendar' or current_route starts with 'app_appointment' ? 'active' : '' }}"
+                                href="{{ path('app_calendar') }}"
+                            >
+                                Agenda
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link text-nowrap dropdown-toggle {{ current_route starts with 'app_repertoire' or current_route starts with 'app_animal_share' ? 'active' : '' }}"
+                                href="#"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                Répertoire
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item {{ current_route == 'app_repertoire_reseau' ? 'active' : '' }}" href="{{ path('app_repertoire_reseau') }}">
+                                        Réseau
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ current_route == 'app_repertoire_structures' ? 'active' : '' }}" href="{{ path('app_repertoire_structures') }}">
+                                        Structures
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ current_route starts with 'app_animal_share' ? 'active' : '' }}" href="{{ path('app_animal_share_index') }}">
+                                        Mes partages
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_factures' ? 'active' : '' }}"
+                                href="{{ path('app_factures') }}"
+                            >
+                                Factures
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_message' ? 'active' : '' }}"
+                                href="{{ path('app_message_index') }}"
+                            >
+                                Messagerie
+                            </a>
+                        </li>
+                    {% else %}
+                        {# ── Menu Propriétaire ── #}
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ (current_route starts with 'app_animal_') and not (current_route starts with 'app_animal_share') ? 'active' : '' }}"
+                                href="{{ path('app_animal_index') }}"
+                            >
                                 Mes chevaux
-                            {% endif %}
-                        </a>
-                    </li>
+                            </a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a
-                            class="nav-link text-nowrap {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}"
-                            href="{{ path('app_health_book_entry_index') }}"
-                        >
-                            Consultations
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}"
+                                href="{{ path('app_health_book_entry_index') }}"
+                            >
+                                Consultations
+                            </a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a
-                            class="nav-link text-nowrap {{ current_route == 'app_calendar' or current_route starts with 'app_appointment' ? 'active' : '' }}"
-                            href="{{ path('app_calendar') }}"
-                        >
-                            Agenda
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route == 'app_calendar' or current_route starts with 'app_appointment' ? 'active' : '' }}"
+                                href="{{ path('app_calendar') }}"
+                            >
+                                Agenda
+                            </a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a
-                            class="nav-link text-nowrap {{ current_route == 'app_directory' ? 'active' : '' }}"
-                            href="{{ path('app_directory') }}"
-                        >
-                            Intervenants
-                        </a>
-                    </li>
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link text-nowrap dropdown-toggle {{ current_route == 'app_directory' or current_route starts with 'app_professional' or current_route starts with 'app_animal_share' ? 'active' : '' }}"
+                                href="#"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                Intervenants
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item {{ current_route == 'app_directory' or current_route starts with 'app_professional' ? 'active' : '' }}" href="{{ path('app_directory') }}">
+                                        Annuaire
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ current_route starts with 'app_animal_share' ? 'active' : '' }}" href="{{ path('app_animal_share_index') }}">
+                                        Mes partages
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
-                    <li class="nav-item">
-                        <a
-                            class="nav-link text-nowrap {{ current_route starts with 'app_message' ? 'active' : '' }}"
-                            href="{{ path('app_message_index') }}"
-                        >
-                            Messagerie
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_message' ? 'active' : '' }}"
+                                href="{{ path('app_message_index') }}"
+                            >
+                                Messagerie
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endif %}
 
                 <li class="nav-item">
                     <a
                         class="nav-link text-nowrap {{ current_route == 'app_contact' ? 'active' : '' }}"
-                        href="{{ path('app_contact'|default('#')) }}">
+                        href="{{ path('app_contact') }}">
                         Centre d'aide
                     </a>
                 </li>
@@ -85,6 +165,47 @@
 
             <div class="navbar-actions d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center gap-2 ms-xl-3">
                 {% if app.user %}
+                    {% if is_granted('ROLE_PRO') %}
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-pro-quick-add"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                aria-label="Création rapide"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end quick-add-menu">
+                                <li class="dropdown-header" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 0.4rem 0.85rem 0.3rem;">Création rapide</li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ path('app_appointment_new') }}">
+                                        <span class="quick-add-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        </span>
+                                        Planifier un rendez-vous
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ path('app_health_book_entry_new') }}">
+                                        <span class="quick-add-icon" style="background: #ede9fe; color: #7c3aed;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                        </span>
+                                        Créer un compte rendu
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ path('app_factures') }}">
+                                        <span class="quick-add-icon" style="background: var(--soft-warm); color: var(--accent-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        </span>
+                                        Créer une facture
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
+
                     {% if stripe_enabled %}
                         <a class="btn btn-sm px-3 text-nowrap {{ app.user.hasActiveSubscription() ? 'btn-navbar-outline' : 'btn-navbar-accent' }}"
                            href="{{ path('app_subscription') }}">

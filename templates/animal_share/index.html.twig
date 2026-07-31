@@ -50,8 +50,14 @@
                                     </td>
                                     <td>{{ share.createdAt ? share.createdAt|date('d/m/Y') : '-' }}</td>
                                     <td class="text-end">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <a href="{{ path('app_animal_share_edit', {'id': share.id}) }}" class="btn btn-outline-primary btn-sm">Modifier</a>
+                                        <div class="d-flex justify-content-end gap-2 align-items-center">
+                                            <form method="post" action="{{ path('app_animal_share_edit', {'id': share.id}) }}" class="d-inline-flex align-items-center gap-1 share-permission-form">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('animal_share' ~ share.id) }}">
+                                                <select name="permissionLevel" class="form-select form-select-sm" style="width: auto; font-size: 0.8rem;" onchange="this.form.submit()">
+                                                    <option value="READ" {{ share.permissionLevel == 'READ' ? 'selected' : '' }}>Lecture seule</option>
+                                                    <option value="WRITE" {{ share.permissionLevel == 'WRITE' ? 'selected' : '' }}>Modification</option>
+                                                </select>
+                                            </form>
                                             <form method="post" action="{{ path('app_animal_share_delete', {'id': share.id}) }}" onsubmit="return confirm('Supprimer ce partage ?');" style="display:inline;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ share.id) }}">
                                                 <button class="btn btn-outline-danger btn-sm">Supprimer</button>

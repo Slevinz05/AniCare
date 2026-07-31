@@ -80,10 +80,20 @@
                         </tr>
 
                         <tr>
-                            <th>Vétérinaire référent</th>
+                            <th>Intervenant</th>
                             <td>
-                                {% if health_book_entry.veterinarianName %}
-                                    Dr. {{ health_book_entry.veterinarianName }}
+                                {% if health_book_entry.veterinarian %}
+                                    <a href="{{ path('app_professional_show', {'id': health_book_entry.veterinarian.id}) }}" class="text-decoration-none fw-bold" style="color: var(--primary-color);">
+                                        {{ health_book_entry.veterinarian.fullName }}
+                                    </a>
+                                    {% if health_book_entry.veterinarian.specialty %}
+                                        <span class="badge ms-1" style="background-color: var(--primary-color); font-size: 0.65rem;">{{ health_book_entry.veterinarian.specialty }}</span>
+                                    {% endif %}
+                                    {% if health_book_entry.veterinarian.phone %}
+                                        <br><a href="tel:{{ health_book_entry.veterinarian.phone }}" class="small text-decoration-none text-secondary">{{ health_book_entry.veterinarian.phone }}</a>
+                                    {% endif %}
+                                {% elseif health_book_entry.veterinarianName %}
+                                    {{ health_book_entry.veterinarianName }}
                                 {% else %}
                                     Non renseigné
                                 {% endif %}
@@ -128,7 +138,9 @@
                                     {% elseif health_book_entry.isDueSoon %}
                                         <span class="badge bg-warning text-dark ms-2">Bientôt</span>
                                     {% endif %}
-                                    {% if health_book_entry.recurrenceMonths %}
+                                    {% if health_book_entry.recurrenceLabel %}
+                                        <span class="text-secondary small ms-2">({{ health_book_entry.recurrenceLabel }})</span>
+                                    {% elseif health_book_entry.recurrenceMonths %}
                                         <span class="text-secondary small ms-2">(tous les {{ health_book_entry.recurrenceMonths }} mois)</span>
                                     {% endif %}
                                 </td>
@@ -175,35 +187,46 @@
                 {% else %}
                     <div class="document-list">
                         {% for document in health_book_entry.documents %}
-                            <a
-                                href="{{ path('app_document_download_health_entry', {'entryId': health_book_entry.id, 'fileName': document.fileName}) }}"
-                                target="_blank"
-                                rel="noopener"
-                                class="document-item"
-                            >
-                                <span class="document-name">
-                                    {{ document.originalName|default(document.fileName) }}
-                                </span>
-
-                                <span class="document-meta">
-                                    {% if document.size is defined %}
-                                        {{ (document.size / 1024)|round(0, 'ceil') }} Ko
-                                    {% endif %}
-
-                                    {% if document.uploadedAt is defined %}
-                                        · {{ document.uploadedAt|date('d/m/Y') }}
-                                    {% endif %}
-                                </span>
-                            </a>
+                            <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
+                                <div>
+                                    <a href="{{ path('app_document_download_health_entry', {'entryId': health_book_entry.id, 'fileName': document.fileName}) }}"
+                                       target="_blank" rel="noopener" class="document-name text-decoration-none">
+                                        {{ document.originalName|default(document.fileName) }}
+                                    </a>
+                                    <span class="document-meta d-block small text-secondary">
+                                        {% if document.size is defined %}
+                                            {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                        {% endif %}
+                                        {% if document.uploadedAt is defined %}
+                                            · {{ document.uploadedAt|date('d/m/Y') }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <form method="post"
+                                      action="{{ path('app_health_book_entry_document_delete', {'id': health_book_entry.id, 'fileName': document.fileName}) }}"
+                                      onsubmit="return confirm('Supprimer ce document ?');"
+                                      style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_doc' ~ document.fileName) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Supprimer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                </form>
+                            </div>
                         {% endfor %}
                     </div>
                 {% endif %}
             </section>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-4 border-top border-anicare">
-                <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
-                    Retour
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
+                        Retour
+                    </a>
+                    <a href="{{ path('app_health_book_entry_import') }}" class="btn btn-outline-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Importer
+                    </a>
+                </div>
 
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-primary">

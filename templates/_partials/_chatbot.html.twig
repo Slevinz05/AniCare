@@ -1,0 +1,251 @@
+{% if app.user %}
+<div id="anicare-chatbot">
+    <div id="chatbot-hint"
+        style="position: fixed; bottom: 2rem; right: 5rem; z-index: 1039;
+               background: #fff; color: var(--secondary-color); font-size: 0.8rem; font-weight: 600;
+               padding: 0.45rem 0.85rem; border-radius: 0.6rem;
+               box-shadow: 0 2px 12px rgba(74,63,51,0.15); white-space: nowrap;
+               pointer-events: none;">
+        Besoin d'un pro ? Demandez-moi !
+        <span style="position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+                     width: 0; height: 0; border-top: 6px solid transparent;
+                     border-bottom: 6px solid transparent; border-left: 6px solid #fff;"></span>
+    </div>
+
+    <button id="chatbot-toggle" type="button" title="Assistant AniCare"
+        style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1050;
+               width: 56px; height: 56px; border-radius: 50%; border: none;
+               background: var(--primary-color); color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,0.4);
+               cursor: pointer; display: flex; align-items: center; justify-content: center;
+               transition: transform 0.2s, box-shadow 0.2s;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+
+    <div id="chatbot-panel" style="display: none; position: fixed; bottom: 5.5rem; right: 1.5rem; z-index: 1040;
+         width: 380px; max-width: calc(100vw - 2rem); height: 520px; max-height: calc(100vh - 8rem);
+         border-radius: 1rem; overflow: hidden; box-shadow: 0 12px 40px rgba(74,63,51,0.2);
+         background: #fff; border: 1px solid var(--border-color);
+         display: none; flex-direction: column;">
+
+        <div style="background: var(--primary-color); color: #fff; padding: 1rem 1.25rem;
+                    display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2);
+                        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                🐴
+            </div>
+            <div style="flex: 1;">
+                <strong style="font-size: 0.95rem;">Assistant AniCare</strong>
+                <div style="font-size: 0.7rem; opacity: 0.8;">Trouvez le bon professionnel</div>
+            </div>
+            <button id="chatbot-close" type="button" style="background: none; border: none; color: #fff; cursor: pointer; padding: 4px; opacity: 0.8; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.8'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div id="chatbot-messages" style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="chatbot-msg chatbot-msg-bot">
+                Bonjour ! 👋 Je suis l'assistant AniCare. Je peux vous aider à trouver un professionnel équin (vétérinaire, dentiste, ostéopathe...) près de chez vous. Que recherchez-vous ?
+            </div>
+        </div>
+
+        <div style="padding: 0.75rem; border-top: 1px solid var(--border-color); flex-shrink: 0; background: #fafaf8;">
+            <form id="chatbot-form" style="display: flex; gap: 0.5rem;">
+                <input type="text" id="chatbot-input" placeholder="Écrivez votre message..."
+                    autocomplete="off"
+                    style="flex: 1; border: 1px solid var(--border-color); border-radius: 0.5rem;
+                           padding: 0.5rem 0.75rem; font-size: 0.85rem; outline: none;
+                           transition: border-color 0.2s;"
+                    onfocus="this.style.borderColor='var(--primary-color)'"
+                    onblur="this.style.borderColor='var(--border-color)'">
+                <button type="submit" id="chatbot-send"
+                    style="background: var(--primary-color); color: #fff; border: none;
+                           border-radius: 0.5rem; padding: 0.5rem 0.75rem; cursor: pointer;
+                           display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.chatbot-msg {
+    max-width: 85%;
+    padding: 0.6rem 0.85rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+.chatbot-msg a {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+.chatbot-msg-bot {
+    align-self: flex-start;
+    background: var(--soft-teal);
+    color: var(--secondary-color);
+    border-bottom-left-radius: 0.2rem;
+}
+.chatbot-msg-user {
+    align-self: flex-end;
+    background: var(--primary-color);
+    color: #fff;
+    border-bottom-right-radius: 0.2rem;
+}
+.chatbot-typing {
+    align-self: flex-start;
+    background: var(--soft-teal);
+    color: var(--secondary-color);
+    border-bottom-left-radius: 0.2rem;
+    display: flex;
+    gap: 4px;
+    padding: 0.7rem 1rem;
+}
+.chatbot-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary-color); opacity: 0.4;
+    animation: chatbotBounce 1.4s infinite;
+}
+.chatbot-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chatbot-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes chatbotBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+#chatbot-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(13,148,136,0.5);
+}
+</style>
+
+<script>
+(function() {
+    var CHATBOT_API = 'http://localhost:3001/api/chat';
+    var sessionId = 'session_' + Math.random().toString(36).slice(2, 10);
+
+    var toggle = document.getElementById('chatbot-toggle');
+    var panel = document.getElementById('chatbot-panel');
+    var form = document.getElementById('chatbot-form');
+    var input = document.getElementById('chatbot-input');
+    var messagesEl = document.getElementById('chatbot-messages');
+    var isOpen = false;
+
+    var hint = document.getElementById('chatbot-hint');
+    var closeBtn = document.getElementById('chatbot-close');
+
+    function openChat() {
+        isOpen = true;
+        panel.style.display = 'flex';
+        toggle.style.display = 'none';
+        if (hint) hint.style.display = 'none';
+        input.focus();
+    }
+
+    function closeChat() {
+        isOpen = false;
+        panel.style.display = 'none';
+        toggle.style.display = 'flex';
+    }
+
+    toggle.addEventListener('click', openChat);
+    closeBtn.addEventListener('click', closeChat);
+
+    function addMessage(text, type) {
+        var div = document.createElement('div');
+        div.className = 'chatbot-msg chatbot-msg-' + type;
+        div.innerHTML = formatMessage(text);
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return div;
+    }
+
+    function addTyping() {
+        var div = document.createElement('div');
+        div.className = 'chatbot-typing';
+        div.id = 'chatbot-typing-indicator';
+        div.innerHTML = '<span></span><span></span><span></span>';
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function removeTyping() {
+        var el = document.getElementById('chatbot-typing-indicator');
+        if (el) el.remove();
+    }
+
+    function formatMessage(text) {
+        // Liens markdown [texte](url)
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+        // Gras **texte**
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        // Sauts de ligne
+        text = text.replace(/\n/g, '<br>');
+        return text;
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var msg = input.value.trim();
+        if (!msg) return;
+
+        addMessage(msg, 'user');
+        input.value = '';
+        input.disabled = true;
+        document.getElementById('chatbot-send').disabled = true;
+
+        addTyping();
+
+        fetch(CHATBOT_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, sessionId: sessionId }),
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            removeTyping();
+            if (data.response) {
+                var text = typeof data.response === 'string'
+                    ? data.response
+                    : data.response.map(function(b) { return b.text || ''; }).join('');
+                addMessage(text, 'bot');
+            } else if (data.error) {
+                addMessage('Erreur : ' + data.error, 'bot');
+            }
+        })
+        .catch(function(err) {
+            removeTyping();
+            addMessage('Le service est indisponible. Vérifiez que le serveur chatbot est démarré.', 'bot');
+        })
+        .finally(function() {
+            input.disabled = false;
+            document.getElementById('chatbot-send').disabled = false;
+            input.focus();
+        });
+    });
+    var footer = document.querySelector('.site-footer');
+    if (footer) {
+        var btnBase = 24;
+        var hintBase = 32;
+        var panelBase = 88;
+        function adjustPosition() {
+            var footerTop = footer.getBoundingClientRect().top;
+            var viewH = window.innerHeight;
+            if (footerTop < viewH) {
+                var offset = viewH - footerTop + 12;
+                toggle.style.bottom = (btnBase + offset) + 'px';
+                if (hint && hint.style.display !== 'none') hint.style.bottom = (hintBase + offset) + 'px';
+                panel.style.bottom = (panelBase + offset) + 'px';
+            } else {
+                toggle.style.bottom = btnBase + 'px';
+                if (hint && hint.style.display !== 'none') hint.style.bottom = hintBase + 'px';
+                panel.style.bottom = panelBase + 'px';
+            }
+        }
+        window.addEventListener('scroll', adjustPosition, { passive: true });
+        window.addEventListener('resize', adjustPosition, { passive: true });
+        adjustPosition();
+    }
+})();
+</script>
+{% endif %}

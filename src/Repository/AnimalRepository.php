@@ -21,36 +21,16 @@ class AnimalRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('a')
             ->leftJoin('a.animalShares', 's')
-            ->where('a.owner = :user')             // Cas 1 : Il est le propriétaire
-            ->orWhere('s.sharedWithEmail = :email') // Cas 2 : L'animal lui est partagé
+            ->where('a.owner = :user')
+            ->orWhere('s.sharedWithEmail = :email')
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
             ->getQuery()
             ->getResult();
     }
 
-    //    /**
-//     * @return Animal[] Returns an array of Animal objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('a.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-    //    public function findOneBySomeField($value): ?Animal
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findOneBySlug(string $slug): ?Animal
+    {
+        return $this->findOneBy(['slug' => $slug]);
+    }
 }

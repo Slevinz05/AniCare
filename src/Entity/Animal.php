@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AnimalRepository::class)]
@@ -95,6 +96,9 @@ class Animal
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $trustedContactPhone = null;
 
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $slug = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
@@ -142,8 +146,35 @@ class Animal
     public function setName(string $name): static
     {
         $this->name = $name;
+        $this->generateSlug();
 
         return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): static
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function generateSlug(): void
+    {
+        $slugger = new AsciiSlugger('fr');
+        $base = $slugger->slug($this->name ?? '')->lower()->toString();
+        $this->slug = $base . '-' . $this->id;
+    }
+
+    public function ensureSlug(): void
+    {
+        if (!$this->slug && $this->name && $this->id) {
+            $this->generateSlug();
+        }
     }
 
     public function getSpecies(): ?string

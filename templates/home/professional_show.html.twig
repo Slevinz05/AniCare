@@ -1,0 +1,294 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ professional.fullName }} - Professionnel équin - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    {# ── Retour annuaire ── #}
+    <div class="mb-4">
+        <a href="{{ path('app_directory') }}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Retour à l'annuaire
+        </a>
+    </div>
+
+    {# ══════════════════════════════════════════════
+       GALERIE PHOTOS (style Airbnb)
+       ══════════════════════════════════════════════ #}
+    {% set photos = professional.profilePhotos ?? [] %}
+    {% if photos|length > 0 %}
+        <div class="pro-gallery mb-4 rounded-3 overflow-hidden" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px; gap: 4px; max-height: 404px;">
+            {% for photo in photos|slice(0, 4) %}
+                <div style="{{ loop.first ? 'grid-row: 1 / 3;' : '' }} overflow: hidden;">
+                    <img src="{{ path('app_professional_photo', {id: professional.id, fileName: photo.fileName}) }}"
+                         alt="{{ photo.originalName|default('Photo') }}"
+                         style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
+                         class="pro-gallery-img"
+                         data-index="{{ loop.index0 }}">
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="mb-4 rounded-3 d-flex align-items-center justify-content-center" style="height: 240px; background: linear-gradient(135deg, var(--soft-teal) 0%, #e2e8f0 100%);">
+            <div class="text-center">
+                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; background-color: var(--primary-color); color: #fff; font-weight: 700; font-size: 1.8rem;">
+                    {{ professional.firstName|first|upper }}{{ professional.lastName|first|upper }}
+                </div>
+                <h2 class="h4 fw-bold mb-0" style="color: var(--secondary-color);">{{ professional.fullName }}</h2>
+                {% if professional.specialty %}
+                    <span class="badge mt-2" style="background-color: var(--primary-color);">{{ professional.specialty }}</span>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        {# ══════════════════════════════════════════════
+           COLONNE GAUCHE - Infos principales
+           ══════════════════════════════════════════════ #}
+        <div class="col-12 col-lg-8">
+
+            {# ── En-tete ── #}
+            <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4 pb-4" style="border-bottom: 1px solid var(--border-color);">
+                <div>
+                    {% if photos|length > 0 %}
+                        <h1 class="h3 fw-bold mb-1" style="color: var(--secondary-color);">{{ professional.fullName }}</h1>
+                    {% endif %}
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        {% if professional.specialty %}
+                            <span class="badge" style="background-color: var(--primary-color); font-size: 0.8rem;">{{ professional.specialty }}</span>
+                        {% endif %}
+                        {% if professional.experienceYears %}
+                            <span class="badge bg-anicare-soft text-teal border border-anicare" style="font-size: 0.8rem;">{{ professional.experienceYears }} ans d'experience</span>
+                        {% endif %}
+                    </div>
+                    {% if professional.city or professional.postalCode %}
+                        <p class="text-secondary mb-0 d-flex align-items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {% if professional.postalCode %}{{ professional.postalCode }} {% endif %}{{ professional.city }}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 64px; height: 64px; background-color: var(--primary-color); color: #fff; font-weight: 700; font-size: 1.4rem;">
+                        {{ professional.firstName|first|upper }}{{ professional.lastName|first|upper }}
+                    </div>
+                </div>
+            </div>
+
+            {# ── Presentation courte ── #}
+            {% if professional.bio %}
+                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--border-color);">
+                    <h2 class="h5 fw-bold mb-3" style="color: var(--secondary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        A propos
+                    </h2>
+                    <p class="mb-0" style="line-height: 1.7; white-space: pre-line;">{{ professional.bio }}</p>
+                </div>
+            {% endif %}
+
+            {# ── Description detaillee des services ── #}
+            {% if professional.profileDescription %}
+                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--border-color);">
+                    <h2 class="h5 fw-bold mb-3" style="color: var(--secondary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Mes services en detail
+                    </h2>
+                    <div style="line-height: 1.7; white-space: pre-line;">{{ professional.profileDescription }}</div>
+                </div>
+            {% endif %}
+
+            {# ── Zone d'exercice ── #}
+            {% if professional.interventionDepartments is not empty %}
+                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--border-color);">
+                    <h2 class="h5 fw-bold mb-3" style="color: var(--secondary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        Zone d'exercice
+                    </h2>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for dept in professional.interventionDepartments %}
+                            <span class="badge bg-anicare-soft text-teal border border-anicare px-3 py-2" style="font-size: 0.8rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                Dept. {{ dept }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# ── Adresse complete ── #}
+            {% if professional.fullAddress %}
+                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--border-color);">
+                    <h2 class="h5 fw-bold mb-3" style="color: var(--secondary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Adresse
+                    </h2>
+                    <p class="mb-0">{{ professional.fullAddress }}</p>
+                </div>
+            {% endif %}
+
+            {# ── Consultations recentes ── #}
+            {% if recent_consultations|length > 0 %}
+                <div class="mb-4">
+                    <h2 class="h5 fw-bold mb-3" style="color: var(--secondary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Activite recente
+                    </h2>
+                    <div class="list-group list-group-flush">
+                        {% for entry in recent_consultations %}
+                            <div class="list-group-item px-0 d-flex justify-content-between align-items-center" style="background: transparent; border-color: var(--border-color);">
+                                <div>
+                                    <strong class="small">{{ entry.title }}</strong>
+                                    {% if entry.type %}
+                                        {% set etype = entry.type|lower %}
+                                        {% if etype == 'vaccination' or etype == 'vaccin' %}
+                                            <span class="badge-medical badge-vaccin ms-1" style="font-size: 0.6rem;">Vaccination</span>
+                                        {% elseif etype == 'chirurgie' %}
+                                            <span class="badge-medical badge-surgery ms-1" style="font-size: 0.6rem;">Chirurgie</span>
+                                        {% else %}
+                                            <span class="badge-medical badge-neutral ms-1" style="font-size: 0.6rem;">{{ entry.type }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <span class="small text-secondary">{{ entry.date ? entry.date|date('d/m/Y') : '' }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {# ══════════════════════════════════════════════
+           COLONNE DROITE - Carte de contact (sticky)
+           ══════════════════════════════════════════════ #}
+        <div class="col-12 col-lg-4">
+            <div class="card anicare-card" style="position: sticky; top: 1rem;">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px; background-color: var(--primary-color); color: #fff; font-weight: 700; font-size: 1.5rem;">
+                            {{ professional.firstName|first|upper }}{{ professional.lastName|first|upper }}
+                        </div>
+                        <h3 class="h5 fw-bold mb-1">{{ professional.fullName }}</h3>
+                        {% if professional.specialty %}
+                            <span class="badge" style="background-color: var(--primary-color); font-size: 0.75rem;">{{ professional.specialty }}</span>
+                        {% endif %}
+                    </div>
+
+                    {# ── Informations de contact ── #}
+                    <div class="mb-4">
+                        {% if professional.phone %}
+                            <div class="d-flex align-items-center gap-2 mb-3 p-2 rounded-2" style="background-color: var(--soft-teal);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                <a href="tel:{{ professional.phone }}" class="text-decoration-none fw-bold" style="color: var(--secondary-color);">{{ professional.phone }}</a>
+                            </div>
+                        {% endif %}
+
+                        {% if professional.email %}
+                            <div class="d-flex align-items-center gap-2 mb-3 p-2 rounded-2" style="background-color: var(--soft-teal);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                <a href="mailto:{{ professional.email }}" class="text-decoration-none small" style="color: var(--secondary-color); word-break: break-all;">{{ professional.email }}</a>
+                            </div>
+                        {% endif %}
+
+                        {% if professional.website %}
+                            <div class="d-flex align-items-center gap-2 mb-3 p-2 rounded-2" style="background-color: var(--soft-teal);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                <a href="{{ professional.website }}" target="_blank" rel="noopener" class="text-decoration-none small" style="color: var(--secondary-color); word-break: break-all;">{{ professional.website|replace({'https://': '', 'http://': ''})|trim('/') }}</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Boutons d'action ── #}
+                    {% if app.user %}
+                        <a href="{{ path('app_message_contact', {'id': professional.id}) }}" class="btn btn-primary w-100 mb-2 d-flex align-items-center justify-content-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Contacter
+                        </a>
+                        <a href="{{ path('app_animal_share_new', {'email': professional.email}) }}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            Partager un cheval
+                        </a>
+                    {% endif %}
+
+                    {# ── Infos complementaires ── #}
+                    <div class="mt-4 pt-3" style="border-top: 1px solid var(--border-color);">
+                        <div class="d-flex justify-content-between small text-secondary mb-2">
+                            <span>Département</span>
+                            <strong>{{ professional.department ?? 'Non renseigné' }}</strong>
+                        </div>
+                        {% if professional.experienceYears %}
+                            <div class="d-flex justify-content-between small text-secondary mb-2">
+                                <span>Experience</span>
+                                <strong>{{ professional.experienceYears }} ans</strong>
+                            </div>
+                        {% endif %}
+                        {% if professional.interventionDepartments is not empty %}
+                            <div class="d-flex justify-content-between small text-secondary mb-2">
+                                <span>Zone</span>
+                                <strong>{{ professional.interventionDepartmentsLabel }}</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{# ── Lightbox pour galerie photos ── #}
+{% if photos|length > 0 %}
+<div id="photoLightbox" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); cursor: pointer;" onclick="closeLightbox()">
+    <button type="button" onclick="closeLightbox()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; z-index: 10000;">&times;</button>
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90vw; max-height: 90vh;">
+        <img id="lightboxImg" src="" alt="" style="max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 0.5rem;" onclick="event.stopPropagation();">
+    </div>
+    {% if photos|length > 1 %}
+        <button type="button" onclick="event.stopPropagation(); navLightbox(-1)" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 2rem; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">&#8249;</button>
+        <button type="button" onclick="event.stopPropagation(); navLightbox(1)" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 2rem; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">&#8250;</button>
+    {% endif %}
+</div>
+
+<script>
+(function() {
+    var photos = [
+        {% for photo in photos %}
+            "{{ path('app_professional_photo', {id: professional.id, fileName: photo.fileName}) }}"{{ not loop.last ? ',' : '' }}
+        {% endfor %}
+    ];
+    var currentIndex = 0;
+    var lightbox = document.getElementById('photoLightbox');
+    var lightboxImg = document.getElementById('lightboxImg');
+
+    document.querySelectorAll('.pro-gallery-img').forEach(function(img) {
+        img.addEventListener('click', function() {
+            currentIndex = parseInt(this.dataset.index);
+            lightboxImg.src = photos[currentIndex];
+            lightbox.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    window.closeLightbox = function() {
+        lightbox.style.display = 'none';
+        document.body.style.overflow = '';
+    };
+
+    window.navLightbox = function(dir) {
+        currentIndex = (currentIndex + dir + photos.length) % photos.length;
+        lightboxImg.src = photos[currentIndex];
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (lightbox.style.display === 'block') {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') navLightbox(-1);
+            if (e.key === 'ArrowRight') navLightbox(1);
+        }
+    });
+})();
+</script>
+{% endif %}
+
+{% endblock %}

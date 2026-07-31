@@ -17,6 +17,10 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        chatbot_api:
+            pattern: ^/api/professionals/(chatbot|specialties)
+            stateless: true
+            security: false
         main:
             lazy: true
             provider: app_user_provider
@@ -45,17 +49,19 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # 🔒 Protection des fonctionnalités de l'application (Réservé aux comptes connectés)
-        - { path: ^/animal, roles: ROLE_USER }
-        - { path: ^/calendar, roles: ROLE_USER }
-        - { path: ^/health/book/entry, roles: ROLE_USER }
-        - { path: ^/weight, roles: ROLE_USER }
-        - { path: ^/allergy, roles: ROLE_USER }
-        - { path: ^/appointment, roles: ROLE_USER }
-        - { path: ^/message, roles: ROLE_USER }
-        - { path: ^/emergency, roles: ROLE_USER }
+        - { path: ^/mes-chevaux, roles: ROLE_USER }
+        - { path: ^/calendrier, roles: ROLE_USER }
+        - { path: ^/consultations, roles: ROLE_USER }
+        - { path: ^/poids, roles: ROLE_USER }
+        - { path: ^/allergies, roles: ROLE_USER }
+        - { path: ^/rendez-vous, roles: ROLE_USER }
+        - { path: ^/messagerie, roles: ROLE_USER }
+        - { path: ^/urgence, roles: ROLE_USER }
         - { path: ^/download, roles: ROLE_USER }
         - { path: ^/profil, roles: ROLE_USER }
+        - { path: ^/partage, roles: ROLE_USER }
+        - { path: ^/repertoire, roles: ROLE_PRO }
+        - { path: ^/factures, roles: ROLE_PRO }
         - { path: ^/document, roles: ROLE_USER }
 
         # Exemples optionnels pour la hiérarchie future :

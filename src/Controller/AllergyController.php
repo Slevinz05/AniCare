@@ -12,11 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/allergy')]
+#[Route('/allergies')]
 #[IsGranted('ROLE_USER')]
 final class AllergyController extends AbstractController
 {
-    #[Route('/animal/{id}', name: 'app_allergy_index', methods: ['GET'])]
+    #[Route('/cheval/{id}', name: 'app_allergy_index', methods: ['GET'])]
     public function index(Animal $animal): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
@@ -27,7 +27,7 @@ final class AllergyController extends AbstractController
         ]);
     }
 
-    #[Route('/animal/{id}/new', name: 'app_allergy_new', methods: ['GET', 'POST'])]
+    #[Route('/cheval/{id}/ajouter', name: 'app_allergy_new', methods: ['GET', 'POST'])]
     public function new(Request $request, Animal $animal, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
@@ -52,7 +52,7 @@ final class AllergyController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_allergy_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/modifier', name: 'app_allergy_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Allergy $allergy, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $allergy->getAnimal());

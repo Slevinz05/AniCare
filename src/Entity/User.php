@@ -72,6 +72,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $specialty = null;
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $profilePhotos = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $profileDescription = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $website = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $interventionDepartments = null;
+
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $experienceYears = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeCustomerId = null;
 
@@ -391,6 +406,94 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $parts = array_filter([$this->address, $this->postalCode, $this->city]);
 
         return $parts ? implode(', ', $parts) : null;
+    }
+
+    public function getProfilePhotos(): ?array
+    {
+        return $this->profilePhotos;
+    }
+
+    public function setProfilePhotos(?array $profilePhotos): static
+    {
+        $this->profilePhotos = $profilePhotos;
+
+        return $this;
+    }
+
+    public function addProfilePhoto(array $photo): static
+    {
+        $photos = $this->profilePhotos ?? [];
+        $photos[] = $photo;
+        $this->profilePhotos = $photos;
+
+        return $this;
+    }
+
+    public function removeProfilePhoto(string $fileName): static
+    {
+        $this->profilePhotos = array_values(array_filter(
+            $this->profilePhotos ?? [],
+            fn (array $p) => ($p['fileName'] ?? '') !== $fileName,
+        ));
+
+        return $this;
+    }
+
+    public function getProfileDescription(): ?string
+    {
+        return $this->profileDescription;
+    }
+
+    public function setProfileDescription(?string $profileDescription): static
+    {
+        $this->profileDescription = $profileDescription;
+
+        return $this;
+    }
+
+    public function getWebsite(): ?string
+    {
+        return $this->website;
+    }
+
+    public function setWebsite(?string $website): static
+    {
+        $this->website = $website;
+
+        return $this;
+    }
+
+    public function getInterventionDepartments(): ?array
+    {
+        return $this->interventionDepartments;
+    }
+
+    public function setInterventionDepartments(?array $interventionDepartments): static
+    {
+        $this->interventionDepartments = $interventionDepartments;
+
+        return $this;
+    }
+
+    public function getInterventionDepartmentsLabel(): ?string
+    {
+        if (empty($this->interventionDepartments)) {
+            return null;
+        }
+
+        return implode(', ', $this->interventionDepartments);
+    }
+
+    public function getExperienceYears(): ?int
+    {
+        return $this->experienceYears;
+    }
+
+    public function setExperienceYears(?int $experienceYears): static
+    {
+        $this->experienceYears = $experienceYears;
+
+        return $this;
     }
 
     public function hasActiveSubscription(): bool

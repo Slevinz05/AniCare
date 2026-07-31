@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/appointment')]
+#[Route('/rendez-vous')]
 #[IsGranted('ROLE_USER')]
 final class AppointmentController extends AbstractController
 {
@@ -28,7 +28,7 @@ final class AppointmentController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_appointment_new', methods: ['GET', 'POST'])]
+    #[Route('/nouveau', name: 'app_appointment_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         /** @var User $user */
@@ -54,7 +54,7 @@ final class AppointmentController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/cancel', name: 'app_appointment_cancel', methods: ['POST'])]
+    #[Route('/{id}/annuler', name: 'app_appointment_cancel', methods: ['POST'])]
     public function cancel(Request $request, Appointment $appointment, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $appointment->getAnimal());
@@ -67,7 +67,7 @@ final class AppointmentController extends AbstractController
         return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/confirm', name: 'app_appointment_confirm', methods: ['POST'])]
+    #[Route('/{id}/confirmer', name: 'app_appointment_confirm', methods: ['POST'])]
     public function confirm(Request $request, Appointment $appointment, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $appointment->getAnimal());

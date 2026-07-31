@@ -158,7 +158,7 @@
     /* Bouton flottant + */
     .fab-add {
         position: fixed;
-        bottom: 28px;
+        bottom: 100px;
         right: 28px;
         width: 56px;
         height: 56px;
@@ -180,7 +180,7 @@
 
     .fab-menu {
         position: fixed;
-        bottom: 92px;
+        bottom: 164px;
         right: 28px;
         z-index: 99;
         display: none;
@@ -504,6 +504,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 fabMenu.classList.remove('show');
             }
         });
+
+        var footer = document.querySelector('.site-footer');
+        if (footer) {
+            var fabBase = 100;
+            var menuBase = 164;
+            function adjustFab() {
+                var footerRect = footer.getBoundingClientRect();
+                var viewH = window.innerHeight;
+                if (footerRect.top < viewH) {
+                    var offset = viewH - footerRect.top + 12;
+                    fabBtn.style.bottom = (fabBase + offset) + 'px';
+                    fabMenu.style.bottom = (menuBase + offset) + 'px';
+                } else {
+                    fabBtn.style.bottom = fabBase + 'px';
+                    fabMenu.style.bottom = menuBase + 'px';
+                }
+            }
+            window.addEventListener('scroll', adjustFab, { passive: true });
+            window.addEventListener('resize', adjustFab, { passive: true });
+            adjustFab();
+        }
     }
 });
 </script>

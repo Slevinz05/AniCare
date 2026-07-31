@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-#[Route('/message')]
+#[Route('/messagerie')]
 #[IsGranted('ROLE_USER')]
 final class MessageController extends AbstractController
 {
@@ -44,7 +44,7 @@ final class MessageController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_message_new', methods: ['GET'])]
+    #[Route('/nouveau', name: 'app_message_new', methods: ['GET'])]
     public function new(AnimalRepository $animalRepository, MessageRepository $messageRepository): Response
     {
         /** @var User $user */
@@ -61,7 +61,7 @@ final class MessageController extends AbstractController
         ]);
     }
 
-    #[Route('/animal/{id}', name: 'app_message_thread', methods: ['GET', 'POST'])]
+    #[Route('/conversation/{id}', name: 'app_message_thread', methods: ['GET', 'POST'])]
     public function thread(Request $request, Animal $animal, MessageRepository $repository, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
@@ -129,7 +129,7 @@ final class MessageController extends AbstractController
         ]);
     }
 
-    #[Route('/contact/{id}', name: 'app_message_contact', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[Route('/contacter/{id}', name: 'app_message_contact', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function contact(Request $request, User $recipient, MessageRepository $repository, EntityManagerInterface $em): Response
     {
         /** @var User $user */
@@ -193,7 +193,7 @@ final class MessageController extends AbstractController
         ]);
     }
 
-    #[Route('/download/{id}', name: 'app_message_download', methods: ['GET'])]
+    #[Route('/telecharger/{id}', name: 'app_message_download', methods: ['GET'])]
     public function download(Message $message): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $message->getAnimal());

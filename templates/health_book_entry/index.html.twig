@@ -21,7 +21,11 @@
                 </p>
             </div>
 
-            <div class="col-12 col-lg-auto">
+            <div class="col-12 col-lg-auto d-flex gap-2">
+                <a href="{{ path('app_health_book_entry_import') }}" class="btn btn-outline-primary shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Importer des documents
+                </a>
                 <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary shadow-sm">
                     Enregistrer une consultation
                 </a>
@@ -49,82 +53,140 @@
         <div class="card anicare-card overflow-hidden">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-medical health-entry-table align-middle mb-0">
+                    <table class="table table-hover table-medical align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Cheval</th>
-                                <th>Consultation</th>
-                                <th>Type</th>
                                 <th>Date</th>
-                                <th>Vétérinaire</th>
+                                <th>Acte</th>
+                                <th>Intervenant</th>
+                                <th>Note</th>
+                                <th>Documents</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {% for health_book_entry in health_book_entries %}
-                                {% set entry_type = health_book_entry.type|default('')|lower %}
+                            {% for entry in health_book_entries %}
+                                {% set entry_type = entry.type|default('')|lower %}
 
                                 <tr>
                                     <td>
-                                        <strong class="text-teal">
-                                            {{ health_book_entry.animal.name ?? 'Non spécifié' }}
-                                        </strong>
+                                        <a href="{{ path('app_animal_show', {'slug': entry.animal.slug}) }}" class="text-decoration-none">
+                                            <strong class="text-teal">{{ entry.animal.name ?? 'Non spécifié' }}</strong>
+                                        </a>
                                     </td>
 
                                     <td>
-                                        <div class="health-entry-title">
-                                            {{ health_book_entry.title }}
-                                        </div>
-
-                                        {% if health_book_entry.description %}
-                                            <div class="health-entry-description">
-                                                {{ health_book_entry.description|length > 90
-                                                    ? health_book_entry.description|slice(0, 90) ~ '…'
-                                                    : health_book_entry.description
-                                                }}
-                                            </div>
+                                        <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="text-decoration-none">
+                                            <strong>{{ entry.date ? entry.date|date('d/m/Y') : 'N/A' }}</strong>
+                                            {% if entry.date and entry.date|date('H:i') != '00:00' %}
+                                                <br><span class="small text-secondary">{{ entry.date|date('H:i') }}</span>
+                                            {% endif %}
+                                        </a>
+                                        {% if entry.isOverdueReminder %}
+                                            <br><span class="badge bg-danger" style="font-size: 0.6rem;">Rappel en retard</span>
+                                        {% elseif entry.isDueSoon %}
+                                            <br><span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Rappel bientot</span>
                                         {% endif %}
                                     </td>
 
                                     <td>
-                                        {% if entry_type == 'vaccin' or entry_type == 'vaccination' %}
-                                            <span class="badge-medical badge-vaccin">Vaccination</span>
+                                        {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
+                                            <span class="badge-medical badge-vaccin">Vaccin</span>
                                         {% elseif entry_type == 'chirurgie' %}
                                             <span class="badge-medical badge-surgery">Chirurgie</span>
                                         {% elseif entry_type == 'consultation' %}
                                             <span class="badge-medical badge-consultation">Consultation</span>
+                                        {% elseif entry_type == 'vermifuge' %}
+                                            <span class="badge-medical badge-neutral">Vermifuge</span>
+                                        {% elseif entry_type == 'antiparasitaire' %}
+                                            <span class="badge-medical badge-neutral">Antiparasitaire</span>
                                         {% else %}
-                                            <span class="badge-medical badge-neutral">
-                                                {{ health_book_entry.type ?: 'Non renseigné' }}
-                                            </span>
+                                            <span class="badge-medical badge-neutral">{{ entry.type ?: 'Non renseigné' }}</span>
+                                        {% endif %}
+                                        {% if entry.title %}
+                                            <br><span class="small text-secondary">{{ entry.title }}</span>
                                         {% endif %}
                                     </td>
 
                                     <td>
-                                        {{ health_book_entry.date ? health_book_entry.date|date('d/m/Y') : 'Non renseignée' }}
-                                        {% if health_book_entry.isOverdueReminder %}
-                                            <span class="badge bg-danger ms-1">Rappel en retard</span>
-                                        {% elseif health_book_entry.isDueSoon %}
-                                            <span class="badge bg-warning text-dark ms-1">Rappel bientôt</span>
+                                        {% if entry.veterinarian %}
+                                            <div class="intervenant-popover-wrapper position-relative d-inline-block">
+                                                <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold text-start intervenant-toggle" style="color: var(--primary-color); background: none; border: none;">
+                                                    {{ entry.veterinarian.fullName }}
+                                                    {% if entry.veterinarian.specialty %}
+                                                        <br><span class="small fw-normal text-secondary">{{ entry.veterinarian.specialty }}</span>
+                                                    {% endif %}
+                                                </button>
+                                                <div class="intervenant-popover d-none rounded-3 shadow p-3" style="z-index: 1050; min-width: 260px; position: fixed; background: #fff; border: 1px solid #dee2e6; color: #212529;">
+                                                    <div class="d-flex align-items-center gap-2 mb-2 pb-2" style="border-bottom: 1px solid #dee2e6;">
+                                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.8rem;">
+                                                            {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
+                                                        </div>
+                                                        <div>
+                                                            <strong class="d-block small" style="color: #212529;">{{ entry.veterinarian.fullName }}</strong>
+                                                            {% if entry.veterinarian.specialty %}
+                                                                <span class="badge" style="background-color: var(--primary-color); font-size: 0.65rem;">{{ entry.veterinarian.specialty }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% if entry.veterinarian.phone %}
+                                                        <div class="small mb-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                                            <a href="tel:{{ entry.veterinarian.phone }}" class="text-decoration-none">{{ entry.veterinarian.phone }}</a>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if entry.veterinarian.email %}
+                                                        <div class="small mb-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                                            <a href="mailto:{{ entry.veterinarian.email }}" class="text-decoration-none">{{ entry.veterinarian.email }}</a>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if entry.veterinarian.city %}
+                                                        <div class="small">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                                            {% if entry.veterinarian.postalCode %}{{ entry.veterinarian.postalCode }} {% endif %}{{ entry.veterinarian.city }}
+                                                        </div>
+                                                    {% endif %}
+                                                    <a href="{{ path('app_professional_show', {'id': entry.veterinarian.id}) }}" class="btn btn-outline-primary btn-sm w-100 mt-2">Voir la fiche</a>
+                                                </div>
+                                            </div>
+                                        {% elseif entry.veterinarianName %}
+                                            <span class="text-secondary">{{ entry.veterinarianName }}</span>
+                                        {% else %}
+                                            <span class="text-secondary fst-italic">Non renseigné</span>
                                         {% endif %}
                                     </td>
 
                                     <td>
-                                        {% if health_book_entry.veterinarianName %}
-                                            Dr. {{ health_book_entry.veterinarianName }}
+                                        {% if entry.description %}
+                                            <span class="small" title="{{ entry.description }}">{{ entry.description|length > 60 ? entry.description|slice(0, 60) ~ '...' : entry.description }}</span>
                                         {% else %}
-                                            <span class="text-secondary">Non renseigné</span>
+                                            <span class="text-secondary fst-italic small">-</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% set docs = entry.documents %}
+                                        {% if docs|length > 0 %}
+                                            {% for doc in docs %}
+                                                <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="badge bg-anicare-soft text-teal border border-anicare text-decoration-none me-1 mb-1" title="{{ doc.originalName|default(doc.fileName) }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                    {{ doc.originalName|default(doc.fileName)|length > 15 ? doc.originalName|default(doc.fileName)|slice(0, 12) ~ '...' : doc.originalName|default(doc.fileName) }}
+                                                </a>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-secondary fst-italic small">-</span>
                                         {% endif %}
                                     </td>
 
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a href="{{ path('app_health_book_entry_show', {'id': health_book_entry.id}) }}" class="btn btn-outline-primary btn-sm">
+                                            <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-outline-primary btn-sm">
                                                 Consulter
                                             </a>
-
-                                            <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-primary btn-sm">
+                                            <a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="btn btn-primary btn-sm">
                                                 Modifier
                                             </a>
                                         </div>
@@ -139,4 +201,47 @@
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    document.querySelectorAll('.intervenant-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var popover = this.nextElementSibling;
+            document.querySelectorAll('.intervenant-popover').forEach(function(p) {
+                if (p !== popover) p.classList.add('d-none');
+            });
+            if (popover.classList.contains('d-none')) {
+                var rect = this.getBoundingClientRect();
+                popover.style.top = (rect.bottom + 4) + 'px';
+                popover.style.left = rect.left + 'px';
+                popover.classList.remove('d-none');
+                var popRect = popover.getBoundingClientRect();
+                if (popRect.right > window.innerWidth - 8) {
+                    popover.style.left = (window.innerWidth - popRect.width - 8) + 'px';
+                }
+            } else {
+                popover.classList.add('d-none');
+            }
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.intervenant-popover-wrapper')) {
+            document.querySelectorAll('.intervenant-popover').forEach(function(p) {
+                p.classList.add('d-none');
+            });
+        }
+    });
+
+    window.addEventListener('scroll', function() {
+        document.querySelectorAll('.intervenant-popover').forEach(function(p) {
+            p.classList.add('d-none');
+        });
+    }, true);
+})();
+</script>
 {% endblock %}

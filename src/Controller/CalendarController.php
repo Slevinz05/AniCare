@@ -22,7 +22,7 @@ final class CalendarController extends AbstractController
 
     private const DAYS_FR = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
-    #[Route('/calendar', name: 'app_calendar', methods: ['GET'])]
+    #[Route('/calendrier', name: 'app_calendar', methods: ['GET'])]
     public function index(
         Request $request,
         HealthBookEntryRepository $healthRepo,

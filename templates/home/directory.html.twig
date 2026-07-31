@@ -27,7 +27,7 @@
                     <div class="col-12 col-md-4">
                         <label for="filter-specialty" class="form-label small fw-bold mb-1">Type d'intervention</label>
                         <select id="filter-specialty" name="specialty" class="form-select form-select-sm">
-                            <option value="">Toutes les specialites</option>
+                            <option value="">Toutes les spécialités</option>
                             {% set specialties = [
                                 'Veterinaire',
                                 'Dentiste',
@@ -47,7 +47,7 @@
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label for="filter-department" class="form-label small fw-bold mb-1">Departement</label>
+                        <label for="filter-department" class="form-label small fw-bold mb-1">Département</label>
                         <input type="text"
                                id="filter-department"
                                name="department"
@@ -74,7 +74,7 @@
                             Filtrer
                         </button>
                         {% if current_specialty or current_department or current_query %}
-                            <a href="{{ path('app_directory') }}" class="btn btn-outline-secondary btn-sm" title="Reinitialiser">
+                            <a href="{{ path('app_directory') }}" class="btn btn-outline-secondary btn-sm" title="Réinitialiser">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             </a>
                         {% endif %}
@@ -115,26 +115,26 @@
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             {% if current_specialty or current_department or current_query %}
-                <h2 class="h4 page-title mb-2">Aucun resultat</h2>
-                <p class="text-secondary mb-3">Aucun professionnel ne correspond a vos criteres de recherche.</p>
-                <a href="{{ path('app_directory') }}" class="btn btn-outline-primary btn-sm">Reinitialiser les filtres</a>
+                <h2 class="h4 page-title mb-2">Aucun résultat</h2>
+                <p class="text-secondary mb-3">Aucun professionnel ne correspond à vos critères de recherche.</p>
+                <a href="{{ path('app_directory') }}" class="btn btn-outline-primary btn-sm">Réinitialiser les filtres</a>
             {% else %}
                 <h2 class="h4 page-title mb-2">Aucun professionnel inscrit</h2>
-                <p class="text-secondary mb-0">Il n'y a pas encore de professionnel enregistre sur la plateforme.</p>
+                <p class="text-secondary mb-0">Il n'y a pas encore de professionnel enregistré sur la plateforme.</p>
             {% endif %}
         </div>
     {% else %}
         <div class="row g-4">
             {% for pro in professionals %}
                 <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card anicare-card h-100">
+                    <div class="card anicare-card h-100" style="transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(74,63,51,0.15)'" onmouseleave="this.style.transform='';this.style.boxShadow=''" onclick="if(!event.target.closest('a,button,.d-flex.gap-2'))window.location='{{ path('app_professional_show', {'id': pro.id}) }}'">
                         <div class="card-body p-4 d-flex flex-column">
                             <div class="d-flex align-items-center gap-3 mb-3">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px; background-color: var(--primary-color); color: #fff; font-weight: 700; font-size: 1.1rem;">
                                     {{ pro.firstName|first|upper }}{{ pro.lastName|first|upper }}
                                 </div>
                                 <div>
-                                    <h3 class="h6 fw-bold mb-1">{{ pro.fullName }}</h3>
+                                    <h3 class="h6 fw-bold mb-1"><a href="{{ path('app_professional_show', {'id': pro.id}) }}" class="text-decoration-none" style="color: inherit;">{{ pro.fullName }}</a></h3>
                                     {% if pro.specialty %}
                                         <span class="badge" style="background-color: var(--primary-color); font-size: 0.7rem;">{{ pro.specialty }}</span>
                                     {% else %}
@@ -165,11 +165,24 @@
                                 {% if pro.bio %}
                                     <p class="mt-2 mb-0" style="line-height: 1.4;">{{ pro.bio|length > 120 ? pro.bio|slice(0, 120) ~ '...' : pro.bio }}</p>
                                 {% endif %}
+                                {% if pro.interventionDepartments is not empty %}
+                                    <div class="mt-2">
+                                        <span class="d-block small fw-bold mb-1" style="color: var(--secondary-color); font-size: 0.7rem;">Zone d'intervention</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for dept in pro.interventionDepartments|slice(0, 5) %}
+                                            <span class="badge bg-anicare-soft text-teal border border-anicare" style="font-size: 0.65rem;">{{ dept }}</span>
+                                        {% endfor %}
+                                        {% if pro.interventionDepartments|length > 5 %}
+                                            <span class="badge bg-light text-secondary border" style="font-size: 0.65rem;">+{{ pro.interventionDepartments|length - 5 }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="mt-auto pt-2 border-top border-light">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                    <span class="small text-secondary">{{ pro.animals|length }} cheval{{ pro.animals|length > 1 ? 'ux' : '' }} suivi{{ pro.animals|length > 1 ? 's' : '' }}</span>
+                                    <span class="small text-secondary">{{ pro.animals|length }} {{ pro.animals|length > 1 ? 'chevaux suivis' : 'cheval suivi' }}</span>
                                     {% if app.user %}
                                         <div class="d-flex gap-2">
                                             <a href="{{ path('app_message_contact', {'id': pro.id}) }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
@@ -189,7 +202,7 @@
     {% endif %}
 
     <div class="mt-4">
-        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">Retour a l'accueil</a>
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">Retour à l'accueil</a>
     </div>
 </div>
 {% endblock %}

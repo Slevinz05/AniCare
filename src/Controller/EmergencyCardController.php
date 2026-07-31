@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 final class EmergencyCardController extends AbstractController
 {
-    #[Route('/emergency/{id}', name: 'app_emergency_card', methods: ['GET'])]
+    #[Route('/urgence/{id}', name: 'app_emergency_card', methods: ['GET'])]
     public function show(Animal $animal): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);

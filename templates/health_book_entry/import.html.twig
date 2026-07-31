@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Importer des documents - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card anicare-card">
+                <div class="card-header medical-header p-4">
+                    <p class="page-eyebrow mb-2">Consultations</p>
+                    <h1 class="page-title mb-1">Importer des documents</h1>
+                    <p class="page-subtitle mb-0">Ajoutez des documents et rattachez-les à un cheval existant ou créez-en un nouveau.</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" class="anicare-form needs-validation" novalidate>
+                        <input type="hidden" name="_token" value="{{ csrf_token('import_documents') }}">
+
+                        {# ── Section 1 : Documents ── #}
+                        <fieldset class="mb-4 pb-4 border-bottom border-light">
+                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Documents a importer</legend>
+
+                            <div class="mb-3">
+                                <label for="import-title" class="form-label fw-bold">Intitulé</label>
+                                <input type="text" id="import-title" name="title" class="form-control"
+                                       placeholder="Ex : Compte-rendu vétérinaire, Ordonnance..." value="Import de documents">
+                            </div>
+
+                            <div class="file-upload-card p-4 rounded-3 border border-dashed bg-light text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="var(--primary-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="mb-2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <p class="small text-secondary mb-2">Glissez vos fichiers ici ou cliquez pour parcourir</p>
+                                <input type="file" name="documents[]" multiple required
+                                       accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+                                       class="form-control" id="import-files">
+                                <div class="form-text mt-2">PDF, images ou documents Word — 5 Mo max par fichier</div>
+                            </div>
+
+                            <div id="file-preview" class="mt-3 d-none">
+                                <label class="form-label small fw-bold">Fichiers selectionnes :</label>
+                                <ul id="file-list" class="list-unstyled mb-0"></ul>
+                            </div>
+                        </fieldset>
+
+                        {# ── Section 2 : Cheval ── #}
+                        <fieldset class="mb-4">
+                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Rattacher à un cheval</legend>
+
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="button" class="btn btn-sm mode-btn active" data-mode="existing"
+                                        style="flex: 1;">
+                                    Cheval existant
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary mode-btn" data-mode="new"
+                                        style="flex: 1;">
+                                    Nouveau cheval
+                                </button>
+                            </div>
+
+                            <input type="hidden" name="mode" id="import-mode" value="existing">
+
+                            {# Mode cheval existant #}
+                            <div id="mode-existing">
+                                {% if animals is empty %}
+                                    <div class="alert bg-anicare-soft border border-anicare text-secondary">
+                                        Aucun cheval enregistré. Créez-en un ci-dessous.
+                                    </div>
+                                {% else %}
+                                    <label for="animal-select" class="form-label fw-bold">Sélectionner un cheval</label>
+                                    <select name="animal_id" id="animal-select" class="form-select">
+                                        <option value="">-- Choisir un cheval --</option>
+                                        {% for animal in animals %}
+                                            <option value="{{ animal.id }}">{{ animal.name }}{% if animal.breed %} ({{ animal.breed }}){% endif %}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+                            </div>
+
+                            {# Mode nouveau cheval #}
+                            <div id="mode-new" class="d-none">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-8">
+                                        <label for="new-animal-name" class="form-label fw-bold">Nom du cheval</label>
+                                        <input type="text" id="new-animal-name" name="new_animal_name"
+                                               class="form-control" placeholder="Ex : Eclipse, Spirit...">
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="new-animal-gender" class="form-label fw-bold">Sexe</label>
+                                        <select name="new_animal_gender" id="new-animal-gender" class="form-select">
+                                            <option value="Hongre">Hongre</option>
+                                            <option value="Jument">Jument</option>
+                                            <option value="Etalon">Etalon</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-text mt-2">Vous pourrez completer les informations du cheval plus tard depuis sa fiche.</div>
+                            </div>
+                        </fieldset>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Importer
+                            </button>
+                            <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary btn-lg">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var modeInput = document.getElementById('import-mode');
+    var existingDiv = document.getElementById('mode-existing');
+    var newDiv = document.getElementById('mode-new');
+    var buttons = document.querySelectorAll('.mode-btn');
+
+    buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var mode = this.dataset.mode;
+            modeInput.value = mode;
+
+            buttons.forEach(function(b) {
+                b.classList.remove('active', 'btn-primary');
+                b.classList.add('btn-outline-primary');
+            });
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('active', 'btn-primary');
+
+            if (mode === 'existing') {
+                existingDiv.classList.remove('d-none');
+                newDiv.classList.add('d-none');
+            } else {
+                existingDiv.classList.add('d-none');
+                newDiv.classList.remove('d-none');
+            }
+        });
+    });
+
+    // Active le premier bouton
+    buttons[0].classList.add('btn-primary');
+
+    // Preview des fichiers
+    var fileInput = document.getElementById('import-files');
+    var filePreview = document.getElementById('file-preview');
+    var fileList = document.getElementById('file-list');
+
+    fileInput.addEventListener('change', function() {
+        fileList.innerHTML = '';
+        if (this.files.length > 0) {
+            filePreview.classList.remove('d-none');
+            Array.from(this.files).forEach(function(f) {
+                var li = document.createElement('li');
+                li.className = 'small d-flex align-items-center gap-2 mb-1';
+                var size = (f.size / 1024).toFixed(0);
+                li.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+                    '<span>' + f.name + '</span><span class="text-secondary">(' + size + ' Ko)</span>';
+                fileList.appendChild(li);
+            });
+        } else {
+            filePreview.classList.add('d-none');
+        }
+    });
+});
+</script>
+{% endblock %}

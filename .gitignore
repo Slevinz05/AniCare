@@ -18,3 +18,8 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> chatbot ###
+/chatbot/node_modules/
+/chatbot/.env
+###< chatbot ###

@@ -54,6 +54,18 @@
                                         <td>{{ app.user.bio|e('html')|nl2br }}</td>
                                     </tr>
                                 {% endif %}
+                                {% if app.user.accountType == 'PRO' and app.user.interventionDepartments is not empty %}
+                                    <tr>
+                                        <th>Départements d'intervention</th>
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for dept in app.user.interventionDepartments %}
+                                                    <span class="badge bg-anicare-soft text-teal border border-anicare">{{ dept }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>

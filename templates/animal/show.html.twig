@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="container py-4">
-    <div class="card anicare-card overflow-hidden">
+    <div class="card anicare-card">
         <div class="card-header medical-header p-4">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
@@ -238,7 +238,7 @@
 
                             {# Formulaire d'invitation #}
                             <div class="mt-3 pt-3 {{ professionals is defined and professionals|length > 0 ? 'border-top border-light' : '' }}">
-                                <form method="post" action="{{ path('app_animal_invite_pro', {'id': animal.id}) }}" id="inviteProForm">
+                                <form method="post" action="{{ path('app_animal_invite_pro', {'slug': animal.slug}) }}" id="inviteProForm">
                                     <input type="hidden" name="_token" value="{{ csrf_token('invite_pro' ~ animal.id) }}">
                                     <input type="hidden" name="professional_id" id="invite_pro_id" value="">
                                     <label class="form-label small fw-bold mb-1">Inviter un professionnel</label>
@@ -310,7 +310,7 @@
                     {# ── HISTORIQUE ── #}
                     <div class="tab-pane fade show active" id="panel-historique" role="tabpanel">
                         <div class="d-flex justify-content-end mb-3">
-                            <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
+                            <a href="{{ path('app_health_book_entry_new', {'animal': animal.id}) }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
                         </div>
 
                         {% if animal.healthBookEntries is empty %}
@@ -322,11 +322,12 @@
                                 <table class="table table-hover table-medical align-middle mb-0">
                                     <thead>
                                         <tr>
-                                            <th>Date du soin</th>
+                                            <th>Date</th>
                                             <th>Acte</th>
                                             <th>Intervenant</th>
                                             <th>Note</th>
                                             <th>Documents</th>
+                                            <th class="text-end">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -340,14 +341,21 @@
                                                             <br><span class="small text-secondary">{{ entry.date|date('H:i') }}</span>
                                                         {% endif %}
                                                     </a>
+                                                    {% if entry.isOverdueReminder %}
+                                                        <br><span class="badge bg-danger" style="font-size: 0.6rem;">Rappel en retard</span>
+                                                    {% elseif entry.isDueSoon %}
+                                                        <br><span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Rappel bientot</span>
+                                                    {% endif %}
                                                 </td>
                                                 <td>
                                                     {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
                                                         <span class="badge-medical badge-vaccin">Vaccin</span>
                                                     {% elseif entry_type == 'vermifuge' %}
                                                         <span class="badge-medical badge-neutral">Vermifuge</span>
-                                                    {% elseif entry_type == 'bilan sanguin' %}
-                                                        <span class="badge-medical badge-neutral">Bilan sanguin</span>
+                                                    {% elseif entry_type == 'antiparasitaire' %}
+                                                        <span class="badge-medical badge-neutral">Antiparasitaire</span>
+                                                    {% elseif entry_type == 'consultation' %}
+                                                        <span class="badge-medical badge-consultation">Consultation</span>
                                                     {% elseif entry_type == 'chirurgie' %}
                                                         <span class="badge-medical badge-surgery">Chirurgie</span>
                                                     {% else %}
@@ -360,19 +368,19 @@
                                                 <td>
                                                     {% if entry.veterinarian %}
                                                         <div class="intervenant-popover-wrapper position-relative d-inline-block">
-                                                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold text-start intervenant-toggle" style="color: var(--primary-color);">
+                                                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold text-start intervenant-toggle" style="color: var(--primary-color); background: none; border: none;">
                                                                 {{ entry.veterinarian.fullName }}
                                                                 {% if entry.veterinarian.specialty %}
                                                                     <br><span class="small fw-normal text-secondary">{{ entry.veterinarian.specialty }}</span>
                                                                 {% endif %}
                                                             </button>
-                                                            <div class="intervenant-popover d-none position-absolute bg-white border rounded-3 shadow p-3" style="z-index: 20; min-width: 260px; top: 100%; left: 0;">
-                                                                <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
+                                                            <div class="intervenant-popover d-none rounded-3 shadow p-3" style="z-index: 1050; min-width: 260px; position: fixed; background: #fff; border: 1px solid #dee2e6; color: #212529;">
+                                                                <div class="d-flex align-items-center gap-2 mb-2 pb-2" style="border-bottom: 1px solid #dee2e6;">
                                                                     <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.8rem;">
                                                                         {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
                                                                     </div>
                                                                     <div>
-                                                                        <strong class="d-block small">{{ entry.veterinarian.fullName }}</strong>
+                                                                        <strong class="d-block small" style="color: #212529;">{{ entry.veterinarian.fullName }}</strong>
                                                                         {% if entry.veterinarian.specialty %}
                                                                             <span class="badge" style="background-color: var(--primary-color); font-size: 0.65rem;">{{ entry.veterinarian.specialty }}</span>
                                                                         {% endif %}
@@ -396,13 +404,13 @@
                                                                         {% if entry.veterinarian.postalCode %}{{ entry.veterinarian.postalCode }} {% endif %}{{ entry.veterinarian.city }}
                                                                     </div>
                                                                 {% endif %}
-                                                                <a href="{{ path('app_directory') }}" class="btn btn-outline-primary btn-sm w-100 mt-2">Voir dans l'annuaire</a>
+                                                                <a href="{{ path('app_professional_show', {'id': entry.veterinarian.id}) }}" class="btn btn-outline-primary btn-sm w-100 mt-2">Voir la fiche</a>
                                                             </div>
                                                         </div>
                                                     {% elseif entry.veterinarianName %}
                                                         <span class="text-secondary">{{ entry.veterinarianName }}</span>
                                                     {% else %}
-                                                        <span class="text-secondary fst-italic">Non renseigne</span>
+                                                        <span class="text-secondary fst-italic">Non renseigné</span>
                                                     {% endif %}
                                                 </td>
                                                 <td>
@@ -425,6 +433,16 @@
                                                         <span class="text-secondary fst-italic small">-</span>
                                                     {% endif %}
                                                 </td>
+                                                <td class="text-end">
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-outline-primary btn-sm">
+                                                            Consulter
+                                                        </a>
+                                                        <a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="btn btn-primary btn-sm">
+                                                            Modifier
+                                                        </a>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -436,7 +454,7 @@
                     {# ── DOCUMENTS ── #}
                     <div class="tab-pane fade" id="panel-documents" role="tabpanel">
                         <div class="d-flex justify-content-end mb-3">
-                            <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Ajouter un document</a>
+                            <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-outline-primary btn-sm">Ajouter un document</a>
                         </div>
 
                         {% if animal.documents is empty %}
@@ -498,7 +516,7 @@
                     {# ── ALLERGIES ── #}
                     <div class="tab-pane fade" id="panel-allergies" role="tabpanel">
                         <div class="d-flex justify-content-end mb-3">
-                            <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Gerer les allergies</a>
+                            <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Gérer les allergies</a>
                         </div>
 
                         {% if animal.allergies is empty %}
@@ -513,11 +531,11 @@
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <strong>{{ allergy.name }}</strong>
                                                 {% if allergy.severity == 'SEVERE' %}
-                                                    <span class="badge bg-danger">Severe</span>
+                                                    <span class="badge bg-danger">Sévère</span>
                                                 {% elseif allergy.severity == 'MODERATE' %}
-                                                    <span class="badge bg-warning text-dark">Moderee</span>
+                                                    <span class="badge bg-warning text-dark">Modérée</span>
                                                 {% else %}
-                                                    <span class="badge bg-info text-dark">Legere</span>
+                                                    <span class="badge bg-info text-dark">Légère</span>
                                                 {% endif %}
                                             </div>
                                             {% if allergy.symptoms %}
@@ -543,7 +561,7 @@
                         Partager
                     </a>
 
-                    <a href="{{ path('app_animal_edit', {'id': animal.id}) }}" class="btn btn-primary">
+                    <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-primary">
                         Modifier le profil
                     </a>
 
@@ -578,7 +596,7 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.length === 0) {
-                        resultsDiv.innerHTML = '<div class="p-2 small text-secondary">Aucun resultat</div>';
+                        resultsDiv.innerHTML = '<div class="p-2 small text-secondary">Aucun résultat</div>';
                     } else {
                         resultsDiv.innerHTML = data.map(p =>
                             '<div class="invite-pro-result p-2 border-bottom" style="cursor:pointer;" data-id="' + p.id + '" data-name="' + p.fullName + ' (' + p.email + ')">' +
@@ -615,7 +633,7 @@
     });
 })();
 
-// Popover intervenants
+// Popover intervenants (position: fixed pour éviter le clipping)
 (function() {
     document.querySelectorAll('.intervenant-toggle').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
@@ -624,7 +642,19 @@
             document.querySelectorAll('.intervenant-popover').forEach(function(p) {
                 if (p !== popover) p.classList.add('d-none');
             });
-            popover.classList.toggle('d-none');
+            if (popover.classList.contains('d-none')) {
+                var rect = this.getBoundingClientRect();
+                popover.style.top = (rect.bottom + 4) + 'px';
+                popover.style.left = rect.left + 'px';
+                // Empêcher le débordement à droite
+                popover.classList.remove('d-none');
+                var popRect = popover.getBoundingClientRect();
+                if (popRect.right > window.innerWidth - 8) {
+                    popover.style.left = (window.innerWidth - popRect.width - 8) + 'px';
+                }
+            } else {
+                popover.classList.add('d-none');
+            }
         });
     });
 
@@ -635,6 +665,12 @@
             });
         }
     });
+
+    window.addEventListener('scroll', function() {
+        document.querySelectorAll('.intervenant-popover').forEach(function(p) {
+            p.classList.add('d-none');
+        });
+    }, true);
 })();
 </script>
 {% endblock %}

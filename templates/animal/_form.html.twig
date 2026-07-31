@@ -57,17 +57,23 @@
                     {{ _self.field(form.coatCustom) }}
                 </div>
 
-                <div class="col-12 col-md-3">
-                    {{ form_label(form.birthDate, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ _self.field(form.birthDate) }}
-                    <div class="form-text text-secondary">Remplir la date ou l'âge.</div>
-                </div>
-
-                <div class="col-12 col-md-3">
-                    {{ form_label(form.age, null, {'label_attr': {'class': 'form-label'}}) }}
-                    <div class="input-group">
-                        {{ _self.field(form.age) }}
-                        <span class="input-group-text">ans</span>
+                <div class="col-12 col-md-6">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-7">
+                            <label class="form-label" for="{{ form.birthDate.vars.id }}">Date de naissance <span class="text-danger">*</span></label>
+                            {{ _self.field(form.birthDate) }}
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label" for="{{ form.age.vars.id }}">Age <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                {{ _self.field(form.age) }}
+                                <span class="input-group-text">ans</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-text text-secondary mt-0">Remplissez l'un ou l'autre, le second se calcule automatiquement.</div>
+                            <div id="ageDateError" class="text-danger small mt-1 d-none">Veuillez renseigner la date de naissance ou l'age.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -316,6 +322,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (coatSelect && coatCustomGroup) {
         coatSelect.addEventListener('change', function () {
             coatCustomGroup.style.display = this.value === 'Autre' ? '' : 'none';
+        });
+    }
+
+    // Validation : au moins date de naissance OU age
+    const theForm = document.querySelector('.anicare-form');
+    const ageDateError = document.getElementById('ageDateError');
+
+    if (theForm && ageDateError) {
+        theForm.addEventListener('submit', function(e) {
+            var bd = document.getElementById('{{ form.birthDate.vars.id }}');
+            var ag = document.getElementById('{{ form.age.vars.id }}');
+            if (bd && ag && !bd.value && !ag.value) {
+                e.preventDefault();
+                ageDateError.classList.remove('d-none');
+                bd.closest('.row').scrollIntoView({behavior: 'smooth', block: 'center'});
+            } else {
+                ageDateError.classList.add('d-none');
+            }
         });
     }
 

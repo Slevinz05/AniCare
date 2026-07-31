@@ -14,11 +14,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/weight')]
+#[Route('/poids')]
 #[IsGranted('ROLE_USER')]
 final class WeightRecordController extends AbstractController
 {
-    #[Route('/animal/{id}', name: 'app_weight_record_index', methods: ['GET'])]
+    #[Route('/cheval/{id}', name: 'app_weight_record_index', methods: ['GET'])]
     public function index(Animal $animal, WeightRecordRepository $repository): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
@@ -31,7 +31,7 @@ final class WeightRecordController extends AbstractController
         ]);
     }
 
-    #[Route('/animal/{id}/data.json', name: 'app_weight_record_chart_data', methods: ['GET'])]
+    #[Route('/cheval/{id}/donnees.json', name: 'app_weight_record_chart_data', methods: ['GET'])]
     public function chartData(Animal $animal, WeightRecordRepository $repository): JsonResponse
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
@@ -46,7 +46,7 @@ final class WeightRecordController extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/animal/{id}/new', name: 'app_weight_record_new', methods: ['GET', 'POST'])]
+    #[Route('/cheval/{id}/ajouter', name: 'app_weight_record_new', methods: ['GET', 'POST'])]
     public function new(Request $request, Animal $animal, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
@@ -74,7 +74,7 @@ final class WeightRecordController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'app_weight_record_delete', methods: ['POST'])]
+    #[Route('/{id}/supprimer', name: 'app_weight_record_delete', methods: ['POST'])]
     public function delete(Request $request, WeightRecord $record, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ANIMAL_DELETE', $record->getAnimal());

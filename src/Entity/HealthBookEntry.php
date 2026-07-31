@@ -44,6 +44,9 @@ class HealthBookEntry
     #[ORM\Column(nullable: true)]
     private ?int $recurrenceMonths = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $recurrenceType = null;
+
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $batchNumber = null;
 
@@ -208,6 +211,41 @@ class HealthBookEntry
         }
 
         return $this;
+    }
+
+    public function getRecurrenceType(): ?string
+    {
+        return $this->recurrenceType;
+    }
+
+    public function setRecurrenceType(?string $recurrenceType): static
+    {
+        $this->recurrenceType = $recurrenceType;
+
+        if ($recurrenceType && $this->date) {
+            $this->nextReminderAt = match ($recurrenceType) {
+                'daily' => $this->date->modify('+1 day'),
+                'weekly' => $this->date->modify('+1 week'),
+                'bimonthly' => $this->date->modify('+2 weeks'),
+                'monthly' => $this->date->modify('+1 month'),
+                'annual' => $this->date->modify('+1 year'),
+                default => $this->nextReminderAt,
+            };
+        }
+
+        return $this;
+    }
+
+    public function getRecurrenceLabel(): ?string
+    {
+        return match ($this->recurrenceType) {
+            'daily' => 'Journalier',
+            'weekly' => 'Hebdomadaire',
+            'bimonthly' => 'Bimensuel',
+            'monthly' => 'Mensuel',
+            'annual' => 'Annuel',
+            default => null,
+        };
     }
 
     public function getBatchNumber(): ?string

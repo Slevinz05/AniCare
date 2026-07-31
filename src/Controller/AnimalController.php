@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-#[Route('/animal')]
+#[Route('/mes-chevaux')]
 #[IsGranted('ROLE_USER')]
 final class AnimalController extends AbstractController
 {
@@ -54,7 +54,7 @@ final class AnimalController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_animal_new', methods: ['GET', 'POST'])]
+    #[Route('/ajouter', name: 'app_animal_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
     {
         $animal = new Animal();
@@ -66,6 +66,14 @@ final class AnimalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$animal->getBirthDate() && $form->get('age')->getData() === null) {
+                $this->addFlash('danger', 'Veuillez renseigner la date de naissance ou l\'age du cheval.');
+                return $this->render('animal/new.html.twig', [
+                    'animal' => $animal,
+                    'form' => $form,
+                ]);
+            }
+
             $animal->setOwner($user);
             $animal->setSpecies('Cheval');
 
@@ -85,6 +93,9 @@ final class AnimalController extends AbstractController
 
             $entityManager->flush();
 
+            $animal->ensureSlug();
+            $entityManager->flush();
+
             return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -94,9 +105,13 @@ final class AnimalController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_animal_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Animal $animal, UserRepository $userRepository): Response
+    #[Route('/{slug}', name: 'app_animal_show', methods: ['GET'])]
+    public function show(string $slug, AnimalRepository $animalRepository, UserRepository $userRepository): Response
     {
+        $animal = $animalRepository->findOneBySlug($slug);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $animal);
 
         $professionals = [];
@@ -118,9 +133,13 @@ final class AnimalController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_animal_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-    public function edit(Request $request, Animal $animal, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
+    #[Route('/{slug}/modifier', name: 'app_animal_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, string $slug, AnimalRepository $animalRepository, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
     {
+        $animal = $animalRepository->findOneBySlug($slug);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
 
         /** @var User $user */
@@ -130,6 +149,14 @@ final class AnimalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$animal->getBirthDate() && $form->get('age')->getData() === null) {
+                $this->addFlash('danger', 'Veuillez renseigner la date de naissance ou l\'age du cheval.');
+                return $this->render('animal/edit.html.twig', [
+                    'animal' => $animal,
+                    'form' => $form,
+                ]);
+            }
+
             $this->syncAgeAndBirthDate($form, $animal);
 
             if ($animal->getCoat() === 'Autre' && $form->get('coatCustom')->getData()) {
@@ -142,10 +169,11 @@ final class AnimalController extends AbstractController
             $this->handleProfessionalInvitation($request, $animal, $userRepository, $entityManager);
             $this->handleReminders($request, $animal, $user, $entityManager);
 
+            $animal->generateSlug();
             $entityManager->flush();
 
             return $this->redirectToRoute('app_animal_show', [
-                'id' => $animal->getId(),
+                'slug' => $animal->getSlug(),
             ], Response::HTTP_SEE_OTHER);
         }
 
@@ -155,13 +183,17 @@ final class AnimalController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/invite-pro', name: 'app_animal_invite_pro', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function inviteProfessional(Request $request, Animal $animal, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
+    #[Route('/{slug}/inviter-professionnel', name: 'app_animal_invite_pro', methods: ['POST'])]
+    public function inviteProfessional(Request $request, string $slug, AnimalRepository $animalRepository, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
+        $animal = $animalRepository->findOneBySlug($slug);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
 
         if (!$this->isCsrfTokenValid('invite_pro' . $animal->getId(), $request->request->get('_token'))) {
-            return $this->redirectToRoute('app_animal_show', ['id' => $animal->getId()]);
+            return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
         }
 
         $proId = $request->request->get('professional_id');
@@ -185,12 +217,53 @@ final class AnimalController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('app_animal_show', ['id' => $animal->getId()]);
+        return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
     }
 
-    #[Route('/{id}', name: 'app_animal_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function delete(Request $request, Animal $animal, EntityManagerInterface $entityManager): Response
+    #[Route('/{slug}/photo-rapide', name: 'app_animal_quick_photo', methods: ['POST'])]
+    public function quickPhoto(Request $request, string $slug, AnimalRepository $animalRepository, EntityManagerInterface $entityManager): Response
     {
+        $animal = $animalRepository->findOneBySlug($slug);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+
+        if (!$this->isCsrfTokenValid('quick_photo' . $animal->getId(), $request->request->get('_token'))) {
+            return $this->redirectToRoute('app_animal_index');
+        }
+
+        /** @var UploadedFile|null $photoFile */
+        $photoFile = $request->files->get('photo');
+        if ($photoFile) {
+            if ($animal->getPhoto()) {
+                $oldPath = $this->photoDirectory . '/' . $animal->getPhoto();
+                if (is_file($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+
+            if (!is_dir($this->photoDirectory)) {
+                mkdir($this->photoDirectory, 0775, true);
+            }
+
+            $safeFilename = $this->slugger->slug(pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME));
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+            $photoFile->move($this->photoDirectory, $newFilename);
+            $animal->setPhoto($newFilename);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_animal_index');
+    }
+
+    #[Route('/{slug}/supprimer', name: 'app_animal_delete', methods: ['POST'])]
+    public function delete(Request $request, string $slug, AnimalRepository $animalRepository, EntityManagerInterface $entityManager): Response
+    {
+        $animal = $animalRepository->findOneBySlug($slug);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
         $this->denyAccessUnlessGranted('ANIMAL_DELETE', $animal);
 
         if ($this->isCsrfTokenValid('delete' . $animal->getId(), $request->getPayload()->getString('_token'))) {

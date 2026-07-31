@@ -27,4 +27,30 @@ class AnimalShareRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findSharedWithEmail(string $email): array
+    {
+        return $this->createQueryBuilder('s')
+            ->innerJoin('s.animal', 'a')
+            ->addSelect('a')
+            ->where('s.sharedWithEmail = :email')
+            ->setParameter('email', $email)
+            ->orderBy('s.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findClientsByProfessionalEmail(string $email): array
+    {
+        return $this->createQueryBuilder('s')
+            ->innerJoin('s.animal', 'a')
+            ->innerJoin('a.owner', 'o')
+            ->addSelect('o')
+            ->where('s.sharedWithEmail = :email')
+            ->setParameter('email', $email)
+            ->groupBy('o.id')
+            ->orderBy('o.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

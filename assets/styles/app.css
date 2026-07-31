@@ -202,6 +202,54 @@ a:hover {
     border-color: var(--accent-hover) !important;
 }
 
+.btn-pro-quick-add {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+.btn-pro-quick-add:hover,
+.btn-pro-quick-add[aria-expanded="true"] {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #fff;
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.quick-add-menu {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    padding: 0.35rem;
+    min-width: 14rem;
+}
+
+.quick-add-menu .dropdown-item {
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.quick-add-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 /* ==========================================================================
    Boutons Bootstrap thémés AniCare
    ========================================================================== */

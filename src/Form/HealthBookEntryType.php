@@ -126,16 +126,16 @@ class HealthBookEntryType extends AbstractType
                 'required' => false,
             ])
 
-            ->add('recurrenceMonths', ChoiceType::class, [
-                'label' => 'Récurrence du rappel',
+            ->add('recurrenceType', ChoiceType::class, [
+                'label' => 'Recurrence du rappel',
                 'required' => false,
-                'placeholder' => 'Pas de récurrence',
+                'placeholder' => 'Pas de recurrence',
                 'choices' => [
-                    '3 mois' => 3,
-                    '6 mois' => 6,
-                    '1 an' => 12,
-                    '2 ans' => 24,
-                    '3 ans' => 36,
+                    'Journalier' => 'daily',
+                    'Hebdomadaire' => 'weekly',
+                    'Bimensuel' => 'bimonthly',
+                    'Mensuel' => 'monthly',
+                    'Annuel' => 'annual',
                 ],
             ])
 

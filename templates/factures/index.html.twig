@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Factures - AniCare{% endblock %}
+
+{% block body %}
+<style>
+    .factures-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+    }
+    .factures-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .factures-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: 30%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .factures-hero > * { position: relative; z-index: 1; }
+</style>
+
+<div class="container py-4">
+    <div class="factures-hero mb-4">
+        <p class="page-eyebrow mb-2" style="color: rgba(255,255,255,0.6);">Gestion</p>
+        <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Factures</h1>
+        <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Créez et gérez vos factures pour vos prestations.</p>
+    </div>
+
+    <div class="card anicare-card">
+        <div class="card-body p-5 text-center">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--primary-color);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <h2 class="h5 page-title mb-2">Fonctionnalité à venir</h2>
+            <p class="text-secondary mb-0" style="max-width: 400px; margin: 0 auto;">
+                Vous pourrez bientôt créer, envoyer et suivre vos factures directement depuis AniCare.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

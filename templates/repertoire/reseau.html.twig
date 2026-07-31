@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Répertoire - Réseau - AniCare{% endblock %}
+
+{% block body %}
+<style>
+    .reseau-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+    }
+    .reseau-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .reseau-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: 30%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .reseau-hero > * { position: relative; z-index: 1; }
+
+    .client-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .client-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+    .client-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(180deg, #fff 0%, #fafaf8 100%);
+        display: flex; align-items: center; gap: 1rem;
+    }
+    .client-avatar {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .client-card-body { padding: 1rem 1.5rem 1.25rem; }
+
+    .animal-chip {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background: #fff;
+        text-decoration: none;
+        font-size: 0.8rem; font-weight: 600;
+        color: var(--secondary-color);
+        transition: all 0.15s;
+    }
+    .animal-chip:hover {
+        border-color: var(--primary-color);
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+    .animal-chip img {
+        width: 24px; height: 24px;
+        border-radius: 6px;
+        object-fit: cover;
+    }
+    .animal-chip .chip-placeholder {
+        width: 24px; height: 24px;
+        border-radius: 6px;
+        background: var(--soft-teal);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.7rem;
+    }
+
+    .stat-pill {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem; font-weight: 700;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="reseau-hero mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p class="page-eyebrow mb-2" style="color: rgba(255,255,255,0.6);">Répertoire</p>
+                <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Mon réseau</h1>
+                <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Les propriétaires qui partagent des dossiers avec vous.</p>
+            </div>
+            {% if clients is not empty %}
+                <span class="stat-pill" style="background: rgba(255,255,255,0.15); color: #fff;">
+                    {{ clients|length }} client{{ clients|length > 1 ? 's' : '' }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if clients is empty %}
+        <div class="card anicare-card">
+            <div class="card-body p-5 text-center">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--primary-color);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h2 class="h5 page-title mb-2">Aucun client pour le moment</h2>
+                <p class="text-secondary mb-0" style="max-width: 420px; margin: 0 auto;">
+                    Quand un propriétaire partagera le dossier d'un cheval avec vous, il apparaîtra ici automatiquement.
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for client in clients %}
+                <div class="col-12 col-md-6">
+                    <div class="client-card h-100">
+                        <div class="client-card-header">
+                            <div class="client-avatar">
+                                {{ client.user.firstName|first|upper }}{{ client.user.lastName|first|upper }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h3 class="fw-bold mb-0" style="font-size: 0.95rem; color: var(--secondary-color);">{{ client.user.fullName }}</h3>
+                                <span class="text-secondary" style="font-size: 0.78rem;">{{ client.user.email }}</span>
+                            </div>
+                            <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
+                                {{ client.animals|length }} {{ client.animals|length > 1 ? 'chevaux' : 'cheval' }}
+                            </span>
+                        </div>
+                        <div class="client-card-body">
+                            <p class="page-eyebrow mb-2">Chevaux partagés</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for animal in client.animals %}
+                                    <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="animal-chip">
+                                        {% if animal.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ animal.photo) }}" alt="{{ animal.name }}">
+                                        {% else %}
+                                            <span class="chip-placeholder">🐴</span>
+                                        {% endif %}
+                                        {{ animal.name }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                            {% if client.sharedSince %}
+                                <p class="small text-secondary mt-3 mb-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    Depuis le {{ client.sharedSince|date('d/m/Y') }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

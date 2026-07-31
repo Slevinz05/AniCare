@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes partages - AniCare{% endblock %}
+
+{% block body %}
+<style>
+    .partages-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+    }
+    .partages-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .partages-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: 30%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .partages-hero > * { position: relative; z-index: 1; }
+
+    .shared-horse-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+    }
+    .shared-horse-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+    .shared-horse-photo {
+        height: 160px;
+        background: linear-gradient(135deg, var(--soft-teal) 0%, #e0f2f1 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 3rem;
+        overflow: hidden;
+    }
+    .shared-horse-photo img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+    }
+    .shared-horse-body {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .owner-badge {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 2rem;
+        background: var(--soft-teal);
+        color: var(--primary-color);
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .permission-badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 2rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    .stat-pill {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem; font-weight: 700;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="partages-hero mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p class="page-eyebrow mb-2" style="color: rgba(255,255,255,0.6);">Répertoire</p>
+                <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Mes partages</h1>
+                <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Les dossiers de chevaux partagés avec vous par leurs propriétaires.</p>
+            </div>
+            {% if received_shares is not empty %}
+                <span class="stat-pill" style="background: rgba(255,255,255,0.15); color: #fff;">
+                    {{ received_shares|length }} dossier{{ received_shares|length > 1 ? 's' : '' }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if received_shares is empty %}
+        <div class="card anicare-card">
+            <div class="card-body p-5 text-center">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--primary-color);"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </div>
+                <h2 class="h5 page-title mb-2">Aucun dossier partagé</h2>
+                <p class="text-secondary mb-0" style="max-width: 420px; margin: 0 auto;">
+                    Quand un propriétaire partagera le dossier d'un cheval avec vous, il apparaîtra ici.
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for share in received_shares %}
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href="{{ path('app_animal_show', {'slug': share.animal.slug}) }}" class="shared-horse-card h-100">
+                        <div class="shared-horse-photo">
+                            {% if share.animal.photo %}
+                                <img src="{{ asset('uploads/photos/' ~ share.animal.photo) }}" alt="{{ share.animal.name }}">
+                            {% else %}
+                                🐴
+                            {% endif %}
+                        </div>
+                        <div class="shared-horse-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h3 class="fw-bold mb-0" style="font-size: 1.1rem; color: var(--secondary-color);">{{ share.animal.name }}</h3>
+                                {% if share.permissionLevel == 'WRITE' %}
+                                    <span class="permission-badge" style="background: #dcfce7; color: #16a34a;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Modification
+                                    </span>
+                                {% else %}
+                                    <span class="permission-badge" style="background: var(--soft-warm); color: var(--accent-color);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        Lecture
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="text-secondary small mb-3">
+                                {% if share.animal.breed %}
+                                    <span>{{ share.animal.breed }}</span>
+                                {% endif %}
+                                {% if share.animal.age is not null %}
+                                    <span>· {{ share.animal.age }} an{{ share.animal.age > 1 ? 's' : '' }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <span class="owner-badge">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    {{ share.animal.owner.fullName }}
+                                </span>
+                                {% if share.createdAt %}
+                                    <span class="text-secondary" style="font-size: 0.7rem;">{{ share.createdAt|date('d/m/Y') }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

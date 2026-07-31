@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Répertoire - Structures - AniCare{% endblock %}
+
+{% block body %}
+<style>
+    .structures-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+    }
+    .structures-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .structures-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: 30%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .structures-hero > * { position: relative; z-index: 1; }
+</style>
+
+<div class="container py-4">
+    <div class="structures-hero mb-4">
+        <p class="page-eyebrow mb-2" style="color: rgba(255,255,255,0.6);">Répertoire</p>
+        <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Structures</h1>
+        <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Gérez votre réseau de structures partenaires.</p>
+    </div>
+
+    <div class="card anicare-card">
+        <div class="card-body p-5 text-center">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--primary-color);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <h2 class="h5 page-title mb-2">Fonctionnalité à venir</h2>
+            <p class="text-secondary mb-0" style="max-width: 400px; margin: 0 auto;">
+                Vous pourrez bientôt ajouter et gérer les structures de votre réseau professionnel : cliniques, centres équestres, laboratoires...
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

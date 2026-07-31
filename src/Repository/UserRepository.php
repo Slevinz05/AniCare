@@ -61,8 +61,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
 
         if ($department) {
-            $qb->andWhere('u.postalCode LIKE :dept')
-               ->setParameter('dept', $department . '%');
+            $qb->andWhere('u.postalCode LIKE :dept OR u.interventionDepartments LIKE :deptJson')
+               ->setParameter('dept', $department . '%')
+               ->setParameter('deptJson', '%"' . $department . '"%');
         }
 
         if ($query) {
