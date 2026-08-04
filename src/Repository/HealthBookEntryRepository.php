@@ -22,11 +22,45 @@ class HealthBookEntryRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('h')
             ->innerJoin('h.animal', 'a')
             ->leftJoin('a.animalShares', 's')
-            ->where('a.owner = :user')
-            ->orWhere('s.sharedWithEmail = :email')
+            ->where('(a.owner = :user OR s.sharedWithEmail = :email)')
+            ->andWhere('h.status = :published OR h.veterinarian = :user')
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
+            ->setParameter('published', 'published')
             ->orderBy('h.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findDraftsByVeterinarian(User $user, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('h')
+            ->where('h.veterinarian = :user')
+            ->andWhere('h.status = :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'draft')
+            ->orderBy('h.date', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findTodaysRemindersByVeterinarian(User $user): array
+    {
+        $today = new \DateTimeImmutable('today');
+        $tomorrow = $today->modify('+1 day');
+
+        return $this->createQueryBuilder('h')
+            ->join('h.animal', 'a')
+            ->leftJoin('a.animalShares', 's')
+            ->where('h.nextReminderAt >= :today')
+            ->andWhere('h.nextReminderAt < :tomorrow')
+            ->andWhere('(a.owner = :user OR s.sharedWithEmail = :email OR h.veterinarian = :user)')
+            ->setParameter('today', $today)
+            ->setParameter('tomorrow', $tomorrow)
+            ->setParameter('user', $user)
+            ->setParameter('email', $user->getEmail())
+            ->orderBy('h.nextReminderAt', 'ASC')
             ->getQuery()
             ->getResult();
     }

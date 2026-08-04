@@ -57,8 +57,14 @@ class HealthBookEntry
     #[ORM\ManyToOne]
     private ?User $veterinarian = null;
 
+    #[ORM\Column(length: 20, options: ['default' => 'published'])]
+    private string $status = 'published';
+
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $documents = [];
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $anatomicalLocations = [];
 
     public function getId(): ?int
     {
@@ -315,6 +321,35 @@ class HealthBookEntry
             $this->getDocuments(),
             fn(array $document) => ($document['fileName'] ?? null) !== $fileName
         ));
+
+        return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+
+    public function getAnatomicalLocations(): array
+    {
+        return $this->anatomicalLocations ?? [];
+    }
+
+    public function setAnatomicalLocations(?array $anatomicalLocations): static
+    {
+        $this->anatomicalLocations = $anatomicalLocations ?? [];
 
         return $this;
     }

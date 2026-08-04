@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Répertoire - Réseau - AniCare{% endblock %}
+{% block title %}Répertoire - AniCare{% endblock %}
 
 {% block body %}
 <style>
@@ -30,6 +30,68 @@
         background: rgba(255,255,255,0.04);
     }
     .reseau-hero > * { position: relative; z-index: 1; }
+
+    .search-box {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: var(--radius-md);
+        padding: 0.65rem 1rem 0.65rem 2.75rem;
+        color: #fff;
+        font-size: 0.9rem;
+        width: 100%;
+        max-width: 420px;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s;
+    }
+    .search-box::placeholder { color: rgba(255,255,255,0.6); }
+    .search-box:focus {
+        outline: none;
+        background: rgba(255,255,255,0.22);
+        border-color: rgba(255,255,255,0.5);
+    }
+    .search-wrapper {
+        position: relative;
+        max-width: 420px;
+    }
+    .search-wrapper svg {
+        position: absolute;
+        left: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.6);
+        pointer-events: none;
+    }
+
+    .tab-pills {
+        display: flex; gap: 0.25rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.25rem;
+    }
+    .tab-pill {
+        padding: 0.5rem 1.25rem;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .tab-pill.active {
+        background: var(--primary-color);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+    }
+    .tab-pill:not(.active):hover {
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+
+    .tab-content-section { display: none; }
+    .tab-content-section.active { display: block; }
 
     .client-card {
         background: var(--card-bg);
@@ -61,34 +123,66 @@
     }
     .client-card-body { padding: 1rem 1.5rem 1.25rem; }
 
-    .animal-chip {
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border-color);
-        background: #fff;
+    .animal-row {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border-color);
         text-decoration: none;
-        font-size: 0.8rem; font-weight: 600;
-        color: var(--secondary-color);
-        transition: all 0.15s;
+        color: inherit;
+        transition: background 0.15s;
     }
-    .animal-chip:hover {
-        border-color: var(--primary-color);
-        background: var(--soft-teal);
-        color: var(--primary-color);
-    }
-    .animal-chip img {
-        width: 24px; height: 24px;
-        border-radius: 6px;
+    .animal-row:last-child { border-bottom: none; }
+    .animal-row:hover { background: var(--soft-teal); margin: 0 -1.5rem; padding-left: 1.5rem; padding-right: 1.5rem; border-radius: var(--radius-sm); }
+    .animal-thumb {
+        width: 36px; height: 36px;
+        border-radius: 10px;
         object-fit: cover;
+        border: 1px solid var(--border-color);
+        flex-shrink: 0;
     }
-    .animal-chip .chip-placeholder {
-        width: 24px; height: 24px;
-        border-radius: 6px;
+    .animal-thumb-placeholder {
+        width: 36px; height: 36px;
+        border-radius: 10px;
         background: var(--soft-teal);
         display: flex; align-items: center; justify-content: center;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
+        flex-shrink: 0;
     }
+    .animal-living-place {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex; align-items: center; gap: 0.3rem;
+    }
+
+    .structure-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .structure-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-color);
+    }
+    .structure-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(180deg, #fff 0%, #fdf8f0 100%);
+        display: flex; align-items: center; gap: 1rem;
+    }
+    .structure-avatar {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent-color), #b8872e);
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .structure-card-body { padding: 1rem 1.5rem 1.25rem; }
 
     .stat-pill {
         display: inline-flex; align-items: center; gap: 0.35rem;
@@ -96,78 +190,210 @@
         border-radius: 2rem;
         font-size: 0.75rem; font-weight: 700;
     }
+
+    .empty-state-section {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+    }
+    .empty-state-section svg {
+        color: var(--primary-color);
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
 </style>
 
 <div class="container py-4">
+    {# ── Hero + Search ── #}
     <div class="reseau-hero mb-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
             <div>
                 <p class="page-eyebrow mb-2" style="color: rgba(255,255,255,0.6);">Répertoire</p>
-                <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Mon réseau</h1>
-                <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Les propriétaires qui partagent des dossiers avec vous.</p>
+                <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Mon répertoire</h1>
+                <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Clients, chevaux et structures en un seul endroit.</p>
             </div>
-            {% if clients is not empty %}
-                <span class="stat-pill" style="background: rgba(255,255,255,0.15); color: #fff;">
-                    {{ clients|length }} client{{ clients|length > 1 ? 's' : '' }}
-                </span>
-            {% endif %}
+            <div class="d-flex gap-2">
+                {% if clients is not empty %}
+                    <span class="stat-pill" style="background: rgba(255,255,255,0.15); color: #fff;">
+                        {{ clients|length }} client{{ clients|length > 1 ? 's' : '' }}
+                    </span>
+                {% endif %}
+                {% if structures is defined and structures is not empty %}
+                    <span class="stat-pill" style="background: rgba(200,151,62,0.3); color: #fff;">
+                        {{ structures|length }} structure{{ structures|length > 1 ? 's' : '' }}
+                    </span>
+                {% endif %}
+            </div>
         </div>
+        <form method="get" action="{{ path('app_repertoire_reseau') }}">
+            <div class="search-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" name="q" class="search-box" placeholder="Rechercher un client, cheval ou structure..." value="{{ query }}" autocomplete="off">
+            </div>
+        </form>
     </div>
 
-    {% if clients is empty %}
-        <div class="card anicare-card">
-            <div class="card-body p-5 text-center">
-                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--primary-color);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                </div>
-                <h2 class="h5 page-title mb-2">Aucun client pour le moment</h2>
-                <p class="text-secondary mb-0" style="max-width: 420px; margin: 0 auto;">
-                    Quand un propriétaire partagera le dossier d'un cheval avec vous, il apparaîtra ici automatiquement.
-                </p>
-            </div>
+    {# ── Tabs ── #}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="tab-pills" role="tablist">
+            <button class="tab-pill active" data-tab="clients" role="tab">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Clients
+            </button>
+            <button class="tab-pill" data-tab="structures" role="tab">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Structures
+            </button>
         </div>
-    {% else %}
-        <div class="row g-4">
-            {% for client in clients %}
-                <div class="col-12 col-md-6">
-                    <div class="client-card h-100">
-                        <div class="client-card-header">
-                            <div class="client-avatar">
-                                {{ client.user.firstName|first|upper }}{{ client.user.lastName|first|upper }}
+        <a href="{{ path('app_animal_share_index') }}" class="btn btn-sm btn-outline-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Mes partages
+        </a>
+    </div>
+
+    {# ── Tab: Clients ── #}
+    <div class="tab-content-section active" id="tab-clients">
+        {% if clients is empty %}
+            <div class="empty-state-section">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                {% if query %}
+                    <h2 class="h5 page-title mb-2">Aucun résultat pour "{{ query }}"</h2>
+                    <p class="text-secondary mb-3">Essayez un autre terme de recherche.</p>
+                    <a href="{{ path('app_repertoire_reseau') }}" class="btn btn-outline-primary btn-sm">Effacer la recherche</a>
+                {% else %}
+                    <h2 class="h5 page-title mb-2">Aucun client pour le moment</h2>
+                    <p class="text-secondary mb-0" style="max-width: 420px; margin: 0 auto;">
+                        Quand un propriétaire partagera le dossier d'un cheval avec vous, il apparaîtra ici automatiquement.
+                    </p>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="row g-4">
+                {% for client in clients %}
+                    <div class="col-12 col-lg-6">
+                        <div class="client-card h-100">
+                            <div class="client-card-header">
+                                <div class="client-avatar">
+                                    {{ client.user.firstName|first|upper }}{{ client.user.lastName|first|upper }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h3 class="fw-bold mb-0" style="font-size: 0.95rem; color: var(--secondary-color);">{{ client.user.fullName }}</h3>
+                                    <span class="text-secondary" style="font-size: 0.78rem;">{{ client.user.email }}</span>
+                                </div>
+                                <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
+                                    {{ client.animals|length }} {{ client.animals|length > 1 ? 'chevaux' : 'cheval' }}
+                                </span>
                             </div>
-                            <div class="flex-grow-1">
-                                <h3 class="fw-bold mb-0" style="font-size: 0.95rem; color: var(--secondary-color);">{{ client.user.fullName }}</h3>
-                                <span class="text-secondary" style="font-size: 0.78rem;">{{ client.user.email }}</span>
-                            </div>
-                            <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
-                                {{ client.animals|length }} {{ client.animals|length > 1 ? 'chevaux' : 'cheval' }}
-                            </span>
-                        </div>
-                        <div class="client-card-body">
-                            <p class="page-eyebrow mb-2">Chevaux partagés</p>
-                            <div class="d-flex flex-wrap gap-2">
+                            <div class="client-card-body">
                                 {% for animal in client.animals %}
-                                    <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="animal-chip">
+                                    <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="animal-row">
                                         {% if animal.photo %}
-                                            <img src="{{ asset('uploads/photos/' ~ animal.photo) }}" alt="{{ animal.name }}">
+                                            <img src="{{ asset('uploads/photos/' ~ animal.photo) }}" alt="{{ animal.name }}" class="animal-thumb">
                                         {% else %}
-                                            <span class="chip-placeholder">🐴</span>
+                                            <span class="animal-thumb-placeholder">🐴</span>
                                         {% endif %}
-                                        {{ animal.name }}
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold" style="font-size: 0.88rem;">{{ animal.name }}</div>
+                                            {% if animal.livingPlaceName %}
+                                                <div class="animal-living-place">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                                    {{ animal.livingPlaceName }}{% if animal.livingPlaceCity %}, {{ animal.livingPlaceCity }}{% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--text-muted); flex-shrink: 0;"><polyline points="9 18 15 12 9 6"/></svg>
                                     </a>
                                 {% endfor %}
                             </div>
                             {% if client.sharedSince %}
-                                <p class="small text-secondary mt-3 mb-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                    Depuis le {{ client.sharedSince|date('d/m/Y') }}
-                                </p>
+                                <div style="padding: 0.6rem 1.5rem; border-top: 1px solid var(--border-color); background: #fafaf8;">
+                                    <p class="small text-secondary mb-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        Client depuis le {{ client.sharedSince|date('d/m/Y') }}
+                                    </p>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ── Tab: Structures ── #}
+    <div class="tab-content-section" id="tab-structures">
+        {% if structures is not defined or structures is empty %}
+            <div class="empty-state-section">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <h2 class="h5 page-title mb-2">Aucune structure répertoriée</h2>
+                <p class="text-secondary mb-0" style="max-width: 420px; margin: 0 auto;">
+                    Les structures apparaissent automatiquement lorsque les fiches chevaux renseignent un lieu de vie (écurie, pension...).
+                </p>
+            </div>
+        {% else %}
+            <div class="row g-4">
+                {% for structure in structures %}
+                    <div class="col-12 col-lg-6">
+                        <div class="structure-card h-100">
+                            <div class="structure-card-header">
+                                <div class="structure-avatar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h3 class="fw-bold mb-0" style="font-size: 0.95rem; color: var(--secondary-color);">{{ structure.name }}</h3>
+                                    {% if structure.city %}
+                                        <span class="text-secondary" style="font-size: 0.78rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                            {% if structure.postalCode %}{{ structure.postalCode }} {% endif %}{{ structure.city }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <span class="stat-pill" style="background: var(--soft-warm); color: var(--accent-color);">
+                                    {{ structure.animals|length }} {{ structure.animals|length > 1 ? 'chevaux' : 'cheval' }}
+                                </span>
+                            </div>
+                            <div class="structure-card-body">
+                                {% if structure.managerName|trim %}
+                                    <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.82rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--text-muted);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        <span class="text-secondary">Responsable :</span>
+                                        <span class="fw-semibold">{{ structure.managerName }}</span>
+                                        {% if structure.managerPhone %}
+                                            <a href="tel:{{ structure.managerPhone }}" class="text-secondary ms-1" style="font-size: 0.78rem;">{{ structure.managerPhone }}</a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                <p class="page-eyebrow mb-2">Chevaux hébergés</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for animal in structure.animals %}
+                                        <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill border text-decoration-none" style="font-size: 0.8rem; color: var(--secondary-color); border-color: var(--border-color) !important; background: #fff; transition: all 0.15s;" onmouseover="this.style.borderColor='var(--accent-color)';this.style.background='var(--soft-warm)'" onmouseout="this.style.borderColor='var(--border-color)';this.style.background='#fff'">
+                                            {% if animal.photo %}
+                                                <img src="{{ asset('uploads/photos/' ~ animal.photo) }}" alt="" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;">
+                                            {% endif %}
+                                            <span class="fw-semibold">{{ animal.name }}</span>
+                                            <span class="text-secondary" style="font-size: 0.72rem;">({{ animal.owner.lastName }})</span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab-pill').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-pill').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.tab-content-section').forEach(function(s) { s.classList.remove('active'); });
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+});
+</script>
 {% endblock %}

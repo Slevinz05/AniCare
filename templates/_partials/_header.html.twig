@@ -44,33 +44,13 @@
                             </a>
                         </li>
 
-                        <li class="nav-item dropdown">
+                        <li class="nav-item">
                             <a
-                                class="nav-link text-nowrap dropdown-toggle {{ current_route starts with 'app_repertoire' or current_route starts with 'app_animal_share' ? 'active' : '' }}"
-                                href="#"
-                                role="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
+                                class="nav-link text-nowrap {{ current_route starts with 'app_repertoire' ? 'active' : '' }}"
+                                href="{{ path('app_repertoire_reseau') }}"
                             >
                                 Répertoire
                             </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item {{ current_route == 'app_repertoire_reseau' ? 'active' : '' }}" href="{{ path('app_repertoire_reseau') }}">
-                                        Réseau
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item {{ current_route == 'app_repertoire_structures' ? 'active' : '' }}" href="{{ path('app_repertoire_structures') }}">
-                                        Structures
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item {{ current_route starts with 'app_animal_share' ? 'active' : '' }}" href="{{ path('app_animal_share_index') }}">
-                                        Mes partages
-                                    </a>
-                                </li>
-                            </ul>
                         </li>
 
                         <li class="nav-item">

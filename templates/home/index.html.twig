@@ -64,13 +64,6 @@
                 position: relative;
                 overflow: hidden;
             }
-            .quick-action::before {
-                content: '';
-                position: absolute; inset: 0;
-                opacity: 0;
-                transition: opacity 0.2s;
-                border-radius: inherit;
-            }
             .quick-action:hover {
                 transform: translateY(-3px);
                 box-shadow: 0 8px 24px rgba(0,0,0,0.08);
@@ -99,6 +92,10 @@
             .qa-partager { background: #fff; color: var(--secondary-color); }
             .qa-partager .qa-icon { background: #e0796b; color: #fff; }
             .qa-partager:hover { border-color: #e0796b; }
+
+            .qa-repertoire { background: #fff; color: var(--secondary-color); }
+            .qa-repertoire .qa-icon { background: #7c3aed; color: #fff; }
+            .qa-repertoire:hover { border-color: #7c3aed; }
 
             .horse-mini-card {
                 display: flex; align-items: center; gap: 1rem;
@@ -175,6 +172,66 @@
                 border-radius: 2rem;
                 font-size: 0.75rem; font-weight: 700;
             }
+
+            .agenda-filter-btn {
+                padding: 0.35rem 1rem;
+                border-radius: 2rem;
+                font-size: 0.8rem;
+                font-weight: 700;
+                border: 1px solid var(--border-color);
+                background: #fff;
+                color: var(--secondary-color);
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+            .agenda-filter-btn:hover {
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+            }
+            .agenda-filter-btn.active {
+                background: var(--primary-color);
+                border-color: var(--primary-color);
+                color: #fff;
+            }
+
+            .agenda-event {
+                display: flex; align-items: center; gap: 0.75rem;
+                padding: 0.75rem 1rem;
+                border-radius: var(--radius-sm);
+                border-left: 3px solid var(--primary-color);
+                background: #fff;
+                transition: all 0.15s;
+                text-decoration: none;
+            }
+            .agenda-event:hover {
+                background: var(--soft-teal);
+                transform: translateX(2px);
+            }
+            .agenda-event.event-appointment { border-left-color: var(--accent-color); }
+            .agenda-event.event-consultation { border-left-color: var(--primary-color); }
+
+            .draft-item {
+                display: flex; align-items: center; gap: 0.75rem;
+                padding: 0.75rem 1rem;
+                border-radius: var(--radius-sm);
+                border: 1px solid var(--border-color);
+                background: #fff;
+                text-decoration: none;
+                transition: all 0.15s;
+            }
+            .draft-item:hover {
+                border-color: var(--accent-color);
+                background: var(--soft-warm);
+                transform: translateX(2px);
+            }
+            .draft-icon {
+                width: 32px; height: 32px;
+                border-radius: 8px;
+                display: flex; align-items: center; justify-content: center;
+                background: var(--soft-warm);
+                color: var(--accent-color);
+                flex-shrink: 0;
+            }
         </style>
 
         {# --- Hero --- #}
@@ -231,6 +288,261 @@
             </div>
         </div>
 
+        {% if is_granted('ROLE_PRO') %}
+        {# ======================================================================
+           DASHBOARD PRO
+           ====================================================================== #}
+
+        {# --- Accès rapide PRO --- #}
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <a href="{{ path('app_health_book_entry_new') }}" class="quick-action qa-consultation">
+                    <span class="qa-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </span>
+                    Nouvelle consultation
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{{ path('app_appointment_index') }}" class="quick-action qa-rdv">
+                    <span class="qa-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </span>
+                    Rendez-vous
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{{ path('app_calendar') }}" class="quick-action qa-planning">
+                    <span class="qa-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </span>
+                    Planning
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{{ path('app_repertoire_reseau') }}" class="quick-action qa-repertoire">
+                    <span class="qa-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </span>
+                    Mes clients
+                </a>
+            </div>
+        </div>
+
+        {# --- Agenda --- #}
+        <div class="section-card mb-4">
+            <div class="section-card-header">
+                <div>
+                    <p class="page-eyebrow mb-0">Agenda</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_home', {agenda: 'day'}) }}" class="agenda-filter-btn {{ pro.agenda_view == 'day' ? 'active' : '' }}">Jour</a>
+                    <a href="{{ path('app_home', {agenda: 'week'}) }}" class="agenda-filter-btn {{ pro.agenda_view == 'week' ? 'active' : '' }}">Semaine</a>
+                    <a href="{{ path('app_home', {agenda: 'month'}) }}" class="agenda-filter-btn {{ pro.agenda_view == 'month' ? 'active' : '' }}">Mois</a>
+                </div>
+            </div>
+            <div class="section-card-body">
+                <p class="text-secondary small mb-3">
+                    {% if pro.agenda_view == 'day' %}
+                        {{ pro.agenda_start|format_datetime('full', 'none', locale='fr') }}
+                    {% elseif pro.agenda_view == 'week' %}
+                        Semaine du {{ pro.agenda_start|format_datetime('short', 'none', locale='fr') }} au {{ pro.agenda_end|format_datetime('long', 'none', locale='fr') }}
+                    {% else %}
+                        {{ pro.agenda_start|format_datetime(pattern='MMMM Y', locale='fr') }}
+                    {% endif %}
+                </p>
+
+                {% set all_events = [] %}
+                {% for appt in pro.agenda_appointments %}
+                    {% set all_events = all_events|merge([{type: 'appointment', date: appt.scheduledAt, title: appt.reason, animal: appt.animal.name, status: appt.status, id: appt.id}]) %}
+                {% endfor %}
+                {% for entry in pro.agenda_entries %}
+                    {% set all_events = all_events|merge([{type: 'consultation', date: entry.date, title: entry.title, animal: entry.animal.name, entryType: entry.type, id: entry.id}]) %}
+                {% endfor %}
+
+                {% if all_events is empty %}
+                    <div class="text-center py-4">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
+                        <p class="text-secondary small mb-0">Aucun événement sur cette période.</p>
+                    </div>
+                {% else %}
+                    <div class="d-flex flex-column gap-2">
+                        {% for event in all_events|slice(0, 8) %}
+                            <a href="{{ event.type == 'appointment' ? path('app_appointment_index') : path('app_health_book_entry_show', {id: event.id}) }}"
+                               class="agenda-event {{ event.type == 'appointment' ? 'event-appointment' : 'event-consultation' }}">
+                                <div class="flex-grow-1">
+                                    <strong style="font-size: 0.88rem; color: var(--secondary-color);">{{ event.title }}</strong>
+                                    <span class="d-block text-secondary" style="font-size: 0.78rem;">
+                                        {{ event.animal }} · {{ event.date|date('d/m H:i') }}
+                                    </span>
+                                </div>
+                                {% if event.type == 'appointment' %}
+                                    <span class="stat-pill" style="background: {{ event.status == 'CONFIRMED' ? 'var(--soft-teal)' : 'var(--soft-warm)' }}; color: {{ event.status == 'CONFIRMED' ? 'var(--primary-color)' : 'var(--accent-color)' }};">
+                                        {{ event.status == 'CONFIRMED' ? 'Confirmé' : 'En attente' }}
+                                    </span>
+                                {% else %}
+                                    <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
+                                        {{ event.entryType }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                    {% if all_events|length > 8 %}
+                        <a href="{{ path('app_calendar') }}" class="btn btn-outline-primary btn-sm w-100 mt-3">
+                            Voir tout le planning
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            {# --- Rendez-vous à venir --- #}
+            <div class="col-12 col-lg-6">
+                <div class="section-card h-100 d-flex flex-column">
+                    <div class="section-card-header">
+                        <p class="page-eyebrow mb-0">Rendez-vous à venir</p>
+                        {% if pro.upcoming_appointments is not empty %}
+                            <span class="stat-pill" style="background: var(--soft-warm); color: var(--accent-color);">
+                                {{ pro.upcoming_appointments|length }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="section-card-body flex-grow-1 d-flex flex-column">
+                        {% if pro.upcoming_appointments is empty %}
+                            <div class="text-center py-4 flex-grow-1 d-flex flex-column justify-content-center">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                </div>
+                                <p class="text-secondary small mb-0">Aucun rendez-vous à venir.</p>
+                            </div>
+                        {% else %}
+                            <div class="d-flex flex-column gap-2">
+                                {% for appt in pro.upcoming_appointments|slice(0, 5) %}
+                                    <div class="reminder-item reminder-upcoming">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="reminder-icon" style="background: var(--soft-warm); color: var(--accent-color);">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                            </div>
+                                            <div>
+                                                <strong class="d-block" style="font-size: 0.88rem; color: var(--secondary-color);">{{ appt.reason }}</strong>
+                                                <span class="text-secondary" style="font-size: 0.78rem;">{{ appt.animal.name }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block fw-bold" style="font-size: 0.82rem; color: var(--accent-color);">{{ appt.scheduledAt|date('d/m') }}</span>
+                                            <span class="text-secondary" style="font-size: 0.72rem;">{{ appt.scheduledAt|date('H:i') }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <a href="{{ path('app_appointment_index') }}" class="btn btn-outline-primary btn-sm w-100 mt-auto pt-2">
+                            Tous les rendez-vous
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Brouillons --- #}
+            <div class="col-12 col-lg-6">
+                <div class="section-card h-100 d-flex flex-column">
+                    <div class="section-card-header">
+                        <p class="page-eyebrow mb-0">Brouillons</p>
+                        {% if pro.drafts is not empty %}
+                            <span class="stat-pill" style="background: var(--soft-warm); color: var(--accent-color);">
+                                {{ pro.drafts|length }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="section-card-body flex-grow-1 d-flex flex-column">
+                        {% if pro.drafts is empty %}
+                            <div class="text-center py-4 flex-grow-1 d-flex flex-column justify-content-center">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </div>
+                                <p class="text-secondary small mb-0">Aucun brouillon en cours.</p>
+                            </div>
+                        {% else %}
+                            <div class="d-flex flex-column gap-2">
+                                {% for draft in pro.drafts %}
+                                    <a href="{{ path('app_health_book_entry_edit', {id: draft.id}) }}" class="draft-item">
+                                        <div class="draft-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong style="font-size: 0.88rem; color: var(--secondary-color);">{{ draft.title }}</strong>
+                                            <span class="d-block text-secondary" style="font-size: 0.78rem;">
+                                                {{ draft.animal.name }} · {{ draft.date|date('d/m/Y') }}
+                                            </span>
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--taupe)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0; opacity:0.4;"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-outline-primary btn-sm w-100 mt-auto pt-2">
+                            Nouvelle consultation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- Rappels du jour --- #}
+        <div class="section-card mb-4">
+            <div class="section-card-header">
+                <p class="page-eyebrow mb-0">Rappels du jour</p>
+                {% if pro.todays_reminders is not empty %}
+                    <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
+                        {{ pro.todays_reminders|length }} rappel{{ pro.todays_reminders|length > 1 ? 's' : '' }}
+                    </span>
+                {% endif %}
+            </div>
+            <div class="section-card-body">
+                {% if pro.todays_reminders is empty %}
+                    <div class="text-center py-4">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </div>
+                        <p class="text-secondary small mb-0">Aucun rappel prévu pour aujourd'hui.</p>
+                    </div>
+                {% else %}
+                    <div class="d-flex flex-column gap-2">
+                        {% for reminder in pro.todays_reminders %}
+                            <div class="reminder-item reminder-upcoming">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="reminder-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                    </div>
+                                    <div>
+                                        <strong class="d-block" style="font-size: 0.88rem; color: var(--secondary-color);">{{ reminder.title }}</strong>
+                                        <span class="text-secondary" style="font-size: 0.78rem;">
+                                            {{ reminder.animal.name }}
+                                            {% if reminder.animal.owner %}
+                                                · {{ reminder.animal.owner.fullName }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
+                                    {{ reminder.type }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% else %}
+        {# ======================================================================
+           DASHBOARD PROPRIETAIRE
+           ====================================================================== #}
+
         {# --- Accès rapide --- #}
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3">
@@ -273,9 +585,7 @@
                 <div class="section-card h-100 d-flex flex-column">
                     <div class="section-card-header">
                         <div>
-                            <p class="page-eyebrow mb-0">
-                                {% if is_granted('ROLE_PRO') %}Chevaux suivis{% else %}Mes chevaux{% endif %}
-                            </p>
+                            <p class="page-eyebrow mb-0">Mes chevaux</p>
                         </div>
                         {% if animals is not empty %}
                             <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
@@ -369,7 +679,7 @@
                                                 <span class="text-secondary" style="font-size: 0.78rem;">{{ reminder.animal.name }}</span>
                                             </div>
                                         </div>
-                                        <span class="stat-pill {{ reminder.date < date() ? '' : '' }}" style="background: {{ reminder.date < date() ? '#fef2f2' : 'var(--soft-warm)' }}; color: {{ reminder.date < date() ? 'var(--danger-color)' : 'var(--accent-color)' }}; font-size: 0.72rem;">
+                                        <span class="stat-pill" style="background: {{ reminder.date < date() ? '#fef2f2' : 'var(--soft-warm)' }}; color: {{ reminder.date < date() ? 'var(--danger-color)' : 'var(--accent-color)' }}; font-size: 0.72rem;">
                                             {{ reminder.date|date('d/m/Y') }}
                                         </span>
                                     </div>
@@ -385,6 +695,8 @@
                 </div>
             </div>
         </div>
+
+        {% endif %}
 
     {% else %}
         {# ======================================================================

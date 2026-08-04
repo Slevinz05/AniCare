@@ -1,0 +1,309 @@
+<div class="horse-anatomy-widget" id="horse-anatomy-widget">
+    <div class="anatomy-header d-flex justify-content-between align-items-center mb-3">
+        <span class="page-eyebrow" style="font-size: 0.75rem;">Localisation anatomique</span>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-primary active" data-layer="bones" id="btn-layer-bones">
+                Os
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-layer="ligaments" id="btn-layer-ligaments">
+                Ligaments
+            </button>
+        </div>
+    </div>
+
+    <div class="anatomy-svg-container position-relative">
+        <div class="anatomy-tooltip" id="anatomy-tooltip"></div>
+        <div style="width:100%; aspect-ratio: 600/500; max-height:420px;">
+            <object id="horse-svg-object"
+                    type="image/svg+xml"
+                    data="{{ asset('images/horse_bones_ligaments.svg') }}"
+                    style="width:100%; height:100%;">
+                Votre navigateur ne supporte pas l'affichage SVG.
+            </object>
+        </div>
+    </div>
+
+    <div class="anatomy-selections mt-3" id="anatomy-selections">
+        <div class="d-flex flex-wrap gap-2" id="anatomy-pills"></div>
+        <p class="text-muted small mt-2 mb-0" id="anatomy-hint">
+            Cliquez sur une zone du cheval pour la sélectionner.
+        </p>
+    </div>
+</div>
+
+<style>
+.horse-anatomy-widget {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #EDE6DB);
+    border-radius: var(--radius-md, 1rem);
+    padding: 1.25rem;
+}
+
+.anatomy-svg-container {
+    background: #fafaf8;
+    border-radius: var(--radius-sm, 0.5rem);
+    padding: 0.75rem;
+    overflow: hidden;
+}
+
+/* Tooltip */
+.anatomy-tooltip {
+    position: absolute;
+    background: rgba(74, 63, 51, 0.92);
+    color: #fff;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+    white-space: nowrap;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.anatomy-tooltip.visible {
+    opacity: 1;
+}
+
+/* Pills de sélection */
+.anatomy-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: default;
+    animation: pillAppear 0.2s ease-out;
+}
+
+.anatomy-pill.bone-pill {
+    background: var(--soft-teal, #f0fdfa);
+    color: var(--primary-hover, #0f766e);
+    border: 1px solid var(--primary-color, #0d9488);
+}
+
+.anatomy-pill.ligament-pill {
+    background: var(--soft-warm, #FFF0CC);
+    color: var(--accent-hover, #A67B3C);
+    border: 1px solid var(--accent-color, #C8973E);
+}
+
+.anatomy-pill .pill-remove {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+.anatomy-pill .pill-remove:hover {
+    opacity: 1;
+}
+
+@keyframes pillAppear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var widget = document.getElementById('horse-anatomy-widget');
+    if (!widget) return;
+
+    var svgObject = document.getElementById('horse-svg-object');
+    var svgContainer = widget.querySelector('.anatomy-svg-container');
+    var tooltip = document.getElementById('anatomy-tooltip');
+    var pillsContainer = document.getElementById('anatomy-pills');
+    var hint = document.getElementById('anatomy-hint');
+    var hiddenInput = document.getElementById('health_book_entry_anatomicalLocations') || document.getElementById('anatomical-locations-input');
+    var btnBones = document.getElementById('btn-layer-bones');
+    var btnLigaments = document.getElementById('btn-layer-ligaments');
+
+    var selectedParts = [];
+
+    if (hiddenInput && hiddenInput.value && hiddenInput.value !== '[]') {
+        try { selectedParts = JSON.parse(hiddenInput.value); } catch(e) {}
+    }
+
+    svgObject.addEventListener('load', function() {
+        var svgDoc = svgObject.contentDocument;
+        if (!svgDoc) return;
+        var svg = svgDoc.querySelector('svg');
+        if (!svg) return;
+
+        // Injecter le CSS directement dans le SVG
+        var style = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
+        style.textContent = '\
+            .global-body path { fill: #e8e4de; stroke: #c5bfb5; stroke-width: 0.5; opacity: 0.5; }\
+            .bones .bone path, .bones .bone, .bones .bones-group > path, .bones > g > path {\
+                fill: #f5f0e8; stroke: #a89e8e; stroke-width: 0.4; cursor: pointer;\
+                transition: fill 0.2s, stroke 0.2s, opacity 0.2s;\
+            }\
+            .bones .bone path:hover, .bones .bone:hover > path, .bones .bones-group > path:hover, .bones > g > path:hover {\
+                fill: #0d9488; stroke: #0f766e; opacity: 0.85;\
+            }\
+            .bones .bone path.selected, .bones .bone.selected > path, .bones .bones-group > path.selected, .bones > g > path.selected {\
+                fill: #0d9488; stroke: #0f766e; opacity: 1;\
+            }\
+            .ligaments .ligament, .ligaments path {\
+                fill: #d4a76a; stroke: #b8904f; stroke-width: 0.5; opacity: 0.8; cursor: pointer;\
+                transition: fill 0.2s, stroke 0.2s, opacity 0.2s;\
+            }\
+            .ligaments .ligament:hover, .ligaments path:hover {\
+                fill: #C8973E; stroke: #A67B3C; opacity: 1;\
+            }\
+            .ligaments .ligament.selected, .ligaments path.selected {\
+                fill: #C8973E; stroke: #A67B3C; opacity: 1;\
+            }\
+            .layer-hidden { display: none; }\
+        ';
+        svg.insertBefore(style, svg.firstChild);
+
+        function getPartName(el) {
+            var titleEl = el.querySelector('title');
+            if (titleEl) return titleEl.textContent.trim();
+            var dn = el.getAttribute('data-name') || (el.closest && el.closest('[data-name]') ? el.closest('[data-name]').getAttribute('data-name') : null);
+            if (dn) return dn.replace(/_/g, ' ');
+            return null;
+        }
+
+        function getPartId(el) {
+            return el.getAttribute('data-name') || (el.closest && el.closest('[data-name]') ? el.closest('[data-name]').getAttribute('data-name') : null);
+        }
+
+        function getPartType(el) {
+            if (el.closest && el.closest('.ligaments')) return 'ligament';
+            if (el.closest && el.closest('.bones')) return 'bone';
+            return null;
+        }
+
+        function getClickableElement(target) {
+            var el = target;
+            while (el && el !== svg) {
+                if (el.getAttribute && el.getAttribute('data-name') && (el.closest('.bones') || el.closest('.ligaments'))) {
+                    return el;
+                }
+                if (el.classList && (el.classList.contains('bone') || el.classList.contains('ligament'))) {
+                    return el;
+                }
+                el = el.parentElement;
+            }
+            return null;
+        }
+
+        function updateDisplay() {
+            pillsContainer.innerHTML = '';
+            selectedParts.forEach(function(part, index) {
+                var pill = document.createElement('span');
+                pill.className = 'anatomy-pill ' + (part.type === 'bone' ? 'bone-pill' : 'ligament-pill');
+                pill.innerHTML = part.name + ' <span class="pill-remove" data-index="' + index + '">&times;</span>';
+                pillsContainer.appendChild(pill);
+            });
+            hint.style.display = selectedParts.length > 0 ? 'none' : '';
+            if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
+
+            svg.querySelectorAll('.selected').forEach(function(el) { el.classList.remove('selected'); });
+            selectedParts.forEach(function(part) {
+                var el = svg.querySelector('[data-name="' + part.id + '"]');
+                if (el) {
+                    el.classList.add('selected');
+                    el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
+                }
+            });
+        }
+
+        function togglePart(id, name, type) {
+            var idx = selectedParts.findIndex(function(p) { return p.id === id; });
+            if (idx >= 0) { selectedParts.splice(idx, 1); }
+            else { selectedParts.push({ id: id, name: name, type: type }); }
+            updateDisplay();
+        }
+
+        svg.addEventListener('click', function(e) {
+            var clickable = getClickableElement(e.target);
+            if (!clickable) return;
+            var id = getPartId(clickable);
+            var name = getPartName(clickable);
+            var type = getPartType(clickable);
+            if (id && name && type) togglePart(id, name, type);
+        });
+
+        svg.addEventListener('mousemove', function(e) {
+            var clickable = getClickableElement(e.target);
+            if (clickable) {
+                var name = getPartName(clickable);
+                if (name) {
+                    tooltip.textContent = name;
+                    tooltip.classList.add('visible');
+                    var rect = svgContainer.getBoundingClientRect();
+                    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+                    tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+                    return;
+                }
+            }
+            tooltip.classList.remove('visible');
+        });
+
+        svg.addEventListener('mouseleave', function() { tooltip.classList.remove('visible'); });
+
+        function setLayer(layer) {
+            var bonesGroups = svg.querySelectorAll('.bones');
+            var ligamentsGroups = svg.querySelectorAll('.ligaments');
+            if (layer === 'bones') {
+                bonesGroups.forEach(function(g) { g.classList.remove('layer-hidden'); });
+                ligamentsGroups.forEach(function(g) { g.classList.add('layer-hidden'); });
+                btnBones.classList.add('active');
+                btnLigaments.classList.remove('active');
+            } else {
+                bonesGroups.forEach(function(g) { g.classList.add('layer-hidden'); });
+                ligamentsGroups.forEach(function(g) { g.classList.remove('layer-hidden'); });
+                btnLigaments.classList.add('active');
+                btnBones.classList.remove('active');
+            }
+        }
+
+        btnBones.addEventListener('click', function() { setLayer('bones'); });
+        btnLigaments.addEventListener('click', function() { setLayer('ligaments'); });
+
+        setLayer('bones');
+        updateDisplay();
+    });
+
+    pillsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('pill-remove')) {
+            var index = parseInt(e.target.getAttribute('data-index'));
+            selectedParts.splice(index, 1);
+            // Re-trigger updateDisplay from the SVG context
+            svgObject.contentDocument && svgObject.dispatchEvent(new Event('load'));
+            pillsContainer.innerHTML = '';
+            selectedParts.forEach(function(part, i) {
+                var pill = document.createElement('span');
+                pill.className = 'anatomy-pill ' + (part.type === 'bone' ? 'bone-pill' : 'ligament-pill');
+                pill.innerHTML = part.name + ' <span class="pill-remove" data-index="' + i + '">&times;</span>';
+                pillsContainer.appendChild(pill);
+            });
+            hint.style.display = selectedParts.length > 0 ? 'none' : '';
+            if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
+            // Remove selection from SVG
+            var svgDoc = svgObject.contentDocument;
+            if (svgDoc) {
+                var svg = svgDoc.querySelector('svg');
+                if (svg) {
+                    svg.querySelectorAll('.selected').forEach(function(el) { el.classList.remove('selected'); });
+                    selectedParts.forEach(function(part) {
+                        var el = svg.querySelector('[data-name="' + part.id + '"]');
+                        if (el) {
+                            el.classList.add('selected');
+                            el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
+                        }
+                    });
+                }
+            }
+        }
+    });
+});
+</script>

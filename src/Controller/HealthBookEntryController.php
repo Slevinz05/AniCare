@@ -158,8 +158,18 @@ final class HealthBookEntryController extends AbstractController
             $this->syncTypeCustom($form, $healthBookEntry);
             $this->handleUploadedDocuments($form, $healthBookEntry);
 
+            $isDraft = $request->request->get('save_draft') !== null;
+            $healthBookEntry->setStatus($isDraft ? 'draft' : 'published');
+
             $entityManager->persist($healthBookEntry);
             $entityManager->flush();
+
+            if ($isDraft) {
+                $this->addFlash('success', 'Brouillon enregistré.');
+                return $this->redirectToRoute('app_health_book_entry_edit', [
+                    'id' => $healthBookEntry->getId(),
+                ], Response::HTTP_SEE_OTHER);
+            }
 
             return $this->redirectToRoute('app_health_book_entry_show', [
                 'id' => $healthBookEntry->getId(),
@@ -199,7 +209,17 @@ final class HealthBookEntryController extends AbstractController
             $this->syncTypeCustom($form, $healthBookEntry);
             $this->handleUploadedDocuments($form, $healthBookEntry);
 
+            $isDraft = $request->request->get('save_draft') !== null;
+            $healthBookEntry->setStatus($isDraft ? 'draft' : 'published');
+
             $entityManager->flush();
+
+            if ($isDraft) {
+                $this->addFlash('success', 'Brouillon enregistré.');
+                return $this->redirectToRoute('app_health_book_entry_edit', [
+                    'id' => $healthBookEntry->getId(),
+                ], Response::HTTP_SEE_OTHER);
+            }
 
             return $this->redirectToRoute('app_health_book_entry_show', [
                 'id' => $healthBookEntry->getId(),

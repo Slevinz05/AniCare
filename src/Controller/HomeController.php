@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\AnimalRepository;
 use App\Repository\AnimalShareRepository;
+use App\Repository\AppointmentRepository;
 use App\Repository\HealthBookEntryRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,8 +19,12 @@ use Symfony\Component\Routing\Attribute\Route;
 class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home', methods: ['GET'])]
-    public function index(AnimalRepository $animalRepository, HealthBookEntryRepository $healthBookRepository): Response
-    {
+    public function index(
+        Request $request,
+        AnimalRepository $animalRepository,
+        HealthBookEntryRepository $healthBookRepository,
+        AppointmentRepository $appointmentRepository,
+    ): Response {
         $user = $this->getUser();
         $animals = [];
         $upcomingReminders = [];
@@ -29,9 +34,38 @@ class HomeController extends AbstractController
             $upcomingReminders = $healthBookRepository->findUpcomingRemindersByOwner($user, 3);
         }
 
+        $proData = [];
+        if ($user instanceof User && $this->isGranted('ROLE_PRO')) {
+            $view = $request->query->get('agenda', 'week');
+            $now = new \DateTimeImmutable();
+
+            if ($view === 'day') {
+                $start = $now->setTime(0, 0);
+                $end = $now->setTime(23, 59, 59);
+            } elseif ($view === 'month') {
+                $start = $now->modify('first day of this month')->setTime(0, 0);
+                $end = $now->modify('last day of this month')->setTime(23, 59, 59);
+            } else {
+                $start = $now->modify('monday this week')->setTime(0, 0);
+                $end = $now->modify('sunday this week')->setTime(23, 59, 59);
+            }
+
+            $proData = [
+                'agenda_view' => $view,
+                'agenda_start' => $start,
+                'agenda_end' => $end,
+                'agenda_appointments' => $appointmentRepository->findByPeriodAndUser($start, $end, $user),
+                'agenda_entries' => $healthBookRepository->findByMonthAndUser($start, $end, $user),
+                'upcoming_appointments' => $appointmentRepository->findUpcomingByUser($user),
+                'drafts' => $healthBookRepository->findDraftsByVeterinarian($user),
+                'todays_reminders' => $healthBookRepository->findTodaysRemindersByVeterinarian($user),
+            ];
+        }
+
         return $this->render('home/index.html.twig', [
             'animals' => $animals,
             'upcoming_reminders' => $upcomingReminders,
+            'pro' => $proData,
         ]);
     }
 
@@ -128,40 +162,56 @@ class HomeController extends AbstractController
     }
 
     #[Route('/repertoire', name: 'app_repertoire_reseau', methods: ['GET'])]
-    public function repertoireReseau(AnimalShareRepository $animalShareRepository): Response
+    public function repertoireReseau(Request $request, AnimalShareRepository $animalShareRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_PRO');
 
         /** @var User $user */
         $user = $this->getUser();
-        $shares = $animalShareRepository->findSharedWithEmail($user->getEmail());
+        $query = $request->query->get('q');
+
+        $shares = $animalShareRepository->searchSharedWithEmail($user->getEmail(), $query);
 
         $clients = [];
+        $structures = [];
         foreach ($shares as $share) {
-            $owner = $share->getAnimal()->getOwner();
-            if ($owner && !isset($clients[$owner->getId()])) {
+            $animal = $share->getAnimal();
+            $owner = $animal->getOwner();
+            if (!$owner) {
+                continue;
+            }
+
+            if (!isset($clients[$owner->getId()])) {
                 $clients[$owner->getId()] = [
                     'user' => $owner,
                     'animals' => [],
                     'sharedSince' => $share->getCreatedAt(),
                 ];
             }
-            if ($owner) {
-                $clients[$owner->getId()]['animals'][] = $share->getAnimal();
+            $clients[$owner->getId()]['animals'][] = $animal;
+
+            $lpName = $animal->getLivingPlaceName();
+            if ($lpName) {
+                $key = mb_strtolower($lpName);
+                if (!isset($structures[$key])) {
+                    $structures[$key] = [
+                        'name' => $lpName,
+                        'city' => $animal->getLivingPlaceCity(),
+                        'postalCode' => $animal->getLivingPlacePostalCode(),
+                        'managerName' => trim(($animal->getLivingPlaceManagerFirstName() ?? '') . ' ' . ($animal->getLivingPlaceManagerLastName() ?? '')),
+                        'managerPhone' => $animal->getLivingPlaceManagerPhone(),
+                        'animals' => [],
+                    ];
+                }
+                $structures[$key]['animals'][] = $animal;
             }
         }
 
         return $this->render('repertoire/reseau.html.twig', [
             'clients' => array_values($clients),
+            'structures' => array_values($structures),
+            'query' => $query,
         ]);
-    }
-
-    #[Route('/repertoire/structures', name: 'app_repertoire_structures', methods: ['GET'])]
-    public function repertoireStructures(): Response
-    {
-        $this->denyAccessUnlessGranted('ROLE_PRO');
-
-        return $this->render('repertoire/structures.html.twig');
     }
 
     #[Route('/factures', name: 'app_factures', methods: ['GET'])]
