@@ -1,24 +1,86 @@
 <svg preserveAspectRatio="xMinYMin meet" viewBox="-10 -20 600 500" class="horse-skeleton horse-skeleton-left" id="leftHorse" xmlns="http://www.w3.org/2000/svg">
     <style>
         .global-body path { fill: #e8e4de; stroke: #c5bfb5; stroke-width: 0.5; opacity: 0.5; }
-        .bones .bone path, .bones .bones-group > path, .bones > g > path {
+        .bones path {
             fill: #f5f0e8; stroke: #a89e8e; stroke-width: 0.4; cursor: pointer;
             transition: fill 0.2s, stroke 0.2s;
         }
-        .bones .bone path:hover, .bones .bones-group > path:hover, .bones > g > path:hover {
+        .bones path:hover, .bones path.hovered {
             fill: #0d9488; stroke: #0f766e; opacity: 0.85;
         }
-        .bones .bone path.selected, .bones .bones-group > path.selected, .bones > g > path.selected,
-        .bones .bone.selected path {
+        .bones path.selected, .bones .bone.selected path {
             fill: #0d9488; stroke: #0f766e; opacity: 1;
         }
         .ligaments path {
             fill: #d4a76a; stroke: #b8904f; stroke-width: 0.5; opacity: 0.8; cursor: pointer;
             transition: fill 0.2s, stroke 0.2s;
         }
-        .ligaments path:hover { fill: #C8973E; stroke: #A67B3C; opacity: 1; }
+        .ligaments path:hover, .ligaments path.hovered { fill: #C8973E; stroke: #A67B3C; opacity: 1; }
         .ligaments path.selected { fill: #C8973E; stroke: #A67B3C; opacity: 1; }
-        .layer-hidden { display: none; }
+        .layer-hidden { visibility: hidden; }
+        .layer-hidden .selected, .layer-hidden .selected path { visibility: visible; }
+
+        /* Zones */
+        .areas .circle {
+            fill: none; stroke: #8b5cf6; stroke-width: 2; opacity: 0.5; cursor: pointer;
+            transition: stroke 0.2s, opacity 0.2s;
+        }
+        .areas .circle:hover, .areas .circle.hovered { opacity: 0.9; stroke-width: 2.5; }
+        .areas .circle.selected { opacity: 1; stroke: #6d28d9; stroke-width: 3; }
+        .areas .skeleton-tool {
+            fill: none; stroke: #3b82f6; stroke-width: 2; opacity: 0.6; cursor: pointer;
+            transition: stroke 0.2s, opacity 0.2s;
+        }
+        .areas .skeleton-tool:hover, .areas .skeleton-tool.hovered { opacity: 1; stroke-width: 2.5; }
+        .areas .skeleton-tool.selected { opacity: 1; stroke: #1d4ed8; stroke-width: 3; }
+        .areas .skeleton-tool.active {
+            fill: none; stroke: #8b5cf6; stroke-width: 2; opacity: 0.7; cursor: pointer;
+        }
+        .areas .skeleton-tool.active:hover, .areas .skeleton-tool.active.hovered { opacity: 1; stroke-width: 2.5; }
+        .areas .skeleton-tool.active.selected { opacity: 1; stroke: #6d28d9; stroke-width: 3; }
+        .areas .helice {
+            fill: none; stroke: #f59e0b; stroke-width: 2; opacity: 0.6; cursor: pointer;
+            transition: stroke 0.2s, opacity 0.2s;
+        }
+        .areas .helice:hover, .areas .helice.hovered { opacity: 1; stroke-width: 2.5; }
+        .areas .helice.selected { opacity: 1; stroke: #b45309; stroke-width: 3; }
+        .areas .nerve {
+            fill: none; stroke: #3b82f6; stroke-width: 2; opacity: 0.6; cursor: pointer;
+        }
+        .areas .nerve:hover, .areas .nerve.hovered { opacity: 1; stroke-width: 2.5; }
+
+        /* Méridiens */
+        .meridians .meridian {
+            fill: none; stroke: #ec4899; stroke-width: 2.5; opacity: 0.7; cursor: pointer;
+            transition: stroke 0.2s, opacity 0.2s, stroke-width 0.2s;
+        }
+        .meridians .meridian:hover, .meridians .meridian.hovered { opacity: 1; stroke-width: 3.5; }
+        .meridians .meridian.selected { opacity: 1; stroke-width: 4; }
+        .meridians .meridian path { fill: none; stroke: inherit; stroke-width: inherit; opacity: inherit; cursor: pointer; }
+        .meridians .meridian-wood { stroke: #22c55e; }
+        .meridians .meridian-wood:hover, .meridians .meridian-wood.hovered, .meridians .meridian-wood.selected { stroke: #16a34a; }
+        .meridians .meridian-wood-2 { stroke: #4ade80; }
+        .meridians .meridian-wood-2:hover, .meridians .meridian-wood-2.hovered, .meridians .meridian-wood-2.selected { stroke: #22c55e; }
+        .meridians .meridian-earth { stroke: #eab308; }
+        .meridians .meridian-earth:hover, .meridians .meridian-earth.hovered, .meridians .meridian-earth.selected { stroke: #ca8a04; }
+        .meridians .meridian-earth-2 { stroke: #facc15; }
+        .meridians .meridian-earth-2:hover, .meridians .meridian-earth-2.hovered, .meridians .meridian-earth-2.selected { stroke: #eab308; }
+        .meridians .meridian-fire { stroke: #ef4444; }
+        .meridians .meridian-fire:hover, .meridians .meridian-fire.hovered, .meridians .meridian-fire.selected { stroke: #dc2626; }
+        .meridians .meridian-fire-2 { stroke: #f87171; }
+        .meridians .meridian-fire-2:hover, .meridians .meridian-fire-2.hovered, .meridians .meridian-fire-2.selected { stroke: #ef4444; }
+        .meridians .meridian-fire-3 { stroke: #fb923c; }
+        .meridians .meridian-fire-3:hover, .meridians .meridian-fire-3.hovered, .meridians .meridian-fire-3.selected { stroke: #f97316; }
+        .meridians .meridian-fire-4 { stroke: #f43f5e; }
+        .meridians .meridian-fire-4:hover, .meridians .meridian-fire-4.hovered, .meridians .meridian-fire-4.selected { stroke: #e11d48; }
+        .meridians .meridian-water { stroke: #3b82f6; }
+        .meridians .meridian-water:hover, .meridians .meridian-water.hovered, .meridians .meridian-water.selected { stroke: #2563eb; }
+        .meridians .meridian-water-2 { stroke: #60a5fa; }
+        .meridians .meridian-water-2:hover, .meridians .meridian-water-2.hovered, .meridians .meridian-water-2.selected { stroke: #3b82f6; }
+        .meridians .meridian-metal { stroke: #94a3b8; }
+        .meridians .meridian-metal:hover, .meridians .meridian-metal.hovered, .meridians .meridian-metal.selected { stroke: #64748b; }
+        .meridians .meridian-metal-2 { stroke: #cbd5e1; }
+        .meridians .meridian-metal-2:hover, .meridians .meridian-metal-2.hovered, .meridians .meridian-metal-2.selected { stroke: #94a3b8; }
     </style>
     <g class="global-body">
         <path d="m 418.36614,258.87052 c 3.19458,3.92979 8.1256,10.2832 10.1075,14.09908 2.82862,4.47448 8.28116,10.87688 8.62541,13.78211 2.2505,16.24482 9.08278,32.58314 14.79774,47.0854 6.29445,18.51618 11.6968,44.82283 7.33442,61.88065 -0.68728,2.39341 -2.02193,8.42432 -2.96587,13.40202 -3.03813,9.38695 -3.01998,22.56343 -8.05939,29.42441 -5.45763,6.55957 -12.17107,14.52006 -16.15955,18.99685 -1.64455,2.06494 -5.64227,8.15212 -6.81505,10.52066 5.11118,2.81323 24.22606,4.3049 32.60058,1.22461 2.65089,-3.27523 3.60601,-4.67216 4.03208,-8.37016 -0.6876,-1.65136 0.30242,-2.67477 -2.44214,-5.56032 2.98968,-1.477 4.09668,-5.21463 5.91808,-7.35642 2.30189,-2.61509 4.1508,-3.88799 6.2079,-4.27391 5.26279,-1.30962 4.50986,-7.34596 4.55926,-11.41623 0.21494,-11.26954 1.67529,-23.06972 2.76553,-33.47397 1.66381,-10.5922 2.09736,-21.67665 4.94752,-32.01777 1.78324,-11.02486 8.13445,-21.78756 6.21023,-29.68344 -4.17478,-9.47335 -8.50608,-16.20719 -11.97493,-27.22227 -0.97409,-5.16729 -29.78275,-28.05329 -37.74068,-37.49331 -12.2757,-11.22033 -9.38915,-6.15441 -21.94864,-13.54799 z" id="sil_posterieur"></path>
@@ -1033,6 +1095,213 @@
             <title>Tendon fléchisseur profond du doigt postérieur droit</title>
         </path>
 
+    </g>
+
+    <g class="areas">
+        <g data-name="osteoNervous">
+            <path data-name="ns_sciaticnerve_left" d="m 429.01543,140.86208 c 25.15473,6.41886 44.36059,12.72455 56.45728,31.75723 7.93427,79.59717 -8.09421,63.21125 -2.5204,104.34518 l 15.62656,38.81438" class="skeleton-tool nerve">
+                <title>Nerf sciatique gauche</title>
+            </path>
+            <ellipse data-name="ns_brachialplexus_left" cx="181.04031" cy="189.38362" rx="2.9938676" ry="3.0372975" class="circle">
+                <title>Plexus brachial gauche</title>
+            </ellipse>
+            <path data-name="ns_obturatorius_left" d="m 483.64994,203.82758 c -5.82383,8.13854 -6.51739,15.26333 -13.85586,19.39675 m -95.86141,-73.02808 c 6.2942,1.99868 12.9252,5.75672 18.72952,5.1964 m -9.24424,-6.08223 c 40.72845,30.82927 117.55546,6.63097 89.35854,33.48807 -15.99844,22.73358 32.00603,11.84535 4.85531,40.97118" class="skeleton-tool nerve">
+                <title>Nerf obturateur gauche</title>
+            </path>
+        </g>
+        <g data-name="osteoAreas">
+            <path data-name="ftm" d="m 45.336414,58.771055 c 0,0 21.57275,-37.302879 40.448905,-33.70742 C 143.08793,36.97359 150.953,156.07314 175.67177,162.58991 237.244,143.71375 282.86136,145.96092 282.86136,145.96092 c 0,0 42.74403,-2.10066 98.89165,0.15745 20.89688,0.84042 59.27116,-5.42435 76.95832,-7.231 22.92249,-2.34141 38.66894,-0.17731 45.94487,1.23093 18.87616,4.49432 31.46025,21.12331 31.46025,21.12331" class="skeleton-tool active">
+                <title>FTM - Force de Traction Médullaire</title>
+            </path>
+            <ellipse data-name="circle_face_i" cy="90.797577" cx="20.296436" rx="23.178692" ry="21.83716" class="circle">
+                <title>Champ de la face inférieure</title>
+            </ellipse>
+            <ellipse data-name="circle_cervical" transform="matrix(0.87271874,-0.4882233,0.48822329,0.87271875,0,0)" cy="151.40675" cx="74.95446" rx="39.747612" ry="82.976479" class="circle">
+                <title>Cervicales</title>
+            </ellipse>
+            <ellipse data-name="circle_withers" cy="130.25534" cx="230.7988" rx="39.272755" ry="31.743849" class="circle">
+                <title>Garrot</title>
+            </ellipse>
+            <ellipse data-name="circle_withers_sternum" class="circle" cx="305.35959" cy="192.29866" rx="33.25169" ry="85.099762" transform="matrix(0.99971,0.0240815,-0.51335575,0.8581759,0,0)">
+                <title>Garrot Sternum</title>
+            </ellipse>
+            <ellipse data-name="circle_shoulder_left" cy="203.64816" cx="175.79878" rx="36.058464" ry="35.85099" class="circle">
+                <title>Epaule gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_sternum" transform="matrix(0.9063822,0.42245864,-0.02595755,0.99966305,0,0)" cy="142.27756" cx="227.38652" rx="58.608574" ry="20.785265" class="circle">
+                <title>Sternum</title>
+            </ellipse>
+            <ellipse data-name="circle_forelimb_left" transform="matrix(-0.09648312,0.99533462,-0.85993328,0.51040645,0,0)" cy="-295.04172" cx="511.4469" rx="111.82537" ry="30.59444" class="circle">
+                <title>Antérieur gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_fetlock_forelimb_left" cx="207.43854" cy="432" rx="17" ry="16" class="circle">
+                <title>Boulet antérieur gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_fetlock_hindlimb_left" cx="537.50244" cy="433" rx="17" ry="16" class="circle">
+                <title>Boulet postérieur gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_knee_left" cx="450" cy="255" rx="26.976009" ry="24.709003" class="circle">
+                <title>Grasset gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_thoracic" cy="140.79105" cx="308.65591" rx="39.272755" ry="25.315277" class="circle">
+                <title>Thoraciques</title>
+            </ellipse>
+            <ellipse data-name="circle_lumbar" cy="136.14819" cx="385.44162" rx="39.272755" ry="25.315277" class="circle">
+                <title>Lombaires</title>
+            </ellipse>
+            <ellipse data-name="circle_sacrum" cy="129.86249" cx="451.69162" rx="34.451324" ry="25.315277" class="circle">
+                <title>Sacrum</title>
+            </ellipse>
+            <ellipse data-name="circle_sacroiliac_left" cy="150.79105" cx="448.29877" rx="44.808472" ry="40.315277" class="circle">
+                <title>Sacro-iliaque gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_thorax_left" cy="201.68387" cx="286.15591" rx="101.59418" ry="59.77956" class="circle">
+                <title>Thorax gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_digestive_left" ry="52.616959" rx="67.649452" cx="399.31091" cy="200.43567" class="circle">
+                <title>Appareil viscéral digestif gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_digestive_inf_left" transform="matrix(0.78224707,0.62296831,-0.70133736,0.71282951,0,0)" ry="77.074387" rx="38.783257" cx="383.58633" cy="-44.695789" class="circle">
+                <title>Appareil viscéral digestif inférieur gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_hindlimb_left" transform="matrix(-0.14444846,-0.98951233,0.70153661,0.71263342,0,0)" cy="752.81067" cx="184.22627" rx="111.96377" ry="86.139328" class="circle">
+                <title>Postérieur gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_face_s" cy="28.247131" cx="71.990433" rx="25.001272" ry="23.991119" class="circle">
+                <title>Champ de la face supérieure</title>
+            </ellipse>
+            <ellipse data-name="circle_face_m" cy="55.773804" cx="48.019615" rx="25.001272" ry="23.991119" class="circle">
+                <title>Champ de la face moyenne</title>
+            </ellipse>
+            <ellipse data-name="circle_mandible_left" transform="matrix(0.51030979,0.85999065,-0.71568913,0.69841898,0,0)" cy="-12.551459" cx="102.5178" rx="25.848698" ry="51.432644" class="circle">
+                <title>Mandibule gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_cervical_upper" cy="50.255341" cx="117.94167" rx="43.558464" ry="43.708134" class="circle">
+                <title>Cervicales hautes</title>
+            </ellipse>
+            <ellipse data-name="circle_cervical_low" cy="133" cx="159.99152" rx="43.558464" ry="43.708134" class="circle">
+                <title>Cervicales basses</title>
+            </ellipse>
+            <circle data-name="circle_carpe_left" cy="367.62714" cx="206.11017" r="25.423729" class="circle">
+                <title>Carpe gauche</title>
+            </circle>
+            <circle data-name="circle_hock_left" transform="scale(1,-1)" cy="-350.24152" cx="524.22461" r="38.453388" class="circle">
+                <title>Jarret gauche</title>
+            </circle>
+            <ellipse data-name="circle_urogenital_left" transform="matrix(0.71273886,0.70142948,-0.7439846,0.66819677,0,0)" cx="453.94504" cy="-179.39514" rx="36.928703" ry="74.385025" class="circle">
+                <title>Appareil uro-génital gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_coxofemoral_left" cx="471.44733" cy="182.38225" rx="33.451313" ry="35.355274" class="circle">
+                <title>Articulation coxo-fémorale gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_co" transform="matrix(0.67594686,-0.73695037,0.64850951,0.76120655,0,0)" cx="291.77383" cy="512.2467" rx="20.523159" ry="60.744438" class="circle">
+                <title>Coccygiennes</title>
+            </ellipse>
+            <ellipse data-name="circle_respiratory_left" transform="matrix(0.99185849,-0.12734493,0.12832421,0.99173227,0,0)" cx="248.8694" cy="233.34932" rx="82.617058" ry="48.576439" class="circle">
+                <title>Appareil viscéral respiratoire gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_hand_left" cx="190.54335" cy="463.94403" rx="19.713442" ry="15.065687" class="circle">
+                <title>Pied antérieur gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_foot_left" cx="527.1131" cy="470.52402" rx="19.713442" ry="15.065687" class="circle">
+                <title>Pied gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_elbow_left" cx="212.32343" cy="262.96924" rx="27.497269" ry="28.235401" class="circle">
+                <title>Coude gauche</title>
+            </ellipse>
+            <ellipse data-name="circle_ATM_left" cx="85.23085" cy="39.289368" rx="9.2115498" ry="8.6513634" class="circle">
+                <title>ATM gauche</title>
+            </ellipse>
+        </g>
+        <g data-name="helices_group" class="helices-group">
+            <g class="helices">
+                <title>Hélice</title>
+                <g class="helice2">
+                    <path data-name="helice_a" d="m 514.82217,160.05644 c -6.04145,1.44469 -86.29251,99.62786 -99.66312,98.05485" class="helice skeleton-tool">
+                        <title>Hélice 8</title>
+                    </path>
+                    <path data-name="helice_b" d="m 334.25917,126.65255 c -21.79747,-3.82017 -75.25335,134.66534 -83.56785,136.57542 -3.97058,2.53551 -29.72595,4.91318 -54.1066,-9.31553 -21.79056,-12.71713 -43.02349,-44.67463 -41.67519,-51.1914" class="helice skeleton-tool">
+                        <title>Hélice 6</title>
+                    </path>
+                    <path data-name="helice_c" d="m 177.53536,56.42668 c -11.23581,-6.067336 -65.20066,55.84186 -72.16686,50.1116" class="helice skeleton-tool">
+                        <title>Hélice 4</title>
+                    </path>
+                    <path data-name="helice_d" d="M 101.14407,73.898311 C 97.211538,66.033246 60.71671,55.466108 56.334745,55.466108 48.225687,58.663351 45.141369,61.125306 45.141369,61.125306" class="helice skeleton-tool">
+                        <title>Hélice 2</title>
+                    </path>
+                </g>
+                <g class="helice1">
+                    <path data-name="helice_e" d="m 514.27966,160.26518 c 8.62691,-3.24135 15.89547,-19.49015 8.89829,-18.0406" class="helice skeleton-tool">
+                        <title>Hélice 9</title>
+                    </path>
+                    <path data-name="helice_f" d="m 416.02597,258.14985 c -12.69645,2.58423 -64.53746,-131.16022 -81.72824,-131.4973" class="helice skeleton-tool">
+                        <title>Hélice 7</title>
+                    </path>
+                    <path data-name="helice_g" d="M 152.36385,191.25834 C 141.57747,188.67411 190.6427,62.118386 177.4968,56.275767" class="helice skeleton-tool">
+                        <title>Hélice 5</title>
+                    </path>
+                    <path data-name="helice_h" d="m 106.27068,107.96369 c -4.08701,2.37128 -6.411531,-2.66312 -7.814173,-6.33408 -2.647076,-6.927856 6.065163,-24.402264 2.273373,-27.843657" class="helice skeleton-tool">
+                        <title>Hélice 3</title>
+                    </path>
+                </g>
+            </g>
+        </g>
+    </g>
+
+    <g class="meridians">
+        <path data-name="mer_liver" d="m 442.17432,455.91666 c 1.86983,-7.0228 13.1208,-14.32328 14.94626,-24.13819 3.85004,-16.34518 6.86468,-28.44279 8.19226,-46.37761 1.13457,-10.87039 2.71723,-19.04131 -1.36776,-32.75874 -7.05967,-12.71847 -12.6659,-38.39073 -13.65134,-44.93361 l -11.3322,-48.11589 c -5.58572,-15.94866 36.77662,-74.15132 23.94073,-80.82134 -24.78141,-3.28513 -45.84549,-3.27327 -64.09972,4.39059 -16.095,6.75733 -35.79961,10.7955 -55.75914,15.01175" class="meridian meridian-wood">
+            <title>Méridien foie</title>
+        </path>
+        <path data-name="mer_spleen" d="m 286.29711,195.77972 c -15.17293,4.12958 -48.85857,23.19404 -53.44194,30.1722 -3.1889,3.80649 11.49732,16.22735 19.39826,19.32425 27.99748,12.77736 103.76677,-25.84457 130.19018,-46.75406 1.88585,1.34432 5.81769,-36.43472 19.40778,-51.54073 41.52291,32.30724 7.4451,70.40497 9.74005,85.10232 -0.26556,7.76943 24.06305,15.11913 33.77288,41.83917 13.76226,20.04391 18.1044,43.35978 21.16856,56.01076 3.40501,27.90074 3.85629,28.70963 4.06562,39.55857 -2.12185,13.98303 -1.7698,43.15261 -5.46731,62.00107 -9.92685,14.98626 -20.67183,21.74533 -20.04931,29.08801" class="meridian meridian-earth">
+            <title>Méridien rate</title>
+        </path>
+        <path data-name="mer_gallbladder" d="m 528.37115,466.95454 c 4.37027,-5.25092 8.69262,-43.33764 -0.83396,-92.15534 -2.17284,-11.13443 -6.05778,-22.40263 -10.36432,-32.22359 -3.68881,-1.93506 -15.65838,-44.5794 -19.31969,-36.67784 -4.00679,8.64715 -14.18868,-13.31981 -20.6829,-25.95908 -19.85107,-50.20513 26.10938,-86.81136 13.28301,-103.7254 -13.93042,-10.66017 -31.90561,-4.20554 -48.06702,-12.0104 -15.81172,-7.63598 -25.11557,-20.60444 -38.63355,-27.98767 -3.72951,-2.03698 -4.95561,16.10578 -7.22695,24.07167 -4.35921,13.0742 -6.05231,18.03917 -8.9611,20.05364 -10.18536,7.05383 -17.18761,21.85309 -30.54937,33.40986 -2.6381,6.27998 -105.46146,0.2807 -94.22268,-20.84077 6.72363,-12.63598 -49.63112,-11.48612 -50.87592,-16.0144 L 185.54103,156.43915 C 148.25581,103.90216 145.33335,32.130562 87.44927,18.300898 86.793436,18.144206 67.465243,11.799392 63.275302,20.507965 c -1.656526,3.443002 13.43446,1.625903 21.055638,13.45677 2.350369,3.648636 -14.958602,-0.220524 -9.990985,12.283209" class="meridian meridian-wood-2">
+            <title>Méridien vésicule biliaire</title>
+        </path>
+        <path data-name="mer_smallintestine" d="m 78.98581,34.333354 c 9.091652,3.04045 1.572241,21.027183 12.092292,30.774232 5.253466,4.867448 14.350688,1.786228 33.568968,5.528555 46.69105,51.859199 119.53355,43.404959 123.04658,76.739209 -0.38104,6.64967 -12.35247,13.40413 -24.93562,19.79702 -20.46002,10.39476 -11.68863,31.7966 -12.98612,40.02277 -5.90985,26.21963 36.18855,52.23813 24.74082,52.99631 0,0 -19.88036,15.63947 -24.4867,31.07253 -6.12628,19.5659 -1.61438,85.9253 2.48712,92.6889 -4.52725,18.9027 -4.79524,34.02857 -4.84015,42.20902 3.30187,18.23418 -7.15503,14.69907 -17.44705,31.92868" class="meridian meridian-fire-2">
+            <title>Méridien intestin grêle</title>
+        </path>
+        <path data-name="mer_tripleheater" d="m 183.81324,455.40226 c 3.95375,-3.60139 15.69709,-15.32096 15.19142,-19.72681 9.43258,-18.62204 2.71574,-32.78455 5.52221,-51.43759 0.81316,-14.51789 -2.01931,-38.10477 -0.25516,-43.79444 -0.51351,-19.92193 0.0885,-37.85609 3.16669,-51.68423 15.02834,-26.35123 18.92286,-29.37287 18.50756,-35.34116 0.35708,-10.13748 -19.73814,-20.38897 -38.35249,-41.58524 -8.0728,-10.16951 -2.73289,-45.35138 2.63038,-61.18484 0.38694,-3.05203 3.298,-12.44157 -2.43158,-12.5396 C 149.67538,137.45613 133.29408,97.114168 127.83374,78.568324 118.68158,70.498237 116.79738,62.430709 115.2913,54.516173 94.88104,47.209802 100.21255,29.46159 85.62039,18.614705 83.469025,17.015517 76.901825,13.075521 74.227706,15.83826 68.506466,21.749105 63.841212,33.13264 67.036305,38.053921" class="meridian meridian-fire-3 active">
+            <title>Méridien triple réchauffeur</title>
+        </path>
+        <g data-name="mer_stomach" class="meridian meridian-earth-2">
+            <title>Méridien estomac</title>
+            <path d="m 237.71334,258.34202 c 12.33632,5.38136 41.20279,5.84437 66.70847,5.27638 6.80813,1.95076 79.15597,-11.60377 93.07332,-28.7223 41.10119,-49.38797 56.20528,-40.66018 62.70374,-56.38408 15.43417,42.8522 -14.0256,66.20698 -10.98916,86.77205 24.35934,27.21467 37.78288,40.32386 41.84981,50.4904 4.88896,3.68478 7.49979,-16.29742 8.30274,-6.84439 0.64472,7.59029 20.32834,59.26562 23.29375,71.58216 2.23039,25.13653 11.50789,59.79717 -1.28861,82.19103"></path>
+            <path d="M 63.334247,54.454915 48.630529,69.241929 C 28.005382,91.328481 27.658937,100.75506 34.129594,109.31225 57.489166,96.727523 100.85636,63.293452 101.06054,74.76519 c 6.64338,19.524644 11.81124,32.90558 21.70316,51.1963 7.90166,18.46503 26.17225,41.62427 27.68758,52.48111 3.53046,11.59142 8.36062,39.57292 10.16894,50.95304 5.70936,16.97506 15.36601,24.7103 22.20434,28.29043"></path>
+            <path d="m 82.680501,35.126379 c 7.068597,13.198423 11.247963,25.915307 11.341757,37.951262"></path>
+            <path d="m 69.190559,11.135733 c -7.327518,5.322523 -6.167667,9.740084 -3.862794,15.162552"></path>
+        </g>
+        <g data-name="mer_pericardium" transform="translate(-1.0939027,0)" class="meridian meridian-fire">
+            <title>Méridien maître du cœur</title>
+            <path d="m 234.30169,241.40223 c 0.1465,4.58933 1.06435,8.25272 0.57734,16.9858"></path>
+            <path d="m 232.46132,283.66508 c -1.30598,22.30686 -2.43872,44.95286 -0.12753,55.22801 -0.45091,9.11257 6.4563,22.29393 5.79012,32.44573 1.29235,24.25953 15.31703,54.2324 10.71472,59.41872 -6.78781,3.63402 -17.85369,24.41937 -16.14135,23.96252"></path>
+        </g>
+        <g data-name="mer_bladder" class="meridian meridian-water">
+            <title>Méridien vessie</title>
+            <path d="M 55.035841,49.440177 C 53.525644,31.925386 56.73482,26.16195 65.373844,15.551276 69.941169,9.9415674 79.697824,12.960208 81.513831,13.425194 136.70013,27.55557 216.47081,121.61805 221.71467,117.6502 c 19.67315,-5.80769 35.35811,12.53613 36.35141,28.53702 11.74071,-1.75963 17.0739,-2.88977 34.52368,-3.69789 21.34733,2.02419 43.61088,0.61139 68.87047,-3.23281 13.85002,-3.55956 39.30115,-5.87237 64.51126,-4.15105 12.69654,1.10987 24.73674,-0.24103 38.66106,1.35061"></path>
+            <path d="m 252.56956,156.65397 c 13.49166,-0.45312 50.67104,5.27374 91.84381,-0.69329 60.41279,-8.75543 124.75796,-7.08786 126.06662,-12.57524"></path>
+            <path d="m 480.55324,138.78633 c 62.95863,65.04635 6.4459,85.58998 25.87302,141.94954 -0.47497,3.10552 11.2471,56.8348 17.12235,48.61751 15.40849,-5.89298 11.98079,7.27537 10.39315,24.05994 -0.62256,6.58174 4.46964,3.64368 4.12237,5.78445 -1.04,6.41115 -4.20636,22.58114 -3.85973,27.52405 3.79056,54.05333 16.47322,32.35559 13.45436,45.74064 -11.98392,8.87318 -5.17486,26.80416 -13.57576,33.59202"></path>
+        </g>
+        <g data-name="mer_heart" class="meridian meridian-fire-4">
+            <title>Méridien cœur</title>
+            <path d="m 235.53692,277.13095 c -2.81645,39.96278 1.24466,58.31035 3.87488,81.15501"></path>
+            <path d="m 192.94593,462.03049 c 6.78349,-12.77476 20.69286,-24.84364 24.21704,-27.66387 3.01384,0.43728 -3.40714,-17.08396 -3.61024,-34.67558 -0.1591,-13.78028 1.4974,-28.26756 1.60445,-33.75191"></path>
+        </g>
+        <g data-name="mer_largeintestine" class="meridian meridian-metal-2">
+            <title>Méridien gros intestin</title>
+            <path d="m 222.94863,368.6937 c 2.45638,4.94959 2.2375,8.77704 8.89255,15.93907 3.95923,3.60524 8.80653,36.55946 7.27033,47.2011 -0.0952,0.6594 -14.03417,20.92566 -14.03417,20.92566"></path>
+            <path d="M 25.280052,97.575813 C 48.61748,79.271327 66.567268,70.653019 86.745417,64.421417 c 35.020703,-35.28736 38.030663,49.674133 65.824113,94.120043 7.43126,19.6595 8.69971,35.2264 13.41829,36.61316 11.76141,9.29161 22.83836,70.06948 32.65826,72.9321 -11.87616,9.93087 -12.43292,17.36988 -12.02216,25.22145 l 12.71136,56.69519"></path>
+        </g>
+        <g data-name="mer_lung" class="meridian meridian-metal">
+            <title>Méridien poumon</title>
+            <path d="m 194.66164,195.74885 c -4.17814,-1.84532 -9.86817,-4.03105 -15.21483,2.43664 -14.01636,25.0653 30.51841,46.70669 49.42079,80.59434"></path>
+            <path d="m 228.02996,454.83898 c 2.38193,-6.62958 9.89889,-17.49537 14.06972,-23.57128 2.2125,-6.9695 -2.93,-27.64462 -5.62726,-46.23105 -7.09294,-34.96415 -17.89013,-61.15949 -5.92688,-103.56804"></path>
+        </g>
+        <g data-name="mer_kidney" class="meridian meridian-water-2">
+            <title>Méridien rein</title>
+            <path d="m 450.377,460.48817 c -1.39869,-12.97743 18.07575,-15.83883 20.37024,-50.54846 -0.30518,-13.00843 4.03493,-18.29765 5.81278,-32.7012 3.40039,-11.62001 -4.58506,-46.57814 -1.00334,-42.10099 l 9.16065,9.35928 c -2.66873,11.27042 -4.64726,8.72432 -11.81015,8.4544 -2.70298,0.76202 3.69847,-48.33017 0.0954,-45.85127 -8.77921,0.70105 -3.95041,-0.45556 -14.27293,-18.39448 -15.05171,-19.89984 -6.84665,-60.88662 5.6446,-86.50627 2.73724,-7.88496 -3.63518,-8.72444 -9.16065,-1.74489 -24.59804,40.16294 -28.85932,38.78701 -72.41275,50.60168 -12.05248,5.09591 -43.90415,10.18191 -69.35921,13.08664 -11.99346,2.60102 -61.12706,5.17469 -80.45844,-5.24822"></path>
+            <path d="m 195.90436,257.1495 c -6.91487,-3.72829 -9.66268,-8.62746 -15.94649,-16.56284"></path>
+        </g>
     </g>
 
 </svg>

@@ -8,6 +8,12 @@
             <button type="button" class="btn btn-outline-primary" data-layer="ligaments" id="btn-layer-ligaments">
                 Ligaments
             </button>
+            <button type="button" class="btn btn-outline-primary" data-layer="areas" id="btn-layer-areas">
+                Zones
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-layer="meridians" id="btn-layer-meridians">
+                Méridiens
+            </button>
         </div>
     </div>
 
@@ -16,7 +22,7 @@
         <div style="width:100%; aspect-ratio: 600/500; max-height:420px;">
             <object id="horse-svg-object"
                     type="image/svg+xml"
-                    data="{{ asset('images/horse_bones_ligaments.svg') }}"
+                    data="{{ asset('images/horse_bones_ligaments.svg') }}?v=8"
                     style="width:100%; height:100%;">
                 Votre navigateur ne supporte pas l'affichage SVG.
             </object>
@@ -29,6 +35,8 @@
             Cliquez sur une zone du cheval pour la sélectionner.
         </p>
     </div>
+
+    <div class="anatomy-interventions mt-3" id="anatomy-interventions"></div>
 </div>
 
 <style>
@@ -92,6 +100,30 @@
     border: 1px solid var(--accent-color, #C8973E);
 }
 
+.anatomy-pill.area-pill {
+    background: #ede9fe;
+    color: #6d28d9;
+    border: 1px solid #8b5cf6;
+}
+
+.anatomy-pill.meridian-pill {
+    background: #fce7f3;
+    color: #be185d;
+    border: 1px solid #ec4899;
+}
+
+.anatomy-pill.nerve-pill {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #3b82f6;
+}
+
+.anatomy-pill.helice-pill {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+}
+
 .anatomy-pill .pill-remove {
     cursor: pointer;
     opacity: 0.6;
@@ -107,6 +139,115 @@
     from { transform: scale(0.8); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+
+/* Intervention cards */
+.intervention-card {
+    border: 1px solid var(--border-color, #EDE6DB);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    animation: pillAppear 0.25s ease-out;
+    background: var(--card-bg, #fff);
+}
+
+.intervention-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.intervention-card-header.bone-header {
+    background: var(--soft-teal, #f0fdfa);
+    color: var(--primary-hover, #0f766e);
+    border-bottom: 1px solid var(--primary-color, #0d9488);
+}
+.intervention-card-header.ligament-header {
+    background: var(--soft-warm, #FFF0CC);
+    color: var(--accent-hover, #A67B3C);
+    border-bottom: 1px solid var(--accent-color, #C8973E);
+}
+.intervention-card-header.area-header {
+    background: #ede9fe;
+    color: #6d28d9;
+    border-bottom: 1px solid #8b5cf6;
+}
+.intervention-card-header.meridian-header {
+    background: #fce7f3;
+    color: #be185d;
+    border-bottom: 1px solid #ec4899;
+}
+.intervention-card-header.nerve-header {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-bottom: 1px solid #3b82f6;
+}
+.intervention-card-header.helice-header {
+    background: #fef3c7;
+    color: #92400e;
+    border-bottom: 1px solid #f59e0b;
+}
+
+.intervention-card-header .card-remove {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.intervention-card-header .card-remove:hover {
+    opacity: 1;
+}
+
+.intervention-card-body {
+    padding: 0.75rem 0.85rem;
+}
+
+.technique-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem 0.75rem;
+}
+
+.technique-option {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: #4a3f33;
+    cursor: pointer;
+    padding: 0.2rem 0;
+}
+
+.technique-option input[type="radio"] {
+    accent-color: var(--primary-color, #0d9488);
+    margin: 0;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+.intervention-notes {
+    width: 100%;
+    border: 1px solid var(--border-color, #EDE6DB);
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.78rem;
+    resize: vertical;
+    min-height: 2.2rem;
+    max-height: 8rem;
+    margin-top: 0.5rem;
+    background: #fafaf8;
+    transition: border-color 0.15s;
+}
+.intervention-notes:focus {
+    outline: none;
+    border-color: var(--primary-color, #0d9488);
+}
+.intervention-notes::placeholder {
+    color: #b5a99a;
+}
 </style>
 
 <script>
@@ -118,10 +259,23 @@ document.addEventListener('DOMContentLoaded', function() {
     var svgContainer = widget.querySelector('.anatomy-svg-container');
     var tooltip = document.getElementById('anatomy-tooltip');
     var pillsContainer = document.getElementById('anatomy-pills');
+    var interventionsContainer = document.getElementById('anatomy-interventions');
     var hint = document.getElementById('anatomy-hint');
     var hiddenInput = document.getElementById('health_book_entry_anatomicalLocations') || document.getElementById('anatomical-locations-input');
     var btnBones = document.getElementById('btn-layer-bones');
     var btnLigaments = document.getElementById('btn-layer-ligaments');
+    var btnAreas = document.getElementById('btn-layer-areas');
+    var btnMeridians = document.getElementById('btn-layer-meridians');
+    var allLayerBtns = [btnBones, btnLigaments, btnAreas, btnMeridians];
+
+    var techniques = [
+        'Technique structurelle',
+        'Tissulaire',
+        'Raideurs articulaires',
+        'Tensions musculaires',
+        'Lésion ancienne ou actuelle',
+        'Restriction primaire'
+    ];
 
     var selectedParts = [];
 
@@ -129,46 +283,34 @@ document.addEventListener('DOMContentLoaded', function() {
         try { selectedParts = JSON.parse(hiddenInput.value); } catch(e) {}
     }
 
-    svgObject.addEventListener('load', function() {
+    function initSvg() {
         var svgDoc = svgObject.contentDocument;
         if (!svgDoc) return;
         var svg = svgDoc.querySelector('svg');
         if (!svg) return;
+        if (svg._anicare_init) return;
+        svg._anicare_init = true;
 
-        // Injecter le CSS directement dans le SVG
-        var style = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
-        style.textContent = '\
-            .global-body path { fill: #e8e4de; stroke: #c5bfb5; stroke-width: 0.5; opacity: 0.5; }\
-            .bones .bone path, .bones .bone, .bones .bones-group > path, .bones > g > path {\
-                fill: #f5f0e8; stroke: #a89e8e; stroke-width: 0.4; cursor: pointer;\
-                transition: fill 0.2s, stroke 0.2s, opacity 0.2s;\
-            }\
-            .bones .bone path:hover, .bones .bone:hover > path, .bones .bones-group > path:hover, .bones > g > path:hover {\
-                fill: #0d9488; stroke: #0f766e; opacity: 0.85;\
-            }\
-            .bones .bone path.selected, .bones .bone.selected > path, .bones .bones-group > path.selected, .bones > g > path.selected {\
-                fill: #0d9488; stroke: #0f766e; opacity: 1;\
-            }\
-            .ligaments .ligament, .ligaments path {\
-                fill: #d4a76a; stroke: #b8904f; stroke-width: 0.5; opacity: 0.8; cursor: pointer;\
-                transition: fill 0.2s, stroke 0.2s, opacity 0.2s;\
-            }\
-            .ligaments .ligament:hover, .ligaments path:hover {\
-                fill: #C8973E; stroke: #A67B3C; opacity: 1;\
-            }\
-            .ligaments .ligament.selected, .ligaments path.selected {\
-                fill: #C8973E; stroke: #A67B3C; opacity: 1;\
-            }\
-            .layer-hidden { display: none; }\
-        ';
-        svg.insertBefore(style, svg.firstChild);
+        svg.querySelectorAll('title').forEach(function(t) {
+            var parent = t.parentElement;
+            if (parent) {
+                parent.setAttribute('data-title', t.textContent.trim());
+                t.remove();
+            }
+        });
 
         function getPartName(el) {
-            var titleEl = el.querySelector('title');
-            if (titleEl) return titleEl.textContent.trim();
+            var dt = el.getAttribute('data-title');
+            if (dt) return dt;
+            var parent = el.closest && el.closest('[data-title]');
+            if (parent) return parent.getAttribute('data-title');
             var dn = el.getAttribute('data-name') || (el.closest && el.closest('[data-name]') ? el.closest('[data-name]').getAttribute('data-name') : null);
             if (dn) return dn.replace(/_/g, ' ');
             return null;
+        }
+
+        function getGroupName(name) {
+            return name ? name.trim() : name;
         }
 
         function getPartId(el) {
@@ -178,16 +320,20 @@ document.addEventListener('DOMContentLoaded', function() {
         function getPartType(el) {
             if (el.closest && el.closest('.ligaments')) return 'ligament';
             if (el.closest && el.closest('.bones')) return 'bone';
+            if (el.closest && el.closest('.helices-group')) return 'helice';
+            if (el.closest && el.closest('[data-name="osteoNervous"]')) return 'nerve';
+            if (el.closest && el.closest('.areas')) return 'area';
+            if (el.closest && el.closest('.meridians')) return 'meridian';
             return null;
         }
 
         function getClickableElement(target) {
             var el = target;
             while (el && el !== svg) {
-                if (el.getAttribute && el.getAttribute('data-name') && (el.closest('.bones') || el.closest('.ligaments'))) {
+                if (el.getAttribute && el.getAttribute('data-name') && (el.closest('.bones') || el.closest('.ligaments') || el.closest('.areas') || el.closest('.meridians'))) {
                     return el;
                 }
-                if (el.classList && (el.classList.contains('bone') || el.classList.contains('ligament'))) {
+                if (el.classList && (el.classList.contains('bone') || el.classList.contains('ligament') || el.classList.contains('circle') || el.classList.contains('skeleton-tool') || el.classList.contains('helice') || el.classList.contains('meridian'))) {
                     return el;
                 }
                 el = el.parentElement;
@@ -195,31 +341,130 @@ document.addEventListener('DOMContentLoaded', function() {
             return null;
         }
 
-        function updateDisplay() {
-            pillsContainer.innerHTML = '';
-            selectedParts.forEach(function(part, index) {
-                var pill = document.createElement('span');
-                pill.className = 'anatomy-pill ' + (part.type === 'bone' ? 'bone-pill' : 'ligament-pill');
-                pill.innerHTML = part.name + ' <span class="pill-remove" data-index="' + index + '">&times;</span>';
-                pillsContainer.appendChild(pill);
+        function findRelatedIds(name, type) {
+            var group = getGroupName(name);
+            var ids = [];
+            var layerSelector = type === 'bone' ? '.bones' : type === 'ligament' ? '.ligaments' : type === 'meridian' ? '.meridians' : null;
+            svg.querySelectorAll('[data-title]').forEach(function(el) {
+                if (layerSelector && !el.closest(layerSelector)) return;
+                if (getGroupName(el.getAttribute('data-title')) === group) {
+                    var dn = el.getAttribute('data-name');
+                    if (dn) ids.push(dn);
+                }
             });
-            hint.style.display = selectedParts.length > 0 ? 'none' : '';
-            if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
+            return ids;
+        }
 
+        function pillClass(type) {
+            var map = {bone:'bone-pill', ligament:'ligament-pill', area:'area-pill', meridian:'meridian-pill', nerve:'nerve-pill', helice:'helice-pill'};
+            return map[type] || 'bone-pill';
+        }
+
+        function headerClass(type) {
+            var map = {bone:'bone-header', ligament:'ligament-header', area:'area-header', meridian:'meridian-header', nerve:'nerve-header', helice:'helice-header'};
+            return map[type] || 'bone-header';
+        }
+
+        function applySelectionClasses() {
             svg.querySelectorAll('.selected').forEach(function(el) { el.classList.remove('selected'); });
             selectedParts.forEach(function(part) {
-                var el = svg.querySelector('[data-name="' + part.id + '"]');
-                if (el) {
-                    el.classList.add('selected');
-                    el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
-                }
+                (part.ids || [part.id]).forEach(function(id) {
+                    var el = svg.querySelector('[data-name="' + id + '"]');
+                    if (el) {
+                        el.classList.add('selected');
+                        el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
+                    }
+                });
             });
         }
 
+        function saveState() {
+            if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
+        }
+
+        function buildInterventionCard(part, index) {
+            var card = document.createElement('div');
+            card.className = 'intervention-card';
+            card.setAttribute('data-part-index', index);
+
+            var header = document.createElement('div');
+            header.className = 'intervention-card-header ' + headerClass(part.type);
+            header.innerHTML = '<span>' + part.name + '</span><span class="card-remove" data-index="' + index + '">&times;</span>';
+
+            var body = document.createElement('div');
+            body.className = 'intervention-card-body';
+
+            var grid = document.createElement('div');
+            grid.className = 'technique-grid';
+
+            var radioName = 'technique_' + index;
+            techniques.forEach(function(tech) {
+                var label = document.createElement('label');
+                label.className = 'technique-option';
+                var radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = radioName;
+                radio.value = tech;
+                if (part.technique === tech) radio.checked = true;
+                radio.addEventListener('change', function() {
+                    selectedParts[index].technique = tech;
+                    saveState();
+                });
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(tech));
+                grid.appendChild(label);
+            });
+
+            var notes = document.createElement('textarea');
+            notes.className = 'intervention-notes';
+            notes.placeholder = 'Description / Notes';
+            notes.rows = 1;
+            notes.value = part.notes || '';
+            notes.addEventListener('input', function() {
+                selectedParts[index].notes = this.value;
+                saveState();
+            });
+
+            body.appendChild(grid);
+            body.appendChild(notes);
+            card.appendChild(header);
+            card.appendChild(body);
+            return card;
+        }
+
+        function updateDisplay() {
+            pillsContainer.innerHTML = '';
+            interventionsContainer.innerHTML = '';
+
+            selectedParts.forEach(function(part, index) {
+                var pill = document.createElement('span');
+                pill.className = 'anatomy-pill ' + pillClass(part.type);
+                pill.innerHTML = part.name + ' <span class="pill-remove" data-index="' + index + '">&times;</span>';
+                pillsContainer.appendChild(pill);
+
+                interventionsContainer.appendChild(buildInterventionCard(part, index));
+            });
+
+            hint.style.display = selectedParts.length > 0 ? 'none' : '';
+            saveState();
+            applySelectionClasses();
+        }
+
+        function removePart(index) {
+            selectedParts.splice(index, 1);
+            updateDisplay();
+        }
+
         function togglePart(id, name, type) {
-            var idx = selectedParts.findIndex(function(p) { return p.id === id; });
-            if (idx >= 0) { selectedParts.splice(idx, 1); }
-            else { selectedParts.push({ id: id, name: name, type: type }); }
+            var group = getGroupName(name);
+            var idx = selectedParts.findIndex(function(p) { return p.name === group; });
+            if (idx >= 0) {
+                selectedParts.splice(idx, 1);
+            } else {
+                var ids = findRelatedIds(name, type);
+                if (ids.length === 0) ids = [id];
+                selectedParts.push({ id: ids[0], ids: ids, name: group, type: type, technique: '', notes: '' });
+            }
             updateDisplay();
         }
 
@@ -232,78 +477,92 @@ document.addEventListener('DOMContentLoaded', function() {
             if (id && name && type) togglePart(id, name, type);
         });
 
+        var lastHoverGroup = null;
+        function setHoverGroup(name, type) {
+            if (name === lastHoverGroup) return;
+            svg.querySelectorAll('.hovered').forEach(function(el) { el.classList.remove('hovered'); });
+            lastHoverGroup = name;
+            if (!name) return;
+            var group = getGroupName(name);
+            var layerSel = type === 'bone' ? '.bones' : type === 'ligament' ? '.ligaments' : type === 'meridian' ? '.meridians' : null;
+            svg.querySelectorAll('[data-title]').forEach(function(el) {
+                if (layerSel && !el.closest(layerSel)) return;
+                if (getGroupName(el.getAttribute('data-title')) === group) {
+                    el.classList.add('hovered');
+                    el.querySelectorAll('path').forEach(function(p) { p.classList.add('hovered'); });
+                }
+            });
+        }
+
         svg.addEventListener('mousemove', function(e) {
             var clickable = getClickableElement(e.target);
             if (clickable) {
                 var name = getPartName(clickable);
+                var type = getPartType(clickable);
                 if (name) {
-                    tooltip.textContent = name;
+                    tooltip.textContent = getGroupName(name);
                     tooltip.classList.add('visible');
-                    var rect = svgContainer.getBoundingClientRect();
-                    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
-                    tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+                    var objRect = svgObject.getBoundingClientRect();
+                    var containerRect = svgContainer.getBoundingClientRect();
+                    var scaleX = objRect.width / svgObject.clientWidth;
+                    var scaleY = objRect.height / svgObject.clientHeight;
+                    var posX = objRect.left - containerRect.left + (e.clientX * scaleX) + 15;
+                    var posY = objRect.top - containerRect.top + (e.clientY * scaleY) - 10;
+                    if (posX + 200 > containerRect.width) posX = posX - 180;
+                    if (posY < 5) posY = 5;
+                    tooltip.style.left = posX + 'px';
+                    tooltip.style.top = posY + 'px';
+                    setHoverGroup(name, type);
                     return;
                 }
             }
             tooltip.classList.remove('visible');
+            setHoverGroup(null, null);
         });
 
-        svg.addEventListener('mouseleave', function() { tooltip.classList.remove('visible'); });
+        svg.addEventListener('mouseleave', function() {
+            tooltip.classList.remove('visible');
+            setHoverGroup(null, null);
+        });
+
+        var layerSelectors = {
+            bones: '.bones',
+            ligaments: '.ligaments',
+            areas: '.areas',
+            meridians: '.meridians'
+        };
 
         function setLayer(layer) {
-            var bonesGroups = svg.querySelectorAll('.bones');
-            var ligamentsGroups = svg.querySelectorAll('.ligaments');
-            if (layer === 'bones') {
-                bonesGroups.forEach(function(g) { g.classList.remove('layer-hidden'); });
-                ligamentsGroups.forEach(function(g) { g.classList.add('layer-hidden'); });
-                btnBones.classList.add('active');
-                btnLigaments.classList.remove('active');
-            } else {
-                bonesGroups.forEach(function(g) { g.classList.add('layer-hidden'); });
-                ligamentsGroups.forEach(function(g) { g.classList.remove('layer-hidden'); });
-                btnLigaments.classList.add('active');
-                btnBones.classList.remove('active');
-            }
+            Object.keys(layerSelectors).forEach(function(key) {
+                var groups = svg.querySelectorAll(layerSelectors[key]);
+                groups.forEach(function(g) {
+                    if (key === layer) g.classList.remove('layer-hidden');
+                    else g.classList.add('layer-hidden');
+                });
+            });
+            allLayerBtns.forEach(function(btn) { btn.classList.remove('active'); });
+            var activeBtn = document.getElementById('btn-layer-' + layer);
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
         btnBones.addEventListener('click', function() { setLayer('bones'); });
         btnLigaments.addEventListener('click', function() { setLayer('ligaments'); });
+        btnAreas.addEventListener('click', function() { setLayer('areas'); });
+        btnMeridians.addEventListener('click', function() { setLayer('meridians'); });
 
         setLayer('bones');
         updateDisplay();
-    });
 
-    pillsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('pill-remove')) {
-            var index = parseInt(e.target.getAttribute('data-index'));
-            selectedParts.splice(index, 1);
-            // Re-trigger updateDisplay from the SVG context
-            svgObject.contentDocument && svgObject.dispatchEvent(new Event('load'));
-            pillsContainer.innerHTML = '';
-            selectedParts.forEach(function(part, i) {
-                var pill = document.createElement('span');
-                pill.className = 'anatomy-pill ' + (part.type === 'bone' ? 'bone-pill' : 'ligament-pill');
-                pill.innerHTML = part.name + ' <span class="pill-remove" data-index="' + i + '">&times;</span>';
-                pillsContainer.appendChild(pill);
-            });
-            hint.style.display = selectedParts.length > 0 ? 'none' : '';
-            if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
-            // Remove selection from SVG
-            var svgDoc = svgObject.contentDocument;
-            if (svgDoc) {
-                var svg = svgDoc.querySelector('svg');
-                if (svg) {
-                    svg.querySelectorAll('.selected').forEach(function(el) { el.classList.remove('selected'); });
-                    selectedParts.forEach(function(part) {
-                        var el = svg.querySelector('[data-name="' + part.id + '"]');
-                        if (el) {
-                            el.classList.add('selected');
-                            el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
-                        }
-                    });
-                }
+        // Delegated click for remove buttons (pills + cards)
+        widget.addEventListener('click', function(e) {
+            if (e.target.classList.contains('pill-remove') || e.target.classList.contains('card-remove')) {
+                var index = parseInt(e.target.getAttribute('data-index'));
+                removePart(index);
             }
-        }
-    });
+        });
+    }
+
+    svgObject.addEventListener('load', initSvg);
+    if (svgObject.contentDocument && svgObject.contentDocument.querySelector('svg')) initSvg();
 });
 </script>
