@@ -160,15 +160,14 @@ final class HealthBookEntryController extends AbstractController
 
             $isDraft = $request->request->get('save_draft') !== null;
             $healthBookEntry->setStatus($isDraft ? 'draft' : 'published');
+            $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
 
             $entityManager->persist($healthBookEntry);
             $entityManager->flush();
 
             if ($isDraft) {
                 $this->addFlash('success', 'Brouillon enregistré.');
-                return $this->redirectToRoute('app_health_book_entry_edit', [
-                    'id' => $healthBookEntry->getId(),
-                ], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
             }
 
             return $this->redirectToRoute('app_health_book_entry_show', [
@@ -216,9 +215,7 @@ final class HealthBookEntryController extends AbstractController
 
             if ($isDraft) {
                 $this->addFlash('success', 'Brouillon enregistré.');
-                return $this->redirectToRoute('app_health_book_entry_edit', [
-                    'id' => $healthBookEntry->getId(),
-                ], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
             }
 
             return $this->redirectToRoute('app_health_book_entry_show', [

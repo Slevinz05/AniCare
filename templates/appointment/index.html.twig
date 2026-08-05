@@ -1,16 +1,63 @@
 {% extends 'base.html.twig' %}
 {% block title %}Rendez-vous - AniCare{% endblock %}
 {% block body %}
+<style>
+    .appt-list-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .appt-list-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+    .appt-list-card-link {
+        text-decoration: none; color: inherit;
+        display: flex; gap: 1rem; align-items: center;
+        padding: 1.25rem 1.5rem;
+    }
+    .appt-date-badge {
+        width: 56px; min-width: 56px; height: 56px;
+        border-radius: 14px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+    .appt-date-badge .day { font-size: 1.3rem; line-height: 1; }
+    .appt-date-badge .month { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
+
+    .appt-status-confirmed .appt-date-badge { background: var(--soft-teal); color: var(--primary-color); }
+    .appt-status-pending .appt-date-badge { background: #fef7ed; color: #b45309; }
+    .appt-status-cancelled .appt-date-badge { background: #f3f4f6; color: var(--taupe); }
+
+    .status-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.35rem;
+    }
+    .status-confirmed { background: var(--primary-color); }
+    .status-pending { background: #b45309; }
+    .status-cancelled { background: var(--danger-color); }
+</style>
+
 <div class="container py-4">
     <div class="page-hero p-4 p-lg-5 mb-5">
         <div class="row align-items-center gy-3">
             <div class="col-12 col-lg">
                 <p class="page-eyebrow mb-2">Organisation</p>
                 <h1 class="page-title mb-2">Rendez-vous</h1>
-                <p class="page-subtitle mb-0">Planifiez et suivez les rendez-vous vétérinaires de vos chevaux.</p>
+                <p class="page-subtitle mb-0">Planifiez et suivez vos rendez-vous.</p>
             </div>
             <div class="col-12 col-lg-auto">
-                <a href="{{ path('app_appointment_new') }}" class="btn btn-primary shadow-sm">Prendre rendez-vous</a>
+                <a href="{{ path('app_appointment_new') }}" class="btn btn-primary shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nouveau rendez-vous
+                </a>
             </div>
         </div>
     </div>
@@ -25,54 +72,50 @@
             </div>
         </div>
     {% else %}
-        <div class="card anicare-card overflow-hidden">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-medical align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Date / Heure</th>
-                                <th>Animal</th>
-                                <th>Motif</th>
-                                <th>Lieu</th>
-                                <th>Statut</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ap in appointments %}
-                                <tr>
-                                    <td><strong>{{ ap.scheduledAt|date('d/m/Y H:i') }}</strong></td>
-                                    <td><strong class="text-teal">{{ ap.animal.name }}</strong></td>
-                                    <td>{{ ap.reason }}</td>
-                                    <td>{{ ap.location ?: '-' }}</td>
-                                    <td>
-                                        {% if ap.status == 'CONFIRMED' %}
-                                            <span class="badge bg-success">Confirmé</span>
-                                        {% elseif ap.status == 'CANCELLED' %}
-                                            <span class="badge bg-secondary">Annulé</span>
-                                        {% else %}
-                                            <span class="badge bg-warning text-dark">En attente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end">
-                                        {% if ap.status == 'PENDING' %}
-                                            <form method="post" action="{{ path('app_appointment_confirm', {'id': ap.id}) }}" style="display:inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ ap.id) }}">
-                                                <button class="btn btn-success btn-sm">Confirmer</button>
-                                            </form>
-                                            <form method="post" action="{{ path('app_appointment_cancel', {'id': ap.id}) }}" style="display:inline;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ ap.id) }}">
-                                                <button class="btn btn-outline-danger btn-sm">Annuler</button>
-                                            </form>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="d-flex flex-column gap-3">
+            {% for ap in appointments %}
+                <div class="appt-list-card appt-status-{{ ap.status|lower }}">
+                    <a href="{{ path('app_appointment_show', {id: ap.id}) }}" class="appt-list-card-link">
+                        <div class="appt-date-badge">
+                            <span class="day">{{ ap.scheduledAt|date('d') }}</span>
+                            <span class="month">{{ ap.scheduledAt|format_datetime(pattern='MMM', locale='fr') }}</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <strong style="font-size: 0.95rem; color: var(--secondary-color);">{{ ap.reason }}</strong>
+                                {% if ap.eventType != 'appointment' %}
+                                    <span class="badge" style="font-size: 0.65rem; background: #f3f4f6; color: var(--text-muted);">{{ ap.eventTypeLabel }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex flex-wrap gap-3" style="font-size: 0.8rem; color: var(--text-muted);">
+                                <span>{{ ap.scheduledAt|date('H:i') }} · {{ ap.duration }} min</span>
+                                {% if ap.animals|length > 1 %}
+                                    <span class="text-teal fw-semibold">{{ ap.animals|length }} chevaux</span>
+                                {% elseif ap.animals|length == 1 %}
+                                    <span class="text-teal fw-semibold">{{ ap.animals|first.name }}</span>
+                                {% elseif ap.animal %}
+                                    <span class="text-teal fw-semibold">{{ ap.animal.name }}</span>
+                                {% endif %}
+                                {% if ap.location %}
+                                    <span>{{ ap.location }}</span>
+                                {% endif %}
+                                {% if ap.client == app.user and ap.createdBy != app.user %}
+                                    <span>Dr. {{ ap.createdBy.fullName }}</span>
+                                {% elseif ap.client and ap.client != app.user %}
+                                    <span>{{ ap.client.fullName }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-1" style="font-size: 0.78rem; font-weight: 600;">
+                            <span class="status-dot {{ ap.status == 'CONFIRMED' ? 'status-confirmed' : (ap.status == 'CANCELLED' ? 'status-cancelled' : 'status-pending') }}"></span>
+                            {% if ap.status == 'CONFIRMED' %}Confirmé
+                            {% elseif ap.status == 'CANCELLED' %}Annulé
+                            {% else %}En attente{% endif %}
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink: 0; opacity: 0.4;"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
                 </div>
-            </div>
+            {% endfor %}
         </div>
     {% endif %}
 </div>

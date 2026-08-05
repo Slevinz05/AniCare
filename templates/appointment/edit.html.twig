@@ -1,0 +1,243 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier - {{ appointment.reason }} - AniCare{% endblock %}
+{% block body %}
+<style>
+    .appointment-form-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+        margin-bottom: 1.5rem;
+    }
+    .appointment-form-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .appointment-form-hero > * { position: relative; z-index: 1; }
+
+    .form-section {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .form-section-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        font-weight: 800;
+        margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .form-section-title svg { color: var(--primary-color); }
+
+    .event-type-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .event-type-group .form-check { flex: 1; min-width: 140px; }
+    .event-type-group .form-check input[type="radio"] { display: none; }
+    .event-type-group .form-check-label {
+        display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+        padding: 1rem 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 700; font-size: 0.82rem;
+        text-align: center;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .event-type-group .form-check input[type="radio"]:checked + .form-check-label {
+        border-color: var(--primary-color);
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+    .event-type-icon {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .duration-display {
+        background: var(--soft-teal);
+        border-radius: var(--radius-sm);
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .animal-checkbox-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .animal-checkbox-grid .form-check { margin: 0; }
+    .animal-checkbox-grid .form-check input[type="checkbox"] { display: none; }
+    .animal-checkbox-grid .form-check-label {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.4rem 0.85rem;
+        border: 1px solid var(--border-color);
+        border-radius: 2rem;
+        cursor: pointer;
+        font-weight: 600; font-size: 0.82rem;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .animal-checkbox-grid .form-check input[type="checkbox"]:checked + .form-check-label {
+        border-color: var(--primary-color);
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+
+            <div class="appointment-form-hero">
+                <p class="page-eyebrow mb-1" style="color: rgba(255,255,255,0.6);">Modifier</p>
+                <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0;">{{ appointment.reason }}</h1>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'anicare-form', 'id': 'appointment-form'}}) }}
+
+                {# ── Type d'événement ── #}
+                <div class="form-section">
+                    <div class="form-section-title">Type d'événement</div>
+                    <div class="event-type-group">
+                        {% for child in form.eventType %}
+                            <div class="form-check">
+                                {{ form_widget(child) }}
+                                <label class="form-check-label" for="{{ child.vars.id }}">
+                                    {% if child.vars.value == 'appointment' %}
+                                        <span class="event-type-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        </span>
+                                    {% elseif child.vars.value == 'rest' %}
+                                        <span class="event-type-icon" style="background: #ede9fe; color: #7c3aed;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                        </span>
+                                    {% else %}
+                                        <span class="event-type-icon" style="background: var(--soft-warm); color: var(--accent-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                        </span>
+                                    {% endif %}
+                                    {{ child.vars.label }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# ── Détails ── #}
+                <div class="form-section">
+                    <div class="form-section-title">Détails</div>
+                    <div class="row g-3">
+                        <div class="col-12">{{ form_row(form.reason, {'attr': {'class': 'form-control'}}) }}</div>
+                        {% if is_pro and form.consultationType is defined %}
+                            <div class="col-12 col-md-6">{{ form_row(form.consultationType, {'attr': {'class': 'form-select'}}) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if is_pro %}
+                <div class="form-section">
+                    <div class="form-section-title">Client & Animaux</div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">{{ form_row(form.client, {'attr': {'class': 'form-select'}}) }}</div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Chevaux concernés</label>
+                            <div class="animal-checkbox-grid">
+                                {% for child in form.animals %}
+                                    <div class="form-check">
+                                        {{ form_widget(child) }}
+                                        <label class="form-check-label" for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="form-section">
+                    <div class="form-section-title">Cheval</div>
+                    {{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}
+                </div>
+                {% endif %}
+
+                {# ── Date, Durée, Lieu ── #}
+                <div class="form-section">
+                    <div class="form-section-title">Date, durée & lieu</div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">{{ form_row(form.scheduledAt, {'attr': {'class': 'form-control'}}) }}</div>
+                        <div class="col-6 col-md-3">{{ form_row(form.duration, {'attr': {'class': 'form-control', 'id': 'appt-duration'}}) }}</div>
+                        <div class="col-12">
+                            <div class="duration-display" id="end-time-display">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>Renseignez la date et la durée pour voir l'heure de fin</span>
+                            </div>
+                        </div>
+                        <div class="col-12">{{ form_row(form.location, {'attr': {'class': 'form-control'}}) }}</div>
+                    </div>
+                </div>
+
+                {% if is_pro %}
+                <div class="form-section">
+                    <div class="form-section-title">Partage</div>
+                    {{ form_row(form.sharedWithProfessional, {'attr': {'class': 'form-select'}}) }}
+                </div>
+                {% endif %}
+
+                <div class="form-section">
+                    <div class="form-section-title">Notes & consignes</div>
+                    <div class="row g-3">
+                        <div class="col-12">{{ form_row(form.publicNotes, {'attr': {'class': 'form-control'}}) }}</div>
+                        {% if is_pro and form.privateNotes is defined %}
+                            <div class="col-12">{{ form_row(form.privateNotes, {'attr': {'class': 'form-control'}}) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {{ form_rest(form) }}
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1">Enregistrer les modifications</button>
+                    <a href="{{ path('app_appointment_show', {id: appointment.id}) }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduledAt = document.getElementById('appointment_scheduledAt');
+    const duration = document.getElementById('appt-duration');
+    const display = document.getElementById('end-time-display');
+
+    function updateEndTime() {
+        if (!scheduledAt || !scheduledAt.value || !duration || !duration.value) return;
+        const start = new Date(scheduledAt.value);
+        if (isNaN(start.getTime())) return;
+        const dur = parseInt(duration.value) || 0;
+        const end = new Date(start.getTime() + dur * 60000);
+        const hh = String(end.getHours()).padStart(2, '0');
+        const mm = String(end.getMinutes()).padStart(2, '0');
+        const dd = String(end.getDate()).padStart(2, '0');
+        const mo = String(end.getMonth() + 1).padStart(2, '0');
+        display.querySelector('span').textContent = 'Fin prévue : ' + dd + '/' + mo + ' à ' + hh + ':' + mm + ' (' + dur + ' min)';
+    }
+
+    if (scheduledAt) scheduledAt.addEventListener('change', updateEndTime);
+    if (duration) duration.addEventListener('input', updateEndTime);
+    updateEndTime();
+});
+</script>
+{% endblock %}

@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CountryType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -207,11 +208,8 @@ class AnimalType extends AbstractType
                 ],
             ])
 
-            ->add('livingPlaceCountry', CountryType::class, [
-                'label' => 'Pays',
-                'required' => false,
-                'placeholder' => 'Sélectionner un pays',
-                'preferred_choices' => ['FR'],
+            ->add('livingPlaceCountry', HiddenType::class, [
+                'data' => 'FR',
             ])
 
             // --- Contact de confiance (EVO-024) ---

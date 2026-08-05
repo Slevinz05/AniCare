@@ -29,9 +29,13 @@ class HomeController extends AbstractController
         $animals = [];
         $upcomingReminders = [];
 
+        $ownerAppointments = [];
         if ($user instanceof User) {
             $animals = $animalRepository->findAccessibleAnimals($user);
-            $upcomingReminders = $healthBookRepository->findUpcomingRemindersByOwner($user, 3);
+            $upcomingReminders = $healthBookRepository->findUpcomingRemindersByOwner($user, 5);
+            if (!$this->isGranted('ROLE_PRO')) {
+                $ownerAppointments = $appointmentRepository->findUpcomingByUser($user);
+            }
         }
 
         $proData = [];
@@ -65,6 +69,7 @@ class HomeController extends AbstractController
         return $this->render('home/index.html.twig', [
             'animals' => $animals,
             'upcoming_reminders' => $upcomingReminders,
+            'owner_appointments' => $ownerAppointments,
             'pro' => $proData,
         ]);
     }

@@ -163,41 +163,78 @@ final class CalendarController extends AbstractController
         $events = [];
 
         foreach ($healthRepo->findByMonthAndUser($start, $end, $user) as $entry) {
+            $animal = $entry->getAnimal();
+            $owner = $animal?->getOwner();
+            $locationParts = array_filter([
+                $animal?->getLivingPlaceName(),
+                $animal?->getLivingPlaceCity(),
+            ]);
+
             $events[] = [
                 'type' => 'consultation',
                 'title' => $entry->getTitle(),
                 'date' => $entry->getDate(),
-                'animal' => $entry->getAnimal()?->getName() ?? 'Cheval',
+                'endAt' => null,
+                'duration' => null,
+                'animal' => $animal?->getName() ?? 'Cheval',
                 'professional' => $entry->getVeterinarianName(),
                 'link' => 'app_health_book_entry_show',
                 'id' => $entry->getId(),
                 'status' => null,
+                'clientName' => $owner?->getFullName(),
+                'location' => $locationParts ? implode(', ', $locationParts) : null,
             ];
         }
 
         foreach ($appointmentRepo->findByPeriodAndUser($start, $end, $user) as $appointment) {
+            $duration = $appointment->getDuration();
+            $endAt = $duration ? $appointment->getScheduledAt()->modify("+{$duration} minutes") : null;
+
+            $client = $appointment->getClient();
+            $firstAnimal = $appointment->getAnimals()->isEmpty() ? $appointment->getAnimal() : $appointment->getAnimals()->first();
+            $locationParts = array_filter([
+                $appointment->getLocation(),
+                $firstAnimal?->getLivingPlaceName(),
+                $firstAnimal?->getLivingPlaceCity(),
+            ]);
+
             $events[] = [
                 'type' => 'appointment',
                 'title' => $appointment->getReason(),
                 'date' => $appointment->getScheduledAt(),
-                'animal' => $appointment->getAnimal()?->getName() ?? 'Cheval',
+                'endAt' => $endAt,
+                'duration' => $duration,
+                'animal' => $appointment->getAnimals()->count() > 1
+                    ? $appointment->getAnimals()->count() . ' chevaux'
+                    : ($appointment->getAnimals()->isEmpty()
+                        ? ($appointment->getAnimal()?->getName() ?? 'RDV')
+                        : $appointment->getAnimals()->first()->getName()),
                 'professional' => null,
-                'link' => 'app_appointment_index',
+                'link' => 'app_appointment_show',
                 'id' => $appointment->getId(),
                 'status' => $appointment->getStatus(),
+                'clientName' => $client?->getFullName(),
+                'location' => $locationParts ? implode(', ', $locationParts) : null,
             ];
         }
 
         foreach ($reminderRepo->findByPeriodAndUser($start, $end, $user) as $reminder) {
+            $animal = $reminder->getAnimal();
+            $owner = $animal?->getOwner();
+
             $events[] = [
                 'type' => 'reminder',
                 'title' => $reminder->getTitle(),
                 'date' => $reminder->getNextOccurrence() ?? $reminder->getScheduledAt(),
-                'animal' => $reminder->getAnimal()?->getName() ?? 'Cheval',
+                'endAt' => null,
+                'duration' => null,
+                'animal' => $animal?->getName() ?? 'Cheval',
                 'professional' => null,
                 'link' => 'app_animal_show',
-                'id' => $reminder->getAnimal()?->getId() ?? 0,
+                'id' => $animal?->getId() ?? 0,
                 'status' => $reminder->getRecurrence(),
+                'clientName' => $owner?->getFullName(),
+                'location' => null,
             ];
         }
 

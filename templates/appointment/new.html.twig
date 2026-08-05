@@ -1,30 +1,531 @@
 {% extends 'base.html.twig' %}
 {% block title %}Nouveau rendez-vous - AniCare{% endblock %}
 {% block body %}
+<style>
+    .appointment-form-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+        margin-bottom: 1.5rem;
+    }
+    .appointment-form-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .appointment-form-hero > * { position: relative; z-index: 1; }
+
+    .form-section {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .form-section-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        font-weight: 800;
+        margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .form-section-title svg { color: var(--primary-color); }
+
+    .event-type-group {
+        display: flex; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .event-type-group .form-check {
+        flex: 1; min-width: 140px;
+    }
+    .event-type-group .form-check input[type="radio"] { display: none; }
+    .event-type-group .form-check-label {
+        display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+        padding: 1rem 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 700; font-size: 0.82rem;
+        text-align: center;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .event-type-group .form-check input[type="radio"]:checked + .form-check-label {
+        border-color: var(--primary-color);
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+    .event-type-group .form-check-label:hover {
+        border-color: var(--primary-color);
+    }
+    .event-type-icon {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .duration-display {
+        background: var(--soft-teal);
+        border-radius: var(--radius-sm);
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .animal-checkbox-grid {
+        display: flex; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .animal-checkbox-grid .form-check { margin: 0; }
+    .animal-checkbox-grid .form-check input[type="checkbox"] { display: none; }
+    .animal-checkbox-grid .form-check-label {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.4rem 0.85rem;
+        border: 1px solid var(--border-color);
+        border-radius: 2rem;
+        cursor: pointer;
+        font-weight: 600; font-size: 0.82rem;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .animal-checkbox-grid .form-check input[type="checkbox"]:checked + .form-check-label {
+        border-color: var(--primary-color);
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+
+    /* Search dropdown */
+    .search-wrapper { position: relative; }
+    .search-results {
+        position: absolute; top: 100%; left: 0; right: 0;
+        z-index: 50;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-md);
+        max-height: 320px;
+        overflow-y: auto;
+        display: none;
+    }
+    .search-results.show { display: block; }
+    .search-result-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.15s;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover, .search-result-item.active {
+        background: var(--soft-teal);
+    }
+    .search-result-name { font-weight: 700; font-size: 0.88rem; color: var(--secondary-color); }
+    .search-result-detail { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .search-result-animals {
+        display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem;
+    }
+    .search-result-animals span {
+        font-size: 0.7rem; font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        border-radius: 1rem;
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+
+    .selected-client-card {
+        display: flex; align-items: center; gap: 0.75rem;
+        background: var(--soft-teal);
+        border: 1px solid var(--primary-color);
+        border-radius: var(--radius-sm);
+        padding: 0.75rem 1rem;
+    }
+    .selected-client-card .client-info { flex: 1; }
+    .selected-client-card .client-name { font-weight: 700; font-size: 0.9rem; color: var(--primary-color); }
+    .selected-client-card .client-email { font-size: 0.75rem; color: var(--text-muted); }
+    .btn-remove-client {
+        background: none; border: none; cursor: pointer;
+        color: var(--text-muted); padding: 0.25rem;
+        transition: color 0.15s;
+    }
+    .btn-remove-client:hover { color: var(--danger-color); }
+
+    #animals-container.hidden { display: none; }
+    .animals-empty {
+        text-align: center;
+        padding: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+</style>
+
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
-            <div class="card anicare-card">
-                <div class="card-header medical-header p-4">
-                    <p class="page-eyebrow mb-2">Organisation</p>
-                    <h1 class="page-title mb-0">Prendre rendez-vous</h1>
-                </div>
-                <div class="card-body p-4">
-                    {{ form_start(form, {'attr': {'class': 'anicare-form'}}) }}
-                        <div class="row g-4">
-                            <div class="col-12">{{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}</div>
-                            <div class="col-12">{{ form_row(form.reason, {'attr': {'class': 'form-control'}}) }}</div>
-                            <div class="col-12 col-md-6">{{ form_row(form.scheduledAt, {'attr': {'class': 'form-control'}}) }}</div>
-                            <div class="col-12 col-md-6">{{ form_row(form.location, {'attr': {'class': 'form-control'}}) }}</div>
-                            <div class="col-12">{{ form_row(form.notes, {'attr': {'class': 'form-control'}}) }}</div>
-                        </div>
-                        {{ form_rest(form) }}
-                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Confirmer le rendez-vous</button>
-                    {{ form_end(form) }}
-                </div>
+
+            <div class="appointment-form-hero">
+                <p class="page-eyebrow mb-1" style="color: rgba(255,255,255,0.6);">Nouveau</p>
+                <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0;">
+                    {% if is_pro %}Planifier un rendez-vous{% else %}Prendre rendez-vous{% endif %}
+                </h1>
             </div>
-            <a href="{{ path('app_appointment_index') }}" class="btn btn-outline-primary mt-3">Retour</a>
+
+            {{ form_start(form, {'attr': {'class': 'anicare-form', 'id': 'appointment-form'}}) }}
+
+                {# ── Type d'événement ── #}
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Type d'événement
+                    </div>
+                    <div class="event-type-group">
+                        {% for child in form.eventType %}
+                            <div class="form-check">
+                                {{ form_widget(child) }}
+                                <label class="form-check-label" for="{{ child.vars.id }}">
+                                    {% if child.vars.value == 'appointment' %}
+                                        <span class="event-type-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        </span>
+                                    {% elseif child.vars.value == 'rest' %}
+                                        <span class="event-type-icon" style="background: #ede9fe; color: #7c3aed;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                        </span>
+                                    {% else %}
+                                        <span class="event-type-icon" style="background: var(--soft-warm); color: var(--accent-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                        </span>
+                                    {% endif %}
+                                    {{ child.vars.label }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# ── Motif & Consultation ── #}
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Détails
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">{{ form_row(form.reason, {'attr': {'class': 'form-control'}}) }}</div>
+                        {% if is_pro and form.consultationType is defined %}
+                            <div class="col-12 col-md-6">{{ form_row(form.consultationType, {'attr': {'class': 'form-select'}}) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if is_pro %}
+                {# ── Client & Animaux (PRO) ── #}
+                <div class="form-section" id="section-client">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        Client & Animaux
+                    </div>
+
+                    {# Hidden select for Symfony form binding #}
+                    <div style="display: none;">
+                        {{ form_widget(form.client) }}
+                    </div>
+
+                    {# Search UI #}
+                    <div id="client-search-wrapper" class="search-wrapper mb-3">
+                        <label class="form-label fw-bold">Rechercher un client, cheval ou structure</label>
+                        <input type="text" id="client-search" class="form-control" placeholder="Nom du client, cheval ou structure..." autocomplete="off">
+                        <div id="client-search-results" class="search-results"></div>
+                    </div>
+
+                    {# Selected client display #}
+                    <div id="selected-client-display" style="display: none;" class="mb-3">
+                        <label class="form-label fw-bold">Client sélectionné</label>
+                        <div class="selected-client-card">
+                            <div class="client-info">
+                                <div class="client-name" id="selected-client-name"></div>
+                                <div class="client-email" id="selected-client-email"></div>
+                            </div>
+                            <button type="button" class="btn-remove-client" id="btn-remove-client" title="Retirer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {# Dynamic animals - hidden until client selected #}
+                    <div id="animals-container" class="hidden">
+                        <label class="form-label fw-bold">Chevaux concernés</label>
+                        <div id="dynamic-animals" class="animal-checkbox-grid"></div>
+                    </div>
+
+                    {# Hidden Symfony checkboxes #}
+                    <div style="display: none;" id="symfony-animals">
+                        {% for child in form.animals %}
+                            <div class="form-check">
+                                {{ form_widget(child) }}
+                                <label class="form-check-label" for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                {# ── Cheval (Propriétaire) ── #}
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                        Cheval
+                    </div>
+                    {{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}
+                </div>
+                {% endif %}
+
+                {# ── Date, Durée, Lieu ── #}
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Date, durée & lieu
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">{{ form_row(form.scheduledAt, {'attr': {'class': 'form-control'}}) }}</div>
+                        <div class="col-6 col-md-3">{{ form_row(form.duration, {'attr': {'class': 'form-control', 'id': 'appt-duration'}}) }}</div>
+                        <div class="col-12">
+                            <div class="duration-display" id="end-time-display">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>Renseignez la date et la durée pour voir l'heure de fin</span>
+                            </div>
+                        </div>
+                        <div class="col-12">{{ form_row(form.location, {'attr': {'class': 'form-control', 'id': 'appt-location'}}) }}</div>
+                    </div>
+                </div>
+
+                {% if is_pro %}
+                {# ── Partage professionnel ── #}
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Partage
+                    </div>
+                    {{ form_row(form.sharedWithProfessional, {'attr': {'class': 'form-select'}}) }}
+                </div>
+                {% endif %}
+
+                {# ── Notes ── #}
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                        Notes & consignes
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">{{ form_row(form.publicNotes, {'attr': {'class': 'form-control'}}) }}</div>
+                        {% if is_pro and form.privateNotes is defined %}
+                            <div class="col-12">{{ form_row(form.privateNotes, {'attr': {'class': 'form-control'}}) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {{ form_rest(form) }}
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Créer le rendez-vous
+                    </button>
+                    <a href="{{ path('app_appointment_index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+                </div>
+
+            {{ form_end(form) }}
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ── End time calculator ──
+    const scheduledAt = document.getElementById('appointment_scheduledAt');
+    const duration = document.getElementById('appt-duration');
+    const display = document.getElementById('end-time-display');
+
+    function updateEndTime() {
+        if (!scheduledAt || !scheduledAt.value || !duration || !duration.value) return;
+        const start = new Date(scheduledAt.value);
+        if (isNaN(start.getTime())) return;
+        const dur = parseInt(duration.value) || 0;
+        const end = new Date(start.getTime() + dur * 60000);
+        const hh = String(end.getHours()).padStart(2, '0');
+        const mm = String(end.getMinutes()).padStart(2, '0');
+        const dd = String(end.getDate()).padStart(2, '0');
+        const mo = String(end.getMonth() + 1).padStart(2, '0');
+        display.querySelector('span').textContent = 'Fin prévue : ' + dd + '/' + mo + ' à ' + hh + ':' + mm + ' (' + dur + ' min)';
+    }
+
+    if (scheduledAt) scheduledAt.addEventListener('change', updateEndTime);
+    if (duration) duration.addEventListener('input', updateEndTime);
+    updateEndTime();
+
+    // ── PRO: Client search & dynamic animals ──
+    const searchInput = document.getElementById('client-search');
+    if (!searchInput) return;
+
+    const searchResults = document.getElementById('client-search-results');
+    const searchWrapper = document.getElementById('client-search-wrapper');
+    const selectedDisplay = document.getElementById('selected-client-display');
+    const selectedName = document.getElementById('selected-client-name');
+    const selectedEmail = document.getElementById('selected-client-email');
+    const btnRemove = document.getElementById('btn-remove-client');
+    const clientSelect = document.getElementById('appointment_client');
+    const animalsContainer = document.getElementById('animals-container');
+    const dynamicAnimals = document.getElementById('dynamic-animals');
+    const locationField = document.getElementById('appt-location');
+    let debounceTimer = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const q = this.value.trim();
+        if (q.length < 2) {
+            searchResults.classList.remove('show');
+            return;
+        }
+        debounceTimer = setTimeout(() => {
+            fetch('/rendez-vous/api/appointment/search?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(data => {
+                    searchResults.innerHTML = '';
+                    if (data.clients.length === 0) {
+                        searchResults.innerHTML = '<div class="search-result-item" style="cursor:default;color:var(--text-muted);font-size:0.85rem;">Aucun résultat</div>';
+                    } else {
+                        data.clients.forEach(client => {
+                            const div = document.createElement('div');
+                            div.className = 'search-result-item';
+                            let animalsHtml = '';
+                            if (client.animals.length > 0) {
+                                animalsHtml = '<div class="search-result-animals">' +
+                                    client.animals.map(a => '<span>' + a.name + (a.livingPlaceName ? ' · ' + a.livingPlaceName : '') + '</span>').join('') +
+                                    '</div>';
+                            }
+                            div.innerHTML = '<div class="search-result-name">' + client.name + '</div>' +
+                                '<div class="search-result-detail">' + client.email + '</div>' +
+                                animalsHtml;
+                            div.addEventListener('click', () => selectClient(client));
+                            searchResults.appendChild(div);
+                        });
+                    }
+                    searchResults.classList.add('show');
+                });
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchWrapper.contains(e.target)) {
+            searchResults.classList.remove('show');
+        }
+    });
+
+    function selectClient(client) {
+        // Set hidden select value
+        clientSelect.value = client.id;
+
+        // Show selected client card
+        selectedName.textContent = client.name;
+        selectedEmail.textContent = client.email;
+        searchWrapper.style.display = 'none';
+        selectedDisplay.style.display = 'block';
+        searchResults.classList.remove('show');
+
+        // Load animals for this client
+        loadAnimals(client.id);
+    }
+
+    btnRemove.addEventListener('click', function() {
+        clientSelect.value = '';
+        searchWrapper.style.display = 'block';
+        selectedDisplay.style.display = 'none';
+        searchInput.value = '';
+        animalsContainer.classList.add('hidden');
+        dynamicAnimals.innerHTML = '';
+        // Uncheck all hidden symfony checkboxes
+        document.querySelectorAll('#symfony-animals input[type="checkbox"]').forEach(cb => cb.checked = false);
+        // Clear location
+        if (locationField) locationField.value = '';
+    });
+
+    function loadAnimals(clientId) {
+        fetch('/rendez-vous/api/client/' + clientId + '/animals')
+            .then(r => r.json())
+            .then(animals => {
+                dynamicAnimals.innerHTML = '';
+                // Uncheck all hidden Symfony checkboxes first
+                document.querySelectorAll('#symfony-animals input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+                if (animals.length === 0) {
+                    dynamicAnimals.innerHTML = '<div class="animals-empty">Aucun cheval trouvé pour ce client.</div>';
+                    animalsContainer.classList.remove('hidden');
+                    return;
+                }
+
+                let firstAddress = '';
+                animals.forEach(animal => {
+                    if (!firstAddress && animal.address) {
+                        firstAddress = animal.address;
+                    }
+
+                    // Find the matching Symfony checkbox
+                    const symCb = document.querySelector('#symfony-animals input[type="checkbox"][value="' + animal.id + '"]');
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-check';
+
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.id = 'dynamic_animal_' + animal.id;
+                    cb.dataset.animalId = animal.id;
+                    cb.dataset.address = animal.address || '';
+
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.htmlFor = cb.id;
+                    label.textContent = animal.name;
+                    if (animal.livingPlaceName) {
+                        const small = document.createElement('small');
+                        small.style.cssText = 'opacity:0.6;margin-left:0.3rem;';
+                        small.textContent = '· ' + animal.livingPlaceName;
+                        label.appendChild(small);
+                    }
+
+                    cb.addEventListener('change', function() {
+                        // Sync with Symfony hidden checkbox
+                        if (symCb) symCb.checked = this.checked;
+                        updateLocationFromAnimals();
+                    });
+
+                    wrapper.appendChild(cb);
+                    wrapper.appendChild(label);
+                    dynamicAnimals.appendChild(wrapper);
+                });
+
+                animalsContainer.classList.remove('hidden');
+
+                // Auto-fill location from first animal's address
+                if (firstAddress && locationField && !locationField.value) {
+                    locationField.value = firstAddress;
+                }
+            });
+    }
+
+    function updateLocationFromAnimals() {
+        const checked = dynamicAnimals.querySelectorAll('input[type="checkbox"]:checked');
+        if (checked.length === 1 && checked[0].dataset.address) {
+            locationField.value = checked[0].dataset.address;
+        } else if (checked.length === 0) {
+            // Don't clear if user typed something custom
+        }
+    }
+});
+</script>
 {% endblock %}

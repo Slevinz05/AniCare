@@ -87,6 +87,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $experienceYears = null;
 
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $defaultConsultationDuration = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $defaultPublicNotes = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeCustomerId = null;
 
@@ -493,6 +499,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->experienceYears = $experienceYears;
 
+        return $this;
+    }
+
+    public function getDefaultConsultationDuration(): ?int
+    {
+        return $this->defaultConsultationDuration;
+    }
+
+    public function setDefaultConsultationDuration(?int $defaultConsultationDuration): static
+    {
+        $this->defaultConsultationDuration = $defaultConsultationDuration;
+        return $this;
+    }
+
+    public function getDefaultPublicNotes(): ?string
+    {
+        return $this->defaultPublicNotes;
+    }
+
+    public function setDefaultPublicNotes(?string $defaultPublicNotes): static
+    {
+        $this->defaultPublicNotes = $defaultPublicNotes;
         return $this;
     }
 

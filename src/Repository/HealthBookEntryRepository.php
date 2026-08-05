@@ -88,10 +88,12 @@ class HealthBookEntryRepository extends ServiceEntityRepository
             ->leftJoin('a.animalShares', 's')
             ->where('h.date BETWEEN :start AND :end')
             ->andWhere('a.owner = :user OR s.sharedWithEmail = :email')
+            ->andWhere('h.status != :draft')
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
+            ->setParameter('draft', 'draft')
             ->orderBy('h.date', 'ASC')
             ->getQuery()
             ->getResult();

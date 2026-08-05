@@ -1,0 +1,120 @@
+{#
+   Autocomplétion d'adresse via api-adresse.data.gouv.fr
+   Usage: {% include 'components/_address_autocomplete.html.twig' with {
+       input_id: 'animal_livingPlaceStreet',
+       postal_id: 'animal_livingPlacePostalCode',
+       city_id: 'animal_livingPlaceCity'
+   } %}
+#}
+<script>
+(function() {
+    var inputId = '{{ input_id }}';
+    var postalId = '{{ postal_id }}';
+    var cityId = '{{ city_id }}';
+
+    var input = document.getElementById(inputId);
+    if (!input) return;
+
+    var wrapper = input.parentNode;
+    wrapper.style.position = 'relative';
+
+    var dropdown = document.createElement('div');
+    dropdown.className = 'address-dropdown';
+    dropdown.style.display = 'none';
+    wrapper.appendChild(dropdown);
+
+    var timeout = null;
+    var results = [];
+    var selectedIdx = -1;
+
+    input.setAttribute('autocomplete', 'off');
+
+    input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        var q = input.value.trim();
+        if (q.length < 3) { close(); return; }
+        timeout = setTimeout(function() { search(q); }, 250);
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (dropdown.style.display === 'none') return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIdx = Math.min(selectedIdx + 1, results.length - 1);
+            highlight();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIdx = Math.max(selectedIdx - 1, 0);
+            highlight();
+        } else if (e.key === 'Enter' && selectedIdx >= 0) {
+            e.preventDefault();
+            select(selectedIdx);
+        } else if (e.key === 'Escape') {
+            close();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) close();
+    });
+
+    function search(q) {
+        fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                results = data.features || [];
+                render();
+            })
+            .catch(function() { close(); });
+    }
+
+    function render() {
+        if (results.length === 0) { close(); return; }
+        selectedIdx = -1;
+        dropdown.innerHTML = results.map(function(f, i) {
+            var p = f.properties;
+            return '<div class="address-option" data-idx="' + i + '">'
+                + '<strong>' + escHtml(p.name || '') + '</strong>'
+                + '<span>' + escHtml((p.postcode || '') + ' ' + (p.city || '')) + '</span>'
+                + '</div>';
+        }).join('');
+        dropdown.style.display = 'block';
+        dropdown.querySelectorAll('.address-option').forEach(function(el) {
+            el.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                select(parseInt(el.dataset.idx));
+            });
+        });
+    }
+
+    function highlight() {
+        dropdown.querySelectorAll('.address-option').forEach(function(el, i) {
+            el.classList.toggle('active', i === selectedIdx);
+        });
+    }
+
+    function select(idx) {
+        var f = results[idx];
+        if (!f) return;
+        var p = f.properties;
+        input.value = p.name || '';
+        var postalEl = document.getElementById(postalId);
+        var cityEl = document.getElementById(cityId);
+        if (postalEl) postalEl.value = p.postcode || '';
+        if (cityEl) cityEl.value = p.city || '';
+        close();
+    }
+
+    function close() {
+        dropdown.style.display = 'none';
+        results = [];
+        selectedIdx = -1;
+    }
+
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+})();
+</script>

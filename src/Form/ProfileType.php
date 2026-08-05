@@ -42,6 +42,11 @@ class ProfileType extends AbstractType
                 'required' => false,
                 'attr' => ['placeholder' => '06 12 34 56 78'],
             ])
+            ->add('address', TextType::class, [
+                'label' => 'Adresse',
+                'required' => false,
+                'attr' => ['placeholder' => 'Numéro et rue', 'autocomplete' => 'street-address'],
+            ])
             ->add('city', TextType::class, [
                 'label' => 'Ville',
                 'required' => false,
@@ -149,6 +154,21 @@ class ProfileType extends AbstractType
                     'label' => "Années d'expérience",
                     'required' => false,
                     'attr' => ['placeholder' => 'Ex : 10', 'min' => 0, 'max' => 99],
+                ])
+                ->add('defaultConsultationDuration', IntegerType::class, [
+                    'label' => 'Durée par défaut d\'une consultation (minutes)',
+                    'required' => false,
+                    'attr' => ['placeholder' => 'Ex : 60', 'min' => 5, 'max' => 480],
+                    'help' => 'Cette durée sera pré-remplie lors de la création d\'un rendez-vous.',
+                ])
+                ->add('defaultPublicNotes', TextareaType::class, [
+                    'label' => 'Notes publiques par défaut',
+                    'required' => false,
+                    'attr' => [
+                        'placeholder' => 'Ex : Tarif consultation : 80€. Prévoir un box propre...',
+                        'rows' => 3,
+                    ],
+                    'help' => 'Ces notes seront pré-remplies sur chaque nouveau rendez-vous.',
                 ])
                 ->add('profilePhotosUpload', FileType::class, [
                     'label' => 'Photos de votre activité',

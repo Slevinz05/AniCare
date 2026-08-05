@@ -66,6 +66,9 @@ class HealthBookEntry
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $anatomicalLocations = [];
 
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -350,6 +353,18 @@ class HealthBookEntry
     public function setAnatomicalLocations(?array $anatomicalLocations): static
     {
         $this->anatomicalLocations = $anatomicalLocations ?? [];
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

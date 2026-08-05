@@ -96,6 +96,18 @@ final class AnimalController extends AbstractController
             $animal->ensureSlug();
             $entityManager->flush();
 
+            $nextAction = $request->request->get('next_action');
+            if ($nextAction === 'consultation' && $this->isGranted('ROLE_PRO')) {
+                return $this->redirectToRoute('app_health_book_entry_new', [
+                    'animal' => $animal->getId(),
+                ], Response::HTTP_SEE_OTHER);
+            }
+            if ($nextAction === 'appointment' && $this->isGranted('ROLE_PRO')) {
+                return $this->redirectToRoute('app_appointment_new', [
+                    'animal' => $animal->getId(),
+                ], Response::HTTP_SEE_OTHER);
+            }
+
             return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
         }
 

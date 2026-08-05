@@ -1022,3 +1022,42 @@ a:hover {
         font-size: 0.8rem;
     }
 }
+
+/* Autocomplétion adresse */
+.address-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    max-height: 220px;
+    overflow-y: auto;
+}
+.address-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--bg-color);
+    transition: background 0.1s;
+}
+.address-option:last-child { border-bottom: none; }
+.address-option:hover,
+.address-option.active {
+    background: var(--soft-teal);
+}
+.address-option strong {
+    color: var(--secondary-color);
+    font-size: 0.85rem;
+}
+.address-option span {
+    color: var(--taupe);
+    font-size: 0.75rem;
+}

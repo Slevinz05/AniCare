@@ -18,13 +18,16 @@ class AppointmentRepository extends ServiceEntityRepository
     public function findUpcomingByUser(User $user): array
     {
         return $this->createQueryBuilder('ap')
-            ->join('ap.animal', 'a')
+            ->leftJoin('ap.animal', 'a')
             ->leftJoin('a.animalShares', 's')
+            ->leftJoin('ap.animals', 'ma')
+            ->leftJoin('ma.animalShares', 'ms')
             ->where('ap.scheduledAt >= :now')
-            ->andWhere('a.owner = :user OR s.sharedWithEmail = :email OR ap.createdBy = :user')
+            ->andWhere('ap.createdBy = :user OR ap.sharedWithProfessional = :user OR ap.client = :user OR a.owner = :user OR s.sharedWithEmail = :email OR ma.owner = :user OR ms.sharedWithEmail = :email')
             ->setParameter('now', new \DateTimeImmutable())
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
+            ->groupBy('ap.id')
             ->orderBy('ap.scheduledAt', 'ASC')
             ->getQuery()
             ->getResult();
@@ -33,14 +36,17 @@ class AppointmentRepository extends ServiceEntityRepository
     public function findByPeriodAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
     {
         return $this->createQueryBuilder('ap')
-            ->join('ap.animal', 'a')
+            ->leftJoin('ap.animal', 'a')
             ->leftJoin('a.animalShares', 's')
+            ->leftJoin('ap.animals', 'ma')
+            ->leftJoin('ma.animalShares', 'ms')
             ->where('ap.scheduledAt BETWEEN :start AND :end')
-            ->andWhere('a.owner = :user OR s.sharedWithEmail = :email OR ap.createdBy = :user')
+            ->andWhere('ap.createdBy = :user OR ap.sharedWithProfessional = :user OR ap.client = :user OR a.owner = :user OR s.sharedWithEmail = :email OR ma.owner = :user OR ms.sharedWithEmail = :email')
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
+            ->groupBy('ap.id')
             ->orderBy('ap.scheduledAt', 'ASC')
             ->getQuery()
             ->getResult();

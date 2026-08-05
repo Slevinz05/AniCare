@@ -1,0 +1,250 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ appointment.reason }} - Rendez-vous - AniCare{% endblock %}
+{% block body %}
+<style>
+    .appt-hero {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+    }
+    .appt-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .appt-hero > * { position: relative; z-index: 1; }
+
+    .appt-detail-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-subtle);
+        overflow: hidden;
+    }
+    .appt-detail-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(180deg, #fff 0%, #fafaf8 100%);
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+    .appt-detail-body { padding: 1.25rem 1.5rem; }
+
+    .detail-row {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border-color);
+        gap: 1rem;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; min-width: 140px; }
+    .detail-value { font-size: 0.88rem; font-weight: 600; text-align: right; flex: 1; }
+
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.3rem 0.85rem;
+        border-radius: 2rem;
+        font-size: 0.75rem; font-weight: 700;
+    }
+    .status-confirmed { background: var(--soft-teal); color: var(--primary-color); }
+    .status-pending { background: #fef7ed; color: #b45309; }
+    .status-cancelled { background: #fef2f2; color: var(--danger-color); }
+
+    .animal-pill {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 2rem;
+        border: 1px solid var(--border-color);
+        font-size: 0.8rem; font-weight: 600;
+        background: #fff;
+        text-decoration: none; color: var(--secondary-color);
+        transition: all 0.15s;
+    }
+    .animal-pill:hover {
+        border-color: var(--primary-color);
+        background: var(--soft-teal);
+        color: var(--primary-color);
+    }
+
+    .notes-block {
+        background: #fafaf8;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        font-size: 0.85rem;
+        white-space: pre-wrap;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+
+            {# ── Hero ── #}
+            <div class="appt-hero mb-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                    <div>
+                        <p class="page-eyebrow mb-1" style="color: rgba(255,255,255,0.6);">{{ appointment.eventTypeLabel }}</p>
+                        <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin: 0;">{{ appointment.reason }}</h1>
+                    </div>
+                    <span class="status-badge {{ appointment.status == 'CONFIRMED' ? 'status-confirmed' : (appointment.status == 'CANCELLED' ? 'status-cancelled' : 'status-pending') }}">
+                        {% if appointment.status == 'CONFIRMED' %}Confirmé
+                        {% elseif appointment.status == 'CANCELLED' %}Annulé
+                        {% else %}En attente{% endif %}
+                    </span>
+                </div>
+                <div class="d-flex flex-wrap gap-3" style="font-size: 0.9rem; opacity: 0.85;">
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        {{ appointment.scheduledAt|format_datetime('long', 'short', locale='fr') }}
+                    </span>
+                    <span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        {{ appointment.duration }} min
+                    </span>
+                    {% if appointment.location %}
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {{ appointment.location }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {# ── Détails ── #}
+                <div class="col-12">
+                    <div class="appt-detail-card">
+                        <div class="appt-detail-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            <span class="fw-bold" style="font-size: 0.88rem;">Récapitulatif</span>
+                        </div>
+                        <div class="appt-detail-body">
+                            <div class="detail-row">
+                                <span class="detail-label">Type d'événement</span>
+                                <span class="detail-value">{{ appointment.eventTypeLabel }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Date & heure</span>
+                                <span class="detail-value">{{ appointment.scheduledAt|format_datetime('full', 'short', locale='fr') }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Durée consultation</span>
+                                <span class="detail-value">{{ appointment.duration }} minutes</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Heure de fin prévue</span>
+                                <span class="detail-value">{{ appointment.endAt|format_datetime('none', 'short', locale='fr') }}</span>
+                            </div>
+                            {% if appointment.consultationType %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Type de consultation</span>
+                                    <span class="detail-value">{{ appointment.consultationType }}</span>
+                                </div>
+                            {% endif %}
+                            {% if appointment.location %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Lieu</span>
+                                    <span class="detail-value">{{ appointment.location }}</span>
+                                </div>
+                            {% endif %}
+                            {% if appointment.client %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Client</span>
+                                    <span class="detail-value">{{ appointment.client.fullName }}</span>
+                                </div>
+                            {% endif %}
+                            {% if appointment.animals|length > 0 %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Chevaux</span>
+                                    <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                        {% for animal in appointment.animals %}
+                                            <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="animal-pill">
+                                                🐴 {{ animal.name }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if appointment.sharedWithProfessional %}
+                                <div class="detail-row">
+                                    <span class="detail-label">Partagé avec</span>
+                                    <span class="detail-value">{{ appointment.sharedWithProfessional.fullName }}{% if appointment.sharedWithProfessional.specialty %} — {{ appointment.sharedWithProfessional.specialty }}{% endif %}</span>
+                                </div>
+                            {% endif %}
+                            <div class="detail-row">
+                                <span class="detail-label">Créé par</span>
+                                <span class="detail-value">{{ appointment.createdBy.fullName }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Notes publiques ── #}
+                {% if appointment.publicNotes %}
+                    <div class="col-12">
+                        <div class="appt-detail-card">
+                            <div class="appt-detail-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                                <span class="fw-bold" style="font-size: 0.88rem;">Notes publiques</span>
+                            </div>
+                            <div class="appt-detail-body">
+                                <div class="notes-block">{{ appointment.publicNotes }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# ── Notes privées (PRO only) ── #}
+                {% if is_granted('ROLE_PRO') and appointment.privateNotes and appointment.createdBy == app.user %}
+                    <div class="col-12">
+                        <div class="appt-detail-card" style="border-color: #e0796b;">
+                            <div class="appt-detail-header" style="background: linear-gradient(180deg, #fff5f5 0%, #fef2f2 100%);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#e0796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span class="fw-bold" style="font-size: 0.88rem; color: #e0796b;">Notes privées</span>
+                            </div>
+                            <div class="appt-detail-body">
+                                <div class="notes-block" style="background: #fef2f2; border-color: #fecdd3;">{{ appointment.privateNotes }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# ── Actions ── #}
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                {% if appointment.status != 'CANCELLED' %}
+                    {% if appointment.createdBy == app.user %}
+                        <a href="{{ path('app_appointment_edit', {id: appointment.id}) }}" class="btn btn-outline-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Modifier
+                        </a>
+                    {% endif %}
+                    {% if appointment.status == 'PENDING' and appointment.createdBy != app.user %}
+                        <form method="post" action="{{ path('app_appointment_confirm', {id: appointment.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ appointment.id) }}">
+                            <button type="submit" class="btn btn-primary">
+                                Accepter le rendez-vous
+                            </button>
+                        </form>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_appointment_cancel', {id: appointment.id}) }}" class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ appointment.id) }}">
+                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('{{ appointment.client == app.user ? 'Refuser ce rendez-vous ?' : 'Annuler ce rendez-vous ?' }}')">
+                            {% if appointment.client == app.user %}Refuser{% else %}Annuler le RDV{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+                <a href="{{ path('app_appointment_index') }}" class="btn btn-outline-secondary ms-auto">Retour</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

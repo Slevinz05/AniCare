@@ -39,7 +39,17 @@
             <div class="row g-3 mb-4">
                 <div class="col-12 col-md-6">
                     {{ _self.label(form.name, true) }}
-                    {{ _self.field(form.name) }}
+                    {{ _self.field(form.name, 'form-control', {'id': 'animal_name_input'}) }}
+                    <div class="d-flex gap-3 mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="letterJeune" checked>
+                            <label class="form-check-label small" for="letterJeune">Jeune à la lettre</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="letterAnimal">
+                            <label class="form-check-label small" for="letterAnimal">Animal à la lettre</label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-12 col-md-6">
@@ -64,17 +74,22 @@
                             {{ _self.field(form.birthDate) }}
                         </div>
                         <div class="col-5">
-                            <label class="form-label" for="{{ form.age.vars.id }}">Age <span class="text-danger">*</span></label>
+                            <label class="form-label">Âge</label>
                             <div class="input-group">
-                                {{ _self.field(form.age) }}
-                                <span class="input-group-text">ans</span>
+                                <input type="text" id="ageDisplay" class="form-control" readonly style="background: var(--soft-teal); font-weight: 700; color: var(--primary-color); text-align: center; padding-left: 0; padding-right: 0;"
+                                       value="{{ form.vars.data.age is not null ? form.vars.data.age : '' }}">
+                                <span class="input-group-text" style="background: var(--soft-teal); color: var(--primary-color); font-weight: 700;">ans</span>
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="form-text text-secondary mt-0">Remplissez l'un ou l'autre, le second se calcule automatiquement.</div>
-                            <div id="ageDateError" class="text-danger small mt-1 d-none">Veuillez renseigner la date de naissance ou l'age.</div>
+                            <div id="letterInfo" class="form-text text-secondary mt-0" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                <span id="letterInfoText"></span>
+                            </div>
+                            <div id="ageDateError" class="text-danger small mt-1 d-none">Veuillez renseigner la date de naissance.</div>
                         </div>
                     </div>
+                    {{ form_widget(form.age, {'attr': {'style': 'display:none', 'id': 'age_hidden_field'}}) }}
                 </div>
 
                 <div class="col-12">
@@ -240,26 +255,29 @@
                         {{ _self.field(form.livingPlaceComplement) }}
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         {{ form_label(form.livingPlacePostalCode, null, {'label_attr': {'class': 'form-label'}}) }}
                         {{ _self.field(form.livingPlacePostalCode) }}
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         {{ form_label(form.livingPlaceCity, null, {'label_attr': {'class': 'form-label'}}) }}
                         {{ _self.field(form.livingPlaceCity) }}
                     </div>
 
-                    <div class="col-12 col-md-4">
-                        {{ form_label(form.livingPlaceCountry, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceCountry, 'form-select') }}
-                    </div>
+                    {{ form_widget(form.livingPlaceCountry) }}
                 </div>
             </div>
 
         </div>
     </div>
 </div>
+
+{% include 'components/_address_autocomplete.html.twig' with {
+    input_id: 'animal_livingPlaceStreet',
+    postal_id: 'animal_livingPlacePostalCode',
+    city_id: 'animal_livingPlaceCity'
+} %}
 
 {# ══════════════════════════════════════════════════════════
    LIGNE PLEINE LARGEUR — Professionnel & Rappels
@@ -306,6 +324,27 @@
     </div>
 </div>
 
+{% if is_granted('ROLE_PRO') %}
+<input type="hidden" name="next_action" id="nextActionValue" value="">
+<div class="row g-4 mt-0">
+    <div class="col-12">
+        <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid var(--primary-color) !important;">
+            <p class="page-eyebrow mb-2" style="color: var(--primary-color);">Après l'enregistrement</p>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <button type="submit" class="btn d-inline-flex align-items-center gap-2" style="background: var(--primary-color); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: none; transition: opacity .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onclick="document.getElementById('nextActionValue').value='consultation'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    Enregistrer + consultation
+                </button>
+                <button type="submit" class="btn d-inline-flex align-items-center gap-2" style="background: var(--accent-color); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: none; transition: opacity .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onclick="document.getElementById('nextActionValue').value='appointment'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Enregistrer + RDV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {{ form_rest(form) }}
 
 <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
@@ -325,62 +364,119 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Validation : au moins date de naissance OU age
-    const theForm = document.querySelector('.anicare-form');
+    // ── Alphabet équidé : calcul automatique date de naissance / âge ──
+    const EQUINE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUV';
+    const JEUNE_CYCLE_START = 2010;
+    const ANIMAL_CYCLE_START = JEUNE_CYCLE_START - 22;
+
+    const nameInput = document.getElementById('animal_name_input') || document.getElementById('{{ form.name.vars.id }}');
+    const birthDateInput = document.getElementById('{{ form.birthDate.vars.id }}');
+    const ageDisplay = document.getElementById('ageDisplay');
+    const ageHidden = document.getElementById('age_hidden_field');
+    const letterJeune = document.getElementById('letterJeune');
+    const letterAnimal = document.getElementById('letterAnimal');
+    const letterInfo = document.getElementById('letterInfo');
+    const letterInfoText = document.getElementById('letterInfoText');
     const ageDateError = document.getElementById('ageDateError');
 
+    function getLetterOffset(name) {
+        if (!name) return -1;
+        const first = name.trim().charAt(0).toUpperCase();
+        const idx = EQUINE_LETTERS.indexOf(first);
+        return idx;
+    }
+
+    function computeAgeFromBirth(dateStr) {
+        if (!dateStr) return '';
+        const birth = new Date(dateStr);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+        return Math.max(0, age);
+    }
+
+    function updateAgeDisplay() {
+        const age = computeAgeFromBirth(birthDateInput.value);
+        ageDisplay.value = age !== '' ? age : '';
+        if (ageHidden) ageHidden.value = age !== '' ? age : '';
+    }
+
+    function updateBirthFromLetter() {
+        const offset = getLetterOffset(nameInput.value);
+        if (offset < 0) {
+            letterInfo.style.display = 'none';
+            birthDateInput.value = '';
+            updateAgeDisplay();
+            return;
+        }
+        const letter = EQUINE_LETTERS[offset];
+        const isAnimal = letterAnimal.checked;
+        const cycleStart = isAnimal ? ANIMAL_CYCLE_START : JEUNE_CYCLE_START;
+        const birthYear = cycleStart + offset;
+        const cycleName = isAnimal ? 'ancien cycle' : 'cycle actuel';
+
+        birthDateInput.value = birthYear + '-01-01';
+        letterInfoText.textContent = 'Lettre « ' + letter + ' » → né(e) en ' + birthYear + ' (' + cycleName + ')';
+        letterInfo.style.display = 'block';
+        updateAgeDisplay();
+    }
+
+    if (letterJeune && letterAnimal) {
+        letterJeune.addEventListener('change', function () {
+            if (this.checked) { letterAnimal.checked = false; updateBirthFromLetter(); }
+        });
+        letterAnimal.addEventListener('change', function () {
+            if (this.checked) { letterJeune.checked = false; updateBirthFromLetter(); }
+        });
+    }
+
+    if (nameInput) {
+        nameInput.addEventListener('input', function () {
+            if (letterJeune.checked || letterAnimal.checked) {
+                updateBirthFromLetter();
+            }
+        });
+    }
+
+    if (birthDateInput) {
+        birthDateInput.addEventListener('change', function () {
+            updateAgeDisplay();
+        });
+        updateAgeDisplay();
+    }
+
+    // Validation : date de naissance requise
+    const theForm = document.querySelector('.anicare-form');
     if (theForm && ageDateError) {
         theForm.addEventListener('submit', function(e) {
-            var bd = document.getElementById('{{ form.birthDate.vars.id }}');
-            var ag = document.getElementById('{{ form.age.vars.id }}');
-            if (bd && ag && !bd.value && !ag.value) {
+            if (!birthDateInput.value) {
                 e.preventDefault();
                 ageDateError.classList.remove('d-none');
-                bd.closest('.row').scrollIntoView({behavior: 'smooth', block: 'center'});
+                birthDateInput.closest('.row').scrollIntoView({behavior: 'smooth', block: 'center'});
             } else {
                 ageDateError.classList.add('d-none');
             }
         });
     }
 
-    // Synchronisation date de naissance ↔ âge
-    const birthDateInput = document.getElementById('{{ form.birthDate.vars.id }}');
-    const ageInput = document.getElementById('{{ form.age.vars.id }}');
-
-    if (birthDateInput && ageInput) {
-        let syncing = false;
-
-        birthDateInput.addEventListener('change', function () {
-            if (syncing) return;
-            syncing = true;
-            if (this.value) {
-                const birth = new Date(this.value);
-                const today = new Date();
-                let age = today.getFullYear() - birth.getFullYear();
-                const m = today.getMonth() - birth.getMonth();
-                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-                ageInput.value = Math.max(0, age);
-            } else {
-                ageInput.value = '';
+    // Init : si birthDate déjà rempli, afficher l'info lettre
+    if (nameInput && birthDateInput && birthDateInput.value) {
+        const offset = getLetterOffset(nameInput.value);
+        if (offset >= 0) {
+            const letter = EQUINE_LETTERS[offset];
+            const birthYear = parseInt(birthDateInput.value.substring(0, 4), 10);
+            const jeuneYear = JEUNE_CYCLE_START + offset;
+            const animalYear = ANIMAL_CYCLE_START + offset;
+            if (birthYear === animalYear) {
+                letterAnimal.checked = true;
+                letterJeune.checked = false;
+                letterInfoText.textContent = 'Lettre « ' + letter + ' » → né(e) en ' + birthYear + ' (ancien cycle)';
+                letterInfo.style.display = 'block';
+            } else if (birthYear === jeuneYear) {
+                letterInfoText.textContent = 'Lettre « ' + letter + ' » → né(e) en ' + birthYear + ' (cycle actuel)';
+                letterInfo.style.display = 'block';
             }
-            syncing = false;
-        });
-
-        ageInput.addEventListener('input', function () {
-            if (syncing) return;
-            syncing = true;
-            if (this.value !== '' && !isNaN(this.value)) {
-                const age = parseInt(this.value, 10);
-                const year = new Date().getFullYear() - age;
-                birthDateInput.value = year + '-01-01';
-            } else {
-                birthDateInput.value = '';
-            }
-            syncing = false;
-        });
-
-        if (birthDateInput.value && !ageInput.value) {
-            birthDateInput.dispatchEvent(new Event('change'));
         }
     }
 

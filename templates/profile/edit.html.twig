@@ -38,16 +38,22 @@
                                 {{ form_errors(form.phone) }}
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.city) }}
+                            <div class="col-12">
+                                {{ form_label(form.address, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.address) }}
                             </div>
 
                             <div class="col-12 col-md-6">
                                 {{ form_label(form.postalCode, null, {'label_attr': {'class': 'form-label'}}) }}
                                 {{ form_widget(form.postalCode, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.postalCode) }}
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.city) }}
                             </div>
 
                             {% if form.specialty is defined %}
@@ -155,4 +161,10 @@
         </div>
     </div>
 </div>
+
+{% include 'components/_address_autocomplete.html.twig' with {
+    input_id: 'profile_address',
+    postal_id: 'profile_postalCode',
+    city_id: 'profile_city'
+} %}
 {% endblock %}
