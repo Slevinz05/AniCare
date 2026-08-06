@@ -17,13 +17,32 @@
         </div>
     </div>
 
+    <div class="anatomy-view-toggle d-flex justify-content-center mb-2">
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-view-toggle active" id="btn-view-left" title="Vue côté gauche">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Gauche
+            </button>
+            <button type="button" class="btn btn-view-toggle" id="btn-view-right" title="Vue côté droit">
+                Droite
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+    </div>
+
     <div class="anatomy-svg-container position-relative">
         <div class="anatomy-tooltip" id="anatomy-tooltip"></div>
-        <div style="width:100%; aspect-ratio: 600/500; max-height:420px;">
-            <object id="horse-svg-object"
+        <div style="width:100%; aspect-ratio: 600/500; max-height:420px; position:relative;">
+            <object id="horse-svg-left"
                     type="image/svg+xml"
-                    data="{{ asset('images/horse_bones_ligaments.svg') }}?v=8"
-                    style="width:100%; height:100%;">
+                    data="{{ asset('images/horse_bones_ligaments.svg') }}?v=9"
+                    style="width:100%; height:100%; position:absolute; top:0; left:0;">
+                Votre navigateur ne supporte pas l'affichage SVG.
+            </object>
+            <object id="horse-svg-right"
+                    type="image/svg+xml"
+                    data="{{ asset('images/horse_bones_ligaments_right.svg') }}?v=3"
+                    style="width:100%; height:100%; position:absolute; top:0; left:0; display:none; transform: scaleX(-1);">
                 Votre navigateur ne supporte pas l'affichage SVG.
             </object>
         </div>
@@ -52,6 +71,41 @@
     border-radius: var(--radius-sm, 0.5rem);
     padding: 0.75rem;
     overflow: hidden;
+}
+
+/* View toggle */
+.btn.btn-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1.5px solid var(--border-color, #EDE6DB);
+    background: #fff;
+    color: #8a7f72;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.btn.btn-view-toggle:first-child {
+    border-radius: 20px 0 0 20px;
+}
+.btn.btn-view-toggle:last-child {
+    border-radius: 0 20px 20px 0;
+}
+.btn.btn-view-toggle.active {
+    background: #0d9488;
+    border-color: #0d9488;
+    color: #fff;
+}
+.btn.btn-view-toggle:not(.active) {
+    background: #fff !important;
+    color: #8a7f72 !important;
+    border-color: var(--border-color, #EDE6DB) !important;
+}
+.btn.btn-view-toggle:not(.active):hover {
+    background: #f5f0e8 !important;
+    color: #4a3f33 !important;
 }
 
 /* Tooltip */
@@ -86,6 +140,14 @@
     font-weight: 500;
     cursor: default;
     animation: pillAppear 0.2s ease-out;
+}
+
+.anatomy-pill .pill-side {
+    font-size: 0.65rem;
+    font-weight: 700;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .anatomy-pill.bone-pill {
@@ -156,6 +218,15 @@
     padding: 0.6rem 0.85rem;
     font-size: 0.82rem;
     font-weight: 600;
+}
+
+.intervention-card-header .card-side-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.5);
+    margin-left: 0.4rem;
 }
 
 .intervention-card-header.bone-header {
@@ -255,7 +326,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var widget = document.getElementById('horse-anatomy-widget');
     if (!widget) return;
 
-    var svgObject = document.getElementById('horse-svg-object');
+    var svgObjectLeft = document.getElementById('horse-svg-left');
+    var svgObjectRight = document.getElementById('horse-svg-right');
     var svgContainer = widget.querySelector('.anatomy-svg-container');
     var tooltip = document.getElementById('anatomy-tooltip');
     var pillsContainer = document.getElementById('anatomy-pills');
@@ -267,6 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var btnAreas = document.getElementById('btn-layer-areas');
     var btnMeridians = document.getElementById('btn-layer-meridians');
     var allLayerBtns = [btnBones, btnLigaments, btnAreas, btnMeridians];
+    var btnViewLeft = document.getElementById('btn-view-left');
+    var btnViewRight = document.getElementById('btn-view-right');
 
     var techniques = [
         'Technique structurelle',
@@ -278,18 +352,187 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     var selectedParts = [];
+    var currentView = 'left';
+    var currentLayer = 'bones';
+    var svgDocs = { left: null, right: null };
+    var initDone = { left: false, right: false };
 
     if (hiddenInput && hiddenInput.value && hiddenInput.value !== '[]') {
         try { selectedParts = JSON.parse(hiddenInput.value); } catch(e) {}
     }
 
-    function initSvg() {
+    function sideLabel(side) {
+        return side === 'left' ? 'G' : 'D';
+    }
+
+    function getActiveSvgObject() {
+        return currentView === 'left' ? svgObjectLeft : svgObjectRight;
+    }
+
+    function switchView(view) {
+        currentView = view;
+        if (view === 'left') {
+            svgObjectLeft.style.display = '';
+            svgObjectRight.style.display = 'none';
+            btnViewLeft.classList.add('active');
+            btnViewRight.classList.remove('active');
+        } else {
+            svgObjectLeft.style.display = 'none';
+            svgObjectRight.style.display = '';
+            btnViewRight.classList.add('active');
+            btnViewLeft.classList.remove('active');
+        }
+    }
+
+    btnViewLeft.addEventListener('click', function() { switchView('left'); });
+    btnViewRight.addEventListener('click', function() { switchView('right'); });
+
+    function pillClass(type) {
+        var map = {bone:'bone-pill', ligament:'ligament-pill', area:'area-pill', meridian:'meridian-pill', nerve:'nerve-pill', helice:'helice-pill'};
+        return map[type] || 'bone-pill';
+    }
+
+    function headerClass(type) {
+        var map = {bone:'bone-header', ligament:'ligament-header', area:'area-header', meridian:'meridian-header', nerve:'nerve-header', helice:'helice-header'};
+        return map[type] || 'bone-header';
+    }
+
+    function saveState() {
+        if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
+    }
+
+    function applySelectionClassesAll() {
+        ['left', 'right'].forEach(function(side) {
+            var svg = svgDocs[side];
+            if (!svg) return;
+            svg.querySelectorAll('.selected').forEach(function(el) { el.classList.remove('selected'); });
+            selectedParts.forEach(function(part) {
+                if (part.side !== side) return;
+                (part.ids || [part.id]).forEach(function(id) {
+                    var el = svg.querySelector('[data-name="' + id + '"]');
+                    if (el) {
+                        el.classList.add('selected');
+                        el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
+                    }
+                });
+            });
+        });
+    }
+
+    function buildInterventionCard(part, index) {
+        var card = document.createElement('div');
+        card.className = 'intervention-card';
+        card.setAttribute('data-part-index', index);
+
+        var header = document.createElement('div');
+        header.className = 'intervention-card-header ' + headerClass(part.type);
+        header.innerHTML = '<span>' + part.name + '<span class="card-side-badge">' + sideLabel(part.side) + '</span></span><span class="card-remove" data-index="' + index + '">&times;</span>';
+
+        var body = document.createElement('div');
+        body.className = 'intervention-card-body';
+
+        var grid = document.createElement('div');
+        grid.className = 'technique-grid';
+
+        var radioName = 'technique_' + index;
+        techniques.forEach(function(tech) {
+            var label = document.createElement('label');
+            label.className = 'technique-option';
+            var radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = radioName;
+            radio.value = tech;
+            if (part.technique === tech) radio.checked = true;
+            radio.addEventListener('change', function() {
+                selectedParts[index].technique = tech;
+                saveState();
+            });
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(tech));
+            grid.appendChild(label);
+        });
+
+        var notes = document.createElement('textarea');
+        notes.className = 'intervention-notes';
+        notes.placeholder = 'Description / Notes';
+        notes.rows = 1;
+        notes.value = part.notes || '';
+        notes.addEventListener('input', function() {
+            selectedParts[index].notes = this.value;
+            saveState();
+        });
+
+        body.appendChild(grid);
+        body.appendChild(notes);
+        card.appendChild(header);
+        card.appendChild(body);
+        return card;
+    }
+
+    function updateDisplay() {
+        pillsContainer.innerHTML = '';
+        interventionsContainer.innerHTML = '';
+
+        selectedParts.forEach(function(part, index) {
+            var pill = document.createElement('span');
+            pill.className = 'anatomy-pill ' + pillClass(part.type);
+            pill.innerHTML = '<span class="pill-side">' + sideLabel(part.side) + '</span> ' + part.name + ' <span class="pill-remove" data-index="' + index + '">&times;</span>';
+            pillsContainer.appendChild(pill);
+
+            interventionsContainer.appendChild(buildInterventionCard(part, index));
+        });
+
+        hint.style.display = selectedParts.length > 0 ? 'none' : '';
+        saveState();
+        applySelectionClassesAll();
+    }
+
+    function removePart(index) {
+        selectedParts.splice(index, 1);
+        updateDisplay();
+    }
+
+    function setLayerOnSvg(svg, layer) {
+        if (!svg) return;
+        var layerSelectors = { bones: '.bones', ligaments: '.ligaments', areas: '.areas', meridians: '.meridians' };
+        var alwaysHide = ['.muscles', '.organs'];
+        Object.keys(layerSelectors).forEach(function(key) {
+            var groups = svg.querySelectorAll(layerSelectors[key]);
+            groups.forEach(function(g) {
+                if (key === layer) g.classList.remove('layer-hidden');
+                else g.classList.add('layer-hidden');
+            });
+        });
+        alwaysHide.forEach(function(sel) {
+            svg.querySelectorAll(sel).forEach(function(g) {
+                g.classList.add('layer-hidden');
+            });
+        });
+    }
+
+    function setLayer(layer) {
+        currentLayer = layer;
+        setLayerOnSvg(svgDocs.left, layer);
+        setLayerOnSvg(svgDocs.right, layer);
+        allLayerBtns.forEach(function(btn) { btn.classList.remove('active'); });
+        var activeBtn = document.getElementById('btn-layer-' + layer);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    btnBones.addEventListener('click', function() { setLayer('bones'); });
+    btnLigaments.addEventListener('click', function() { setLayer('ligaments'); });
+    btnAreas.addEventListener('click', function() { setLayer('areas'); });
+    btnMeridians.addEventListener('click', function() { setLayer('meridians'); });
+
+    function initSvgSide(svgObject, side) {
         var svgDoc = svgObject.contentDocument;
         if (!svgDoc) return;
         var svg = svgDoc.querySelector('svg');
         if (!svg) return;
         if (svg._anicare_init) return;
         svg._anicare_init = true;
+        svgDocs[side] = svg;
+        initDone[side] = true;
 
         svg.querySelectorAll('title').forEach(function(t) {
             var parent = t.parentElement;
@@ -355,115 +598,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return ids;
         }
 
-        function pillClass(type) {
-            var map = {bone:'bone-pill', ligament:'ligament-pill', area:'area-pill', meridian:'meridian-pill', nerve:'nerve-pill', helice:'helice-pill'};
-            return map[type] || 'bone-pill';
-        }
-
-        function headerClass(type) {
-            var map = {bone:'bone-header', ligament:'ligament-header', area:'area-header', meridian:'meridian-header', nerve:'nerve-header', helice:'helice-header'};
-            return map[type] || 'bone-header';
-        }
-
-        function applySelectionClasses() {
-            svg.querySelectorAll('.selected').forEach(function(el) { el.classList.remove('selected'); });
-            selectedParts.forEach(function(part) {
-                (part.ids || [part.id]).forEach(function(id) {
-                    var el = svg.querySelector('[data-name="' + id + '"]');
-                    if (el) {
-                        el.classList.add('selected');
-                        el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
-                    }
-                });
-            });
-        }
-
-        function saveState() {
-            if (hiddenInput) hiddenInput.value = JSON.stringify(selectedParts);
-        }
-
-        function buildInterventionCard(part, index) {
-            var card = document.createElement('div');
-            card.className = 'intervention-card';
-            card.setAttribute('data-part-index', index);
-
-            var header = document.createElement('div');
-            header.className = 'intervention-card-header ' + headerClass(part.type);
-            header.innerHTML = '<span>' + part.name + '</span><span class="card-remove" data-index="' + index + '">&times;</span>';
-
-            var body = document.createElement('div');
-            body.className = 'intervention-card-body';
-
-            var grid = document.createElement('div');
-            grid.className = 'technique-grid';
-
-            var radioName = 'technique_' + index;
-            techniques.forEach(function(tech) {
-                var label = document.createElement('label');
-                label.className = 'technique-option';
-                var radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = radioName;
-                radio.value = tech;
-                if (part.technique === tech) radio.checked = true;
-                radio.addEventListener('change', function() {
-                    selectedParts[index].technique = tech;
-                    saveState();
-                });
-                label.appendChild(radio);
-                label.appendChild(document.createTextNode(tech));
-                grid.appendChild(label);
-            });
-
-            var notes = document.createElement('textarea');
-            notes.className = 'intervention-notes';
-            notes.placeholder = 'Description / Notes';
-            notes.rows = 1;
-            notes.value = part.notes || '';
-            notes.addEventListener('input', function() {
-                selectedParts[index].notes = this.value;
-                saveState();
-            });
-
-            body.appendChild(grid);
-            body.appendChild(notes);
-            card.appendChild(header);
-            card.appendChild(body);
-            return card;
-        }
-
-        function updateDisplay() {
-            pillsContainer.innerHTML = '';
-            interventionsContainer.innerHTML = '';
-
-            selectedParts.forEach(function(part, index) {
-                var pill = document.createElement('span');
-                pill.className = 'anatomy-pill ' + pillClass(part.type);
-                pill.innerHTML = part.name + ' <span class="pill-remove" data-index="' + index + '">&times;</span>';
-                pillsContainer.appendChild(pill);
-
-                interventionsContainer.appendChild(buildInterventionCard(part, index));
-            });
-
-            hint.style.display = selectedParts.length > 0 ? 'none' : '';
-            saveState();
-            applySelectionClasses();
-        }
-
-        function removePart(index) {
-            selectedParts.splice(index, 1);
-            updateDisplay();
-        }
-
         function togglePart(id, name, type) {
             var group = getGroupName(name);
-            var idx = selectedParts.findIndex(function(p) { return p.name === group; });
+            var idx = selectedParts.findIndex(function(p) { return p.name === group && p.side === side; });
             if (idx >= 0) {
                 selectedParts.splice(idx, 1);
             } else {
                 var ids = findRelatedIds(name, type);
                 if (ids.length === 0) ids = [id];
-                selectedParts.push({ id: ids[0], ids: ids, name: group, type: type, technique: '', notes: '' });
+                selectedParts.push({ id: ids[0], ids: ids, name: group, type: type, side: side, technique: '', notes: '' });
             }
             updateDisplay();
         }
@@ -504,10 +647,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     tooltip.classList.add('visible');
                     var objRect = svgObject.getBoundingClientRect();
                     var containerRect = svgContainer.getBoundingClientRect();
-                    var scaleX = objRect.width / svgObject.clientWidth;
-                    var scaleY = objRect.height / svgObject.clientHeight;
-                    var posX = objRect.left - containerRect.left + (e.clientX * scaleX) + 15;
-                    var posY = objRect.top - containerRect.top + (e.clientY * scaleY) - 10;
+                    var posX = (objRect.left - containerRect.left) + e.clientX + 15;
+                    var posY = (objRect.top - containerRect.top) + e.clientY - 10;
                     if (posX + 200 > containerRect.width) posX = posX - 180;
                     if (posY < 5) posY = 5;
                     tooltip.style.left = posX + 'px';
@@ -525,44 +666,34 @@ document.addEventListener('DOMContentLoaded', function() {
             setHoverGroup(null, null);
         });
 
-        var layerSelectors = {
-            bones: '.bones',
-            ligaments: '.ligaments',
-            areas: '.areas',
-            meridians: '.meridians'
-        };
-
-        function setLayer(layer) {
-            Object.keys(layerSelectors).forEach(function(key) {
-                var groups = svg.querySelectorAll(layerSelectors[key]);
-                groups.forEach(function(g) {
-                    if (key === layer) g.classList.remove('layer-hidden');
-                    else g.classList.add('layer-hidden');
-                });
-            });
-            allLayerBtns.forEach(function(btn) { btn.classList.remove('active'); });
-            var activeBtn = document.getElementById('btn-layer-' + layer);
-            if (activeBtn) activeBtn.classList.add('active');
-        }
-
-        btnBones.addEventListener('click', function() { setLayer('bones'); });
-        btnLigaments.addEventListener('click', function() { setLayer('ligaments'); });
-        btnAreas.addEventListener('click', function() { setLayer('areas'); });
-        btnMeridians.addEventListener('click', function() { setLayer('meridians'); });
-
-        setLayer('bones');
-        updateDisplay();
-
-        // Delegated click for remove buttons (pills + cards)
-        widget.addEventListener('click', function(e) {
-            if (e.target.classList.contains('pill-remove') || e.target.classList.contains('card-remove')) {
-                var index = parseInt(e.target.getAttribute('data-index'));
-                removePart(index);
-            }
+        ['.bones', '.ligaments', '.areas', '.meridians'].forEach(function(sel) {
+            svg.querySelectorAll(sel).forEach(function(g) { g.classList.remove('masked'); });
         });
+
+        setLayerOnSvg(svg, currentLayer);
+        applySelectionClassesAll();
     }
 
-    svgObject.addEventListener('load', initSvg);
-    if (svgObject.contentDocument && svgObject.contentDocument.querySelector('svg')) initSvg();
+    function tryInit(svgObject, side) {
+        if (initDone[side]) return;
+        if (svgObject.contentDocument && svgObject.contentDocument.querySelector('svg')) {
+            initSvgSide(svgObject, side);
+        }
+    }
+
+    svgObjectLeft.addEventListener('load', function() { initSvgSide(svgObjectLeft, 'left'); });
+    svgObjectRight.addEventListener('load', function() { initSvgSide(svgObjectRight, 'right'); });
+    tryInit(svgObjectLeft, 'left');
+    tryInit(svgObjectRight, 'right');
+
+    setLayer('bones');
+    updateDisplay();
+
+    widget.addEventListener('click', function(e) {
+        if (e.target.classList.contains('pill-remove') || e.target.classList.contains('card-remove')) {
+            var index = parseInt(e.target.getAttribute('data-index'));
+            removePart(index);
+        }
+    });
 });
 </script>

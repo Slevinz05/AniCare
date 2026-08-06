@@ -1,0 +1,294 @@
+{% set locations = health_book_entry.anatomicalLocations|default([]) %}
+{% if locations is not empty %}
+{% set left_parts = locations|filter(l => (l.side|default('left')) == 'left') %}
+{% set right_parts = locations|filter(l => (l.side|default('')) == 'right') %}
+{% set has_left = left_parts|length > 0 %}
+{% set has_right = right_parts|length > 0 %}
+{% set both = has_left and has_right %}
+
+<section class="anatomy-show-section mb-5">
+    <p class="page-eyebrow mb-2">Localisation anatomique</p>
+    <h2 class="h4 page-title mb-3">Zones identifiées</h2>
+
+    <div class="anatomy-show-container d-flex gap-3 {{ both ? '' : 'justify-content-center' }}" style="flex-wrap: wrap;">
+        {% if has_left %}
+        <div class="anatomy-show-side {{ both ? 'anatomy-show-half' : 'anatomy-show-full' }}">
+            <div class="anatomy-show-label">Côté gauche</div>
+            <div class="anatomy-show-svg-wrap">
+                <object id="anatomy-show-left"
+                        type="image/svg+xml"
+                        data="{{ asset('images/horse_bones_ligaments.svg') }}?v=9"
+                        style="width:100%; height:100%;">
+                </object>
+            </div>
+            <div class="anatomy-show-cards mt-2">
+                {% for loc in left_parts %}
+                    <div class="anatomy-show-card" data-part-id="{{ loc.id }}" data-part-type="{{ loc.type }}">
+                        <div class="anatomy-show-card-header {{ loc.type == 'bone' ? 'bone-header' : (loc.type == 'ligament' ? 'ligament-header' : (loc.type == 'area' ? 'area-header' : (loc.type == 'meridian' ? 'meridian-header' : (loc.type == 'nerve' ? 'nerve-header' : 'helice-header')))) }}">
+                            {{ loc.name }}
+                        </div>
+                        {% if loc.technique|default('') is not empty or loc.notes|default('') is not empty %}
+                        <div class="anatomy-show-card-body">
+                            {% if loc.technique|default('') is not empty %}
+                                <span class="anatomy-show-technique">{{ loc.technique }}</span>
+                            {% endif %}
+                            {% if loc.notes|default('') is not empty %}
+                                <p class="anatomy-show-notes mb-0">{{ loc.notes }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if has_right %}
+        <div class="anatomy-show-side {{ both ? 'anatomy-show-half' : 'anatomy-show-full' }}">
+            <div class="anatomy-show-label">Côté droit</div>
+            <div class="anatomy-show-svg-wrap">
+                <object id="anatomy-show-right"
+                        type="image/svg+xml"
+                        data="{{ asset('images/horse_bones_ligaments_right.svg') }}?v=3"
+                        style="width:100%; height:100%; transform: scaleX(-1);">
+                </object>
+            </div>
+            <div class="anatomy-show-cards mt-2">
+                {% for loc in right_parts %}
+                    <div class="anatomy-show-card" data-part-id="{{ loc.id }}" data-part-type="{{ loc.type }}">
+                        <div class="anatomy-show-card-header {{ loc.type == 'bone' ? 'bone-header' : (loc.type == 'ligament' ? 'ligament-header' : (loc.type == 'area' ? 'area-header' : (loc.type == 'meridian' ? 'meridian-header' : (loc.type == 'nerve' ? 'nerve-header' : 'helice-header')))) }}">
+                            {{ loc.name }}
+                        </div>
+                        {% if loc.technique|default('') is not empty or loc.notes|default('') is not empty %}
+                        <div class="anatomy-show-card-body">
+                            {% if loc.technique|default('') is not empty %}
+                                <span class="anatomy-show-technique">{{ loc.technique }}</span>
+                            {% endif %}
+                            {% if loc.notes|default('') is not empty %}
+                                <p class="anatomy-show-notes mb-0">{{ loc.notes }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.anatomy-show-container {
+    align-items: flex-start;
+}
+.anatomy-show-half {
+    flex: 1 1 45%;
+    min-width: 280px;
+    max-width: 50%;
+}
+.anatomy-show-full {
+    flex: 1 1 100%;
+    max-width: 500px;
+}
+.anatomy-show-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8a7f72;
+    text-align: center;
+    margin-bottom: 0.4rem;
+}
+.anatomy-show-svg-wrap {
+    background: #fafaf8;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    aspect-ratio: 600 / 500;
+    max-height: 340px;
+    overflow: hidden;
+}
+.anatomy-show-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.anatomy-show-card {
+    border: 1px solid var(--border-color, #EDE6DB);
+    border-radius: 0.6rem;
+    overflow: hidden;
+    background: var(--card-bg, #fff);
+}
+.anatomy-show-card-header {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.anatomy-show-card-header.bone-header {
+    background: var(--soft-teal, #f0fdfa);
+    color: var(--primary-hover, #0f766e);
+    border-bottom: 1px solid var(--primary-color, #0d9488);
+}
+.anatomy-show-card-header.ligament-header {
+    background: var(--soft-warm, #FFF0CC);
+    color: var(--accent-hover, #A67B3C);
+    border-bottom: 1px solid var(--accent-color, #C8973E);
+}
+.anatomy-show-card-header.area-header {
+    background: #ede9fe;
+    color: #6d28d9;
+    border-bottom: 1px solid #8b5cf6;
+}
+.anatomy-show-card-header.meridian-header {
+    background: #fce7f3;
+    color: #be185d;
+    border-bottom: 1px solid #ec4899;
+}
+.anatomy-show-card-header.nerve-header {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-bottom: 1px solid #3b82f6;
+}
+.anatomy-show-card-header.helice-header {
+    background: #fef3c7;
+    color: #92400e;
+    border-bottom: 1px solid #f59e0b;
+}
+.anatomy-show-card-body {
+    padding: 0.45rem 0.7rem;
+}
+.anatomy-show-technique {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--primary-color, #0d9488);
+    background: var(--soft-teal, #f0fdfa);
+    border: 1px solid var(--primary-color, #0d9488);
+    border-radius: 12px;
+    padding: 0.15rem 0.5rem;
+    margin-bottom: 0.3rem;
+}
+.anatomy-show-notes {
+    font-size: 0.78rem;
+    color: #4a3f33;
+    line-height: 1.4;
+}
+</style>
+
+<script>
+(function() {
+    var locationsJson = {{ locations|json_encode|raw }};
+
+    function initShowSvg(objectEl, side) {
+        if (!objectEl) return;
+        var svgDoc = objectEl.contentDocument;
+        if (!svgDoc) return;
+        var svg = svgDoc.querySelector('svg');
+        if (!svg) return;
+
+        svg.querySelectorAll('title').forEach(function(t) {
+            var parent = t.parentElement;
+            if (parent) {
+                parent.setAttribute('data-title', t.textContent.trim());
+                t.remove();
+            }
+        });
+
+        // Remove masked class from managed layers
+        ['.bones', '.ligaments', '.areas', '.meridians'].forEach(function(sel) {
+            svg.querySelectorAll(sel).forEach(function(g) { g.classList.remove('masked'); });
+        });
+
+        // Hide all layers first
+        ['.bones', '.ligaments', '.areas', '.meridians', '.muscles', '.organs'].forEach(function(sel) {
+            svg.querySelectorAll(sel).forEach(function(g) {
+                g.classList.add('layer-hidden');
+            });
+        });
+
+        var sideParts = locationsJson.filter(function(l) {
+            return (l.side || 'left') === side;
+        });
+        var activeLayers = {};
+        sideParts.forEach(function(part) {
+            if (part.type === 'bone') activeLayers['bones'] = true;
+            else if (part.type === 'ligament') activeLayers['ligaments'] = true;
+            else if (part.type === 'area' || part.type === 'nerve' || part.type === 'helice') activeLayers['areas'] = true;
+            else if (part.type === 'meridian') activeLayers['meridians'] = true;
+        });
+
+        // Show layers that have selections
+        Object.keys(activeLayers).forEach(function(layer) {
+            svg.querySelectorAll('.' + layer).forEach(function(g) {
+                g.classList.remove('layer-hidden');
+            });
+        });
+
+        // Apply selected class to matching parts
+        var selectedIds = {};
+        sideParts.forEach(function(part) {
+            (part.ids || [part.id]).forEach(function(id) {
+                selectedIds[id] = true;
+                var el = svg.querySelector('[data-name="' + id + '"]');
+                if (el) {
+                    el.classList.add('selected');
+                    el.querySelectorAll('path').forEach(function(p) { p.classList.add('selected'); });
+                }
+            });
+        });
+
+        // Hide non-selected elements within active layers
+        var showStyle = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
+        var rules = [];
+        Object.keys(activeLayers).forEach(function(layer) {
+            rules.push('.' + layer + ' > * { visibility: hidden; }');
+        });
+        rules.push('.selected, .selected path, .selected * { visibility: visible !important; }');
+        showStyle.textContent = rules.join('\n');
+        svg.insertBefore(showStyle, svg.firstChild);
+
+        svg.style.pointerEvents = 'none';
+
+        // Match card header colors to SVG element colors
+        var container = objectEl.closest('.anatomy-show-side');
+        if (!container) return;
+        sideParts.forEach(function(part) {
+            var firstId = (part.ids || [part.id])[0];
+            var svgEl = svg.querySelector('[data-name="' + firstId + '"]');
+            if (!svgEl) return;
+            var card = container.querySelector('.anatomy-show-card[data-part-id="' + part.id + '"]');
+            if (!card) return;
+            var header = card.querySelector('.anatomy-show-card-header');
+            if (!header) return;
+
+            var color = null;
+            if (part.type === 'meridian') {
+                var cs = window.getComputedStyle(svgEl);
+                color = cs.stroke || cs.getPropertyValue('stroke');
+            }
+            if (color && color !== 'none' && color !== '') {
+                header.style.background = color + '1a';
+                header.style.color = color;
+                header.style.borderBottomColor = color;
+                var technique = card.querySelector('.anatomy-show-technique');
+                if (technique) {
+                    technique.style.color = color;
+                    technique.style.background = color + '1a';
+                    technique.style.borderColor = color;
+                }
+            }
+        });
+    }
+
+    function tryInit(objectEl, side) {
+        if (!objectEl) return;
+        objectEl.addEventListener('load', function() { initShowSvg(objectEl, side); });
+        if (objectEl.contentDocument && objectEl.contentDocument.querySelector('svg')) {
+            initShowSvg(objectEl, side);
+        }
+    }
+
+    tryInit(document.getElementById('anatomy-show-left'), 'left');
+    tryInit(document.getElementById('anatomy-show-right'), 'right');
+})();
+</script>
+{% endif %}
