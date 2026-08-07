@@ -81,19 +81,27 @@ class HealthBookEntryRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByMonthAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
+    public function findByMonthAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user, array $structureIds = []): array
     {
-        return $this->createQueryBuilder('h')
+        $qb = $this->createQueryBuilder('h')
             ->join('h.animal', 'a')
             ->leftJoin('a.animalShares', 's')
             ->where('h.date BETWEEN :start AND :end')
-            ->andWhere('a.owner = :user OR s.sharedWithEmail = :email')
             ->andWhere('h.status != :draft')
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
-            ->setParameter('draft', 'draft')
+            ->setParameter('draft', 'draft');
+
+        $conditions = 'a.owner = :user OR s.sharedWithEmail = :email';
+
+        if (!empty($structureIds)) {
+            $conditions .= ' OR a.structure IN (:structureIds)';
+            $qb->setParameter('structureIds', $structureIds);
+        }
+
+        return $qb->andWhere($conditions)
             ->orderBy('h.date', 'ASC')
             ->getQuery()
             ->getResult();

@@ -43,7 +43,7 @@ final class AppointmentController extends AbstractController
             $defaultDuration = $user->getDefaultConsultationDuration() ?? 60;
             $appointment->setDuration($defaultDuration);
 
-            $defaultNotes = $user->getDefaultPublicNotes();
+            $defaultNotes = $user->getDefaultAppointmentNotes();
             if ($defaultNotes) {
                 $appointment->setPublicNotes($defaultNotes);
             }

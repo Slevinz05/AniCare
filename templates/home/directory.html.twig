@@ -108,7 +108,103 @@
         </div>
     {% endif %}
 
+    {# ── Professionnels de la structure (mis en avant) ── #}
+    {% set structure_pros = [] %}
+    {% set other_pros = [] %}
+    {% for pro in professionals %}
+        {% if pro.id in structure_pro_ids %}
+            {% set structure_pros = structure_pros|merge([pro]) %}
+        {% else %}
+            {% set other_pros = other_pros|merge([pro]) %}
+        {% endif %}
+    {% endfor %}
+
+    {% if structure_pros is not empty %}
+        <div class="mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f), var(--anicare-dark, #3d7a6e));">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h2 class="h6 fw-bold mb-0" style="color: var(--anicare-dark, #3d7a6e);">Professionnels de votre structure</h2>
+                <span class="badge rounded-pill" style="background-color: var(--anicare-primary, #5a9e8f);">{{ structure_pros|length }}</span>
+            </div>
+            <div class="row g-4 mb-4">
+                {% for pro in structure_pros %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card anicare-card h-100 position-relative" style="transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; border: 2px solid var(--anicare-primary, #5a9e8f);" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(90,158,143,0.25)'" onmouseleave="this.style.transform='';this.style.boxShadow=''" onclick="if(!event.target.closest('a,button,.d-flex.gap-2'))window.location='{{ path('app_professional_show', {'id': pro.id}) }}'">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge d-flex align-items-center gap-1" style="background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f), var(--anicare-dark, #3d7a6e)); font-size: 0.65rem; padding: 0.35em 0.65em;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Structure
+                                </span>
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f), var(--anicare-dark, #3d7a6e)); color: #fff; font-weight: 700; font-size: 1.1rem;">
+                                        {{ pro.firstName|first|upper }}{{ pro.lastName|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 fw-bold mb-1"><a href="{{ path('app_professional_show', {'id': pro.id}) }}" class="text-decoration-none" style="color: inherit;">{{ pro.fullName }}</a></h3>
+                                        {% if pro.specialty %}
+                                            <span class="badge" style="background-color: var(--anicare-primary, #5a9e8f); font-size: 0.7rem;">{{ pro.specialty }}</span>
+                                        {% else %}
+                                            <span class="badge bg-anicare-soft text-teal border-anicare" style="font-size: 0.7rem;">PRO</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="text-secondary small mb-3">
+                                    {% if pro.city or pro.postalCode %}
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                            <span>{% if pro.postalCode %}{{ pro.postalCode }} {% endif %}{{ pro.city }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if pro.phone %}
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            <a href="tel:{{ pro.phone }}" class="text-decoration-none text-secondary">{{ pro.phone }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if pro.email %}
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                            <a href="mailto:{{ pro.email }}" class="text-decoration-none text-secondary">{{ pro.email }}</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mt-auto pt-2 border-top border-light">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <span class="small text-secondary">{{ pro.animals|length }} {{ pro.animals|length > 1 ? 'chevaux suivis' : 'cheval suivi' }}</span>
+                                        {% if app.user %}
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ path('app_message_contact', {'id': pro.id}) }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                                    Contacter
+                                                </a>
+                                                <a href="{{ path('app_professional_show', {'id': pro.id}) }}" class="btn btn-primary btn-sm">Voir la fiche</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if other_pros is not empty %}
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <h2 class="h6 fw-bold mb-0 text-secondary">Autres professionnels</h2>
+                <span class="badge rounded-pill bg-secondary">{{ other_pros|length }}</span>
+            </div>
+        {% endif %}
+    {% endif %}
+
     {# ── Liste ── #}
+    {% set display_pros = structure_pros is not empty ? other_pros : professionals %}
     {% if professionals is empty %}
         <div class="empty-state text-center p-5">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-secondary mb-3" style="opacity: 0.4;">
@@ -123,9 +219,9 @@
                 <p class="text-secondary mb-0">Il n'y a pas encore de professionnel enregistré sur la plateforme.</p>
             {% endif %}
         </div>
-    {% else %}
+    {% elseif display_pros is not empty %}
         <div class="row g-4">
-            {% for pro in professionals %}
+            {% for pro in display_pros %}
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card anicare-card h-100" style="transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(74,63,51,0.15)'" onmouseleave="this.style.transform='';this.style.boxShadow=''" onclick="if(!event.target.closest('a,button,.d-flex.gap-2'))window.location='{{ path('app_professional_show', {'id': pro.id}) }}'">
                         <div class="card-body p-4 d-flex flex-column">

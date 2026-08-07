@@ -21,8 +21,14 @@
         .layer-hidden .selected, .layer-hidden .selected path { visibility: visible; }
         .masked { visibility: hidden; }
         .masked .selected, .masked .selected path { visibility: visible; }
-        .organs { visibility: hidden; }
-        .organs .selected, .organs .selected path { visibility: visible; }
+        .organs .organ { }
+        .organs .organ { cursor: pointer; transition: fill 0.2s, opacity 0.2s; }
+        .organs .organ path { fill: #f8bbd0; stroke: #e91e63; stroke-width: 0.5; opacity: 0.6; cursor: pointer; transition: fill 0.2s, stroke 0.2s; }
+        .organs .organ:hover path, .organs .organ.hovered path { fill: #f48fb1; stroke: #c2185b; opacity: 0.9; }
+        .organs .organ.selected path { fill: #e91e63; stroke: #ad1457; opacity: 1; }
+        .organs path.organ { fill: #f8bbd0; stroke: #e91e63; stroke-width: 0.5; opacity: 0.6; cursor: pointer; transition: fill 0.2s, stroke 0.2s; }
+        .organs path.organ:hover, .organs path.organ.hovered { fill: #f48fb1; stroke: #c2185b; opacity: 0.9; }
+        .organs path.organ.selected { fill: #e91e63; stroke: #ad1457; opacity: 1; }
 
         /* Zones */
         .areas .circle {
@@ -94,7 +100,7 @@
 
         <!-- {{#if displaySkeletonItem doc "organs"}} -->
 
-        <g class="organs organs-ok">
+        <g class="organs organs-ok masked">
             <path data-name="o_stomach" d="m 325.32132,169.52816 c 24.17819,-15.05306 25.68169,-14.7992 14.73649,8.09758 -11.0095,24.40347 -52.81744,22.74985 -44.98778,16.69018 0.0662,-0.11337 15.67898,-15.98891 30.25129,-24.78776 z" class="organ">
                 <title>Estomac</title>
             </path>
@@ -161,7 +167,7 @@
             </path>
         </g>
 
-        <g class="organs organs-ok">
+        <g class="organs organs-ok masked">
             <path data-name="o_vagina" d="m 514.92841,160.77924 c -20.97446,-6.27032 -42.90478,-4.01077 -65.4253,-3.08792 -2.64653,0.23876 -3.89133,8.75131 2.89492,8.87776 19.23196,-4.54937 32.87065,0.43113 42.75185,-1.29503 12.67667,-5.25035 15.08795,-0.17315 21.70846,0.33005 -2.15142,-1.98727 -0.9285,-3.31695 -1.92993,-4.82486 z" class="organ">
                 <title>Vagin</title>
             </path>
@@ -169,7 +175,7 @@
                 <title>Mamelle droit</title>
             </path>
         </g>
-        <g class="organs organs-ok">
+        <g class="organs organs-ok masked">
             <path data-name="o_uterus" d="m 419.68538,157.69132 c 0.85441,-1.99551 30.11903,-0.91293 29.62473,0.0965 3.50027,3.15647 3.89778,6.2681 0.96498,8.39528 -11.66624,-0.76317 -19.56103,0.0977 -29.72123,-2.12294 -2.84809,0.38235 -2.95559,-5.5021 -0.86848,-6.36884 z" class="organ">
                 <title>Utérus</title>
             </path>

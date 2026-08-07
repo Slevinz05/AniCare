@@ -30,7 +30,7 @@ final class AllergyController extends AbstractController
     #[Route('/cheval/{id}/ajouter', name: 'app_allergy_new', methods: ['GET', 'POST'])]
     public function new(Request $request, Animal $animal, EntityManagerInterface $em): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $animal);
 
         $allergy = new Allergy();
 
@@ -55,7 +55,7 @@ final class AllergyController extends AbstractController
     #[Route('/{id}/modifier', name: 'app_allergy_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Allergy $allergy, EntityManagerInterface $em): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $allergy->getAnimal());
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $allergy->getAnimal());
 
         $form = $this->createForm(AllergyType::class, $allergy);
         $form->handleRequest($request);
@@ -75,7 +75,7 @@ final class AllergyController extends AbstractController
     #[Route('/{id}', name: 'app_allergy_delete', methods: ['POST'])]
     public function delete(Request $request, Allergy $allergy, EntityManagerInterface $em): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_DELETE', $allergy->getAnimal());
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $allergy->getAnimal());
 
         $animalId = $allergy->getAnimal()->getId();
 

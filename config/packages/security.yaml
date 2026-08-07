@@ -47,6 +47,11 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
+    role_hierarchy:
+        ROLE_PRO: ROLE_USER
+        ROLE_STRUCTURE: ROLE_USER
+        ROLE_ADMIN: [ROLE_PRO, ROLE_STRUCTURE]
+
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/mes-chevaux, roles: ROLE_USER }
@@ -62,6 +67,7 @@ security:
         - { path: ^/partage, roles: ROLE_USER }
         - { path: ^/repertoire, roles: ROLE_PRO }
         - { path: ^/factures, roles: ROLE_PRO }
+        - { path: ^/structures, roles: ROLE_USER }
         - { path: ^/document, roles: ROLE_USER }
 
         # Exemples optionnels pour la hiérarchie future :

@@ -6,6 +6,7 @@ use App\Entity\HealthBookEntry;
 use App\Entity\User;
 use App\Form\HealthBookEntryType;
 use App\Repository\AnimalRepository;
+use App\Repository\AppointmentRepository;
 use App\Repository\HealthBookEntryRepository;
 use App\Service\DocumentUploader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -122,7 +123,7 @@ final class HealthBookEntryController extends AbstractController
     }
 
     #[Route('/nouvelle', name: 'app_health_book_entry_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, AnimalRepository $animalRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, AnimalRepository $animalRepository, AppointmentRepository $appointmentRepository): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -145,12 +146,45 @@ final class HealthBookEntryController extends AbstractController
             }
         }
 
+        $appointmentId = $request->query->get('appointment');
+        if ($appointmentId) {
+            $appointment = $appointmentRepository->find((int) $appointmentId);
+            if ($appointment && $appointment->getCreatedBy() === $user) {
+                $healthBookEntry->setAppointment($appointment);
+                $healthBookEntry->setDate($appointment->getScheduledAt());
+                if (!$healthBookEntry->getAnimal() && $appointment->getAnimals()->count() > 0) {
+                    $healthBookEntry->setAnimal($appointment->getAnimals()->first());
+                }
+                if ($appointment->getConsultationType()) {
+                    $healthBookEntry->setType($appointment->getConsultationType());
+                }
+                if ($appointment->getReason()) {
+                    $healthBookEntry->setTitle($appointment->getReason());
+                }
+            }
+        }
+
         if ($this->isGranted('ROLE_PRO')) {
             $healthBookEntry->setVeterinarian($user);
+
+            $defaultNotes = $user->getDefaultPublicNotes();
+            if ($defaultNotes) {
+                $healthBookEntry->setDescription($defaultNotes);
+            }
+        }
+
+        $rehabTemplates = [];
+        foreach ($user->getRehabilitationTemplates() as $tpl) {
+            $name = $tpl['name'] ?? '';
+            if ($name !== '') {
+                $rehabTemplates[$name] = $name;
+            }
         }
 
         $form = $this->createForm(HealthBookEntryType::class, $healthBookEntry, [
             'user' => $user,
+            'rehabilitation_templates' => $rehabTemplates,
+            'preset_appointment_id' => $healthBookEntry->getAppointment()?->getId() ?? 0,
         ]);
         $form->handleRequest($request);
 
@@ -194,13 +228,23 @@ final class HealthBookEntryController extends AbstractController
     #[Route('/{id}/modifier', name: 'app_health_book_entry_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Request $request, HealthBookEntry $healthBookEntry, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $healthBookEntry->getAnimal());
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $healthBookEntry->getAnimal());
 
         /** @var User $user */
         $user = $this->getUser();
 
+        $rehabTemplates = [];
+        foreach ($user->getRehabilitationTemplates() as $tpl) {
+            $name = $tpl['name'] ?? '';
+            if ($name !== '') {
+                $rehabTemplates[$name] = $name;
+            }
+        }
+
         $form = $this->createForm(HealthBookEntryType::class, $healthBookEntry, [
             'user' => $user,
+            'rehabilitation_templates' => $rehabTemplates,
+            'preset_appointment_id' => $healthBookEntry->getAppointment()?->getId() ?? 0,
         ]);
         $form->handleRequest($request);
 
@@ -232,7 +276,7 @@ final class HealthBookEntryController extends AbstractController
     #[Route('/{id}/document/{fileName}/supprimer', name: 'app_health_book_entry_document_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function deleteDocument(Request $request, HealthBookEntry $healthBookEntry, string $fileName, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $healthBookEntry->getAnimal());
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $healthBookEntry->getAnimal());
 
         if ($this->isCsrfTokenValid('delete_doc' . $fileName, $request->request->get('_token'))) {
             $filePath = $this->healthBookEntryUploadsDirectory . '/' . $fileName;

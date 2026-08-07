@@ -14,6 +14,9 @@
             <button type="button" class="btn btn-outline-primary" data-layer="meridians" id="btn-layer-meridians">
                 Méridiens
             </button>
+            <button type="button" class="btn btn-outline-primary" data-layer="organs" id="btn-layer-organs">
+                Organes
+            </button>
         </div>
     </div>
 
@@ -35,13 +38,13 @@
         <div style="width:100%; aspect-ratio: 600/500; max-height:420px; position:relative;">
             <object id="horse-svg-left"
                     type="image/svg+xml"
-                    data="{{ asset('images/horse_bones_ligaments.svg') }}?v=9"
+                    data="{{ asset('images/horse_bones_ligaments.svg') }}?v=11"
                     style="width:100%; height:100%; position:absolute; top:0; left:0;">
                 Votre navigateur ne supporte pas l'affichage SVG.
             </object>
             <object id="horse-svg-right"
                     type="image/svg+xml"
-                    data="{{ asset('images/horse_bones_ligaments_right.svg') }}?v=3"
+                    data="{{ asset('images/horse_bones_ligaments_right.svg') }}?v=5"
                     style="width:100%; height:100%; position:absolute; top:0; left:0; display:none; transform: scaleX(-1);">
                 Votre navigateur ne supporte pas l'affichage SVG.
             </object>
@@ -186,6 +189,12 @@
     border: 1px solid #f59e0b;
 }
 
+.anatomy-pill.organ-pill {
+    background: #fce4ec;
+    color: #ad1457;
+    border: 1px solid #e91e63;
+}
+
 .anatomy-pill .pill-remove {
     cursor: pointer;
     opacity: 0.6;
@@ -258,6 +267,11 @@
     background: #fef3c7;
     color: #92400e;
     border-bottom: 1px solid #f59e0b;
+}
+.intervention-card-header.organ-header {
+    background: #fce4ec;
+    color: #ad1457;
+    border-bottom: 1px solid #e91e63;
 }
 
 .intervention-card-header .card-remove {
@@ -338,7 +352,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var btnLigaments = document.getElementById('btn-layer-ligaments');
     var btnAreas = document.getElementById('btn-layer-areas');
     var btnMeridians = document.getElementById('btn-layer-meridians');
-    var allLayerBtns = [btnBones, btnLigaments, btnAreas, btnMeridians];
+    var btnOrgans = document.getElementById('btn-layer-organs');
+    var allLayerBtns = [btnBones, btnLigaments, btnAreas, btnMeridians, btnOrgans];
     var btnViewLeft = document.getElementById('btn-view-left');
     var btnViewRight = document.getElementById('btn-view-right');
 
@@ -388,12 +403,12 @@ document.addEventListener('DOMContentLoaded', function() {
     btnViewRight.addEventListener('click', function() { switchView('right'); });
 
     function pillClass(type) {
-        var map = {bone:'bone-pill', ligament:'ligament-pill', area:'area-pill', meridian:'meridian-pill', nerve:'nerve-pill', helice:'helice-pill'};
+        var map = {bone:'bone-pill', ligament:'ligament-pill', area:'area-pill', meridian:'meridian-pill', nerve:'nerve-pill', helice:'helice-pill', organ:'organ-pill'};
         return map[type] || 'bone-pill';
     }
 
     function headerClass(type) {
-        var map = {bone:'bone-header', ligament:'ligament-header', area:'area-header', meridian:'meridian-header', nerve:'nerve-header', helice:'helice-header'};
+        var map = {bone:'bone-header', ligament:'ligament-header', area:'area-header', meridian:'meridian-header', nerve:'nerve-header', helice:'helice-header', organ:'organ-header'};
         return map[type] || 'bone-header';
     }
 
@@ -494,8 +509,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setLayerOnSvg(svg, layer) {
         if (!svg) return;
-        var layerSelectors = { bones: '.bones', ligaments: '.ligaments', areas: '.areas', meridians: '.meridians' };
-        var alwaysHide = ['.muscles', '.organs'];
+        var layerSelectors = { bones: '.bones', ligaments: '.ligaments', areas: '.areas', meridians: '.meridians', organs: '.organs' };
+        var alwaysHide = ['.muscles'];
         Object.keys(layerSelectors).forEach(function(key) {
             var groups = svg.querySelectorAll(layerSelectors[key]);
             groups.forEach(function(g) {
@@ -523,6 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
     btnLigaments.addEventListener('click', function() { setLayer('ligaments'); });
     btnAreas.addEventListener('click', function() { setLayer('areas'); });
     btnMeridians.addEventListener('click', function() { setLayer('meridians'); });
+    btnOrgans.addEventListener('click', function() { setLayer('organs'); });
 
     function initSvgSide(svgObject, side) {
         var svgDoc = svgObject.contentDocument;
@@ -567,16 +583,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (el.closest && el.closest('[data-name="osteoNervous"]')) return 'nerve';
             if (el.closest && el.closest('.areas')) return 'area';
             if (el.closest && el.closest('.meridians')) return 'meridian';
+            if (el.closest && el.closest('.organs')) return 'organ';
             return null;
         }
 
         function getClickableElement(target) {
             var el = target;
             while (el && el !== svg) {
-                if (el.getAttribute && el.getAttribute('data-name') && (el.closest('.bones') || el.closest('.ligaments') || el.closest('.areas') || el.closest('.meridians'))) {
+                if (el.getAttribute && el.getAttribute('data-name') && (el.closest('.bones') || el.closest('.ligaments') || el.closest('.areas') || el.closest('.meridians') || el.closest('.organs'))) {
                     return el;
                 }
-                if (el.classList && (el.classList.contains('bone') || el.classList.contains('ligament') || el.classList.contains('circle') || el.classList.contains('skeleton-tool') || el.classList.contains('helice') || el.classList.contains('meridian'))) {
+                if (el.classList && (el.classList.contains('bone') || el.classList.contains('ligament') || el.classList.contains('circle') || el.classList.contains('skeleton-tool') || el.classList.contains('helice') || el.classList.contains('meridian') || el.classList.contains('organ'))) {
                     return el;
                 }
                 el = el.parentElement;
@@ -587,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function findRelatedIds(name, type) {
             var group = getGroupName(name);
             var ids = [];
-            var layerSelector = type === 'bone' ? '.bones' : type === 'ligament' ? '.ligaments' : type === 'meridian' ? '.meridians' : null;
+            var layerSelector = type === 'bone' ? '.bones' : type === 'ligament' ? '.ligaments' : type === 'meridian' ? '.meridians' : type === 'organ' ? '.organs' : null;
             svg.querySelectorAll('[data-title]').forEach(function(el) {
                 if (layerSelector && !el.closest(layerSelector)) return;
                 if (getGroupName(el.getAttribute('data-title')) === group) {
@@ -627,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
             lastHoverGroup = name;
             if (!name) return;
             var group = getGroupName(name);
-            var layerSel = type === 'bone' ? '.bones' : type === 'ligament' ? '.ligaments' : type === 'meridian' ? '.meridians' : null;
+            var layerSel = type === 'bone' ? '.bones' : type === 'ligament' ? '.ligaments' : type === 'meridian' ? '.meridians' : type === 'organ' ? '.organs' : null;
             svg.querySelectorAll('[data-title]').forEach(function(el) {
                 if (layerSel && !el.closest(layerSel)) return;
                 if (getGroupName(el.getAttribute('data-title')) === group) {
@@ -666,7 +683,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setHoverGroup(null, null);
         });
 
-        ['.bones', '.ligaments', '.areas', '.meridians'].forEach(function(sel) {
+        ['.bones', '.ligaments', '.areas', '.meridians', '.organs'].forEach(function(sel) {
             svg.querySelectorAll(sel).forEach(function(g) { g.classList.remove('masked'); });
         });
 

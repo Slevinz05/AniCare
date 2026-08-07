@@ -56,6 +56,7 @@ class RegistrationFormType extends AbstractType
                 'choices'  => [
                     'Je suis un Particulier (Propriétaire d\'animal)' => 'OWNER',
                     'Je suis un Professionnel (Vétérinaire, Soignant, Éducateur...)' => 'PRO',
+                    'Je représente une Structure (Écurie, Centre équestre, Haras...)' => 'STRUCTURE',
                 ],
                 'expanded' => true,
                 'multiple' => false,

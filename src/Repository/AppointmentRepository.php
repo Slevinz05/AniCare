@@ -33,19 +33,27 @@ class AppointmentRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByPeriodAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user): array
+    public function findByPeriodAndUser(\DateTimeImmutable $start, \DateTimeImmutable $end, User $user, array $structureIds = []): array
     {
-        return $this->createQueryBuilder('ap')
+        $qb = $this->createQueryBuilder('ap')
             ->leftJoin('ap.animal', 'a')
             ->leftJoin('a.animalShares', 's')
             ->leftJoin('ap.animals', 'ma')
             ->leftJoin('ma.animalShares', 'ms')
             ->where('ap.scheduledAt BETWEEN :start AND :end')
-            ->andWhere('ap.createdBy = :user OR ap.sharedWithProfessional = :user OR ap.client = :user OR a.owner = :user OR s.sharedWithEmail = :email OR ma.owner = :user OR ms.sharedWithEmail = :email')
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->setParameter('user', $user)
-            ->setParameter('email', $user->getEmail())
+            ->setParameter('email', $user->getEmail());
+
+        $conditions = 'ap.createdBy = :user OR ap.sharedWithProfessional = :user OR ap.client = :user OR a.owner = :user OR s.sharedWithEmail = :email OR ma.owner = :user OR ms.sharedWithEmail = :email';
+
+        if (!empty($structureIds)) {
+            $conditions .= ' OR a.structure IN (:structureIds) OR ma.structure IN (:structureIds)';
+            $qb->setParameter('structureIds', $structureIds);
+        }
+
+        return $qb->andWhere($conditions)
             ->groupBy('ap.id')
             ->orderBy('ap.scheduledAt', 'ASC')
             ->getQuery()

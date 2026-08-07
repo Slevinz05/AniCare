@@ -29,22 +29,25 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            // 🔑 AJOUT : Gestion dynamique des rôles selon le type de compte
-            // On vérifie ce qui a été coché dans le formulaire (renvoie 'OWNER' ou 'PRO')
-            if ($user->getAccountType() === 'PRO') {
-                // Si c'est un professionnel, on lui donne le rôle PRO
+            $accountType = $user->getAccountType();
+            if ($accountType === 'PRO') {
                 $user->setRoles(['ROLE_PRO']);
+            } elseif ($accountType === 'STRUCTURE') {
+                $user->setRoles(['ROLE_STRUCTURE']);
             } else {
-                // Si c'est un propriétaire, on s'assure qu'il a le rôle de base (facultatif car géré par Symfony par défaut)
                 $user->setRoles(['ROLE_USER']);
             }
 
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
+            $response = $security->login($user, AppAuthenticator::class, 'main');
 
-            return $security->login($user, AppAuthenticator::class, 'main');
+            if ($accountType === 'STRUCTURE') {
+                return $this->redirectToRoute('app_structure_index');
+            }
+
+            return $response ?? $this->redirectToRoute('app_home');
         }
 
         return $this->render('registration/register.html.twig', [

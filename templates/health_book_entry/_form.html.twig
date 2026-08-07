@@ -35,10 +35,28 @@
                 {{ form_errors(form.title) }}
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-7">
                 {{ form_label(form.date, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                <div style="display:none;">{{ form_widget(form.date, {'attr': {'id': 'health_book_entry_date'}}) }}</div>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="date" id="hbe-date" class="form-control" style="flex: 1 1 auto;">
+                    <div class="input-group" style="flex: 0 0 auto; width: auto;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-2" id="hbe-h-down" title="-1h">−</button>
+                        <span class="input-group-text time-picker-display" id="hbe-hours">00</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-2" id="hbe-h-up" title="+1h">+</button>
+                        <span class="input-group-text time-picker-colon">:</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-2" id="hbe-m-down" title="-5 min">−</button>
+                        <span class="input-group-text time-picker-display" id="hbe-minutes">00</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-2" id="hbe-m-up" title="+5 min">+</button>
+                    </div>
+                </div>
                 {{ form_errors(form.date) }}
+            </div>
+
+            <div class="col-12 col-md-5">
+                {{ form_label(form.appointment, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.appointment, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.appointment) }}
             </div>
 
             <div class="col-12 col-md-6">
@@ -49,24 +67,116 @@
         </div>
     </fieldset>
 
-    {# ── Section 2 : Observations ── #}
+    {# ── Section 2 : Anamnèse ── #}
     <fieldset class="mb-4 pb-4 border-bottom border-light">
-        <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Observations</legend>
-        <div class="row g-3">
-            <div class="col-12">
-                {{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.description) }}
+        <legend class="page-eyebrow mb-0" style="font-size: 0.75rem;">
+            <button type="button" class="btn btn-sm w-100 text-start d-flex align-items-center justify-content-between text-white fw-bold rounded-2 px-3 py-2" style="background: linear-gradient(135deg, var(--primary-color, #0d9488), var(--primary-hover, #0f766e));" data-bs-toggle="collapse" data-bs-target="#anamneseCollapse" aria-expanded="false" aria-controls="anamneseCollapse">
+                Anamnèse / Commémoratif
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="bilan-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+        </legend>
+        <div class="collapse" id="anamneseCollapse">
+            <div class="pt-3">
+                <div class="col-12">
+                    <div class="dictaphone-wrap">
+                        {{ form_widget(form.anamnesis, {'attr': {'class': 'form-control dictaphone-target'}}) }}
+                        <button type="button" class="btn-dictaphone" title="Dicter">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        </button>
+                    </div>
+                    {{ form_errors(form.anamnesis) }}
+                </div>
             </div>
         </div>
     </fieldset>
 
-    {# ── Section 2b : Localisation anatomique (SVG cheval interactif) ── #}
+
+
+    {# ── Section : Bilan statique / palpation ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-0" style="font-size: 0.75rem;">
+            <button type="button" class="btn btn-sm w-100 text-start d-flex align-items-center justify-content-between text-white fw-bold rounded-2 px-3 py-2" style="background: linear-gradient(135deg, var(--primary-color, #0d9488), var(--primary-hover, #0f766e));" data-bs-toggle="collapse" data-bs-target="#bilanStatiqueCollapse" aria-expanded="false" aria-controls="bilanStatiqueCollapse">
+                Bilan de l'examen statique / palpation
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="bilan-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+        </legend>
+        <div class="collapse" id="bilanStatiqueCollapse">
+            <div class="pt-3">
+                <div class="col-12">
+                    <div class="dictaphone-wrap">
+                        {{ form_widget(form.staticExamination, {'attr': {'class': 'form-control dictaphone-target'}}) }}
+                        <button type="button" class="btn-dictaphone" title="Dicter">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        </button>
+                    </div>
+                    {{ form_errors(form.staticExamination) }}
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    {# ── Section : Localisation anatomique (SVG cheval interactif) ── #}
     {% if is_granted('ROLE_PRO') %}
     <fieldset class="mb-4 pb-4 border-bottom border-light">
         {{ include('_partials/_horse_anatomy.html.twig') }}
     </fieldset>
     {% endif %}
+
+    {# ── Section : Rééducation ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-0" style="font-size: 0.75rem;">
+            <button type="button" class="btn btn-sm w-100 text-start d-flex align-items-center justify-content-between text-white fw-bold rounded-2 px-3 py-2" style="background: linear-gradient(135deg, var(--primary-color, #0d9488), var(--primary-hover, #0f766e));" data-bs-toggle="collapse" data-bs-target="#reeducationCollapse" aria-expanded="false" aria-controls="reeducationCollapse">
+                Rééducation
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="bilan-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+        </legend>
+        <div class="collapse" id="reeducationCollapse">
+            <div class="pt-3">
+                <div class="col-12 mb-3">
+                    {{ form_label(form.rehabilitationType, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {% set rehab_tpls = app.user.rehabilitationTemplates|default([]) %}
+                    {{ form_widget(form.rehabilitationType, {'attr': {
+                        'class': 'form-select',
+                        'id': 'rehab-type-select',
+                        'data-templates': rehab_tpls|json_encode
+                    }}) }}
+                    {{ form_errors(form.rehabilitationType) }}
+                </div>
+                <div class="col-12">
+                    <div class="dictaphone-wrap">
+                        {{ form_widget(form.rehabilitation, {'attr': {'class': 'form-control dictaphone-target', 'placeholder': 'Programme de rééducation, exercices, consignes...'}}) }}
+                        <button type="button" class="btn-dictaphone" title="Dicter">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        </button>
+                    </div>
+                    {{ form_errors(form.rehabilitation) }}
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    {# ── Section : Notes / Observations ── #}
+    <fieldset class="mb-4 pb-4 border-bottom border-light">
+        <legend class="page-eyebrow mb-0" style="font-size: 0.75rem;">
+            <button type="button" class="btn btn-sm w-100 text-start d-flex align-items-center justify-content-between text-white fw-bold rounded-2 px-3 py-2" style="background: linear-gradient(135deg, var(--primary-color, #0d9488), var(--primary-hover, #0f766e));" data-bs-toggle="collapse" data-bs-target="#notesCollapse" aria-expanded="false" aria-controls="notesCollapse">
+                Notes / Observations
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="bilan-chevron"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+        </legend>
+        <div class="collapse" id="notesCollapse">
+            <div class="pt-3">
+                <div class="col-12">
+                    <div class="dictaphone-wrap">
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control dictaphone-target', 'placeholder': 'Notes, observations, recommandations...'}}) }}
+                        <button type="button" class="btn-dictaphone" title="Dicter">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        </button>
+                    </div>
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+        </div>
+    </fieldset>
 
     {# ── Section 3 : Traitement ── #}
     <fieldset class="mb-4 pb-4 border-bottom border-light">
@@ -154,5 +264,256 @@ document.addEventListener('DOMContentLoaded', function () {
             typeCustomGroup.style.display = this.value === 'Autre' ? '' : 'none';
         });
     }
+
+    // ── Date + heure picker (heures ±1, minutes ±5) ──
+    (function() {
+        var hiddenDate = document.getElementById('health_book_entry_date');
+        var hbeDate = document.getElementById('hbe-date');
+        var hbeH = document.getElementById('hbe-hours');
+        var hbeM = document.getElementById('hbe-minutes');
+        if (!hiddenDate || !hbeDate || !hbeH || !hbeM) return;
+
+        var h = 0, m = 0;
+        function pad2(n) { return String(n).padStart(2, '0'); }
+
+        function render() {
+            hbeH.textContent = pad2(h);
+            hbeM.textContent = pad2(m);
+        }
+
+        function sync() {
+            if (!hbeDate.value) return;
+            hiddenDate.value = hbeDate.value + 'T' + pad2(h) + ':' + pad2(m);
+        }
+
+        var now;
+        if (hiddenDate.value) {
+            now = new Date(hiddenDate.value);
+            if (isNaN(now.getTime())) now = new Date();
+        } else {
+            now = new Date();
+            now.setMinutes(Math.round(now.getMinutes() / 5) * 5, 0, 0);
+        }
+        hbeDate.value = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+        h = now.getHours();
+        m = now.getMinutes();
+        render();
+        sync();
+
+        hbeDate.addEventListener('change', sync);
+
+        document.getElementById('hbe-h-up').addEventListener('click', function() {
+            h = (h + 1) % 24; render(); sync();
+        });
+        document.getElementById('hbe-h-down').addEventListener('click', function() {
+            h = (h - 1 + 24) % 24; render(); sync();
+        });
+        document.getElementById('hbe-m-up').addEventListener('click', function() {
+            m += 5;
+            if (m >= 60) { m = 0; h = (h + 1) % 24; }
+            render(); sync();
+        });
+        document.getElementById('hbe-m-down').addEventListener('click', function() {
+            m -= 5;
+            if (m < 0) { m = 55; h = (h - 1 + 24) % 24; }
+            render(); sync();
+        });
+
+        var apptSelect = document.getElementById('health_book_entry_appointment');
+        if (apptSelect) {
+            // Store full labels and short labels
+            for (var i = 0; i < apptSelect.options.length; i++) {
+                var o = apptSelect.options[i];
+                o.dataset.fullLabel = o.textContent;
+                var parts = o.textContent.split(' — ');
+                o.dataset.shortLabel = parts.length > 1 ? parts.slice(1).join(' — ') : o.textContent;
+            }
+
+            function showShortLabel() {
+                var sel = apptSelect.options[apptSelect.selectedIndex];
+                if (sel && sel.value) sel.textContent = sel.dataset.shortLabel;
+            }
+
+            function restoreFullLabels() {
+                for (var i = 0; i < apptSelect.options.length; i++) {
+                    apptSelect.options[i].textContent = apptSelect.options[i].dataset.fullLabel;
+                }
+            }
+
+            apptSelect.addEventListener('focus', restoreFullLabels);
+            apptSelect.addEventListener('mousedown', restoreFullLabels);
+            apptSelect.addEventListener('change', function() {
+                var opt = this.options[this.selectedIndex];
+                if (opt && opt.value && opt.dataset.date) {
+                    hbeDate.value = opt.dataset.date;
+                    h = parseInt(opt.dataset.hour) || 0;
+                    m = parseInt(opt.dataset.minute) || 0;
+                    render(); sync();
+                }
+                showShortLabel();
+            });
+            apptSelect.addEventListener('blur', showShortLabel);
+
+            showShortLabel();
+        }
+    })();
+
+    var rehabSelect = document.getElementById('health_book_entry_rehabilitationType');
+    if (rehabSelect) {
+        var templates = [];
+        try { templates = JSON.parse(rehabSelect.dataset.templates || '[]'); } catch(e) {}
+        var rehabTextarea = document.getElementById('health_book_entry_rehabilitation');
+
+        rehabSelect.addEventListener('change', function() {
+            var selected = this.value;
+            if (!selected || !rehabTextarea) return;
+
+            var tpl = templates.find(function(t) { return t.name === selected; });
+            if (!tpl || !tpl.description) return;
+
+            var current = rehabTextarea.value.trim();
+            var header = '▸ ' + tpl.name;
+            var block = header + '\n' + tpl.description;
+
+            if (current) {
+                rehabTextarea.value = current + '\n\n' + block;
+            } else {
+                rehabTextarea.value = block;
+            }
+
+            rehabTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            this.value = '';
+        });
+    }
 });
+</script>
+
+<style>
+.time-picker-display {
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-width: 32px;
+    justify-content: center;
+    padding: 0.25rem 0.3rem;
+}
+.time-picker-colon {
+    min-width: auto;
+    padding: 0.25rem 0.1rem;
+    border-left: 0;
+    border-right: 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.bilan-chevron {
+    transition: transform 0.3s;
+}
+[aria-expanded="true"] .bilan-chevron {
+    transform: rotate(180deg);
+}
+.dictaphone-wrap {
+    position: relative;
+}
+.dictaphone-wrap textarea {
+    padding-right: 3rem;
+}
+.btn-dictaphone {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: 1.5px solid #ccc;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #8a7f72;
+    transition: all 0.2s;
+    padding: 0;
+}
+.btn-dictaphone:hover {
+    border-color: var(--primary-color, #0d9488);
+    color: var(--primary-color, #0d9488);
+    background: var(--soft-teal, #f0fdfa);
+}
+.btn-dictaphone.recording {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+    animation: dictPulse 1.2s ease-in-out infinite;
+}
+@keyframes dictPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+</style>
+
+<script>
+(function() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        document.querySelectorAll('.btn-dictaphone').forEach(function(btn) { btn.style.display = 'none'; });
+        return;
+    }
+
+    document.querySelectorAll('.btn-dictaphone').forEach(function(btn) {
+        var textarea = btn.closest('.dictaphone-wrap').querySelector('.dictaphone-target');
+        if (!textarea) return;
+        var recognition = null;
+
+        btn.addEventListener('click', function() {
+            if (btn.classList.contains('recording')) {
+                if (recognition) recognition.stop();
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'fr-FR';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            var baseText = textarea.value;
+            var finalTranscript = '';
+            btn.classList.add('recording');
+
+            recognition.onresult = function(e) {
+                var interim = '';
+                for (var i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) {
+                        var chunk = e.results[i][0].transcript;
+                        if (finalTranscript && chunk) {
+                            if (!finalTranscript.endsWith(' ')) finalTranscript += ' ';
+                            chunk = chunk.charAt(0).toLowerCase() + chunk.slice(1);
+                        }
+                        finalTranscript += chunk;
+                    } else {
+                        interim += e.results[i][0].transcript;
+                    }
+                }
+                var sep = baseText && !baseText.endsWith(' ') && !baseText.endsWith('\n') ? ' ' : '';
+                textarea.value = baseText + sep + finalTranscript + (interim ? ' ' + interim + ' [...]' : '');
+            };
+
+            recognition.onend = function() {
+                btn.classList.remove('recording');
+                var sep = baseText && !baseText.endsWith(' ') && !baseText.endsWith('\n') ? ' ' : '';
+                textarea.value = baseText + sep + finalTranscript;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                recognition = null;
+            };
+
+            recognition.onerror = function(e) {
+                btn.classList.remove('recording');
+                recognition = null;
+                if (e.error !== 'aborted' && e.error !== 'no-speech') {
+                    console.warn('Dictaphone:', e.error);
+                }
+            };
+
+            recognition.start();
+        });
+    });
+})();
 </script>

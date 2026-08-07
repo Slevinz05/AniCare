@@ -293,7 +293,23 @@
                         Date, durée & lieu
                     </div>
                     <div class="row g-3">
-                        <div class="col-12 col-md-6">{{ form_row(form.scheduledAt, {'attr': {'class': 'form-control'}}) }}</div>
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.scheduledAt) }}
+                            <div style="display:none;">{{ form_widget(form.scheduledAt, {'attr': {'id': 'appointment_scheduledAt'}}) }}</div>
+                            <div class="d-flex gap-2">
+                                <input type="date" id="appt-date" class="form-control">
+                                <div class="input-group" style="max-width: 160px;">
+                                    <button type="button" class="btn btn-outline-secondary px-2" id="time-down" title="−15 min">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </button>
+                                    <input type="text" id="appt-time" class="form-control text-center fw-bold" readonly style="min-width: 70px;">
+                                    <button type="button" class="btn btn-outline-secondary px-2" id="time-up" title="+15 min">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            {{ form_errors(form.scheduledAt) }}
+                        </div>
                         <div class="col-6 col-md-3">{{ form_row(form.duration, {'attr': {'class': 'form-control', 'id': 'appt-duration'}}) }}</div>
                         <div class="col-12">
                             <div class="duration-display" id="end-time-display">
@@ -349,7 +365,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // ── End time calculator ──
     const scheduledAt = document.getElementById('appointment_scheduledAt');
-    const duration = document.getElementById('appt-duration');
+    const duration = document.getElementById('appointment_duration');
     const display = document.getElementById('end-time-display');
 
     function updateEndTime() {
@@ -367,6 +383,69 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (scheduledAt) scheduledAt.addEventListener('change', updateEndTime);
     if (duration) duration.addEventListener('input', updateEndTime);
+
+    // ── Custom date + time picker (15-min steps) ──
+    const apptDate = document.getElementById('appt-date');
+    const apptTime = document.getElementById('appt-time');
+    const timeUp = document.getElementById('time-up');
+    const timeDown = document.getElementById('time-down');
+
+    function roundTo15(date) {
+        var m = date.getMinutes();
+        var r = Math.round(m / 15) * 15;
+        date.setMinutes(r, 0, 0);
+        return date;
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function syncToHidden() {
+        if (!apptDate.value || !apptTime.value) return;
+        scheduledAt.value = apptDate.value + 'T' + apptTime.value;
+        scheduledAt.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function setTimeDisplay(h, m) {
+        apptTime.value = pad2(h) + ':' + pad2(m);
+    }
+
+    function getTimeParts() {
+        var parts = (apptTime.value || '00:00').split(':');
+        return { h: parseInt(parts[0]) || 0, m: parseInt(parts[1]) || 0 };
+    }
+
+    // Init from existing scheduledAt value or current time rounded to 15 min
+    (function initPicker() {
+        var now;
+        if (scheduledAt.value) {
+            now = new Date(scheduledAt.value);
+            if (isNaN(now.getTime())) now = new Date();
+        } else {
+            now = roundTo15(new Date());
+        }
+        apptDate.value = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+        setTimeDisplay(now.getHours(), now.getMinutes());
+        syncToHidden();
+    })();
+
+    apptDate.addEventListener('change', syncToHidden);
+
+    timeUp.addEventListener('click', function() {
+        var t = getTimeParts();
+        t.m += 15;
+        if (t.m >= 60) { t.m = 0; t.h = (t.h + 1) % 24; }
+        setTimeDisplay(t.h, t.m);
+        syncToHidden();
+    });
+
+    timeDown.addEventListener('click', function() {
+        var t = getTimeParts();
+        t.m -= 15;
+        if (t.m < 0) { t.m = 45; t.h = (t.h - 1 + 24) % 24; }
+        setTimeDisplay(t.h, t.m);
+        syncToHidden();
+    });
+
     updateEndTime();
 
     // ── PRO: Client search & dynamic animals ──

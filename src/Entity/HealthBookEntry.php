@@ -24,7 +24,19 @@ class HealthBookEntry
     private ?\DateTimeImmutable $date = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $anamnesis = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $staticExamination = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $rehabilitationType = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $rehabilitation = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $veterinarianName = null;
@@ -69,6 +81,10 @@ class HealthBookEntry
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'healthBookEntries')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Appointment $appointment = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,6 +122,54 @@ class HealthBookEntry
     public function setDate(\DateTimeImmutable $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getAnamnesis(): ?string
+    {
+        return $this->anamnesis;
+    }
+
+    public function setAnamnesis(?string $anamnesis): static
+    {
+        $this->anamnesis = $anamnesis;
+
+        return $this;
+    }
+
+    public function getStaticExamination(): ?string
+    {
+        return $this->staticExamination;
+    }
+
+    public function setStaticExamination(?string $staticExamination): static
+    {
+        $this->staticExamination = $staticExamination;
+
+        return $this;
+    }
+
+    public function getRehabilitationType(): ?string
+    {
+        return $this->rehabilitationType;
+    }
+
+    public function setRehabilitationType(?string $rehabilitationType): static
+    {
+        $this->rehabilitationType = $rehabilitationType;
+
+        return $this;
+    }
+
+    public function getRehabilitation(): ?string
+    {
+        return $this->rehabilitation;
+    }
+
+    public function setRehabilitation(?string $rehabilitation): static
+    {
+        $this->rehabilitation = $rehabilitation;
 
         return $this;
     }
@@ -354,6 +418,17 @@ class HealthBookEntry
     {
         $this->anatomicalLocations = $anatomicalLocations ?? [];
 
+        return $this;
+    }
+
+    public function getAppointment(): ?Appointment
+    {
+        return $this->appointment;
+    }
+
+    public function setAppointment(?Appointment $appointment): static
+    {
+        $this->appointment = $appointment;
         return $this;
     }
 

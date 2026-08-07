@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ structure.name }} - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <a href="{{ path('app_structure_index') }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+        Retour
+    </a>
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <p class="page-eyebrow mb-1">Structure</p>
+            <h1 class="page-title mb-0">{{ structure.name }}</h1>
+            {% if structure.type %}
+                <span class="badge bg-anicare-soft text-teal border border-anicare mt-2">{{ structure.type }}</span>
+            {% endif %}
+        </div>
+        {% if is_granted('STRUCTURE_EDIT', structure) %}
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_structure_edit', {id: structure.id}) }}" class="btn btn-outline-primary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil me-1" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/></svg>
+                    Modifier
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card anicare-card mb-4">
+                <div class="card-body p-4">
+                    <p class="page-eyebrow mb-2">Informations</p>
+                    <h2 class="h5 page-title mb-4">Coordonnées</h2>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-medical align-middle mb-0">
+                            <tbody>
+                                {% if structure.fullAddress %}
+                                    <tr>
+                                        <th style="width: 35%;">Adresse</th>
+                                        <td>{{ structure.fullAddress }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if structure.phone %}
+                                    <tr>
+                                        <th>Téléphone</th>
+                                        <td>{{ structure.phone }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if structure.email %}
+                                    <tr>
+                                        <th>E-mail</th>
+                                        <td>{{ structure.email }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if structure.siret %}
+                                    <tr>
+                                        <th>SIRET</th>
+                                        <td>{{ structure.siret }}</td>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Créée le</th>
+                                    <td>{{ structure.createdAt|date('d/m/Y') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card anicare-card mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="page-eyebrow mb-1">Pensionnaires</p>
+                            <h2 class="h5 page-title mb-0">Chevaux ({{ animals|length }})</h2>
+                        </div>
+                    </div>
+
+                    {% if animals is empty %}
+                        <p class="text-muted small mb-0">Aucun cheval rattaché à cette structure.</p>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-medical align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Race</th>
+                                        <th>Propriétaire</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for animal in animals %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path('app_animal_show', {slug: animal.slug}) }}" class="text-decoration-none fw-semibold">
+                                                    {{ animal.name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ animal.breed ?? '—' }}</td>
+                                            <td>{{ animal.owner.fullName ?? animal.owner.email }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card anicare-card mb-4">
+                <div class="card-body p-4">
+                    <p class="page-eyebrow mb-2">Équipe</p>
+                    <h2 class="h5 page-title mb-3">Membres ({{ members|length }})</h2>
+
+                    {% for membership in members %}
+                        <div class="d-flex align-items-center justify-content-between {{ not loop.last ? 'mb-3 pb-3 border-bottom' : '' }}">
+                            <div>
+                                <div class="fw-semibold small">{{ membership.user.fullName ?? membership.user.email }}</div>
+                                <div class="text-muted" style="font-size: 0.8rem;">{{ membership.user.email }}</div>
+                            </div>
+                            <span class="badge {{ membership.role == 'MANAGER' ? 'bg-warning text-dark' : (membership.role == 'PRO' ? 'bg-info text-white' : 'bg-light text-secondary border') }}">
+                                {{ membership.role == 'MANAGER' ? 'Gérant' : (membership.role == 'PRO' ? 'Pro' : 'Propriétaire') }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if is_granted('STRUCTURE_EDIT', structure) %}
+                <div class="mt-4">
+                    <form method="post" action="{{ path('app_structure_delete', {id: structure.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette structure ? Cette action est irréversible.');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ structure.id) }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash me-1" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.707 3h11V2h-11z"/></svg>
+                            Supprimer la structure
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

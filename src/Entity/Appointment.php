@@ -80,10 +80,17 @@ class Appointment
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
+    /**
+     * @var Collection<int, HealthBookEntry>
+     */
+    #[ORM\OneToMany(targetEntity: HealthBookEntry::class, mappedBy: 'appointment')]
+    private Collection $healthBookEntries;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->animals = new ArrayCollection();
+        $this->healthBookEntries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -306,5 +313,13 @@ class Appointment
     {
         $this->notes = $notes;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, HealthBookEntry>
+     */
+    public function getHealthBookEntries(): Collection
+    {
+        return $this->healthBookEntries;
     }
 }

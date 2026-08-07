@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\ChangePasswordType;
 use App\Form\ProfileType;
+use App\Form\ProSettingsType;
 use App\Service\DocumentUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -91,6 +92,58 @@ class ProfileController extends AbstractController
 
         $this->addFlash('success', 'Photo supprimée.');
         return $this->redirectToRoute('app_profile_edit');
+    }
+
+    #[Route('/parametres-pro', name: 'app_profile_pro_settings', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_PRO')]
+    public function proSettings(Request $request, EntityManagerInterface $em): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $form = $this->createForm(ProSettingsType::class, $user);
+
+        $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+        $openingHours = $user->getOpeningHours() ?? [];
+
+        if ($request->isMethod('GET')) {
+            foreach ($days as $day) {
+                $dayData = $openingHours[$day] ?? null;
+                if ($dayData && ($dayData['enabled'] ?? false)) {
+                    $form->get('hours_' . $day . '_enabled')->setData(true);
+                    $form->get('hours_' . $day . '_start')->setData($dayData['start'] ?? '09:00');
+                    $form->get('hours_' . $day . '_end')->setData($dayData['end'] ?? '18:00');
+                }
+            }
+        }
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $hours = [];
+            foreach ($days as $day) {
+                $enabled = $form->get('hours_' . $day . '_enabled')->getData();
+                $hours[$day] = [
+                    'enabled' => (bool) $enabled,
+                    'start' => $enabled ? ($form->get('hours_' . $day . '_start')->getData() ?: '09:00') : null,
+                    'end' => $enabled ? ($form->get('hours_' . $day . '_end')->getData() ?: '18:00') : null,
+                ];
+            }
+            $user->setOpeningHours($hours);
+
+            $rehabTemplatesJson = $request->request->get('rehabilitation_templates_data', '[]');
+            $rehabTemplates = json_decode($rehabTemplatesJson, true) ?: [];
+            $user->setRehabilitationTemplates($rehabTemplates);
+
+            $em->flush();
+            $this->addFlash('success', 'Vos paramètres professionnels ont été mis à jour.');
+
+            return $this->redirectToRoute('app_profile_pro_settings');
+        }
+
+        return $this->render('profile/pro_settings.html.twig', [
+            'form' => $form,
+        ]);
     }
 
     #[Route('/mot-de-passe', name: 'app_profile_password', methods: ['GET', 'POST'])]

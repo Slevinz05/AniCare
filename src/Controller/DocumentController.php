@@ -68,7 +68,9 @@ final class DocumentController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+        if ($animal->getOwner() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
 
         $newStatus = $request->getPayload()->getString('status');
         if (!in_array($newStatus, ['approved', 'rejected', 'pending'], true)) {

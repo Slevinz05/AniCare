@@ -17,20 +17,20 @@
             <div class="anatomy-show-svg-wrap">
                 <object id="anatomy-show-left"
                         type="image/svg+xml"
-                        data="{{ asset('images/horse_bones_ligaments.svg') }}?v=9"
+                        data="{{ asset('images/horse_bones_ligaments.svg') }}?v=11"
                         style="width:100%; height:100%;">
                 </object>
             </div>
             <div class="anatomy-show-cards mt-2">
                 {% for loc in left_parts %}
                     <div class="anatomy-show-card" data-part-id="{{ loc.id }}" data-part-type="{{ loc.type }}">
-                        <div class="anatomy-show-card-header {{ loc.type == 'bone' ? 'bone-header' : (loc.type == 'ligament' ? 'ligament-header' : (loc.type == 'area' ? 'area-header' : (loc.type == 'meridian' ? 'meridian-header' : (loc.type == 'nerve' ? 'nerve-header' : 'helice-header')))) }}">
+                        <div class="anatomy-show-card-header {{ loc.type == 'bone' ? 'bone-header' : (loc.type == 'ligament' ? 'ligament-header' : (loc.type == 'area' ? 'area-header' : (loc.type == 'meridian' ? 'meridian-header' : (loc.type == 'nerve' ? 'nerve-header' : (loc.type == 'organ' ? 'organ-header' : 'helice-header'))))) }}">
                             {{ loc.name }}
                         </div>
                         {% if loc.technique|default('') is not empty or loc.notes|default('') is not empty %}
                         <div class="anatomy-show-card-body">
                             {% if loc.technique|default('') is not empty %}
-                                <span class="anatomy-show-technique">{{ loc.technique }}</span>
+                                <span class="anatomy-show-technique technique-{{ loc.type }}">{{ loc.technique }}</span>
                             {% endif %}
                             {% if loc.notes|default('') is not empty %}
                                 <p class="anatomy-show-notes mb-0">{{ loc.notes }}</p>
@@ -49,20 +49,20 @@
             <div class="anatomy-show-svg-wrap">
                 <object id="anatomy-show-right"
                         type="image/svg+xml"
-                        data="{{ asset('images/horse_bones_ligaments_right.svg') }}?v=3"
+                        data="{{ asset('images/horse_bones_ligaments_right.svg') }}?v=5"
                         style="width:100%; height:100%; transform: scaleX(-1);">
                 </object>
             </div>
             <div class="anatomy-show-cards mt-2">
                 {% for loc in right_parts %}
                     <div class="anatomy-show-card" data-part-id="{{ loc.id }}" data-part-type="{{ loc.type }}">
-                        <div class="anatomy-show-card-header {{ loc.type == 'bone' ? 'bone-header' : (loc.type == 'ligament' ? 'ligament-header' : (loc.type == 'area' ? 'area-header' : (loc.type == 'meridian' ? 'meridian-header' : (loc.type == 'nerve' ? 'nerve-header' : 'helice-header')))) }}">
+                        <div class="anatomy-show-card-header {{ loc.type == 'bone' ? 'bone-header' : (loc.type == 'ligament' ? 'ligament-header' : (loc.type == 'area' ? 'area-header' : (loc.type == 'meridian' ? 'meridian-header' : (loc.type == 'nerve' ? 'nerve-header' : (loc.type == 'organ' ? 'organ-header' : 'helice-header'))))) }}">
                             {{ loc.name }}
                         </div>
                         {% if loc.technique|default('') is not empty or loc.notes|default('') is not empty %}
                         <div class="anatomy-show-card-body">
                             {% if loc.technique|default('') is not empty %}
-                                <span class="anatomy-show-technique">{{ loc.technique }}</span>
+                                <span class="anatomy-show-technique technique-{{ loc.type }}">{{ loc.technique }}</span>
                             {% endif %}
                             {% if loc.notes|default('') is not empty %}
                                 <p class="anatomy-show-notes mb-0">{{ loc.notes }}</p>
@@ -153,6 +153,11 @@
     color: #92400e;
     border-bottom: 1px solid #f59e0b;
 }
+.anatomy-show-card-header.organ-header {
+    background: #fce4ec;
+    color: #ad1457;
+    border-bottom: 1px solid #e91e63;
+}
 .anatomy-show-card-body {
     padding: 0.45rem 0.7rem;
 }
@@ -160,12 +165,34 @@
     display: inline-block;
     font-size: 0.72rem;
     font-weight: 600;
-    color: var(--primary-color, #0d9488);
-    background: var(--soft-teal, #f0fdfa);
-    border: 1px solid var(--primary-color, #0d9488);
     border-radius: 12px;
     padding: 0.15rem 0.5rem;
     margin-bottom: 0.3rem;
+}
+.anatomy-show-technique.technique-bone {
+    color: var(--primary-hover, #0f766e);
+    background: var(--soft-teal, #f0fdfa);
+    border: 1px solid var(--primary-color, #0d9488);
+}
+.anatomy-show-technique.technique-ligament {
+    color: var(--accent-hover, #A67B3C);
+    background: var(--soft-warm, #FFF0CC);
+    border: 1px solid var(--accent-color, #C8973E);
+}
+.anatomy-show-technique.technique-area, .anatomy-show-technique.technique-nerve, .anatomy-show-technique.technique-helice {
+    color: #6d28d9;
+    background: #ede9fe;
+    border: 1px solid #8b5cf6;
+}
+.anatomy-show-technique.technique-meridian {
+    color: #be185d;
+    background: #fce7f3;
+    border: 1px solid #ec4899;
+}
+.anatomy-show-technique.technique-organ {
+    color: #ad1457;
+    background: #fce4ec;
+    border: 1px solid #e91e63;
 }
 .anatomy-show-notes {
     font-size: 0.78rem;
@@ -194,7 +221,7 @@
         });
 
         // Remove masked class from managed layers
-        ['.bones', '.ligaments', '.areas', '.meridians'].forEach(function(sel) {
+        ['.bones', '.ligaments', '.areas', '.meridians', '.organs'].forEach(function(sel) {
             svg.querySelectorAll(sel).forEach(function(g) { g.classList.remove('masked'); });
         });
 
@@ -214,6 +241,7 @@
             else if (part.type === 'ligament') activeLayers['ligaments'] = true;
             else if (part.type === 'area' || part.type === 'nerve' || part.type === 'helice') activeLayers['areas'] = true;
             else if (part.type === 'meridian') activeLayers['meridians'] = true;
+            else if (part.type === 'organ') activeLayers['organs'] = true;
         });
 
         // Show layers that have selections

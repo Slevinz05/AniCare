@@ -1,0 +1,215 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres professionnels - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-12 col-lg-3">
+            {{ include('profile/_sidebar.html.twig') }}
+        </div>
+
+        <div class="col-12 col-lg-9">
+            <div class="card anicare-card">
+                <div class="card-body p-4 p-lg-5">
+                    <p class="page-eyebrow mb-2">Compte PRO</p>
+                    <h1 class="page-title mb-1">Paramètres professionnels</h1>
+                    <p class="page-subtitle mb-4">Configurez vos disponibilités et votre visibilité.</p>
+
+                    {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                        {# ══════════════════════════════════════ #}
+                        {# ── SECTION 1 : Rendez-vous ────────── #}
+                        {# ══════════════════════════════════════ #}
+                        <fieldset class="mb-4 pb-4 border-bottom border-light">
+                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                Rendez-vous
+                            </legend>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    {{ form_label(form.defaultConsultationDuration, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.defaultConsultationDuration, {'attr': {'class': 'form-control', 'step': '5', 'min': '5', 'max': '480'}}) }}
+                                        <span class="input-group-text">min</span>
+                                    </div>
+                                    {{ form_errors(form.defaultConsultationDuration) }}
+                                </div>
+                                <div class="col-12">
+                                    {{ form_label(form.defaultAppointmentNotes, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                    {{ form_widget(form.defaultAppointmentNotes, {'attr': {'class': 'form-control'}}) }}
+                                    {% if form.defaultAppointmentNotes.vars.help %}
+                                        <div class="form-text mt-1">{{ form.defaultAppointmentNotes.vars.help }}</div>
+                                    {% endif %}
+                                    {{ form_errors(form.defaultAppointmentNotes) }}
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        {# ══════════════════════════════════════ #}
+                        {# ── SECTION 2 : Compte rendu ───────── #}
+                        {# ══════════════════════════════════════ #}
+                        <fieldset class="mb-4 pb-4 border-bottom border-light">
+                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                Compte rendu
+                            </legend>
+
+                            <div class="mb-3">
+                                <p class="form-label fw-bold mb-2">Types de rééducation</p>
+                                <p class="text-secondary small mb-3">Créez des modèles de rééducation que vous pourrez sélectionner lors de la rédaction d'un compte rendu.</p>
+
+                                <div id="rehab-templates-list" class="mb-3">
+                                    {% for tpl in app.user.rehabilitationTemplates %}
+                                        <div class="rehab-template-row d-flex align-items-center gap-2 mb-2">
+                                            <input type="text" class="form-control form-control-sm rehab-tpl-name" value="{{ tpl.name }}" placeholder="Nom du type">
+                                            <input type="text" class="form-control form-control-sm rehab-tpl-desc" value="{{ tpl.description|default('') }}" placeholder="Description (optionnel)">
+                                            <button type="button" class="btn btn-outline-danger btn-sm rehab-tpl-remove" title="Supprimer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="button" id="rehab-add-btn" class="btn btn-outline-primary btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Ajouter un type
+                                </button>
+
+                                <input type="hidden" name="rehabilitation_templates_data" id="rehab-templates-data">
+                            </div>
+
+                            <hr class="my-3 border-light">
+
+                            <div>
+                                {{ form_label(form.defaultPublicNotes, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.defaultPublicNotes, {'attr': {'class': 'form-control'}}) }}
+                                {% if form.defaultPublicNotes.vars.help %}
+                                    <div class="form-text mt-1">{{ form.defaultPublicNotes.vars.help }}</div>
+                                {% endif %}
+                                {{ form_errors(form.defaultPublicNotes) }}
+                            </div>
+                        </fieldset>
+
+                        {# ── Visibilité annuaire ── #}
+                        <fieldset class="mb-4 pb-4 border-bottom border-light">
+                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Annuaire</legend>
+                            <div class="form-check form-switch">
+                                {{ form_widget(form.directoryVisible, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
+                                {{ form_label(form.directoryVisible, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                            <p class="form-text mt-1 mb-0">
+                                Lorsque activé, votre profil apparaîtra dans le répertoire des professionnels et sera visible par les propriétaires.
+                            </p>
+                        </fieldset>
+
+                        {# ── Horaires d'ouverture ── #}
+                        <fieldset class="mb-4">
+                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Horaires de consultation</legend>
+
+                            <div class="form-check form-switch mb-3">
+                                {{ form_widget(form.openingHoursVisible, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
+                                {{ form_label(form.openingHoursVisible, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+
+                            <p class="text-secondary small mb-3">Cochez les jours où vous êtes disponible et indiquez vos horaires.</p>
+
+                            <div class="opening-hours-grid">
+                                {% set days = [
+                                    {key: 'lundi', label: 'Lundi'},
+                                    {key: 'mardi', label: 'Mardi'},
+                                    {key: 'mercredi', label: 'Mercredi'},
+                                    {key: 'jeudi', label: 'Jeudi'},
+                                    {key: 'vendredi', label: 'Vendredi'},
+                                    {key: 'samedi', label: 'Samedi'},
+                                    {key: 'dimanche', label: 'Dimanche'}
+                                ] %}
+
+                                {% for day in days %}
+                                    {% set enabledField = 'hours_' ~ day.key ~ '_enabled' %}
+                                    {% set startField = 'hours_' ~ day.key ~ '_start' %}
+                                    {% set endField = 'hours_' ~ day.key ~ '_end' %}
+                                    <div class="opening-hours-row d-flex align-items-center gap-3 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
+                                        <div class="form-check" style="min-width: 130px;">
+                                            {{ form_widget(form[enabledField], {'attr': {'class': 'form-check-input opening-hour-toggle', 'data-day': day.key}}) }}
+                                            <label class="form-check-label fw-bold" for="{{ form[enabledField].vars.id }}">{{ day.label }}</label>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 opening-hour-times" data-day="{{ day.key }}" style="{{ not form[enabledField].vars.data ? 'opacity: 0.4; pointer-events: none;' : '' }}">
+                                            {{ form_widget(form[startField], {'attr': {'class': 'form-control form-control-sm', 'style': 'width: 80px;'}}) }}
+                                            <span class="text-secondary">à</span>
+                                            {{ form_widget(form[endField], {'attr': {'class': 'form-control form-control-sm', 'style': 'width: 80px;'}}) }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
+
+                        {{ form_rest(form) }}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
+                            <a href="{{ path('app_profile') }}" class="btn btn-outline-primary btn-lg">Retour</a>
+                        </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.opening-hour-toggle').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var day = this.dataset.day;
+            var times = document.querySelector('.opening-hour-times[data-day="' + day + '"]');
+            if (times) {
+                times.style.opacity = this.checked ? '1' : '0.4';
+                times.style.pointerEvents = this.checked ? '' : 'none';
+            }
+        });
+    });
+
+    var rehabList = document.getElementById('rehab-templates-list');
+    var rehabData = document.getElementById('rehab-templates-data');
+
+    function createRow(name, desc) {
+        var row = document.createElement('div');
+        row.className = 'rehab-template-row d-flex align-items-center gap-2 mb-2';
+        row.innerHTML =
+            '<input type="text" class="form-control form-control-sm rehab-tpl-name" value="' + (name || '') + '" placeholder="Nom du type">' +
+            '<input type="text" class="form-control form-control-sm rehab-tpl-desc" value="' + (desc || '') + '" placeholder="Description (optionnel)">' +
+            '<button type="button" class="btn btn-outline-danger btn-sm rehab-tpl-remove" title="Supprimer">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            '</button>';
+        return row;
+    }
+
+    document.getElementById('rehab-add-btn').addEventListener('click', function() {
+        rehabList.appendChild(createRow('', ''));
+        rehabList.lastElementChild.querySelector('.rehab-tpl-name').focus();
+    });
+
+    rehabList.addEventListener('click', function(e) {
+        var btn = e.target.closest('.rehab-tpl-remove');
+        if (btn) btn.closest('.rehab-template-row').remove();
+    });
+
+    rehabData.closest('form').addEventListener('submit', function() {
+        var templates = [];
+        rehabList.querySelectorAll('.rehab-template-row').forEach(function(row) {
+            var name = row.querySelector('.rehab-tpl-name').value.trim();
+            if (name) {
+                templates.push({
+                    name: name,
+                    description: row.querySelector('.rehab-tpl-desc').value.trim()
+                });
+            }
+        });
+        rehabData.value = JSON.stringify(templates);
+    });
+});
+</script>
+{% endblock %}

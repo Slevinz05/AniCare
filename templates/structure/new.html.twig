@@ -1,0 +1,254 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle structure - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 760px;">
+    <a href="{{ path('app_structure_index') }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+        Retour
+    </a>
+
+    <div class="card anicare-card">
+        <div class="card-body p-4 p-lg-5">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f), var(--anicare-dark, #3d7a6e));">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 16 16"><path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM4 8.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM7.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/><path d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3z"/></svg>
+                </div>
+                <h1 class="page-title mb-1">Créer une structure</h1>
+                <p class="text-muted small mb-0">Enregistrez votre écurie, centre équestre ou haras sur AniCare</p>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                {# ── Identité ── #}
+                <div class="form-section mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="form-section-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v1h.5A1.5 1.5 0 0 1 16 4.5v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 11.5v-7A1.5 1.5 0 0 1 1.5 3H2zm1 0v1h11V2z"/></svg>
+                        </div>
+                        <h6 class="form-section-title mb-0">Identité</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Adresse ── #}
+                <div class="form-section mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="form-section-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/><path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>
+                        </div>
+                        <h6 class="form-section-title mb-0">Adresse</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            {{ form_label(form.street, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.street, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12">
+                            {{ form_label(form.complement, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.complement, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.postalCode, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.postalCode, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.country, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.country, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Contact ── #}
+                <div class="form-section mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="form-section-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/></svg>
+                        </div>
+                        <h6 class="form-section-title mb-0">Contact & informations</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.siret, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.siret, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Gérant ── #}
+                <div class="manager-section rounded-3 p-4 mb-4" id="managerSection">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="manager-section-icon flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/><path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0"/></svg>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="form-check mb-2">
+                                <input type="checkbox" name="is_manager" id="is_manager" value="1" class="form-check-input">
+                                <label for="is_manager" class="form-check-label fw-bold" style="font-size: 0.95rem;">Je suis le gérant de cette structure</label>
+                            </div>
+                            <p class="small mb-0" style="color: #7a7067; line-height: 1.6;">
+                                Vous pouvez créer une structure sans en être le gérant, par exemple pour y rattacher vos clients ou chevaux et faciliter votre suivi.
+                                Le gérant pourra être désigné plus tard via un code fourni par AniCare.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/></svg>
+                    Créer la structure
+                </button>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="managerModal" tabindex="-1" aria-labelledby="managerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <div class="text-center px-4 pt-4 pb-3" style="background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f) 0%, var(--anicare-dark, #3d7a6e) 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 mb-3" style="width: 64px; height: 64px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/><path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/></svg>
+                    </div>
+                    <h5 class="text-white fw-bold mb-1">Devenir gérant</h5>
+                    <p class="text-white-50 small mb-0">Cette action vous engage</p>
+                </div>
+                <div class="px-4 py-4">
+                    <p class="text-secondary mb-3">
+                        En confirmant, vous devenez le <strong>gérant officiel</strong> de cette structure sur AniCare. Vous serez responsable de :
+                    </p>
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-start gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                            <span class="small">La gestion des informations de la structure</span>
+                        </li>
+                        <li class="d-flex align-items-start gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                            <span class="small">Le suivi des chevaux et des membres rattachés</span>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                            <span class="small">Les modifications et la suppression de la structure</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+                <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary flex-fill" id="confirmManagerBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-check me-1" viewBox="0 0 16 16"><path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/><path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0"/></svg>
+                    Confirmer, je deviens gérant
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-section {
+    border-left: 3px solid var(--border-color, #e0d6cc);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+}
+.form-section:focus-within {
+    border-left-color: var(--anicare-primary, #5a9e8f);
+}
+.form-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--soft-teal, #e6f2ef);
+    color: var(--anicare-primary, #5a9e8f);
+    flex-shrink: 0;
+}
+.form-section-title {
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--secondary-color, #5c4e3c);
+}
+.manager-section {
+    border: 2px solid var(--border-color, #e0d6cc);
+    background: #faf8f5;
+    transition: all 0.25s ease;
+}
+.manager-section:has(#is_manager:checked) {
+    border-color: var(--anicare-primary, #5a9e8f);
+    background: var(--soft-teal, #e6f2ef);
+}
+.manager-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--soft-teal, #e6f2ef);
+    color: var(--anicare-primary, #5a9e8f);
+    transition: all 0.25s ease;
+}
+.manager-section:has(#is_manager:checked) .manager-section-icon {
+    background: var(--anicare-primary, #5a9e8f);
+    color: white;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form.anicare-form');
+    var modalEl = document.getElementById('managerModal');
+    var modal = new bootstrap.Modal(modalEl);
+    var confirmed = false;
+
+    form.addEventListener('submit', function(e) {
+        var cb = document.getElementById('is_manager');
+        if (cb.checked && !confirmed) {
+            e.preventDefault();
+            modal.show();
+        }
+    });
+
+    document.getElementById('confirmManagerBtn').addEventListener('click', function() {
+        confirmed = true;
+        modal.hide();
+        form.requestSubmit();
+    });
+
+    modalEl.addEventListener('hidden.bs.modal', function() {
+        if (!confirmed) {
+            document.getElementById('is_manager').checked = false;
+        }
+    });
+});
+</script>
+{% endblock %}

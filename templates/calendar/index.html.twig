@@ -336,7 +336,7 @@
                     {% set isoDate = currentYear ~ '-' ~ (currentMonth < 10 ? '0' ~ currentMonth : currentMonth) ~ '-' ~ (day < 10 ? '0' ~ day : day) ~ 'T09:00' %}
 
                     <div class="calendar-day-box position-relative {{ isToday ? 'current-today-box' : '' }}"
-                         onclick="window.location='{{ path('app_health_book_entry_new', {preset_date: isoDate}) }}'">
+                         onclick="window.location='{{ path('app_appointment_new', {date: isoDate}) }}'">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="fw-bold small {{ isToday ? 'text-teal fs-6' : '' }}" style="{{ not isToday ? 'color: var(--secondary-color);' : '' }}">
                                 {{ day }}
@@ -402,7 +402,7 @@
                             {% set colDate = weekDays[colIdx].date|date('Y-m-d') ~ 'T' ~ (hour < 10 ? '0' ~ hour : hour) ~ ':00' %}
                             <div class="time-col {{ weekDays[colIdx].isToday ? 'is-today-col' : '' }}"
                                  data-hour="{{ hour }}" data-col="{{ colIdx }}"
-                                 onclick="window.location='{{ path('app_health_book_entry_new', {preset_date: colDate}) }}'">
+                                 onclick="window.location='{{ path('app_appointment_new', {date: colDate}) }}'">
                                 {% for event in weekDays[colIdx].events %}
                                     {% set evHour = event.date|date('G')|number_format %}
                                     {% if evHour == hour and event.date|date('H:i') != '00:00' %}
@@ -462,7 +462,7 @@
                         {% set slotDate = currentDate|date('Y-m-d') ~ 'T' ~ (hour < 10 ? '0' ~ hour : hour) ~ ':00' %}
                         <div class="time-label"><span>{{ hour < 10 ? '0' ~ hour : hour }}:00</span></div>
                         <div class="time-col is-today-col" data-hour="{{ hour }}"
-                             onclick="window.location='{{ path('app_health_book_entry_new', {preset_date: slotDate}) }}'">
+                             onclick="window.location='{{ path('app_appointment_new', {date: slotDate}) }}'">
                             {% for event in events %}
                                 {% set evHour = event.date|date('G')|number_format %}
                                 {% if evHour == hour and event.date|date('H:i') != '00:00' %}

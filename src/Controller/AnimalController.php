@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Animal;
+use App\Entity\AnimalDeletionRequest;
 use App\Entity\AnimalShare;
 use App\Entity\Reminder;
 use App\Entity\User;
 use App\Form\AnimalType;
+use App\Repository\AnimalDeletionRequestRepository;
 use App\Repository\AnimalRepository;
 use App\Repository\UserRepository;
 use App\Service\DocumentUploader;
@@ -118,7 +120,7 @@ final class AnimalController extends AbstractController
     }
 
     #[Route('/{slug}', name: 'app_animal_show', methods: ['GET'])]
-    public function show(string $slug, AnimalRepository $animalRepository, UserRepository $userRepository): Response
+    public function show(string $slug, AnimalRepository $animalRepository, UserRepository $userRepository, AnimalDeletionRequestRepository $deletionRequestRepository): Response
     {
         $animal = $animalRepository->findOneBySlug($slug);
         if (!$animal) {
@@ -139,9 +141,12 @@ final class AnimalController extends AbstractController
             }
         }
 
+        $pendingDeletionRequest = $deletionRequestRepository->findPendingForAnimal($animal->getId());
+
         return $this->render('animal/show.html.twig', [
             'animal' => $animal,
             'professionals' => $professionals,
+            'pending_deletion_request' => $pendingDeletionRequest,
         ]);
     }
 
@@ -293,6 +298,101 @@ final class AnimalController extends AbstractController
         }
 
         return $this->redirectToRoute('app_animal_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{slug}/demander-suppression', name: 'app_animal_request_delete', methods: ['POST'])]
+    public function requestDelete(
+        Request $request,
+        string $slug,
+        AnimalRepository $animalRepository,
+        AnimalDeletionRequestRepository $deletionRequestRepository,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $animal = $animalRepository->findOneBySlug($slug);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
+        $this->denyAccessUnlessGranted('ANIMAL_REQUEST_DELETE', $animal);
+
+        if (!$this->isCsrfTokenValid('request_delete' . $animal->getId(), $request->getPayload()->getString('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+        }
+
+        $existing = $deletionRequestRepository->findPendingForAnimal($animal->getId());
+        if ($existing) {
+            $this->addFlash('warning', 'Une demande de suppression est déjà en attente pour ce cheval.');
+            return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $deletionRequest = new AnimalDeletionRequest();
+        $deletionRequest->setAnimal($animal);
+        $deletionRequest->setRequestedBy($user);
+        $deletionRequest->setReason($request->request->getString('reason') ?: null);
+
+        $entityManager->persist($deletionRequest);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Votre demande de suppression a été envoyée au propriétaire de ' . $animal->getName() . '.');
+
+        return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+    }
+
+    #[Route('/demande-suppression/{id}/repondre', name: 'app_animal_deletion_respond', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function respondToDeletionRequest(
+        Request $request,
+        AnimalDeletionRequest $deletionRequest,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $animal = $deletionRequest->getAnimal();
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($animal->getOwner() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$deletionRequest->isPending()) {
+            $this->addFlash('warning', 'Cette demande a déjà été traitée.');
+            return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+        }
+
+        if (!$this->isCsrfTokenValid('respond_deletion' . $deletionRequest->getId(), $request->getPayload()->getString('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+        }
+
+        $action = $request->request->getString('action');
+
+        if ($action === 'approve') {
+            $deletionRequest->setStatus(AnimalDeletionRequest::STATUS_APPROVED);
+            $deletionRequest->setRespondedAt(new \DateTimeImmutable());
+
+            if ($animal->getPhoto()) {
+                $photoPath = $this->photoDirectory . '/' . $animal->getPhoto();
+                if (is_file($photoPath)) {
+                    unlink($photoPath);
+                }
+            }
+            $this->deletePhysicalDocuments($animal->getDocuments());
+
+            $entityManager->remove($animal);
+            $entityManager->flush();
+
+            $this->addFlash('success', $animal->getName() . ' a été supprimé.');
+            return $this->redirectToRoute('app_animal_index');
+        }
+
+        $deletionRequest->setStatus(AnimalDeletionRequest::STATUS_REJECTED);
+        $deletionRequest->setRespondedAt(new \DateTimeImmutable());
+        $entityManager->flush();
+
+        $this->addFlash('info', 'La demande de suppression a été refusée.');
+        return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
     }
 
     private function syncAgeAndBirthDate(FormInterface $form, Animal $animal): void

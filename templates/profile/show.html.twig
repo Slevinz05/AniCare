@@ -4,23 +4,13 @@
 
 {% block body %}
 <div class="container py-4">
-    <div class="page-hero p-4 p-lg-5 mb-5">
-        <div class="row align-items-center gy-3">
-            <div class="col-12 col-lg">
-                <p class="page-eyebrow mb-2">Compte</p>
-                <h1 class="page-title mb-2">Mon profil</h1>
-                <p class="page-subtitle mb-0">Gérez vos informations personnelles et vos paramètres.</p>
-            </div>
-            <div class="col-12 col-lg-auto d-flex gap-2">
-                <a href="{{ path('app_profile_edit') }}" class="btn btn-primary shadow-sm">Modifier le profil</a>
-                <a href="{{ path('app_profile_password') }}" class="btn btn-outline-primary">Changer le mot de passe</a>
-            </div>
-        </div>
-    </div>
-
     <div class="row g-4">
-        <div class="col-12 col-lg-8">
-            <div class="card anicare-card">
+        <div class="col-12 col-lg-3">
+            {{ include('profile/_sidebar.html.twig') }}
+        </div>
+
+        <div class="col-12 col-lg-9">
+            <div class="card anicare-card mb-4">
                 <div class="card-body p-4">
                     <p class="page-eyebrow mb-2">Informations personnelles</p>
                     <h2 class="h5 page-title mb-4">Identité</h2>
@@ -71,47 +61,96 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-12 col-lg-4">
-            <div class="card anicare-card h-100">
-                <div class="card-body p-4">
-                    <p class="page-eyebrow mb-2">Paramètres</p>
-                    <h2 class="h5 page-title mb-4">Compte</h2>
+            <div class="row g-4">
+                <div class="col-12 col-md-6">
+                    <div class="card anicare-card h-100">
+                        <div class="card-body p-4">
+                            <p class="page-eyebrow mb-2">Paramètres</p>
+                            <h2 class="h5 page-title mb-3">Compte</h2>
 
-                    <div class="mb-3">
-                        <span class="small fw-bold text-secondary d-block mb-1">Type de compte</span>
-                        {% if is_granted('ROLE_PRO') %}
-                            <span class="badge bg-anicare-soft text-teal border-anicare" style="font-weight: 800;">PRO</span>
-                        {% else %}
-                            <span class="badge bg-light text-secondary border">Particulier</span>
-                        {% endif %}
-                    </div>
+                            <div class="mb-3">
+                                <span class="small fw-bold text-secondary d-block mb-1">Type de compte</span>
+                                {% if is_granted('ROLE_PRO') %}
+                                    <span class="badge bg-anicare-soft text-teal border-anicare" style="font-weight: 800;">PRO</span>
+                                {% else %}
+                                    <span class="badge bg-light text-secondary border">Particulier</span>
+                                {% endif %}
+                            </div>
 
-                    <div class="mb-3">
-                        <span class="small fw-bold text-secondary d-block mb-1">Notifications e-mail</span>
-                        {% if app.user.acceptsNotifications %}
-                            <span class="text-success small">Activées</span>
-                        {% else %}
-                            <span class="text-secondary small">Désactivées</span>
-                        {% endif %}
-                    </div>
+                            <div class="mb-3">
+                                <span class="small fw-bold text-secondary d-block mb-1">Notifications e-mail</span>
+                                {% if app.user.acceptsNotifications %}
+                                    <span class="text-success small">Activées</span>
+                                {% else %}
+                                    <span class="text-secondary small">Désactivées</span>
+                                {% endif %}
+                            </div>
 
-                    <div>
-                        <span class="small fw-bold text-secondary d-block mb-1">Chevaux</span>
-                        <span class="small">{{ app.user.animals|length }} enregistré{{ app.user.animals|length > 1 ? 's' : '' }}</span>
+                            <div>
+                                <span class="small fw-bold text-secondary d-block mb-1">Chevaux</span>
+                                <span class="small">{{ app.user.animals|length }} enregistré{{ app.user.animals|length > 1 ? 's' : '' }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-end">
-                <a href="{{ path('app_logout') }}" class="btn btn-outline-danger">
-                    Se déconnecter
-                </a>
+                {% if is_granted('ROLE_PRO') %}
+                <div class="col-12 col-md-6">
+                    <div class="card anicare-card h-100">
+                        <div class="card-body p-4">
+                            <p class="page-eyebrow mb-2">Professionnel</p>
+                            <h2 class="h5 page-title mb-3">Paramètres PRO</h2>
+
+                            <div class="mb-3">
+                                <span class="small fw-bold text-secondary d-block mb-1">Visibilité annuaire</span>
+                                {% if app.user.directoryVisible %}
+                                    <span class="text-success small">Visible</span>
+                                {% else %}
+                                    <span class="text-secondary small">Masqué</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="small fw-bold text-secondary d-block mb-1">Durée de séance</span>
+                                <span class="small">{{ app.user.defaultConsultationDuration ? app.user.defaultConsultationDuration ~ ' min' : 'Non définie' }}</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="small fw-bold text-secondary d-block mb-1">Visibilité horaires</span>
+                                {% if app.user.openingHoursVisible %}
+                                    <span class="text-success small">Visibles</span>
+                                {% else %}
+                                    <span class="text-secondary small">Masqués</span>
+                                {% endif %}
+                            </div>
+
+                            {% set hours = app.user.openingHours ?? [] %}
+                            {% set hasHours = false %}
+                            {% for day, data in hours %}
+                                {% if data.enabled|default(false) %}{% set hasHours = true %}{% endif %}
+                            {% endfor %}
+                            <div>
+                                <span class="small fw-bold text-secondary d-block mb-1">Horaires</span>
+                                {% if hasHours %}
+                                    {% set dayLabels = {lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu', vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'} %}
+                                    {% for day, data in hours %}
+                                        {% if data.enabled|default(false) %}
+                                            <div class="small">
+                                                <strong>{{ dayLabels[day]|default(day) }}</strong> {{ data.start }} – {{ data.end }}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="small text-secondary">Non définis</span>
+                                {% endif %}
+                            </div>
+
+                            <a href="{{ path('app_profile_pro_settings') }}" class="btn btn-outline-primary btn-sm mt-3">Configurer</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

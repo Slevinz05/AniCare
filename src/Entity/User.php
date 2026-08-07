@@ -93,6 +93,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $defaultPublicNotes = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $defaultAppointmentNotes = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $openingHours = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $directoryVisible = false;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $openingHoursVisible = true;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $rehabilitationTemplates = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripeCustomerId = null;
 
@@ -105,9 +120,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $subscriptionEndsAt = null;
 
+    /** @var Collection<int, StructureMembership> */
+    #[ORM\OneToMany(targetEntity: StructureMembership::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $structureMemberships;
+
     public function __construct()
     {
         $this->animals = new ArrayCollection();
+        $this->structureMemberships = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -524,6 +544,65 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getDefaultAppointmentNotes(): ?string
+    {
+        return $this->defaultAppointmentNotes;
+    }
+
+    public function setDefaultAppointmentNotes(?string $defaultAppointmentNotes): static
+    {
+        $this->defaultAppointmentNotes = $defaultAppointmentNotes;
+        return $this;
+    }
+
+    public function getOpeningHours(): ?array
+    {
+        return $this->openingHours;
+    }
+
+    public function setOpeningHours(?array $openingHours): static
+    {
+        $this->openingHours = $openingHours;
+
+        return $this;
+    }
+
+    public function isDirectoryVisible(): bool
+    {
+        return $this->directoryVisible;
+    }
+
+    public function setDirectoryVisible(bool $directoryVisible): static
+    {
+        $this->directoryVisible = $directoryVisible;
+
+        return $this;
+    }
+
+    public function isOpeningHoursVisible(): bool
+    {
+        return $this->openingHoursVisible;
+    }
+
+    public function setOpeningHoursVisible(bool $openingHoursVisible): static
+    {
+        $this->openingHoursVisible = $openingHoursVisible;
+
+        return $this;
+    }
+
+    public function getRehabilitationTemplates(): array
+    {
+        return $this->rehabilitationTemplates ?? [];
+    }
+
+    public function setRehabilitationTemplates(?array $rehabilitationTemplates): static
+    {
+        $this->rehabilitationTemplates = $rehabilitationTemplates;
+
+        return $this;
+    }
+
     public function hasActiveSubscription(): bool
     {
         if ($this->subscriptionStatus === 'active') {
@@ -535,5 +614,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return false;
+    }
+
+    /** @return Collection<int, StructureMembership> */
+    public function getStructureMemberships(): Collection
+    {
+        return $this->structureMemberships;
+    }
+
+    public function addStructureMembership(StructureMembership $membership): static
+    {
+        if (!$this->structureMemberships->contains($membership)) {
+            $this->structureMemberships->add($membership);
+            $membership->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStructureMembership(StructureMembership $membership): static
+    {
+        if ($this->structureMemberships->removeElement($membership)) {
+            if ($membership->getUser() === $this) {
+                $membership->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getStructures(): array
+    {
+        return $this->structureMemberships->map(
+            fn (StructureMembership $m) => $m->getStructure()
+        )->toArray();
     }
 }

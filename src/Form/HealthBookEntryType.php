@@ -3,9 +3,11 @@
 namespace App\Form;
 
 use App\Entity\Animal;
+use App\Entity\Appointment;
 use App\Entity\HealthBookEntry;
 use App\Entity\User;
 use App\Repository\AnimalRepository;
+use App\Repository\AppointmentRepository;
 use App\Repository\UserRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -83,6 +85,29 @@ class HealthBookEntryType extends AbstractType
                 'widget' => 'single_text',
             ])
 
+            ->add('appointment', EntityType::class, [
+                'label' => 'Rendez-vous associé',
+                'class' => Appointment::class,
+                'required' => false,
+                'placeholder' => 'Aucun rendez-vous',
+                'choice_label' => fn (Appointment $a) => $a->getScheduledAt()->format('d/m/Y H:i') . ' — ' . $a->getReason(),
+                'choice_attr' => fn (Appointment $a) => [
+                    'data-date' => $a->getScheduledAt()->format('Y-m-d'),
+                    'data-hour' => $a->getScheduledAt()->format('H'),
+                    'data-minute' => $a->getScheduledAt()->format('i'),
+                ],
+                'query_builder' => function (AppointmentRepository $repo) use ($user, $options) {
+                    $qb = $repo->createQueryBuilder('a')
+                        ->where('a.createdBy = :user')
+                        ->andWhere('a.scheduledAt < :now OR a.id = :presetId')
+                        ->setParameter('user', $user)
+                        ->setParameter('now', new \DateTimeImmutable())
+                        ->setParameter('presetId', $options['preset_appointment_id'] ?? 0)
+                        ->orderBy('a.scheduledAt', 'DESC');
+                    return $qb;
+                },
+            ])
+
             ->add('veterinarian', EntityType::class, [
                 'label' => 'Intervenant',
                 'class' => User::class,
@@ -95,12 +120,46 @@ class HealthBookEntryType extends AbstractType
                     ->orderBy('u.lastName', 'ASC'),
             ])
 
+            ->add('anamnesis', TextareaType::class, [
+                'label' => 'Anamnèse / Commémoratif',
+                'required' => false,
+                'attr' => [
+                    'rows' => 4,
+                    'placeholder' => 'Historique du patient, antécédents, motif de consultation...',
+                ],
+            ])
+
             ->add('description', TextareaType::class, [
-                'label' => 'Description / observations',
+                'label' => 'Notes / Observations',
                 'required' => false,
                 'attr' => [
                     'rows' => 5,
-                    'placeholder' => 'Ajoutez les observations, traitements ou recommandations importantes.',
+                    'placeholder' => 'Notes, observations, recommandations...',
+                ],
+            ])
+
+            ->add('staticExamination', TextareaType::class, [
+                'label' => 'Bilan de l\'examen statique / palpation',
+                'required' => false,
+                'attr' => [
+                    'rows' => 5,
+                    'placeholder' => 'Aspect général, état de santé, position antalgique, conformation, aplombs, déformations, sensibilités...',
+                ],
+            ])
+
+            ->add('rehabilitationType', ChoiceType::class, [
+                'label' => 'Type de rééducation',
+                'required' => false,
+                'placeholder' => 'Sélectionner un type de rééducation',
+                'choices' => $options['rehabilitation_templates'],
+            ])
+
+            ->add('rehabilitation', TextareaType::class, [
+                'label' => 'Rééducation',
+                'required' => false,
+                'attr' => [
+                    'rows' => 5,
+                    'placeholder' => 'Programme de rééducation, exercices, consignes...',
                 ],
             ])
 
@@ -190,5 +249,7 @@ class HealthBookEntryType extends AbstractType
         ]);
         $resolver->setRequired('user');
         $resolver->setAllowedTypes('user', User::class);
+        $resolver->setDefault('rehabilitation_templates', []);
+        $resolver->setDefault('preset_appointment_id', 0);
     }
 }

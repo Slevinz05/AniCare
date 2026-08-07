@@ -109,6 +109,10 @@ class Animal
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
+    #[ORM\ManyToOne(inversedBy: 'animals')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Structure $structure = null;
+
     /** @var Collection<int, HealthBookEntry> */
     #[ORM\OneToMany(targetEntity: HealthBookEntry::class, mappedBy: 'animal')]
     private Collection $healthBookEntries;
@@ -489,6 +493,18 @@ class Animal
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getStructure(): ?Structure
+    {
+        return $this->structure;
+    }
+
+    public function setStructure(?Structure $structure): static
+    {
+        $this->structure = $structure;
 
         return $this;
     }

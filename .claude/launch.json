@@ -3,9 +3,8 @@
   "configurations": [
     {
       "name": "anicare-dev",
-      "runtimeExecutable": "docker",
-      "runtimeArgs": ["compose", "up"],
-      "port": 8080
+      "url": "http://localhost:8000",
+      "port": 8000
     }
   ]
 }

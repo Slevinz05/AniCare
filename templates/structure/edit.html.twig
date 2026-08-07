@@ -1,0 +1,246 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ structure.name }} - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 760px;">
+    <a href="{{ path('app_structure_show', {id: structure.id}) }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+        Retour
+    </a>
+
+    <div class="card anicare-card">
+        <div class="card-body p-4 p-lg-5">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f), var(--anicare-dark, #3d7a6e));">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/></svg>
+                </div>
+                <h1 class="page-title mb-1">Modifier {{ structure.name }}</h1>
+                <p class="text-muted small mb-0">Mettez à jour les informations de votre structure</p>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                {# ── Identité ── #}
+                <div class="form-section mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="form-section-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v1h.5A1.5 1.5 0 0 1 16 4.5v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 11.5v-7A1.5 1.5 0 0 1 1.5 3H2zm1 0v1h11V2z"/></svg>
+                        </div>
+                        <h6 class="form-section-title mb-0">Identité</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Adresse ── #}
+                <div class="form-section mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="form-section-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/><path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>
+                        </div>
+                        <h6 class="form-section-title mb-0">Adresse</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            {{ form_label(form.street, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.street, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12">
+                            {{ form_label(form.complement, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.complement, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.postalCode, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.postalCode, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {{ form_label(form.country, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.country, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+
+                {# ── Contact ── #}
+                <div class="form-section mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="form-section-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/></svg>
+                        </div>
+                        <h6 class="form-section-title mb-0">Contact & informations</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_label(form.siret, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.siret, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-lg me-2" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg>
+                    Enregistrer les modifications
+                </button>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    {# ── Transfert de gérance ── #}
+    <div class="card anicare-card mt-4">
+        <div class="card-body p-4 p-lg-5">
+            <div class="d-flex align-items-start gap-3 mb-3">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 44px; height: 44px; background: #fff3e0; color: #e65100;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/></svg>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1" style="color: var(--secondary-color, #5c4e3c);">Transférer la gérance</h6>
+                    <p class="small text-muted mb-0">Désignez un autre membre comme gérant de cette structure. Vous perdrez vos droits de gestion.</p>
+                </div>
+            </div>
+
+            {% if other_members is not empty %}
+                <form method="post" action="{{ path('app_structure_transfer_manager', {id: structure.id}) }}" id="transferForm">
+                    <input type="hidden" name="_token" value="{{ csrf_token('transfer_manager' ~ structure.id) }}">
+
+                    <div class="mb-3">
+                        <label for="target_user_id" class="form-label fw-semibold" style="font-size: 0.88rem; color: var(--secondary-color, #5c4e3c);">Nouveau gérant</label>
+                        <select name="target_user_id" id="target_user_id" class="form-select" required>
+                            <option value="">Sélectionner un membre...</option>
+                            {% for membership in other_members %}
+                                <option value="{{ membership.user.id }}">
+                                    {{ membership.user.firstName }} {{ membership.user.lastName }}
+                                    ({{ membership.role == 'PRO' ? 'Professionnel' : 'Propriétaire' }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-warning w-100" id="transferBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-right me-2" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/></svg>
+                        Transférer la gérance
+                    </button>
+                </form>
+            {% else %}
+                <div class="rounded-3 p-3 text-center" style="background: #f5f0eb;">
+                    <p class="small text-muted mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
+                        Aucun autre membre dans cette structure. Invitez des membres pour pouvoir transférer la gérance.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Modal de confirmation de transfert #}
+<div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <div class="text-center px-4 pt-4 pb-3" style="background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 mb-3" style="width: 64px; height: 64px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M10 8c-.552 0-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5S10.552 8 10 8"/></svg>
+                    </div>
+                    <h5 class="text-white fw-bold mb-1">Transférer la gérance</h5>
+                    <p class="text-white-50 small mb-0">Cette action est irréversible</p>
+                </div>
+                <div class="px-4 py-4">
+                    <p class="text-secondary mb-3">
+                        Vous êtes sur le point de transférer la gérance de <strong>{{ structure.name }}</strong> à <strong id="transferTargetName"></strong>.
+                    </p>
+                    <div class="alert alert-warning small mb-0 d-flex align-items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg>
+                        <span>Vous ne pourrez plus modifier les informations de la structure ni gérer ses membres. Seul le nouveau gérant aura ces droits.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+                <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning flex-fill" id="confirmTransferBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-right me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/></svg>
+                    Confirmer le transfert
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-section {
+    border-left: 3px solid var(--border-color, #e0d6cc);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+}
+.form-section:focus-within {
+    border-left-color: var(--anicare-primary, #5a9e8f);
+}
+.form-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--soft-teal, #e6f2ef);
+    color: var(--anicare-primary, #5a9e8f);
+    flex-shrink: 0;
+}
+.form-section-title {
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--secondary-color, #5c4e3c);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var transferBtn = document.getElementById('transferBtn');
+    if (!transferBtn) return;
+
+    var modalEl = document.getElementById('transferModal');
+    var modal = new bootstrap.Modal(modalEl);
+    var select = document.getElementById('target_user_id');
+    var form = document.getElementById('transferForm');
+
+    transferBtn.addEventListener('click', function() {
+        if (!select.value) {
+            select.focus();
+            return;
+        }
+        var selectedText = select.options[select.selectedIndex].text.trim();
+        document.getElementById('transferTargetName').textContent = selectedText;
+        modal.show();
+    });
+
+    document.getElementById('confirmTransferBtn').addEventListener('click', function() {
+        modal.hide();
+        form.submit();
+    });
+});
+</script>
+{% endblock %}

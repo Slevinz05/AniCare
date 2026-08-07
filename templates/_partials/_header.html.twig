@@ -70,8 +70,17 @@
                                 Messagerie
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_structure' ? 'active' : '' }}"
+                                href="{{ path('app_structure_index') }}"
+                            >
+                                Structures
+                            </a>
+                        </li>
                     {% else %}
-                        {# ── Menu Propriétaire ── #}
+                        {# ── Menu Propriétaire / Structure ── #}
                         <li class="nav-item">
                             <a
                                 class="nav-link text-nowrap {{ (current_route starts with 'app_animal_') and not (current_route starts with 'app_animal_share') ? 'active' : '' }}"
@@ -81,6 +90,7 @@
                             </a>
                         </li>
 
+                        {% if not is_granted('ROLE_STRUCTURE') %}
                         <li class="nav-item">
                             <a
                                 class="nav-link text-nowrap {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}"
@@ -89,6 +99,7 @@
                                 Consultations
                             </a>
                         </li>
+                        {% endif %}
 
                         <li class="nav-item">
                             <a
@@ -129,6 +140,15 @@
                                 href="{{ path('app_message_index') }}"
                             >
                                 Messagerie
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link text-nowrap {{ current_route starts with 'app_structure' ? 'active' : '' }}"
+                                href="{{ path('app_structure_index') }}"
+                            >
+                                Structures
                             </a>
                         </li>
                     {% endif %}

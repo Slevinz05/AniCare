@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\StructureMembership;
 use App\Entity\User;
 use App\Repository\AnimalRepository;
 use App\Repository\AnimalShareRepository;
 use App\Repository\AppointmentRepository;
 use App\Repository\HealthBookEntryRepository;
+use App\Repository\StructureMembershipRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -89,7 +91,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/annuaire', name: 'app_directory', methods: ['GET'])]
-    public function directory(Request $request, UserRepository $userRepository): Response
+    public function directory(Request $request, UserRepository $userRepository, StructureMembershipRepository $membershipRepo): Response
     {
         $specialty = $request->query->get('specialty');
         $department = $request->query->get('department');
@@ -101,11 +103,35 @@ class HomeController extends AbstractController
             ? $userRepository->findProfessionalsFiltered($specialty, $department, $query)
             : $userRepository->findProfessionals();
 
+        $structureProIds = [];
+        /** @var User|null $user */
+        $user = $this->getUser();
+        if ($user) {
+            $managerMemberships = $membershipRepo->findBy(['user' => $user, 'role' => StructureMembership::ROLE_MANAGER]);
+            foreach ($managerMemberships as $membership) {
+                $structure = $membership->getStructure();
+                foreach ($structure->getAnimals() as $animal) {
+                    foreach ($animal->getAnimalShares() as $share) {
+                        $pro = $userRepository->findOneBy(['email' => $share->getSharedWithEmail(), 'accountType' => 'PRO']);
+                        if ($pro) {
+                            $structureProIds[$pro->getId()] = true;
+                        }
+                    }
+                }
+                foreach ($structure->getMemberships() as $m) {
+                    if ($m->getRole() === StructureMembership::ROLE_PRO) {
+                        $structureProIds[$m->getUser()->getId()] = true;
+                    }
+                }
+            }
+        }
+
         return $this->render('home/directory.html.twig', [
             'professionals' => $professionals,
             'current_specialty' => $specialty,
             'current_department' => $department,
             'current_query' => $query,
+            'structure_pro_ids' => array_keys($structureProIds),
         ]);
     }
 

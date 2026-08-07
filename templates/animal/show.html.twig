@@ -309,9 +309,11 @@
 
                     {# ── HISTORIQUE ── #}
                     <div class="tab-pane fade show active" id="panel-historique" role="tabpanel">
+                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
                         <div class="d-flex justify-content-end mb-3">
                             <a href="{{ path('app_health_book_entry_new', {'animal': animal.id}) }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
                         </div>
+                        {% endif %}
 
                         {% if animal.healthBookEntries is empty %}
                             <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
@@ -438,9 +440,11 @@
                                                         <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-outline-primary btn-sm">
                                                             Consulter
                                                         </a>
+                                                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
                                                         <a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="btn btn-primary btn-sm">
                                                             Modifier
                                                         </a>
+                                                        {% endif %}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -453,9 +457,11 @@
 
                     {# ── DOCUMENTS ── #}
                     <div class="tab-pane fade" id="panel-documents" role="tabpanel">
+                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
                         <div class="d-flex justify-content-end mb-3">
                             <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-outline-primary btn-sm">Ajouter un document</a>
                         </div>
+                        {% endif %}
 
                         {% if animal.documents is empty %}
                             <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
@@ -490,7 +496,7 @@
                                                 <span class="badge bg-warning text-dark">En attente</span>
                                             {% endif %}
 
-                                            {% if is_granted('ANIMAL_EDIT', animal) and is_granted('ROLE_PRO') %}
+                                            {% if animal.owner == app.user %}
                                                 {% if doc_status != 'approved' %}
                                                     <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
                                                         <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
@@ -515,9 +521,11 @@
 
                     {# ── ALLERGIES ── #}
                     <div class="tab-pane fade" id="panel-allergies" role="tabpanel">
+                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
                         <div class="d-flex justify-content-end mb-3">
                             <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Gérer les allergies</a>
                         </div>
+                        {% endif %}
 
                         {% if animal.allergies is empty %}
                             <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
@@ -551,6 +559,47 @@
                 </div>
             </section>
 
+            {# ── Demande de suppression en attente (visible par le propriétaire) ── #}
+            {% if pending_deletion_request and is_granted('ANIMAL_DELETE', animal) %}
+                <div class="alert border-warning bg-warning bg-opacity-10 mt-5">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background: linear-gradient(135deg, #f0ad4e, #ec971f);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <div class="flex-grow-1">
+                            <strong class="d-block mb-1">Demande de suppression en attente</strong>
+                            <p class="small text-secondary mb-2">
+                                <strong>{{ pending_deletion_request.requestedBy.fullName }}</strong> (gérant de structure)
+                                a demandé la suppression de {{ animal.name }}
+                                le {{ pending_deletion_request.createdAt|date('d/m/Y à H:i') }}.
+                            </p>
+                            {% if pending_deletion_request.reason %}
+                                <p class="small fst-italic mb-2">« {{ pending_deletion_request.reason }} »</p>
+                            {% endif %}
+                            <div class="d-flex gap-2">
+                                <form method="post" action="{{ path('app_animal_deletion_respond', {'id': pending_deletion_request.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('respond_deletion' ~ pending_deletion_request.id) }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirmer la suppression définitive de {{ animal.name }} ? Cette action est irréversible.');">
+                                        Approuver la suppression
+                                    </button>
+                                </form>
+                                <form method="post" action="{{ path('app_animal_deletion_respond', {'id': pending_deletion_request.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('respond_deletion' ~ pending_deletion_request.id) }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        Refuser
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-5 pt-4 border-top border-anicare">
                 <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary">
                     Retour
@@ -561,13 +610,63 @@
                         Partager
                     </a>
 
-                    <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-primary">
-                        Modifier le profil
-                    </a>
+                    {% if is_granted('ANIMAL_EDIT', animal) %}
+                        <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-primary">
+                            Modifier le profil
+                        </a>
+                    {% endif %}
 
-                    {{ include('animal/_delete_form.html.twig') }}
+                    {% if is_granted('ANIMAL_DELETE', animal) %}
+                        {{ include('animal/_delete_form.html.twig') }}
+                    {% elseif is_granted('ANIMAL_REQUEST_DELETE', animal) %}
+                        {% if pending_deletion_request %}
+                            <span class="btn btn-outline-warning btn-sm disabled">
+                                Suppression demandée
+                            </span>
+                        {% else %}
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#requestDeleteModal">
+                                Demander la suppression
+                            </button>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
+
+            {# ── Modal demande de suppression (gérant) ── #}
+            {% if is_granted('ANIMAL_REQUEST_DELETE', animal) and not pending_deletion_request %}
+                <div class="modal fade" id="requestDeleteModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header text-white" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                                <h5 class="modal-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2">
+                                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                    Demander la suppression
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" action="{{ path('app_animal_request_delete', {'slug': animal.slug}) }}">
+                                <div class="modal-body">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('request_delete' ~ animal.id) }}">
+                                    <p class="text-secondary">
+                                        Vous demandez la suppression de <strong>{{ animal.name }}</strong>.
+                                        Le propriétaire ({{ animal.owner.fullName }}) devra valider cette demande avant la suppression définitive.
+                                    </p>
+                                    <div class="mb-0">
+                                        <label for="deletion_reason" class="form-label fw-bold">Motif (optionnel)</label>
+                                        <textarea name="reason" id="deletion_reason" class="form-control" rows="3" placeholder="Expliquez la raison de cette demande..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" class="btn btn-danger">Envoyer la demande</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
