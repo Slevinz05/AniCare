@@ -176,6 +176,11 @@ final class AppointmentController extends AbstractController
             $this->addFlash('success', 'Rendez-vous confirmé.');
         }
 
+        $redirect = $request->query->get('redirect');
+        if ($redirect === 'home') {
+            return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
+        }
+
         return $this->redirectToRoute('app_appointment_index', [], Response::HTTP_SEE_OTHER);
     }
 
@@ -184,23 +189,40 @@ final class AppointmentController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_PRO');
 
+        $ownerAddress = implode(', ', array_filter([
+            $client->getAddress(),
+            trim(($client->getPostalCode() ?? '') . ' ' . ($client->getCity() ?? '')),
+        ]));
+
         $animals = [];
         foreach ($client->getAnimals() as $animal) {
-            $address = array_filter([
+            $livingAddress = implode(', ', array_filter([
                 $animal->getLivingPlaceName(),
                 $animal->getLivingPlaceStreet(),
-                $animal->getLivingPlacePostalCode() . ' ' . $animal->getLivingPlaceCity(),
-            ]);
+                trim(($animal->getLivingPlacePostalCode() ?? '') . ' ' . ($animal->getLivingPlaceCity() ?? '')),
+            ]));
+
+            $structure = $animal->getStructure();
+            $structureAddress = $structure
+                ? implode(', ', array_filter([
+                    $structure->getName(),
+                    $structure->getStreet(),
+                    trim(($structure->getPostalCode() ?? '') . ' ' . ($structure->getCity() ?? '')),
+                ]))
+                : '';
+
             $animals[] = [
                 'id' => $animal->getId(),
                 'name' => $animal->getName(),
                 'photo' => $animal->getPhoto(),
                 'livingPlaceName' => $animal->getLivingPlaceName(),
-                'address' => implode(', ', $address),
+                'structureName' => $structure?->getName(),
+                'address' => $livingAddress,
+                'structureAddress' => $structureAddress,
             ];
         }
 
-        return new JsonResponse($animals);
+        return new JsonResponse(['animals' => $animals, 'ownerAddress' => $ownerAddress]);
     }
 
     #[Route('/api/appointment/search', name: 'app_appointment_search', methods: ['GET'])]
@@ -237,16 +259,12 @@ final class AppointmentController extends AbstractController
         foreach ($clients as $client) {
             $animals = [];
             foreach ($client->getAnimals() as $animal) {
-                $address = array_filter([
-                    $animal->getLivingPlaceName(),
-                    $animal->getLivingPlaceStreet(),
-                    $animal->getLivingPlacePostalCode() . ' ' . $animal->getLivingPlaceCity(),
-                ]);
+                $structure = $animal->getStructure();
                 $animals[] = [
                     'id' => $animal->getId(),
                     'name' => $animal->getName(),
                     'livingPlaceName' => $animal->getLivingPlaceName(),
-                    'address' => implode(', ', $address),
+                    'structureName' => $structure?->getName(),
                 ];
             }
             $results[] = [

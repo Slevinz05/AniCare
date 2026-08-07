@@ -250,6 +250,79 @@ a:hover {
     flex-shrink: 0;
 }
 
+/* ── Profile dropdown avatar ── */
+.btn-navbar-avatar {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+.btn-navbar-avatar:hover,
+.btn-navbar-avatar[aria-expanded="true"] {
+    background: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.35);
+}
+.navbar-avatar-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid rgba(255,255,255,0.35);
+}
+.profile-dropdown-menu {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 240px;
+}
+.profile-dropdown-header {
+    padding: 0.6rem 0.75rem;
+    white-space: normal;
+    color: var(--secondary-color);
+}
+.profile-dropdown-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.profile-dropdown-menu .dropdown-item {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+    transition: all 0.15s;
+}
+.profile-dropdown-menu .dropdown-item:hover {
+    background: var(--soft-teal);
+    color: var(--primary-color);
+}
+.profile-dropdown-menu .dropdown-item.text-danger:hover {
+    background: #fef2f2;
+    color: var(--danger-color);
+}
+.profile-dropdown-menu .dropdown-divider {
+    margin: 0.3rem 0;
+    border-color: var(--border-color);
+}
+
 /* ==========================================================================
    Boutons Bootstrap thémés AniCare
    ========================================================================== */

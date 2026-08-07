@@ -48,6 +48,12 @@ class Structure
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $siret = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $coverPhoto = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
     #[ORM\Column(length: 8, unique: true)]
     private ?string $claimCode = null;
 
@@ -186,6 +192,28 @@ class Structure
     public function setSiret(?string $siret): static
     {
         $this->siret = $siret;
+        return $this;
+    }
+
+    public function getCoverPhoto(): ?string
+    {
+        return $this->coverPhoto;
+    }
+
+    public function setCoverPhoto(?string $coverPhoto): static
+    {
+        $this->coverPhoto = $coverPhoto;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
         return $this;
     }
 

@@ -3,244 +3,549 @@
 {% block title %}Modifier {{ structure.name }} - AniCare{% endblock %}
 
 {% block body %}
-<div class="container py-4" style="max-width: 760px;">
-    <a href="{{ path('app_structure_show', {id: structure.id}) }}" class="btn btn-sm btn-outline-secondary mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-        Retour
-    </a>
+<div class="structure-edit-page">
+    <div class="container" style="max-width: 800px;">
 
-    <div class="card anicare-card">
-        <div class="card-body p-4 p-lg-5">
-            <div class="text-center mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--anicare-primary, #5a9e8f), var(--anicare-dark, #3d7a6e));">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/></svg>
+        {# ── Header ── #}
+        <div class="se-header">
+            <a href="{{ path('app_structure_show', {id: structure.id}) }}" class="se-back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Retour à la structure
+            </a>
+            <div class="se-header-content">
+                <div class="se-header-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
-                <h1 class="page-title mb-1">Modifier {{ structure.name }}</h1>
-                <p class="text-muted small mb-0">Mettez à jour les informations de votre structure</p>
+                <div>
+                    <h1 class="se-title">{{ structure.name }}</h1>
+                    <p class="se-subtitle">Modifier les informations de la structure</p>
+                </div>
+            </div>
+        </div>
+
+        {# ── Formulaire principal ── #}
+        <div class="se-card">
+            {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+
+            {# ── Identité ── #}
+            <div class="se-section">
+                <div class="se-section-header">
+                    <div class="se-section-dot" style="background: var(--primary-color);"></div>
+                    <span class="se-section-label">Identité</span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-8">
+                        {{ form_label(form.name, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.name, {'attr': {'class': 'form-control se-input'}}) }}
+                        {{ form_errors(form.name) }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.type, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.type, {'attr': {'class': 'form-select se-input'}}) }}
+                        {{ form_errors(form.type) }}
+                    </div>
+                </div>
             </div>
 
-            {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate'}}) }}
-
-                {# ── Identité ── #}
-                <div class="form-section mb-4">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <div class="form-section-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v1h.5A1.5 1.5 0 0 1 16 4.5v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 11.5v-7A1.5 1.5 0 0 1 1.5 3H2zm1 0v1h11V2z"/></svg>
-                        </div>
-                        <h6 class="form-section-title mb-0">Identité</h6>
+            {# ── Adresse ── #}
+            <div class="se-section">
+                <div class="se-section-header">
+                    <div class="se-section-dot" style="background: var(--accent-color);"></div>
+                    <span class="se-section-label">Adresse</span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        {{ form_label(form.street, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.street, {'attr': {'class': 'form-control se-input'}}) }}
                     </div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-8">
-                            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.name) }}
-                        </div>
-                        <div class="col-12 col-md-4">
-                            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
-                            {{ form_errors(form.type) }}
-                        </div>
+                    <div class="col-12">
+                        {{ form_label(form.complement, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.complement, {'attr': {'class': 'form-control se-input'}}) }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.postalCode, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.postalCode, {'attr': {'class': 'form-control se-input'}}) }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.city, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.city, {'attr': {'class': 'form-control se-input'}}) }}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        {{ form_label(form.country, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.country, {'attr': {'class': 'form-control se-input'}}) }}
                     </div>
                 </div>
+            </div>
 
-                {# ── Adresse ── #}
-                <div class="form-section mb-4">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <div class="form-section-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/><path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>
-                        </div>
-                        <h6 class="form-section-title mb-0">Adresse</h6>
+            {# ── Contact ── #}
+            <div class="se-section">
+                <div class="se-section-header">
+                    <div class="se-section-dot" style="background: #7c3aed;"></div>
+                    <span class="se-section-label">Contact & informations</span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.phone, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.phone, {'attr': {'class': 'form-control se-input'}}) }}
                     </div>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            {{ form_label(form.street, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.street, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-12">
-                            {{ form_label(form.complement, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.complement, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-12 col-md-4">
-                            {{ form_label(form.postalCode, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.postalCode, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-12 col-md-4">
-                            {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.city, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-12 col-md-4">
-                            {{ form_label(form.country, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.country, {'attr': {'class': 'form-control'}}) }}
-                        </div>
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.email, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control se-input'}}) }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        {{ form_label(form.siret, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.siret, {'attr': {'class': 'form-control se-input'}}) }}
                     </div>
                 </div>
+            </div>
 
-                {# ── Contact ── #}
-                <div class="form-section mb-4">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <div class="form-section-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/></svg>
-                        </div>
-                        <h6 class="form-section-title mb-0">Contact & informations</h6>
+            {# ── Présentation ── #}
+            <div class="se-section">
+                <div class="se-section-header">
+                    <div class="se-section-dot" style="background: #059669;"></div>
+                    <span class="se-section-label">Présentation</span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control se-input'}}) }}
+                        {{ form_errors(form.description) }}
                     </div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-12 col-md-6">
-                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-                        </div>
-                        <div class="col-12 col-md-6">
-                            {{ form_label(form.siret, null, {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.siret, {'attr': {'class': 'form-control'}}) }}
-                        </div>
+                    <div class="col-12">
+                        {{ form_label(form.coverPhotoFile, null, {'label_attr': {'class': 'se-label'}}) }}
+                        {% if structure.coverPhoto %}
+                            <div class="se-cover-preview mb-2">
+                                <img src="{{ path('app_structure_cover', {id: structure.id, fileName: structure.coverPhoto}) }}" alt="Photo de couverture actuelle">
+                            </div>
+                        {% endif %}
+                        {{ form_widget(form.coverPhotoFile, {'attr': {'class': 'form-control se-input'}}) }}
+                        {{ form_errors(form.coverPhotoFile) }}
+                        <div class="form-text" style="font-size: 0.78rem;">JPEG, PNG ou WebP — max 5 Mo — format paysage recommandé</div>
                     </div>
                 </div>
+            </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 1rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-lg me-2" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg>
-                    Enregistrer les modifications
-                </button>
+            <button type="submit" class="se-submit-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Enregistrer les modifications
+            </button>
 
             {{ form_end(form) }}
         </div>
-    </div>
 
-    {# ── Transfert de gérance ── #}
-    <div class="card anicare-card mt-4">
-        <div class="card-body p-4 p-lg-5">
-            <div class="d-flex align-items-start gap-3 mb-3">
-                <div class="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 44px; height: 44px; background: #fff3e0; color: #e65100;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/></svg>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-1" style="color: var(--secondary-color, #5c4e3c);">Transférer la gérance</h6>
-                    <p class="small text-muted mb-0">Désignez un autre membre comme gérant de cette structure. Vous perdrez vos droits de gestion.</p>
+        {# ── Actions avancées ── #}
+        <div class="se-advanced-label">
+            <span>Actions avancées</span>
+        </div>
+
+        <div class="row g-3">
+            {# ── Transfert de gérance ── #}
+            <div class="col-12 col-md-6">
+                <div class="se-action-card se-action-transfer">
+                    <div class="se-action-icon-wrap se-action-icon-orange">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+                    </div>
+                    <h6 class="se-action-title">Transférer la gérance</h6>
+                    <p class="se-action-desc">Désignez un autre membre comme gérant. Vous perdrez vos droits de gestion.</p>
+
+                    {% if other_members is not empty %}
+                        <form method="post" action="{{ path('app_structure_transfer_manager', {id: structure.id}) }}" id="transferForm">
+                            <input type="hidden" name="_token" value="{{ csrf_token('transfer_manager' ~ structure.id) }}">
+                            <select name="target_user_id" id="target_user_id" class="form-select se-input mb-3" style="font-size: 0.85rem;" required>
+                                <option value="">Sélectionner un membre...</option>
+                                {% for membership in other_members %}
+                                    <option value="{{ membership.user.id }}">
+                                        {{ membership.user.firstName }} {{ membership.user.lastName }}
+                                        ({{ membership.role == 'PRO' ? 'Pro' : 'Propriétaire' }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="se-action-btn se-action-btn-orange" id="transferBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/></svg>
+                                Transférer la gérance
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="se-action-empty">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
+                            Aucun autre membre pour le moment
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
-            {% if other_members is not empty %}
-                <form method="post" action="{{ path('app_structure_transfer_manager', {id: structure.id}) }}" id="transferForm">
-                    <input type="hidden" name="_token" value="{{ csrf_token('transfer_manager' ~ structure.id) }}">
-
-                    <div class="mb-3">
-                        <label for="target_user_id" class="form-label fw-semibold" style="font-size: 0.88rem; color: var(--secondary-color, #5c4e3c);">Nouveau gérant</label>
-                        <select name="target_user_id" id="target_user_id" class="form-select" required>
-                            <option value="">Sélectionner un membre...</option>
-                            {% for membership in other_members %}
-                                <option value="{{ membership.user.id }}">
-                                    {{ membership.user.firstName }} {{ membership.user.lastName }}
-                                    ({{ membership.role == 'PRO' ? 'Professionnel' : 'Propriétaire' }})
-                                </option>
-                            {% endfor %}
-                        </select>
+            {# ── Suppression ── #}
+            <div class="col-12 col-md-6">
+                <div class="se-action-card se-action-danger">
+                    <div class="se-action-icon-wrap se-action-icon-red">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </div>
+                    <h6 class="se-action-title" style="color: #991b1b;">Supprimer la structure</h6>
+                    <p class="se-action-desc">Action irréversible. Les chevaux et membres seront détachés de la structure.</p>
 
-                    <button type="button" class="btn btn-outline-warning w-100" id="transferBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-right me-2" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/></svg>
-                        Transférer la gérance
-                    </button>
-                </form>
-            {% else %}
-                <div class="rounded-3 p-3 text-center" style="background: #f5f0eb;">
-                    <p class="small text-muted mb-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
-                        Aucun autre membre dans cette structure. Invitez des membres pour pouvoir transférer la gérance.
-                    </p>
+                    <form method="post" action="{{ path('app_structure_delete', {id: structure.id}) }}" id="deleteForm">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ structure.id) }}">
+                        <button type="button" class="se-action-btn se-action-btn-red" id="deleteBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Supprimer définitivement
+                        </button>
+                    </form>
                 </div>
-            {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{# ══ Modales ══ #}
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-body p-0">
+                <div class="text-center px-4 pt-4 pb-3" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 64px; height: 64px; background: rgba(255,255,255,0.2);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <h5 class="text-white fw-bold mb-1">Supprimer la structure</h5>
+                    <p class="text-white-50 small mb-0">Cette action est irréversible</p>
+                </div>
+                <div class="px-4 py-4">
+                    <p class="text-secondary mb-0">Vous êtes sur le point de supprimer définitivement <strong>{{ structure.name }}</strong>. Tous les chevaux et membres seront détachés.</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+                <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal" style="border-radius: 10px;">Annuler</button>
+                <button type="button" class="btn btn-danger flex-fill" id="confirmDeleteBtn" style="border-radius: 10px;">Supprimer</button>
+            </div>
         </div>
     </div>
 </div>
 
-{# Modal de confirmation de transfert #}
 <div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
             <div class="modal-body p-0">
-                <div class="text-center px-4 pt-4 pb-3" style="background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 mb-3" style="width: 64px; height: 64px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M10 8c-.552 0-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5S10.552 8 10 8"/></svg>
+                <div class="text-center px-4 pt-4 pb-3" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 64px; height: 64px; background: rgba(255,255,255,0.2);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
                     </div>
                     <h5 class="text-white fw-bold mb-1">Transférer la gérance</h5>
                     <p class="text-white-50 small mb-0">Cette action est irréversible</p>
                 </div>
                 <div class="px-4 py-4">
-                    <p class="text-secondary mb-3">
-                        Vous êtes sur le point de transférer la gérance de <strong>{{ structure.name }}</strong> à <strong id="transferTargetName"></strong>.
-                    </p>
-                    <div class="alert alert-warning small mb-0 d-flex align-items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg>
-                        <span>Vous ne pourrez plus modifier les informations de la structure ni gérer ses membres. Seul le nouveau gérant aura ces droits.</span>
+                    <p class="text-secondary mb-3">Vous êtes sur le point de transférer la gérance de <strong>{{ structure.name }}</strong> à <strong id="transferTargetName"></strong>.</p>
+                    <div class="rounded-3 p-3 d-flex align-items-start gap-2" style="background: #fffbeb; border: 1px solid #fde68a;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#d97706" class="flex-shrink-0 mt-1" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg>
+                        <span class="small" style="color: #92400e;">Vous ne pourrez plus modifier la structure ni gérer ses membres. Seul le nouveau gérant aura ces droits.</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
-                <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-warning flex-fill" id="confirmTransferBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-right me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/></svg>
-                    Confirmer le transfert
-                </button>
+                <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal" style="border-radius: 10px;">Annuler</button>
+                <button type="button" class="btn flex-fill" id="confirmTransferBtn" style="border-radius: 10px; background: #d97706; color: #fff;">Confirmer le transfert</button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-.form-section {
-    border-left: 3px solid var(--border-color, #e0d6cc);
-    padding-left: 1.25rem;
-    transition: border-color 0.2s ease;
+.structure-edit-page {
+    padding: 1.5rem 0 3rem;
 }
-.form-section:focus-within {
-    border-left-color: var(--anicare-primary, #5a9e8f);
-}
-.form-section-icon {
+
+/* ── Header ── */
+.se-back-link {
     display: inline-flex;
     align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--secondary-color, #5c4e3c);
+    text-decoration: none;
+    margin-bottom: 1.25rem;
+    transition: color 0.15s;
+}
+.se-back-link:hover {
+    color: var(--primary-color);
+}
+.se-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.se-header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary-color, #0d9488), #2d6a5f);
+    display: flex;
+    align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--soft-teal, #e6f2ef);
-    color: var(--anicare-primary, #5a9e8f);
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+}
+.se-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--secondary-color, #4A3F33);
+    margin: 0;
+    line-height: 1.2;
+}
+.se-subtitle {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin: 0.15rem 0 0;
+}
+
+/* ── Card principale ── */
+.se-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid var(--border-color, #EDE6DB);
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* ── Sections ── */
+.se-section {
+    padding-bottom: 1.75rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid #f3f0ec;
+}
+.se-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0;
+}
+.se-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+.se-section-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     flex-shrink: 0;
 }
-.form-section-title {
+.se-section-label {
+    font-size: 0.78rem;
     font-weight: 800;
-    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     color: var(--secondary-color, #5c4e3c);
+}
+
+/* ── Inputs ── */
+.se-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--secondary-color, #5c4e3c);
+    margin-bottom: 0.35rem;
+}
+.se-input {
+    border: 1.5px solid var(--border-color, #EDE6DB);
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.9rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fafaf8;
+}
+.se-input:focus {
+    border-color: var(--primary-color, #0d9488);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    background: #fff;
+}
+
+/* ── Cover preview ── */
+.se-cover-preview {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color, #EDE6DB);
+}
+.se-cover-preview img {
+    display: block;
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+}
+
+/* ── Submit ── */
+.se-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.85rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color, #0d9488), #2d6a5f);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+.se-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.35);
+}
+.se-submit-btn:active {
+    transform: translateY(0);
+}
+
+/* ── Séparateur actions avancées ── */
+.se-advanced-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0 1rem;
+    color: #b0a89e;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.se-advanced-label::before,
+.se-advanced-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color, #EDE6DB);
+}
+
+/* ── Action cards ── */
+.se-action-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s;
+}
+.se-action-transfer {
+    border: 1px solid var(--border-color, #EDE6DB);
+}
+.se-action-transfer:hover {
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.1);
+}
+.se-action-danger {
+    border: 1px solid #fecaca;
+    background: #fffbfb;
+}
+.se-action-danger:hover {
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.08);
+}
+.se-action-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+.se-action-icon-orange {
+    background: #fff7ed;
+    color: #c2410c;
+}
+.se-action-icon-red {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+.se-action-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--secondary-color, #5c4e3c);
+    margin-bottom: 0.35rem;
+}
+.se-action-desc {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+.se-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+}
+.se-action-btn-orange {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+.se-action-btn-orange:hover {
+    background: #fed7aa;
+}
+.se-action-btn-red {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.se-action-btn-red:hover {
+    background: #fecaca;
+}
+.se-action-empty {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    background: #f9f7f4;
+    color: #9ca3af;
+    font-size: 0.8rem;
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var transferBtn = document.getElementById('transferBtn');
-    if (!transferBtn) return;
+    if (transferBtn) {
+        var modalEl = document.getElementById('transferModal');
+        var modal = new bootstrap.Modal(modalEl);
+        var select = document.getElementById('target_user_id');
+        var form = document.getElementById('transferForm');
 
-    var modalEl = document.getElementById('transferModal');
-    var modal = new bootstrap.Modal(modalEl);
-    var select = document.getElementById('target_user_id');
-    var form = document.getElementById('transferForm');
+        transferBtn.addEventListener('click', function() {
+            if (!select.value) { select.focus(); return; }
+            document.getElementById('transferTargetName').textContent = select.options[select.selectedIndex].text.trim();
+            modal.show();
+        });
 
-    transferBtn.addEventListener('click', function() {
-        if (!select.value) {
-            select.focus();
-            return;
-        }
-        var selectedText = select.options[select.selectedIndex].text.trim();
-        document.getElementById('transferTargetName').textContent = selectedText;
-        modal.show();
-    });
+        document.getElementById('confirmTransferBtn').addEventListener('click', function() {
+            modal.hide();
+            form.submit();
+        });
+    }
 
-    document.getElementById('confirmTransferBtn').addEventListener('click', function() {
-        modal.hide();
-        form.submit();
-    });
+    var deleteBtn = document.getElementById('deleteBtn');
+    if (deleteBtn) {
+        var deleteModalEl = document.getElementById('deleteModal');
+        var deleteModal = new bootstrap.Modal(deleteModalEl);
+        var deleteForm = document.getElementById('deleteForm');
+
+        deleteBtn.addEventListener('click', function() { deleteModal.show(); });
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            deleteModal.hide();
+            deleteForm.submit();
+        });
+    }
 });
 </script>
 {% endblock %}

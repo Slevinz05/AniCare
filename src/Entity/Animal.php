@@ -115,6 +115,7 @@ class Animal
 
     /** @var Collection<int, HealthBookEntry> */
     #[ORM\OneToMany(targetEntity: HealthBookEntry::class, mappedBy: 'animal')]
+    #[ORM\OrderBy(['date' => 'DESC'])]
     private Collection $healthBookEntries;
 
     /** @var Collection<int, AnimalShare> */

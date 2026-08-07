@@ -27,6 +27,9 @@ final class HealthBookEntryController extends AbstractController
 
         #[Autowire('%kernel.project_dir%/var/uploads/health-book-entries')]
         private readonly string $healthBookEntryUploadsDirectory,
+
+        #[Autowire('%kernel.project_dir%/var/uploads/animals')]
+        private readonly string $animalUploadsDirectory,
     ) {
     }
 
@@ -35,9 +38,11 @@ final class HealthBookEntryController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+        $isPro = $this->isGranted('ROLE_PRO');
 
         return $this->render('health_book_entry/index.html.twig', [
-            'health_book_entries' => $healthBookEntryRepository->findAccessibleByUser($user),
+            'health_book_entries' => $healthBookEntryRepository->findAccessibleByUser($user, $isPro),
+            'is_pro' => $isPro,
         ]);
     }
 
@@ -95,26 +100,22 @@ final class HealthBookEntryController extends AbstractController
                 return $this->redirectToRoute('app_health_book_entry_import');
             }
 
-            $title = trim($request->request->get('title', '')) ?: 'Import de documents';
+            $documents = $this->documentUploader->uploadMany(
+                $uploadedFiles,
+                $this->animalUploadsDirectory,
+            );
 
-            $entry = new HealthBookEntry();
-            $entry->setTitle($title);
-            $entry->setType('Autre');
-            $entry->setDate(new \DateTimeImmutable());
-            $entry->setAnimal($animal);
-            $entry->setDescription('Documents importés le' . date('d/m/Y'));
-
-            $documents = $this->documentUploader->uploadMany($uploadedFiles, $this->healthBookEntryUploadsDirectory);
             foreach ($documents as $document) {
-                $entry->addDocument($document);
+                $animal->addDocument($document);
             }
 
-            $entityManager->persist($entry);
             $entityManager->flush();
 
             $this->addFlash('success', count($documents) . ' document(s) importé(s) avec succès.');
 
-            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $entry->getId()]);
+            return $this->redirect(
+                $this->generateUrl('app_animal_show', ['slug' => $animal->getSlug()]) . '#panel-documents'
+            );
         }
 
         return $this->render('health_book_entry/import.html.twig', [

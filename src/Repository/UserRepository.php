@@ -89,4 +89,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+
+    public function searchOwners(string $query, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.accountType != :proType')
+            ->andWhere('u.firstName LIKE :q OR u.lastName LIKE :q OR u.email LIKE :q')
+            ->setParameter('proType', 'PRO')
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('u.lastName', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

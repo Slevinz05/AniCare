@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const clientSelect = document.getElementById('appointment_client');
     const animalsContainer = document.getElementById('animals-container');
     const dynamicAnimals = document.getElementById('dynamic-animals');
-    const locationField = document.getElementById('appt-location');
+    const locationField = document.getElementById('appt-location') || document.getElementById('appointment_location');
     let debounceTimer = null;
 
     searchInput.addEventListener('input', function() {
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             let animalsHtml = '';
                             if (client.animals.length > 0) {
                                 animalsHtml = '<div class="search-result-animals">' +
-                                    client.animals.map(a => '<span>' + a.name + (a.livingPlaceName ? ' · ' + a.livingPlaceName : '') + '</span>').join('') +
+                                    client.animals.map(a => '<span>' + a.name + (a.structureName ? ' · ' + a.structureName : (a.livingPlaceName ? ' · ' + a.livingPlaceName : '')) + '</span>').join('') +
                                     '</div>';
                             }
                             div.innerHTML = '<div class="search-result-name">' + client.name + '</div>' +
@@ -534,27 +534,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (locationField) locationField.value = '';
     });
 
+    let currentOwnerAddress = '';
+
     function loadAnimals(clientId) {
         fetch('/rendez-vous/api/client/' + clientId + '/animals')
             .then(r => r.json())
-            .then(animals => {
+            .then(data => {
+                const animals = data.animals;
+                currentOwnerAddress = data.ownerAddress || '';
                 dynamicAnimals.innerHTML = '';
-                // Uncheck all hidden Symfony checkboxes first
                 document.querySelectorAll('#symfony-animals input[type="checkbox"]').forEach(cb => cb.checked = false);
 
                 if (animals.length === 0) {
                     dynamicAnimals.innerHTML = '<div class="animals-empty">Aucun cheval trouvé pour ce client.</div>';
                     animalsContainer.classList.remove('hidden');
+                    if (currentOwnerAddress && locationField && !locationField.value) {
+                        locationField.value = currentOwnerAddress;
+                    }
                     return;
                 }
 
-                let firstAddress = '';
                 animals.forEach(animal => {
-                    if (!firstAddress && animal.address) {
-                        firstAddress = animal.address;
-                    }
+                    // Best address: structure > livingPlace > owner
+                    const bestAddress = animal.structureAddress || animal.address || currentOwnerAddress;
 
-                    // Find the matching Symfony checkbox
                     const symCb = document.querySelector('#symfony-animals input[type="checkbox"][value="' + animal.id + '"]');
 
                     const wrapper = document.createElement('div');
@@ -564,21 +567,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     cb.type = 'checkbox';
                     cb.id = 'dynamic_animal_' + animal.id;
                     cb.dataset.animalId = animal.id;
-                    cb.dataset.address = animal.address || '';
+                    cb.dataset.address = bestAddress;
 
                     const label = document.createElement('label');
                     label.className = 'form-check-label';
                     label.htmlFor = cb.id;
                     label.textContent = animal.name;
-                    if (animal.livingPlaceName) {
+                    const locationHint = animal.structureName || animal.livingPlaceName;
+                    if (locationHint) {
                         const small = document.createElement('small');
                         small.style.cssText = 'opacity:0.6;margin-left:0.3rem;';
-                        small.textContent = '· ' + animal.livingPlaceName;
+                        small.textContent = '· ' + locationHint;
                         label.appendChild(small);
                     }
 
                     cb.addEventListener('change', function() {
-                        // Sync with Symfony hidden checkbox
                         if (symCb) symCb.checked = this.checked;
                         updateLocationFromAnimals();
                     });
@@ -590,9 +593,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 animalsContainer.classList.remove('hidden');
 
-                // Auto-fill location from first animal's address
-                if (firstAddress && locationField && !locationField.value) {
-                    locationField.value = firstAddress;
+                // Auto-fill with first animal's best address
+                const firstBest = animals[0].structureAddress || animals[0].address || currentOwnerAddress;
+                if (firstBest && locationField && !locationField.value) {
+                    locationField.value = firstBest;
                 }
             });
     }
@@ -601,8 +605,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const checked = dynamicAnimals.querySelectorAll('input[type="checkbox"]:checked');
         if (checked.length === 1 && checked[0].dataset.address) {
             locationField.value = checked[0].dataset.address;
-        } else if (checked.length === 0) {
-            // Don't clear if user typed something custom
+        } else if (checked.length > 1) {
+            // Multiple animals: use the first checked one's address
+            locationField.value = checked[0].dataset.address;
         }
     }
 });

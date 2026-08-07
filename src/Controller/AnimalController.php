@@ -6,10 +6,12 @@ use App\Entity\Animal;
 use App\Entity\AnimalDeletionRequest;
 use App\Entity\AnimalShare;
 use App\Entity\Reminder;
+use App\Entity\StructureMembership;
 use App\Entity\User;
 use App\Form\AnimalType;
 use App\Repository\AnimalDeletionRequestRepository;
 use App\Repository\AnimalRepository;
+use App\Repository\StructureMembershipRepository;
 use App\Repository\UserRepository;
 use App\Service\DocumentUploader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,12 +59,38 @@ final class AnimalController extends AbstractController
     }
 
     #[Route('/ajouter', name: 'app_animal_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, StructureMembershipRepository $membershipRepo): Response
     {
         $animal = new Animal();
 
         /** @var User $user */
         $user = $this->getUser();
+
+        $isStructure = $this->isGranted('ROLE_STRUCTURE');
+        $structure = null;
+
+        if ($isStructure) {
+            $membership = $membershipRepo->findOneBy(['user' => $user, 'role' => StructureMembership::ROLE_MANAGER]);
+            $structure = $membership?->getStructure();
+
+            if ($structure) {
+                $animal->setStructure($structure);
+                $animal->setLivingPlaceName($structure->getName());
+                $animal->setLivingPlaceStreet($structure->getStreet());
+                $animal->setLivingPlaceComplement($structure->getComplement());
+                $animal->setLivingPlacePostalCode($structure->getPostalCode());
+                $animal->setLivingPlaceCity($structure->getCity());
+                $animal->setLivingPlaceCountry($structure->getCountry());
+                $animal->setLivingPlaceManagerLastName($user->getLastName());
+                $animal->setLivingPlaceManagerFirstName($user->getFirstName());
+                $animal->setLivingPlaceManagerPhone($user->getPhone() ?? $structure->getPhone());
+                $animal->setLivingPlaceManagerEmail($user->getEmail() ?? $structure->getEmail());
+            }
+        } else {
+            $animal->setTrustedContactLastName($user->getLastName());
+            $animal->setTrustedContactFirstName($user->getFirstName());
+            $animal->setTrustedContactPhone($user->getPhone());
+        }
 
         $form = $this->createForm(AnimalType::class, $animal);
         $form->handleRequest($request);
@@ -76,7 +104,23 @@ final class AnimalController extends AbstractController
                 ]);
             }
 
-            $animal->setOwner($user);
+            if ($isStructure) {
+                $ownerId = $request->request->get('owner_id');
+                if ($ownerId) {
+                    $owner = $userRepository->find($ownerId);
+                    if ($owner) {
+                        $animal->setOwner($owner);
+                    }
+                }
+                if (!$animal->getOwner()) {
+                    $animal->setOwner($user);
+                }
+                if ($structure) {
+                    $animal->setStructure($structure);
+                }
+            } else {
+                $animal->setOwner($user);
+            }
             $animal->setSpecies('Cheval');
 
             $this->syncAgeAndBirthDate($form, $animal);

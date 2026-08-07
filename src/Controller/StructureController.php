@@ -7,23 +7,40 @@ use App\Entity\StructureMembership;
 use App\Entity\User;
 use App\Form\StructureType;
 use App\Repository\AnimalRepository;
+use App\Repository\StructureMembershipRepository;
 use App\Repository\StructureRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/structures')]
 #[IsGranted('ROLE_USER')]
 final class StructureController extends AbstractController
 {
+    public function __construct(
+        #[Autowire('%kernel.project_dir%/var/uploads/structures')] private readonly string $uploadsDir,
+        private readonly SluggerInterface $slugger,
+    ) {
+    }
     #[Route('', name: 'app_structure_index', methods: ['GET'])]
-    public function index(Request $request, StructureRepository $structureRepository): Response
+    public function index(Request $request, StructureRepository $structureRepository, StructureMembershipRepository $membershipRepo): Response
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        if ($this->isGranted('ROLE_STRUCTURE')) {
+            $membership = $membershipRepo->findOneBy(['user' => $user, 'role' => StructureMembership::ROLE_MANAGER]);
+            if ($membership) {
+                return $this->redirectToRoute('app_structure_show', ['id' => $membership->getStructure()->getId()]);
+            }
+        }
 
         $search = trim($request->query->getString('q'));
         $allStructures = $search
@@ -55,6 +72,8 @@ final class StructureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleCoverUpload($form, $structure);
+
             $entityManager->persist($structure);
 
             $isManager = $request->request->getBoolean('is_manager');
@@ -121,6 +140,8 @@ final class StructureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleCoverUpload($form, $structure);
+
             $entityManager->flush();
 
             $this->addFlash('success', 'Structure mise à jour.');
@@ -252,5 +273,49 @@ final class StructureController extends AbstractController
         }
 
         return $this->render('structure/claim.html.twig');
+    }
+
+    #[Route('/{id}/cover/{fileName}', name: 'app_structure_cover', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function cover(Structure $structure, string $fileName): BinaryFileResponse
+    {
+        if ($structure->getCoverPhoto() !== $fileName) {
+            throw $this->createNotFoundException();
+        }
+
+        $filePath = $this->uploadsDir . '/' . basename($fileName);
+        if (!is_file($filePath)) {
+            throw $this->createNotFoundException();
+        }
+
+        $response = new BinaryFileResponse($filePath);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $fileName);
+
+        return $response;
+    }
+
+    private function handleCoverUpload($form, Structure $structure): void
+    {
+        $file = $form->get('coverPhotoFile')->getData();
+        if (!$file) {
+            return;
+        }
+
+        if (!is_dir($this->uploadsDir)) {
+            mkdir($this->uploadsDir, 0777, true);
+        }
+
+        if ($structure->getCoverPhoto()) {
+            $oldPath = $this->uploadsDir . '/' . $structure->getCoverPhoto();
+            if (is_file($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+        $file->move($this->uploadsDir, $newFilename);
+        $structure->setCoverPhoto($newFilename);
     }
 }

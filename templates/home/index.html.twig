@@ -277,6 +277,35 @@
             .evt-day { font-size: 1.2rem; line-height: 1; }
             .evt-month { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
             .min-width-0 { min-width: 0; }
+
+            .evt-row-link {
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+            }
+            .evt-accept-form { flex-shrink: 0; }
+            .evt-accept-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.3rem;
+                padding: 0.35rem 0.75rem;
+                border-radius: 2rem;
+                border: none;
+                background: var(--primary-color);
+                color: #fff;
+                font-size: 0.72rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.15s;
+                white-space: nowrap;
+                box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+            }
+            .evt-accept-btn:hover {
+                background: #0f766e;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35);
+            }
+            .evt-accept-btn:active { transform: translateY(0); }
         </style>
 
         {# --- Hero --- #}
@@ -629,6 +658,7 @@
 
         {# --- Accès rapide --- #}
         <div class="row g-3 mb-4">
+            {% if not is_granted('ROLE_STRUCTURE') %}
             <div class="col-6 col-md-3">
                 <a href="{{ path('app_health_book_entry_new') }}" class="quick-action qa-consultation">
                     <span class="qa-icon">
@@ -637,6 +667,7 @@
                     Nouvelle consultation
                 </a>
             </div>
+            {% endif %}
             <div class="col-6 col-md-3">
                 <a href="{{ path('app_appointment_index') }}" class="quick-action qa-rdv">
                     {% set pending_count = owner_appointments|filter(a => a.status == 'PENDING')|length %}
@@ -673,7 +704,7 @@
                 <div class="section-card h-100 d-flex flex-column">
                     <div class="section-card-header">
                         <div>
-                            <p class="page-eyebrow mb-0">Mes chevaux</p>
+                            <p class="page-eyebrow mb-0">{{ is_granted('ROLE_STRUCTURE') ? 'Chevaux de la structure' : 'Mes chevaux' }}</p>
                         </div>
                         {% if animals is not empty %}
                             <span class="stat-pill" style="background: var(--soft-teal); color: var(--primary-color);">
@@ -747,6 +778,7 @@
                                 subtitle: (appt.animals|length > 1 ? appt.animals|length ~ ' chevaux' : (appt.animals|length == 1 ? appt.animals|first.name : (appt.animal ? appt.animal.name : ''))) ~ (appt.createdBy and appt.createdBy != app.user ? ' · Dr. ' ~ appt.createdBy.fullName : ''),
                                 type: 'appointment',
                                 status: appt.status,
+                                id: appt.id,
                                 link: path('app_appointment_show', {id: appt.id})
                             }]) %}
                         {% endfor %}
@@ -791,7 +823,8 @@
                                         {% set badge_color = 'var(--accent-color)' %}
                                         {% set pill_label = 'Rappel' %}
                                     {% endif %}
-                                    <{% if event.link %}a href="{{ event.link }}"{% else %}div{% endif %} class="evt-row" style="text-decoration: none; color: inherit;">
+                                    <div class="evt-row" style="color: inherit; position: relative;">
+                                        {% if event.link %}<a href="{{ event.link }}" class="evt-row-link"></a>{% endif %}
                                         <div class="evt-date-badge" style="background: {{ badge_bg }}; color: {{ badge_color }};">
                                             <span class="evt-day">{{ event.day }}</span>
                                             <span class="evt-month">{{ event.month }}</span>
@@ -802,10 +835,20 @@
                                                 {% if event.time %}<span style="font-weight: 600;">{{ event.time }}</span> · {% endif %}{{ event.subtitle }}
                                             </span>
                                         </div>
-                                        <span class="stat-pill" style="background: {{ badge_bg }}; color: {{ badge_color }}; font-size: 0.68rem; white-space: nowrap;">
-                                            {{ pill_label }}
-                                        </span>
-                                    </{% if event.link %}a{% else %}div{% endif %}>
+                                        {% if event.status == 'PENDING' and event.type == 'appointment' and event.id is defined %}
+                                            <form method="post" action="{{ path('app_appointment_confirm', {id: event.id}) }}?redirect=home" class="evt-accept-form" style="position: relative; z-index: 2;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ event.id) }}">
+                                                <button type="submit" class="evt-accept-btn" title="Accepter le rendez-vous">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                                    Accepter
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="stat-pill" style="background: {{ badge_bg }}; color: {{ badge_color }}; font-size: 0.68rem; white-space: nowrap;">
+                                                {{ pill_label }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -815,10 +858,12 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                 Rendez-vous
                             </a>
+                            {% if not is_granted('ROLE_STRUCTURE') %}
                             <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-secondary btn-sm flex-fill">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                                 Carnet de santé
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

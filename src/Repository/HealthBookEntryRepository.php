@@ -17,8 +17,17 @@ class HealthBookEntryRepository extends ServiceEntityRepository
         parent::__construct($registry, HealthBookEntry::class);
     }
 
-    public function findAccessibleByUser(User $user): array
+    public function findAccessibleByUser(User $user, bool $isPro = false): array
     {
+        if ($isPro) {
+            return $this->createQueryBuilder('h')
+                ->where('h.veterinarian = :user')
+                ->setParameter('user', $user)
+                ->orderBy('h.date', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+
         return $this->createQueryBuilder('h')
             ->innerJoin('h.animal', 'a')
             ->leftJoin('a.animalShares', 's')

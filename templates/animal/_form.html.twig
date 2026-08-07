@@ -194,23 +194,45 @@
        ══════════════════════════════════════════════════════════ #}
     <div class="col-12 col-lg-5">
         <div class="d-flex flex-column gap-4">
-            {# ── Contact de confiance ── #}
+            {# ── Propriétaire ── #}
             <div class="p-4 rounded-3 border border-anicare bg-white mb-4" style="border-left: 4px solid #dc3545 !important;">
-                <p class="page-eyebrow mb-2" style="color: #dc3545;">Contact de confiance</p>
-                <p class="text-secondary small mb-3">Personne à contacter en cas d'urgence concernant ce cheval.</p>
-                <div class="row g-3">
+                <p class="page-eyebrow mb-2" style="color: #dc3545;">Propriétaire</p>
+                {% if is_granted('ROLE_STRUCTURE') %}
+                    <p class="text-secondary small mb-3">Rattachez un compte propriétaire existant ou renseignez les coordonnées manuellement.</p>
+
+                    <div class="position-relative mb-3">
+                        <input type="text" id="ownerSearchInput" class="form-control" placeholder="Rechercher un propriétaire (nom, email)..." autocomplete="off">
+                        <div id="ownerSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; display: none; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div id="ownerSelected" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-3" style="background-color: #fce4ec;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <div class="flex-grow-1">
+                                <strong id="ownerSelectedName" class="small" style="color: #dc3545;"></strong>
+                                <span id="ownerSelectedInfo" class="d-block small text-secondary"></span>
+                            </div>
+                            <button type="button" id="ownerRemoveBtn" class="btn btn-sm btn-outline-danger border-0" style="font-size: 0.8rem;">&#10005;</button>
+                        </div>
+                        <input type="hidden" name="owner_id" id="ownerIdInput" value="">
+                    </div>
+                {% else %}
+                    <p class="text-secondary small mb-3">Coordonnées du propriétaire du cheval.</p>
+                {% endif %}
+
+                <div class="row g-3" id="ownerManualFields">
                     <div class="col-12 col-md-6">
-                        {{ form_label(form.trustedContactLastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_label(form.trustedContactLastName, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
                         {{ _self.field(form.trustedContactLastName) }}
                     </div>
 
                     <div class="col-12 col-md-6">
-                        {{ form_label(form.trustedContactFirstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_label(form.trustedContactFirstName, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
                         {{ _self.field(form.trustedContactFirstName) }}
                     </div>
 
                     <div class="col-12">
-                        {{ form_label(form.trustedContactPhone, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_label(form.trustedContactPhone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
                         {{ _self.field(form.trustedContactPhone) }}
                     </div>
                 </div>
@@ -535,6 +557,80 @@ document.addEventListener('DOMContentLoaded', function () {
         document.addEventListener('click', function (e) {
             if (!proInput.contains(e.target) && !proResults.contains(e.target)) {
                 proResults.style.display = 'none';
+            }
+        });
+    }
+
+    // ── Recherche propriétaire (structure) ──
+    const ownerInput = document.getElementById('ownerSearchInput');
+    const ownerResults = document.getElementById('ownerSearchResults');
+    const ownerSelected = document.getElementById('ownerSelected');
+    const ownerIdInput = document.getElementById('ownerIdInput');
+    const ownerSelectedName = document.getElementById('ownerSelectedName');
+    const ownerSelectedInfo = document.getElementById('ownerSelectedInfo');
+    const ownerRemoveBtn = document.getElementById('ownerRemoveBtn');
+    const ownerManualFields = document.getElementById('ownerManualFields');
+    let ownerDebounce = null;
+
+    if (ownerInput) {
+        ownerInput.addEventListener('input', function () {
+            clearTimeout(ownerDebounce);
+            const q = this.value.trim();
+            if (q.length < 2) { ownerResults.style.display = 'none'; return; }
+
+            ownerDebounce = setTimeout(function () {
+                fetch('{{ path("api_owners_search") }}?q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        ownerResults.innerHTML = '';
+                        if (data.length === 0) {
+                            ownerResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun compte trouvé.</div>';
+                        } else {
+                            data.forEach(function (owner) {
+                                var item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                item.innerHTML = '<strong>' + owner.fullName + '</strong><br><span class="small text-secondary">' + owner.email + (owner.phone ? ' — ' + owner.phone : '') + '</span>';
+                                item.addEventListener('click', function () {
+                                    ownerIdInput.value = owner.id;
+                                    ownerSelectedName.textContent = owner.fullName;
+                                    ownerSelectedInfo.textContent = owner.email + (owner.phone ? ' — ' + owner.phone : '');
+                                    ownerSelected.style.display = 'block';
+                                    ownerInput.style.display = 'none';
+                                    ownerResults.style.display = 'none';
+
+                                    var lastNameField = document.getElementById('{{ form.trustedContactLastName.vars.id }}');
+                                    var firstNameField = document.getElementById('{{ form.trustedContactFirstName.vars.id }}');
+                                    var phoneField = document.getElementById('{{ form.trustedContactPhone.vars.id }}');
+                                    if (lastNameField) lastNameField.value = owner.lastName || '';
+                                    if (firstNameField) firstNameField.value = owner.firstName || '';
+                                    if (phoneField) phoneField.value = owner.phone || '';
+                                });
+                                ownerResults.appendChild(item);
+                            });
+                        }
+                        ownerResults.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        ownerRemoveBtn.addEventListener('click', function () {
+            ownerIdInput.value = '';
+            ownerSelected.style.display = 'none';
+            ownerInput.style.display = 'block';
+            ownerInput.value = '';
+
+            var lastNameField = document.getElementById('{{ form.trustedContactLastName.vars.id }}');
+            var firstNameField = document.getElementById('{{ form.trustedContactFirstName.vars.id }}');
+            var phoneField = document.getElementById('{{ form.trustedContactPhone.vars.id }}');
+            if (lastNameField) lastNameField.value = '';
+            if (firstNameField) firstNameField.value = '';
+            if (phoneField) phoneField.value = '';
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!ownerInput.contains(e.target) && !ownerResults.contains(e.target)) {
+                ownerResults.style.display = 'none';
             }
         });
     }

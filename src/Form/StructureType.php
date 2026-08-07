@@ -6,10 +6,14 @@ use App\Entity\Structure;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Image;
 
 class StructureType extends AbstractType
 {
@@ -69,6 +73,26 @@ class StructureType extends AbstractType
                 'label' => 'SIRET',
                 'required' => false,
                 'attr' => ['placeholder' => 'Optionnel'],
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Présentez votre structure en quelques mots...',
+                    'rows' => 4,
+                ],
+            ])
+            ->add('coverPhotoFile', FileType::class, [
+                'label' => 'Photo de couverture',
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new Image([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypesMessage' => 'Formats acceptés : JPEG, PNG, WebP.',
+                    ]),
+                ],
             ])
         ;
     }

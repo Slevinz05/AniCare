@@ -463,13 +463,14 @@
                         </div>
                         {% endif %}
 
-                        {% if animal.documents is empty %}
+                        {% set sorted_documents = animal.documents|sort((a, b) => (b.uploadedAt ?? '') <=> (a.uploadedAt ?? '')) %}
+                        {% if sorted_documents is empty %}
                             <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                                Aucun document n'est encore associe a ce cheval.
+                                Aucun document n'est encore associé à ce cheval.
                             </div>
                         {% else %}
                             <div class="document-list">
-                                {% for document in animal.documents %}
+                                {% for document in sorted_documents %}
                                     <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
                                         <div>
                                             <a href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
