@@ -68,4 +68,45 @@ class AnimalRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['slug' => $slug]);
     }
+
+    public function searchByQuery(string $query, int $limit = 20): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.owner', 'o')
+            ->where('LOWER(a.name) LIKE LOWER(:q)')
+            ->orWhere('a.identificationNumber LIKE :q')
+            ->orWhere('a.microchipNumber LIKE :q')
+            ->orWhere("CONCAT(LOWER(o.firstName), ' ', LOWER(o.lastName)) LIKE LOWER(:q)")
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('a.name', 'ASC')
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findDuplicates(string $name, ?string $identificationNumber, ?string $microchipNumber): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.owner', 'o');
+
+        $conditions = [];
+
+        if ($identificationNumber) {
+            $conditions[] = 'a.identificationNumber = :idNum';
+            $qb->setParameter('idNum', $identificationNumber);
+        }
+
+        if ($microchipNumber) {
+            $conditions[] = 'a.microchipNumber = :chip';
+            $qb->setParameter('chip', $microchipNumber);
+        }
+
+        $conditions[] = 'LOWER(a.name) = LOWER(:name)';
+        $qb->setParameter('name', $name);
+
+        $qb->where(implode(' OR ', $conditions))
+            ->orderBy('a.name', 'ASC');
+
+        return $qb->getQuery()->getResult();
+    }
 }

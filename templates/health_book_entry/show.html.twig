@@ -1,27 +1,169 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail de la consultation - AniCare{% endblock %}
+{% block title %}{{ health_book_entry.title }} - Consultation - AniCare{% endblock %}
 
 {% block body %}
-{% set entry_type = health_book_entry.type|default('')|lower %}
+{% set entry = health_book_entry %}
+{% set entry_type = entry.type|default('')|lower %}
+{% set is_author = is_author|default(false) %}
 
-<div class="container py-4">
-    <div class="card anicare-card overflow-hidden">
+<style>
+    .consultation-status-bar {
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    .status-draft {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+        color: #856404;
+        border: 1px solid #ffc107;
+    }
+    .status-published {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border: 1px solid #28a745;
+    }
+    .status-shared {
+        background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+        color: #004085;
+        border: 1px solid #007bff;
+    }
+    .consultation-section {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        transition: box-shadow 0.2s;
+    }
+    .consultation-section:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .section-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .section-header .section-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .section-body {
+        padding: 1.25rem;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+    }
+    .info-value {
+        font-size: 0.925rem;
+        color: #212529;
+    }
+    .text-block {
+        background: var(--soft-teal, #eef7f5);
+        border-left: 3px solid var(--primary-color, #1a4d45);
+        border-radius: 0 8px 8px 0;
+        padding: 1rem 1.25rem;
+        line-height: 1.7;
+        color: #333;
+    }
+    .action-bar {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .btn-validate {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    .btn-validate:hover { background: linear-gradient(135deg, #218838 0%, #1e7e34 100%); color: #fff; transform: translateY(-1px); }
+    .btn-share {
+        background: linear-gradient(135deg, #007bff 0%, #0069d9 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    .btn-share:hover { background: linear-gradient(135deg, #0069d9 0%, #0062cc 100%); color: #fff; transform: translateY(-1px); }
+</style>
+
+<div class="container py-4" style="max-width: 900px;">
+
+    {# --- Breadcrumb --- #}
+    <nav class="mb-3">
+        <ol class="breadcrumb small mb-0">
+            <li class="breadcrumb-item"><a href="{{ path('app_health_book_entry_index') }}" class="text-decoration-none" style="color: var(--primary-color);">Consultations</a></li>
+            {% if entry.animal %}
+                <li class="breadcrumb-item"><a href="{{ path('app_animal_show', {slug: entry.animal.slug}) }}" class="text-decoration-none" style="color: var(--primary-color);">{{ entry.animal.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{{ entry.title }}</li>
+        </ol>
+    </nav>
+
+    {# --- Status banner --- #}
+    {% if entry.isDraft %}
+        <div class="consultation-status-bar status-draft mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Brouillon — visible uniquement par vous
+        </div>
+    {% elseif entry.isShared %}
+        <div class="consultation-status-bar status-shared mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
+            Compte-rendu transmis{{ entry.sharedAt ? ' le ' ~ entry.sharedAt|date('d/m/Y à H\\hi') : '' }}
+        </div>
+    {% elseif entry.isPublished %}
+        <div class="consultation-status-bar status-published mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Consultation validée{% if is_author %} — prête à être transmise{% endif %}
+        </div>
+    {% endif %}
+
+    {# --- Header card --- #}
+    <div class="consultation-section mb-4">
         <div class="card-header medical-header p-4">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
-                    <p class="page-eyebrow mb-2">Détail de la consultation</p>
-
-                    <h1 class="page-title mb-1">
-                        {{ health_book_entry.title }}
-                    </h1>
-
+                    <h1 class="page-title mb-1" style="font-size: 1.5rem;">{{ entry.title }}</h1>
                     <p class="page-subtitle mb-0">
-                        Consultation n°{{ health_book_entry.id }}
+                        {{ entry.date ? entry.date|date('d/m/Y') : '' }}
+                        {% if entry.animal %}
+                            · {{ entry.animal.species|default('Cheval') }} {{ entry.animal.name }}
+                        {% endif %}
                     </p>
                 </div>
-
-                <div>
+                <div class="d-flex align-items-center gap-2">
                     {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
                         <span class="badge-medical badge-vaccin">Vaccination</span>
                     {% elseif entry_type == 'chirurgie' %}
@@ -29,259 +171,325 @@
                     {% elseif entry_type == 'consultation' %}
                         <span class="badge-medical badge-consultation">Consultation</span>
                     {% else %}
-                        <span class="badge-medical badge-neutral">
-                            {{ health_book_entry.type ?: 'Non renseigné' }}
-                        </span>
+                        <span class="badge-medical badge-neutral">{{ entry.type ?: 'Non renseigné' }}</span>
                     {% endif %}
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="card-body p-4">
-            <div class="table-responsive mb-5">
-                <table class="table table-hover table-medical align-middle mb-0">
-                    <tbody>
-                        <tr>
-                            <th style="width: 35%;">Cheval concerné</th>
-                            <td>
-                                <strong class="text-teal">
-                                    {{ health_book_entry.animal.name ?? 'Non spécifié' }}
-                                </strong>
-                            </td>
-                        </tr>
+    {# --- Workflow actions (author only) --- #}
+    {% if is_author %}
+        <div class="action-bar mb-4">
+            {% if entry.isDraft %}
+                <form method="post" action="{{ path('app_health_book_entry_validate', {id: entry.id}) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ entry.id) }}">
+                    <button type="submit" class="btn-validate" onclick="return confirm('Valider cette consultation ? Elle deviendra visible par les personnes ayant accès à l\'animal.')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Valider la consultation
+                    </button>
+                </form>
+            {% elseif entry.isPublished %}
+                <form method="post" action="{{ path('app_health_book_entry_share', {id: entry.id}) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('share' ~ entry.id) }}">
+                    <button type="submit" class="btn-share" onclick="return confirm('Transmettre le compte-rendu au référent de l\'animal ?')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
+                        Transmettre au référent
+                    </button>
+                </form>
+            {% endif %}
 
-                        <tr>
-                            <th>Intitulé de la consultation</th>
-                            <td>{{ health_book_entry.title }}</td>
-                        </tr>
+            <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="btn btn-outline-primary" style="border-radius: 8px; font-size: 0.875rem;">
+                Modifier
+            </a>
+        </div>
+    {% endif %}
 
-                        <tr>
-                            <th>Type de consultation</th>
-                            <td>
-                                {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
-                                    <span class="badge-medical badge-vaccin">Vaccination</span>
-                                {% elseif entry_type == 'chirurgie' %}
-                                    <span class="badge-medical badge-surgery">Chirurgie</span>
-                                {% elseif entry_type == 'consultation' %}
-                                    <span class="badge-medical badge-consultation">Consultation</span>
-                                {% else %}
-                                    <span class="badge-medical badge-neutral">
-                                        {{ health_book_entry.type ?: 'Non renseigné' }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Date de la consultation</th>
-                            <td>
-                                {{ health_book_entry.date ? health_book_entry.date|date('d/m/Y') : 'Non renseignée' }}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Intervenant</th>
-                            <td>
-                                {% if health_book_entry.veterinarian %}
-                                    <a href="{{ path('app_professional_show', {'id': health_book_entry.veterinarian.id}) }}" class="text-decoration-none fw-bold" style="color: var(--primary-color);">
-                                        {{ health_book_entry.veterinarian.fullName }}
-                                    </a>
-                                    {% if health_book_entry.veterinarian.specialty %}
-                                        <span class="badge ms-1" style="background-color: var(--primary-color); font-size: 0.65rem;">{{ health_book_entry.veterinarian.specialty }}</span>
-                                    {% endif %}
-                                    {% if health_book_entry.veterinarian.phone %}
-                                        <br><a href="tel:{{ health_book_entry.veterinarian.phone }}" class="small text-decoration-none text-secondary">{{ health_book_entry.veterinarian.phone }}</a>
-                                    {% endif %}
-                                {% elseif health_book_entry.veterinarianName %}
-                                    {{ health_book_entry.veterinarianName }}
-                                {% else %}
-                                    Non renseigné
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        {% if health_book_entry.appointment %}
-                            <tr>
-                                <th>Rendez-vous associé</th>
-                                <td>
-                                    <a href="{{ path('app_appointment_show', {id: health_book_entry.appointment.id}) }}" class="text-decoration-none fw-bold" style="color: var(--accent-color);">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                        {{ health_book_entry.appointment.scheduledAt|date('d/m/Y à H:i') }} — {{ health_book_entry.appointment.reason }}
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endif %}
-
-                        {% if health_book_entry.dosage %}
-                            <tr>
-                                <th>Posologie</th>
-                                <td>{{ health_book_entry.dosage }}</td>
-                            </tr>
-                        {% endif %}
-
-                        {% if health_book_entry.frequency %}
-                            <tr>
-                                <th>Fréquence</th>
-                                <td>{{ health_book_entry.frequency }}</td>
-                            </tr>
-                        {% endif %}
-
-                        {% if health_book_entry.endDate %}
-                            <tr>
-                                <th>Date de fin</th>
-                                <td>{{ health_book_entry.endDate|date('d/m/Y') }}</td>
-                            </tr>
-                        {% endif %}
-
-                        {% if health_book_entry.batchNumber %}
-                            <tr>
-                                <th>Numéro de lot</th>
-                                <td>{{ health_book_entry.batchNumber }}</td>
-                            </tr>
-                        {% endif %}
-
-                        {% if health_book_entry.nextReminderAt %}
-                            <tr>
-                                <th>Prochain rappel</th>
-                                <td>
-                                    {{ health_book_entry.nextReminderAt|date('d/m/Y') }}
-                                    {% if health_book_entry.isOverdueReminder %}
-                                        <span class="badge bg-danger ms-2">En retard</span>
-                                    {% elseif health_book_entry.isDueSoon %}
-                                        <span class="badge bg-warning text-dark ms-2">Bientôt</span>
-                                    {% endif %}
-                                    {% if health_book_entry.recurrenceLabel %}
-                                        <span class="text-secondary small ms-2">({{ health_book_entry.recurrenceLabel }})</span>
-                                    {% elseif health_book_entry.recurrenceMonths %}
-                                        <span class="text-secondary small ms-2">(tous les {{ health_book_entry.recurrenceMonths }} mois)</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
-
-                        {% if health_book_entry.anamnesis %}
-                            <tr>
-                                <th>Anamnèse / Commémoratif</th>
-                                <td>
-                                    <div class="health-entry-note">
-                                        {{ health_book_entry.anamnesis|e('html')|nl2br }}
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endif %}
-
-                        <tr>
-                            <th>Notes / Observations</th>
-                            <td>
-                                {% if health_book_entry.description %}
-                                    <div class="health-entry-note">
-                                        {{ health_book_entry.description|e('html')|nl2br }}
-                                    </div>
-                                {% else %}
-                                    <span class="text-secondary">
-                                        Aucune observation renseignée.
-                                    </span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+    {# --- Section : Informations générales --- #}
+    <div class="consultation-section mb-4">
+        <div class="section-header">
+            <div class="section-icon" style="background: var(--soft-teal, #eef7f5); color: var(--primary-color, #1a4d45);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </div>
-
-            {% if health_book_entry.staticExamination %}
-            <section class="mb-5">
-                <p class="page-eyebrow mb-2">Examen</p>
-                <h2 class="h4 page-title mb-3">Bilan de l'examen statique / palpation</h2>
-                <div class="health-entry-note p-3 rounded-3 border" style="background: var(--soft-teal, #f0fdfa); border-color: var(--primary-color, #0d9488) !important;">
-                    {{ health_book_entry.staticExamination|e('html')|nl2br }}
+            <h2 class="h6 mb-0 fw-bold">Informations générales</h2>
+        </div>
+        <div class="section-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Animal</span>
+                    <span class="info-value">
+                        {% if entry.animal %}
+                            <a href="{{ path('app_animal_show', {slug: entry.animal.slug}) }}" class="text-decoration-none fw-semibold" style="color: var(--primary-color);">
+                                {{ entry.animal.name }}
+                            </a>
+                        {% else %}
+                            Non spécifié
+                        {% endif %}
+                    </span>
                 </div>
-            </section>
-            {% endif %}
-
-            {% if health_book_entry.rehabilitation %}
-            <section class="mb-5">
-                <p class="page-eyebrow mb-2">Soins</p>
-                <h2 class="h4 page-title mb-3">Rééducation{% if health_book_entry.rehabilitationType %} — {{ health_book_entry.rehabilitationType }}{% endif %}</h2>
-                <div class="health-entry-note p-3 rounded-3 border" style="background: var(--soft-teal, #f0fdfa); border-color: var(--primary-color, #0d9488) !important;">
-                    {{ health_book_entry.rehabilitation|e('html')|nl2br }}
+                <div class="info-item">
+                    <span class="info-label">Date</span>
+                    <span class="info-value">{{ entry.date ? entry.date|date('d/m/Y') : 'Non renseignée' }}</span>
                 </div>
-            </section>
-            {% endif %}
-
-            {{ include('_partials/_horse_anatomy_show.html.twig') }}
-
-            <section class="mb-5">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                    <div>
-                        <p class="page-eyebrow mb-2">Documents</p>
-
-                        <h2 class="h4 page-title mb-0">
-                            Documents associés
-                        </h2>
-                    </div>
-
-                    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-outline-primary btn-sm">
-                        Ajouter un document
-                    </a>
+                <div class="info-item">
+                    <span class="info-label">Intervenant</span>
+                    <span class="info-value">
+                        {% if entry.veterinarian %}
+                            <a href="{{ path('app_professional_show', {id: entry.veterinarian.id}) }}" class="text-decoration-none fw-semibold" style="color: var(--primary-color);">
+                                {{ entry.veterinarian.fullName }}
+                            </a>
+                            {% if entry.veterinarian.specialty %}
+                                <span class="badge ms-1" style="background-color: var(--primary-color); font-size: 0.6rem;">{{ entry.veterinarian.specialty }}</span>
+                            {% endif %}
+                        {% elseif entry.veterinarianName %}
+                            {{ entry.veterinarianName }}
+                        {% else %}
+                            Non renseigné
+                        {% endif %}
+                    </span>
                 </div>
-
-                {% if health_book_entry.documents is empty %}
-                    <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                        Aucun document n'est encore associé à cette consultation.
-                    </div>
-                {% else %}
-                    <div class="document-list">
-                        {% for document in health_book_entry.documents %}
-                            <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
-                                <div>
-                                    <a href="{{ path('app_document_download_health_entry', {'entryId': health_book_entry.id, 'fileName': document.fileName}) }}"
-                                       target="_blank" rel="noopener" class="document-name text-decoration-none">
-                                        {{ document.originalName|default(document.fileName) }}
-                                    </a>
-                                    <span class="document-meta d-block small text-secondary">
-                                        {% if document.size is defined %}
-                                            {{ (document.size / 1024)|round(0, 'ceil') }} Ko
-                                        {% endif %}
-                                        {% if document.uploadedAt is defined %}
-                                            · {{ document.uploadedAt|date('d/m/Y') }}
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                <form method="post"
-                                      action="{{ path('app_health_book_entry_document_delete', {'id': health_book_entry.id, 'fileName': document.fileName}) }}"
-                                      onsubmit="return confirm('Supprimer ce document ?');"
-                                      style="display: inline;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_doc' ~ document.fileName) }}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Supprimer">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        {% endfor %}
+                <div class="info-item">
+                    <span class="info-label">Type</span>
+                    <span class="info-value">{{ entry.type ?: 'Non renseigné' }}</span>
+                </div>
+                {% if entry.appointment %}
+                    <div class="info-item">
+                        <span class="info-label">Rendez-vous associé</span>
+                        <span class="info-value">
+                            <a href="{{ path('app_appointment_show', {id: entry.appointment.id}) }}" class="text-decoration-none" style="color: var(--accent-color);">
+                                {{ entry.appointment.scheduledAt|date('d/m/Y à H:i') }}
+                            </a>
+                        </span>
                     </div>
                 {% endif %}
-            </section>
+            </div>
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-4 border-top border-anicare">
-                <div class="d-flex gap-2">
-                    <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
-                        Retour
-                    </a>
-                    <a href="{{ path('app_health_book_entry_import') }}" class="btn btn-outline-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        Importer
-                    </a>
+            {# Posologie / traitement #}
+            {% if entry.dosage or entry.frequency or entry.endDate or entry.batchNumber %}
+                <hr class="my-3" style="border-color: #e9ecef;">
+                <div class="info-grid">
+                    {% if entry.dosage %}
+                        <div class="info-item">
+                            <span class="info-label">Posologie</span>
+                            <span class="info-value">{{ entry.dosage }}</span>
+                        </div>
+                    {% endif %}
+                    {% if entry.frequency %}
+                        <div class="info-item">
+                            <span class="info-label">Fréquence</span>
+                            <span class="info-value">{{ entry.frequency }}</span>
+                        </div>
+                    {% endif %}
+                    {% if entry.endDate %}
+                        <div class="info-item">
+                            <span class="info-label">Date de fin</span>
+                            <span class="info-value">{{ entry.endDate|date('d/m/Y') }}</span>
+                        </div>
+                    {% endif %}
+                    {% if entry.batchNumber %}
+                        <div class="info-item">
+                            <span class="info-label">Numéro de lot</span>
+                            <span class="info-value">{{ entry.batchNumber }}</span>
+                        </div>
+                    {% endif %}
                 </div>
+            {% endif %}
 
-                <div class="d-flex gap-2 flex-wrap">
-                    <a href="{{ path('app_health_book_entry_edit', {'id': health_book_entry.id}) }}" class="btn btn-primary">
-                        Modifier
+            {# Rappel #}
+            {% if entry.nextReminderAt %}
+                <hr class="my-3" style="border-color: #e9ecef;">
+                <div class="info-item">
+                    <span class="info-label">Prochain rappel</span>
+                    <span class="info-value">
+                        {{ entry.nextReminderAt|date('d/m/Y') }}
+                        {% if entry.isOverdueReminder %}
+                            <span class="badge bg-danger ms-1">En retard</span>
+                        {% elseif entry.isDueSoon %}
+                            <span class="badge bg-warning text-dark ms-1">Bientôt</span>
+                        {% endif %}
+                        {% if entry.recurrenceLabel %}
+                            <span class="text-secondary small ms-1">({{ entry.recurrenceLabel }})</span>
+                        {% elseif entry.recurrenceMonths %}
+                            <span class="text-secondary small ms-1">(tous les {{ entry.recurrenceMonths }} mois)</span>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# --- Section : Anamnèse --- #}
+    {% if entry.anamnesis %}
+    <div class="consultation-section mb-4">
+        <div class="section-header">
+            <div class="section-icon" style="background: #fff3e0; color: #e65100;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h2 class="h6 mb-0 fw-bold">Anamnèse / Commémoratif</h2>
+        </div>
+        <div class="section-body">
+            <div class="text-block">
+                {{ entry.anamnesis|e('html')|nl2br }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# --- Section : Notes / Observations --- #}
+    {% if entry.description %}
+    <div class="consultation-section mb-4">
+        <div class="section-header">
+            <div class="section-icon" style="background: var(--soft-teal, #eef7f5); color: var(--primary-color, #1a4d45);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h2 class="h6 mb-0 fw-bold">Notes / Observations</h2>
+        </div>
+        <div class="section-body">
+            <div class="text-block">
+                {{ entry.description|e('html')|nl2br }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# --- Section : Examen statique --- #}
+    {% if entry.staticExamination %}
+    <div class="consultation-section mb-4">
+        <div class="section-header">
+            <div class="section-icon" style="background: #e8f5e9; color: #2e7d32;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <h2 class="h6 mb-0 fw-bold">Bilan de l'examen statique / palpation</h2>
+        </div>
+        <div class="section-body">
+            <div class="text-block">
+                {{ entry.staticExamination|e('html')|nl2br }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# --- Section : Rééducation --- #}
+    {% if entry.rehabilitation %}
+    <div class="consultation-section mb-4">
+        <div class="section-header">
+            <div class="section-icon" style="background: #f3e5f5; color: #7b1fa2;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <h2 class="h6 mb-0 fw-bold">
+                Rééducation{% if entry.rehabilitationType %} — {{ entry.rehabilitationType }}{% endif %}
+            </h2>
+        </div>
+        <div class="section-body">
+            <div class="text-block">
+                {{ entry.rehabilitation|e('html')|nl2br }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# --- Section : Schéma anatomique --- #}
+    {{ include('_partials/_horse_anatomy_show.html.twig') }}
+
+    {# --- Section : Documents --- #}
+    <div class="consultation-section mb-4">
+        <div class="section-header">
+            <div class="section-icon" style="background: #e3f2fd; color: #1565c0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            </div>
+            <div class="d-flex justify-content-between align-items-center flex-grow-1">
+                <h2 class="h6 mb-0 fw-bold">Documents ({{ entry.documents|length }})</h2>
+                {% if is_author %}
+                    <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 0.75rem;">
+                        + Ajouter
                     </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="section-body">
+            {% if entry.documents is empty %}
+                <p class="text-secondary mb-0 small">Aucun document associé.</p>
+            {% else %}
+                {% for document in entry.documents %}
+                    <div class="d-flex justify-content-between align-items-center py-2 {{ not loop.last ? 'border-bottom' : '' }}" style="border-color: #f0f0f0 !important;">
+                        <div>
+                            <a href="{{ path('app_document_download_health_entry', {entryId: entry.id, fileName: document.fileName}) }}"
+                               target="_blank" rel="noopener" class="text-decoration-none fw-semibold" style="color: var(--primary-color);">
+                                {{ document.originalName|default(document.fileName) }}
+                            </a>
+                            <span class="d-block small text-secondary">
+                                {% if document.size is defined %}{{ (document.size / 1024)|round(0, 'ceil') }} Ko{% endif %}
+                                {% if document.uploadedAt is defined %} · {{ document.uploadedAt|date('d/m/Y') }}{% endif %}
+                            </span>
+                        </div>
+                        {% if is_author %}
+                        <form method="post"
+                              action="{{ path('app_health_book_entry_document_delete', {id: entry.id, fileName: document.fileName}) }}"
+                              onsubmit="return confirm('Supprimer ce document ?');"
+                              style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_doc' ~ document.fileName) }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Supprimer" style="border-radius: 6px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 
-                    {{ include('health_book_entry/_delete_form.html.twig') }}
+    {# --- Footer actions --- #}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3">
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-secondary" style="border-radius: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Retour
+            </a>
+        </div>
+
+        {% if is_author %}
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="btn btn-primary" style="border-radius: 8px;">
+                Modifier
+            </a>
+            {{ include('health_book_entry/_delete_form.html.twig') }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if app.request.get('complete_animal') and health_book_entry.animal %}
+<div class="modal fade" id="completeAnimalModal" tabindex="-1" aria-labelledby="completeAnimalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+            <div class="modal-body text-center p-4">
+                <div style="width: 60px; height: 60px; border-radius: 14px; background: var(--soft-teal); color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: var(--secondary-color);">Consultation enregistrée !</h5>
+                <p class="text-secondary mb-3" style="font-size: 0.88rem;">
+                    La fiche animale <strong>{{ health_book_entry.animal.name }}</strong> a été créée avec les informations de base.<br>
+                    Souhaitez-vous compléter le profil maintenant ?
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600; padding: 0.5rem 1.25rem;">
+                        Plus tard
+                    </button>
+                    <a href="{{ path('app_animal_edit', {slug: health_book_entry.animal.slug}) }}" class="btn d-flex align-items-center gap-2" style="background: var(--primary-color); color: #fff; border-radius: 10px; font-weight: 600; padding: 0.5rem 1.25rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Compléter la fiche
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = new bootstrap.Modal(document.getElementById('completeAnimalModal'));
+    modal.show();
+});
+</script>
+{% endif %}
 {% endblock %}

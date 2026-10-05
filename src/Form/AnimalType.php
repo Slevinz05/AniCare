@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -24,8 +25,26 @@ class AnimalType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('species', ChoiceType::class, [
+                'label' => 'Espèce',
+                'choices' => [
+                    'Cheval' => 'Cheval',
+                    'Chien' => 'Chien',
+                    'Chat' => 'Chat',
+                    'Vache' => 'Vache',
+                    'Lapin' => 'Lapin',
+                    'Cochon' => 'Cochon',
+                    'Chèvre' => 'Chèvre',
+                    'Mouton' => 'Mouton',
+                    'Autre' => 'Autre',
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'data' => 'Cheval',
+            ])
+
             ->add('name', TextType::class, [
-                'label' => 'Nom du cheval',
+                'label' => 'Nom',
                 'attr' => [
                     'placeholder' => 'Ex : Ourasi',
                 ],
@@ -212,28 +231,46 @@ class AnimalType extends AbstractType
                 'data' => 'FR',
             ])
 
-            // --- Contact de confiance (EVO-024) ---
-            ->add('trustedContactFirstName', TextType::class, [
-                'label' => 'Prénom',
+            ->add('vetReferentName', TextType::class, [
+                'label' => 'Nom du vétérinaire',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Ex : Marie',
+                    'placeholder' => 'Ex : Dr. Martin',
                 ],
             ])
 
-            ->add('trustedContactLastName', TextType::class, [
-                'label' => 'Nom',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'Ex : Martin',
-                ],
-            ])
-
-            ->add('trustedContactPhone', TelType::class, [
-                'label' => 'Téléphone',
+            ->add('vetReferentPhone', TelType::class, [
+                'label' => 'Téléphone du vétérinaire',
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex : 06 12 34 56 78',
+                ],
+            ])
+
+            ->add('antecedentsPro', TextareaType::class, [
+                'label' => 'Antécédents médicaux (professionnel)',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Historique médical, traitements passés, pathologies connues...',
+                    'rows' => 4,
+                ],
+            ])
+
+            ->add('antecedentsReferent', TextareaType::class, [
+                'label' => 'Antécédents (référent / propriétaire)',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Informations complémentaires sur l\'animal...',
+                    'rows' => 4,
+                ],
+            ])
+
+            ->add('notes', TextareaType::class, [
+                'label' => 'Notes / Particularités',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Allergies, sensibilités, habitudes, etc.',
+                    'rows' => 4,
                 ],
             ])
 

@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Animal;
 use App\Entity\Appointment;
+use App\Entity\Structure;
 use App\Entity\User;
 use App\Form\AppointmentType;
 use App\Repository\AnimalRepository;
@@ -36,6 +38,7 @@ final class AppointmentController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $isPro = $this->isGranted('ROLE_PRO');
+        $isStructure = $this->isGranted('ROLE_STRUCTURE');
 
         $appointment = new Appointment();
 
@@ -75,7 +78,24 @@ final class AppointmentController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $appointment->setCreatedBy($user);
 
-            if (!$isPro && $form->has('animal')) {
+            $newAnimalMode = $request->request->get('new_animal_mode') === '1';
+            if ($newAnimalMode) {
+                $newAnimal = $this->createAnimalFromRequest($request, $em, $user, $isPro, $isStructure);
+                if ($newAnimal) {
+                    $appointment->addAnimal($newAnimal);
+                    $appointment->setAnimal($newAnimal);
+                }
+
+                if ($isStructure) {
+                    $proId = $request->request->get('new_animal_pro_id');
+                    if ($proId) {
+                        $pro = $em->getRepository(User::class)->find((int) $proId);
+                        if ($pro && $pro->getAccountType() === 'PRO') {
+                            $appointment->setSharedWithProfessional($pro);
+                        }
+                    }
+                }
+            } elseif (!$isPro && $form->has('animal')) {
                 $animal = $form->get('animal')->getData();
                 if ($animal) {
                     $appointment->addAnimal($animal);
@@ -96,7 +116,66 @@ final class AppointmentController extends AbstractController
         return $this->render('appointment/new.html.twig', [
             'form' => $form,
             'is_pro' => $isPro,
+            'is_structure' => $isStructure,
         ]);
+    }
+
+    private function createAnimalFromRequest(Request $request, EntityManagerInterface $em, User $user, bool $isPro, bool $isStructure): ?Animal
+    {
+        $name = trim($request->request->get('new_animal_name', ''));
+        if (!$name) {
+            return null;
+        }
+
+        $animal = new Animal();
+        $animal->setName($name);
+        $animal->setSpecies('Cheval');
+        $animal->setGender($request->request->get('new_animal_gender', 'Hongre'));
+
+        $birthDateStr = $request->request->get('new_animal_birth_date', '');
+        if ($birthDateStr) {
+            try {
+                $animal->setBirthDate(new \DateTimeImmutable($birthDateStr));
+            } catch (\Exception) {
+            }
+        }
+
+        $sire = trim($request->request->get('new_animal_sire', ''));
+        if ($sire) {
+            $animal->setIdentificationNumber($sire);
+        }
+
+        $microchip = trim($request->request->get('new_animal_microchip', ''));
+        if ($microchip) {
+            $animal->setMicrochipNumber($microchip);
+        }
+
+        $ownerId = $request->request->get('new_animal_owner_id');
+        if ($ownerId) {
+            $owner = $em->getRepository(User::class)->find((int) $ownerId);
+            if ($owner) {
+                $animal->setOwner($owner);
+            }
+        }
+
+        if (!$animal->getOwner()) {
+            $animal->setOwner($user);
+        }
+
+        $structureId = $request->request->get('new_animal_structure_id');
+        if ($structureId) {
+            $structure = $em->getRepository(Structure::class)->find((int) $structureId);
+            if ($structure) {
+                $animal->setStructure($structure);
+            }
+        }
+
+        $em->persist($animal);
+        $em->flush();
+        $animal->generateSlug();
+        $em->flush();
+
+        return $animal;
     }
 
     #[Route('/{id}', name: 'app_appointment_show', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -276,5 +355,100 @@ final class AppointmentController extends AbstractController
         }
 
         return new JsonResponse(['clients' => $results]);
+    }
+
+    #[Route('/api/search-owners', name: 'app_appointment_search_owners', methods: ['GET'])]
+    public function searchOwners(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $query = mb_strtolower(trim($request->query->get('q', '')));
+        if (strlen($query) < 2) {
+            return new JsonResponse(['owners' => []]);
+        }
+
+        $owners = $em->getRepository(User::class)->createQueryBuilder('u')
+            ->where('LOWER(u.firstName) LIKE :q OR LOWER(u.lastName) LIKE :q OR LOWER(u.email) LIKE :q')
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('u.lastName', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        $results = [];
+        foreach ($owners as $owner) {
+            $results[] = [
+                'id' => $owner->getId(),
+                'name' => $owner->getFullName(),
+                'email' => $owner->getEmail(),
+                'accountType' => $owner->getAccountType(),
+            ];
+        }
+
+        return new JsonResponse(['owners' => $results]);
+    }
+
+    #[Route('/api/search-structures', name: 'app_appointment_search_structures', methods: ['GET'])]
+    public function searchStructures(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $query = mb_strtolower(trim($request->query->get('q', '')));
+        if (strlen($query) < 2) {
+            return new JsonResponse(['structures' => []]);
+        }
+
+        $structures = $em->getRepository(Structure::class)->createQueryBuilder('s')
+            ->where('LOWER(s.name) LIKE :q OR LOWER(s.city) LIKE :q')
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('s.name', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        $results = [];
+        foreach ($structures as $structure) {
+            $results[] = [
+                'id' => $structure->getId(),
+                'name' => $structure->getName(),
+                'street' => $structure->getStreet(),
+                'postalCode' => $structure->getPostalCode(),
+                'city' => $structure->getCity(),
+                'type' => $structure->getType(),
+            ];
+        }
+
+        return new JsonResponse(['structures' => $results]);
+    }
+
+    #[Route('/api/search-professionals', name: 'app_appointment_search_professionals', methods: ['GET'])]
+    public function searchProfessionals(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $query = mb_strtolower(trim($request->query->get('q', '')));
+        if (strlen($query) < 2) {
+            return new JsonResponse(['professionals' => []]);
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $pros = $em->getRepository(User::class)->createQueryBuilder('u')
+            ->where('u.accountType = :pro')
+            ->andWhere('u.id != :self')
+            ->andWhere('LOWER(u.firstName) LIKE :q OR LOWER(u.lastName) LIKE :q OR LOWER(u.specialty) LIKE :q')
+            ->setParameter('pro', 'PRO')
+            ->setParameter('self', $user->getId())
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('u.lastName', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        $results = [];
+        foreach ($pros as $pro) {
+            $results[] = [
+                'id' => $pro->getId(),
+                'name' => $pro->getFullName(),
+                'specialty' => $pro->getSpecialty(),
+            ];
+        }
+
+        return new JsonResponse(['professionals' => $results]);
     }
 }

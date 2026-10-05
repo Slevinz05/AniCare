@@ -58,7 +58,7 @@ final class AnimalShareController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->denyAccessUnlessGranted('ANIMAL_DELETE', $animalShare->getAnimal());
+            $this->denyAccessUnlessGranted('ANIMAL_MANAGE_SHARE', $animalShare->getAnimal());
 
             $animalShare->setCreatedAt(new \DateTimeImmutable());
 
@@ -104,7 +104,7 @@ final class AnimalShareController extends AbstractController
     #[Route('/{id}/modifier', name: 'app_animal_share_edit', methods: ['POST'])]
     public function edit(Request $request, AnimalShare $animalShare, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_DELETE', $animalShare->getAnimal());
+        $this->denyAccessUnlessGranted('ANIMAL_MANAGE_SHARE', $animalShare->getAnimal());
 
         if (!$this->isCsrfTokenValid('animal_share' . $animalShare->getId(), $request->getPayload()->getString('_token'))) {
             $this->addFlash('danger', 'Jeton CSRF invalide.');
@@ -124,7 +124,7 @@ final class AnimalShareController extends AbstractController
     #[Route('/{id}', name: 'app_animal_share_delete', methods: ['POST'])]
     public function delete(Request $request, AnimalShare $animalShare, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ANIMAL_DELETE', $animalShare->getAnimal());
+        $this->denyAccessUnlessGranted('ANIMAL_MANAGE_SHARE', $animalShare->getAnimal());
 
         if ($this->isCsrfTokenValid('delete' . $animalShare->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($animalShare);

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\HealthBookEntry;
+use App\Entity\Structure;
 use App\Entity\User;
 use App\Form\HealthBookEntryType;
 use App\Repository\AnimalRepository;
@@ -15,7 +16,11 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/consultations')]
@@ -24,6 +29,8 @@ final class HealthBookEntryController extends AbstractController
 {
     public function __construct(
         private readonly DocumentUploader $documentUploader,
+        private readonly MailerInterface $mailer,
+        private readonly UserPasswordHasherInterface $passwordHasher,
 
         #[Autowire('%kernel.project_dir%/var/uploads/health-book-entries')]
         private readonly string $healthBookEntryUploadsDirectory,
@@ -196,18 +203,83 @@ final class HealthBookEntryController extends AbstractController
             $isDraft = $request->request->get('save_draft') !== null;
             $healthBookEntry->setStatus($isDraft ? 'draft' : 'published');
             $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+            $healthBookEntry->setCreatedBy($user);
+
+            $newAnimalCreated = false;
+            $newAnimalName = $request->request->get('new_animal_name');
+            if ($newAnimalName && !$healthBookEntry->getAnimal()) {
+                $animal = new \App\Entity\Animal();
+                $animal->setName($newAnimalName);
+                $animal->setGender($request->request->get('new_animal_gender', 'Mâle'));
+                $animal->setCreatedByPro($user);
+
+                // Assign owner: the selected referent if available, otherwise the PRO
+                $referentId = $request->request->get('consultation_referent_id');
+                $referentUser = $referentId ? $entityManager->getRepository(User::class)->find((int) $referentId) : null;
+                $animal->setOwner($referentUser ?? $user);
+
+                if ($referentUser) {
+                    $referent = new \App\Entity\AnimalReferent();
+                    $referent->setAnimal($animal);
+                    $referent->setUser($referentUser);
+                    $referent->setRole('principal');
+                    $referent->setStatus('active');
+                    $entityManager->persist($referent);
+                }
+
+                if ($breed = $request->request->get('new_animal_breed')) {
+                    $animal->setBreed($breed);
+                }
+                if ($birthdate = $request->request->get('new_animal_birthdate')) {
+                    try { $animal->setBirthDate(new \DateTimeImmutable($birthdate)); } catch (\Exception) {}
+                }
+                if ($coat = $request->request->get('new_animal_coat')) {
+                    $animal->setCoat($coat);
+                }
+                if ($identification = $request->request->get('new_animal_identification')) {
+                    $animal->setIdentificationNumber($identification);
+                }
+                $entityManager->persist($animal);
+                $healthBookEntry->setAnimal($animal);
+                $newAnimalCreated = true;
+            }
+
+            if (!$healthBookEntry->getTitle()) {
+                $type = $healthBookEntry->getType() ?? 'Consultation';
+                $date = $healthBookEntry->getDate()?->format('d/m/Y') ?? date('d/m/Y');
+                $healthBookEntry->setTitle($type . ' du ' . $date);
+            }
 
             $entityManager->persist($healthBookEntry);
             $entityManager->flush();
+
+            if ($newAnimalCreated) {
+                $healthBookEntry->getAnimal()->ensureSlug();
+                $entityManager->flush();
+            }
+
+            // ── Handle sharing ──
+            $shareTargetType = $request->request->get('share_target_type');
+            $shareMode = $request->request->get('share_mode');
+            if ($shareTargetType && $shareMode) {
+                $healthBookEntry->setShareMode($shareMode);
+                $healthBookEntry->setSharedAt(new \DateTimeImmutable());
+
+                $this->handleSharing($healthBookEntry, $request, $entityManager, $user);
+                $entityManager->flush();
+            }
 
             if ($isDraft) {
                 $this->addFlash('success', 'Brouillon enregistré.');
                 return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
             }
 
-            return $this->redirectToRoute('app_health_book_entry_show', [
-                'id' => $healthBookEntry->getId(),
-            ], Response::HTTP_SEE_OTHER);
+            $params = ['id' => $healthBookEntry->getId()];
+            if ($newAnimalCreated) {
+                $params['complete_animal'] = $healthBookEntry->getAnimal()->getId();
+            }
+
+            return $this->redirectToRoute('app_health_book_entry_show', $params, Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('health_book_entry/new.html.twig', [
@@ -221,8 +293,16 @@ final class HealthBookEntryController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ANIMAL_VIEW', $healthBookEntry->getAnimal());
 
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($healthBookEntry->isDraft() && !$healthBookEntry->isAuthor($user)) {
+            throw $this->createAccessDeniedException('Les brouillons ne sont visibles que par leur auteur.');
+        }
+
         return $this->render('health_book_entry/show.html.twig', [
             'health_book_entry' => $healthBookEntry,
+            'is_author' => $healthBookEntry->isAuthor($user),
         ]);
     }
 
@@ -233,6 +313,15 @@ final class HealthBookEntryController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
+
+        if (!$healthBookEntry->isAuthor($user)) {
+            if ($healthBookEntry->isDraft()) {
+                throw $this->createAccessDeniedException('Seul l\'auteur peut modifier un brouillon.');
+            }
+            if ($healthBookEntry->getStatus() === 'published') {
+                throw $this->createAccessDeniedException('Seul l\'auteur peut modifier un compte-rendu publié.');
+            }
+        }
 
         $rehabTemplates = [];
         foreach ($user->getRehabilitationTemplates() as $tpl) {
@@ -272,6 +361,63 @@ final class HealthBookEntryController extends AbstractController
             'health_book_entry' => $healthBookEntry,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/valider', name: 'app_health_book_entry_validate', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function validate(Request $request, HealthBookEntry $healthBookEntry, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $healthBookEntry->getAnimal());
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$healthBookEntry->isAuthor($user)) {
+            throw $this->createAccessDeniedException('Seul l\'auteur peut valider cette consultation.');
+        }
+
+        if (!$healthBookEntry->isDraft()) {
+            $this->addFlash('warning', 'Cette consultation est déjà validée.');
+            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+        }
+
+        if ($this->isCsrfTokenValid('validate' . $healthBookEntry->getId(), $request->request->get('_token'))) {
+            $healthBookEntry->setStatus('published');
+            $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Consultation validée avec succès.');
+        }
+
+        return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+    }
+
+    #[Route('/{id}/partager', name: 'app_health_book_entry_share', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function share(Request $request, HealthBookEntry $healthBookEntry, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT_HEALTH', $healthBookEntry->getAnimal());
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$healthBookEntry->isAuthor($user)) {
+            throw $this->createAccessDeniedException('Seul l\'auteur peut partager cette consultation.');
+        }
+
+        if ($healthBookEntry->isDraft()) {
+            $this->addFlash('warning', 'Veuillez d\'abord valider le brouillon avant de le partager.');
+            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+        }
+
+        if ($this->isCsrfTokenValid('share' . $healthBookEntry->getId(), $request->request->get('_token'))) {
+            $healthBookEntry->setStatus('shared');
+            $healthBookEntry->setSharedAt(new \DateTimeImmutable());
+            $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Compte-rendu transmis au référent.');
+        }
+
+        return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
     }
 
     #[Route('/{id}/document/{fileName}/supprimer', name: 'app_health_book_entry_document_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -350,6 +496,157 @@ final class HealthBookEntryController extends AbstractController
             if (is_file($filePath)) {
                 unlink($filePath);
             }
+        }
+    }
+
+    private function handleSharing(
+        HealthBookEntry $entry,
+        Request $request,
+        EntityManagerInterface $em,
+        User $sender,
+    ): void {
+        $type = $request->request->get('share_target_type');
+        $appUrl = $this->generateUrl('app_health_book_entry_show', ['id' => $entry->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $emailParams = [
+            'sender_name' => $sender->getFullName(),
+            'animal_name' => $entry->getAnimal()?->getName() ?? '',
+            'entry_type' => $entry->getType() ?? 'Consultation',
+            'share_mode' => $entry->getShareMode(),
+            'app_url' => $appUrl,
+        ];
+
+        switch ($type) {
+            case 'user':
+                $userId = (int) $request->request->get('share_with_user_id');
+                $targetUser = $em->getRepository(User::class)->find($userId);
+                if ($targetUser) {
+                    $entry->setSharedWithUser($targetUser);
+                    $entry->setSharedWithEmail($targetUser->getEmail());
+                    $entry->setStatus('shared');
+                    $this->sendShareEmail(
+                        $targetUser->getEmail(),
+                        'consultation_shared',
+                        array_merge($emailParams, [
+                            'recipient_email' => $targetUser->getEmail(),
+                            'is_new_user' => false,
+                        ])
+                    );
+                    $this->addFlash('success', 'Consultation partagée avec ' . $targetUser->getFullName() . '.');
+                }
+                break;
+
+            case 'new_user':
+                $email = $request->request->get('share_with_email');
+                $firstName = $request->request->get('new_user_first_name');
+                $lastName = $request->request->get('new_user_last_name');
+                if ($email && $firstName && $lastName) {
+                    $existingUser = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+                    if ($existingUser) {
+                        $entry->setSharedWithUser($existingUser);
+                        $entry->setSharedWithEmail($email);
+                        $entry->setStatus('shared');
+                        $this->sendShareEmail(
+                            $email,
+                            'consultation_shared',
+                            array_merge($emailParams, [
+                                'recipient_email' => $email,
+                                'is_new_user' => false,
+                            ])
+                        );
+                        $this->addFlash('info', 'L\'utilisateur existe déjà — consultation partagée avec ' . $existingUser->getFullName() . '.');
+                    } else {
+                        $newUser = new User();
+                        $newUser->setFirstName($firstName);
+                        $newUser->setLastName($lastName);
+                        $newUser->setEmail($email);
+                        $tempPassword = bin2hex(random_bytes(8));
+                        $newUser->setPassword($this->passwordHasher->hashPassword($newUser, $tempPassword));
+                        $newUser->setRoles(['ROLE_USER']);
+                        $newUser->setAccountType('Propriétaire');
+                        $em->persist($newUser);
+                        $em->flush();
+
+                        $entry->setSharedWithUser($newUser);
+                        $entry->setSharedWithEmail($email);
+                        $entry->setStatus('shared');
+
+                        $registerUrl = $this->generateUrl('app_home', [], UrlGeneratorInterface::ABSOLUTE_URL);
+                        $this->sendShareEmail(
+                            $email,
+                            'consultation_shared',
+                            array_merge($emailParams, [
+                                'recipient_email' => $email,
+                                'is_new_user' => true,
+                            ])
+                        );
+                        $this->addFlash('success', 'Compte créé pour ' . $firstName . ' ' . $lastName . ' et invitation envoyée.');
+                    }
+                }
+                break;
+
+            case 'structure':
+                $structureId = (int) $request->request->get('share_with_structure_id');
+                $structure = $em->getRepository(Structure::class)->find($structureId);
+                if ($structure) {
+                    $entry->setSharedWithStructure($structure);
+                    $entry->setStatus('shared');
+                    $structureEmail = $structure->getEmail();
+                    if ($structureEmail) {
+                        $this->sendShareEmail(
+                            $structureEmail,
+                            'consultation_shared',
+                            array_merge($emailParams, [
+                                'recipient_email' => $structureEmail,
+                                'is_new_user' => false,
+                            ])
+                        );
+                    }
+                    $this->addFlash('success', 'Consultation partagée avec la structure ' . $structure->getName() . '.');
+                }
+                break;
+
+            case 'new_structure':
+                $structureName = $request->request->get('new_structure_name');
+                $structureEmail = $request->request->get('new_structure_email');
+                if ($structureName && $structureEmail) {
+                    $structure = new Structure();
+                    $structure->setName($structureName);
+                    $structure->setEmail($structureEmail);
+                    $structure->setCreatedBy($sender);
+                    $em->persist($structure);
+                    $em->flush();
+
+                    $entry->setSharedWithStructure($structure);
+                    $entry->setStatus('shared');
+
+                    $registerUrl = $this->generateUrl('app_register', [], UrlGeneratorInterface::ABSOLUTE_URL);
+                    $this->sendShareEmail(
+                        $structureEmail,
+                        'structure_invitation',
+                        [
+                            'sender_name' => $sender->getFullName(),
+                            'structure_name' => $structureName,
+                            'register_url' => $registerUrl,
+                            'claim_code' => $structure->getClaimCode(),
+                        ]
+                    );
+                    $this->addFlash('success', 'Structure "' . $structureName . '" créée et invitation envoyée.');
+                }
+                break;
+        }
+    }
+
+    private function sendShareEmail(string $to, string $template, array $params): void
+    {
+        try {
+            $email = (new Email())
+                ->from('noreply@anicare.fr')
+                ->to($to)
+                ->subject('AniCare — Partage de consultation')
+                ->html($this->renderView('emails/' . $template . '.html.twig', $params));
+            $this->mailer->send($email);
+        } catch (\Exception) {
         }
     }
 }

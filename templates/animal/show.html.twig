@@ -30,7 +30,7 @@
                 {# ── Colonne gauche : Le cheval ── #}
                 <div class="col-12 col-lg-7">
                     <div class="p-4 rounded-3 bg-light h-100">
-                        <p class="page-eyebrow mb-3">Le cheval</p>
+                        <p class="page-eyebrow mb-3">{{ animal.species|default('Cheval') }}</p>
 
                         {% if animal.photo %}
                             <div class="text-center mb-4">
@@ -114,37 +114,118 @@
                 {# ── Colonne droite : Propriétaire, Lieu de vie & Professionnels ── #}
                 <div class="col-12 col-lg-5">
                     <div class="d-flex flex-column gap-4 h-100">
-                        {# Propriétaire #}
+                        {# Référent principal #}
+                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0" style="border-left: 4px solid #dc3545 !important;">
+                            <p class="page-eyebrow mb-3" style="color: #dc3545;">Référent principal</p>
+                            {% if principal_referent %}
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, #dc3545, #c82333); color: #fff; font-weight: 700;">
+                                        {{ principal_referent.user.firstName|first|upper }}{{ principal_referent.user.lastName|first|upper }}
+                                    </div>
+                                    <div>
+                                        <strong class="d-block">{{ principal_referent.user.fullName }}</strong>
+                                        <span class="text-secondary small">{{ principal_referent.user.email }}</span>
+                                        <span class="badge rounded-pill ms-1" style="background-color: #dc3545; font-size: 0.65rem;">{{ principal_referent.roleLabel }}</span>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless align-middle mb-0">
+                                        <tbody>
+                                            {% if principal_referent.user.phone %}
+                                                <tr>
+                                                    <th style="width: 35%;" class="text-secondary">Téléphone</th>
+                                                    <td><a href="tel:{{ principal_referent.user.phone }}">{{ principal_referent.user.phone }}</a></td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if principal_referent.user.city %}
+                                                <tr>
+                                                    <th class="text-secondary">Ville</th>
+                                                    <td>{{ principal_referent.user.city }}</td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="rounded-circle bg-anicare-soft d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+                                        <span style="font-size: 1.2rem;">👤</span>
+                                    </div>
+                                    <div>
+                                        <strong class="d-block">{{ animal.owner.fullName }}</strong>
+                                        <span class="text-secondary small">{{ animal.owner.email }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Référents secondaires #}
                         <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0">
-                            <p class="page-eyebrow mb-3">Propriétaire</p>
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <div class="rounded-circle bg-anicare-soft d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
-                                    <span style="font-size: 1.2rem;">👤</span>
-                                </div>
-                                <div>
-                                    <strong class="d-block">{{ animal.owner.fullName }}</strong>
-                                    <span class="text-secondary small">{{ animal.owner.email }}</span>
-                                </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="page-eyebrow mb-0">Référents secondaires</p>
+                                {% if can_edit|default(false) %}
+                                    <a href="{{ path('app_referent_invite', {animalId: animal.id}) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 0.75rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                        Inviter
+                                    </a>
+                                {% endif %}
                             </div>
+                            {% set refs = secondary_referents|filter(r => true) %}
+                            {% if refs|length > 0 %}
+                                {% for ref in refs %}
+                                    <div class="d-flex align-items-center gap-3 {{ not loop.last ? 'mb-3 pb-3 border-bottom border-light' : '' }}">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: {{ ref.isActive ? 'var(--accent-color)' : '#adb5bd' }}; color: #fff; font-weight: 600; font-size: 0.8rem;">
+                                            {{ ref.user.firstName|first|upper }}{{ ref.user.lastName|first|upper }}
+                                        </div>
+                                        <div class="flex-grow-1 min-width-0">
+                                            <strong class="d-block text-truncate">{{ ref.user.fullName }}</strong>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <span class="small text-secondary">{{ ref.roleLabel }}</span>
+                                                {% if ref.status == 'pending' %}
+                                                    <span class="badge rounded-pill" style="background: #fff3cd; color: #856404; font-size: 0.6rem;">En attente</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% if can_edit|default(false) and ref.status != 'revoked' %}
+                                            <form method="post" action="{{ path('app_referent_revoke', {id: ref.id}) }}" onsubmit="return confirm('Révoquer {{ ref.user.fullName }} comme référent ?');" class="flex-shrink-0">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('revoke' ~ ref.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Révoquer" style="border-radius: 6px; font-size: 0.7rem;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-secondary small mb-0">Aucun référent secondaire.</p>
+                            {% endif %}
+                        </div>
+
+                        {# Vétérinaire référent #}
+                        {% if animal.vetReferentName %}
+                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0" style="border-left: 4px solid #2196F3 !important;">
+                            <p class="page-eyebrow mb-3" style="color: #2196F3;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                Vétérinaire référent
+                            </p>
                             <div class="table-responsive">
                                 <table class="table table-sm table-borderless align-middle mb-0">
                                     <tbody>
-                                        {% if animal.owner.phone %}
-                                            <tr>
-                                                <th style="width: 35%;" class="text-secondary">Téléphone</th>
-                                                <td><a href="tel:{{ animal.owner.phone }}">{{ animal.owner.phone }}</a></td>
-                                            </tr>
-                                        {% endif %}
-                                        {% if animal.owner.city %}
-                                            <tr>
-                                                <th class="text-secondary">Ville</th>
-                                                <td>{{ animal.owner.city }}</td>
-                                            </tr>
+                                        <tr>
+                                            <th style="width: 35%;" class="text-secondary">Nom</th>
+                                            <td><strong>{{ animal.vetReferentName }}</strong></td>
+                                        </tr>
+                                        {% if animal.vetReferentPhone %}
+                                        <tr>
+                                            <th class="text-secondary">Téléphone</th>
+                                            <td><a href="tel:{{ animal.vetReferentPhone }}">{{ animal.vetReferentPhone }}</a></td>
+                                        </tr>
                                         {% endif %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+                        {% endif %}
 
                         {# Lieu de vie #}
                         {% if animal.livingPlaceName or animal.livingPlaceCity or animal.livingPlaceManagerLastName %}
@@ -265,6 +346,28 @@
                     </div>
                 </div>
             </div>
+
+            {# ── Antécédents ── #}
+            {% if animal.antecedentsPro or animal.antecedentsReferent %}
+            <div class="row g-4 mb-5">
+                {% if animal.antecedentsPro and is_granted('ROLE_PRO') %}
+                <div class="col-12 col-md-6">
+                    <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #9C27B0 !important;">
+                        <p class="page-eyebrow mb-2" style="color: #9C27B0;">Antécédents (professionnel)</p>
+                        <p class="small text-secondary mb-0" style="white-space: pre-line;">{{ animal.antecedentsPro }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if animal.antecedentsReferent %}
+                <div class="col-12 col-md-6">
+                    <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #9C27B0 !important;">
+                        <p class="page-eyebrow mb-2" style="color: #9C27B0;">Antécédents (référent)</p>
+                        <p class="small text-secondary mb-0" style="white-space: pre-line;">{{ animal.antecedentsReferent }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
 
             <section>
                 <div class="mb-3">
@@ -607,9 +710,11 @@
                 </a>
 
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="{{ path('app_animal_share_new') }}" class="btn btn-outline-primary">
-                        Partager
-                    </a>
+                    {% if is_granted('ANIMAL_MANAGE_SHARE', animal) %}
+                        <a href="{{ path('app_animal_share_new') }}" class="btn btn-outline-primary">
+                            Partager
+                        </a>
+                    {% endif %}
 
                     {% if is_granted('ANIMAL_EDIT', animal) %}
                         <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-primary">

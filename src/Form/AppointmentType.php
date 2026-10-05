@@ -133,6 +133,7 @@ class AppointmentType extends AbstractType
                     'choice_label' => 'name',
                     'placeholder' => 'Sélectionner un cheval',
                     'mapped' => false,
+                    'required' => false,
                     'query_builder' => fn (AnimalRepository $repo) => $repo->createQueryBuilder('a')
                         ->leftJoin('a.animalShares', 's')
                         ->where('a.owner = :user')

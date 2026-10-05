@@ -124,10 +124,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: StructureMembership::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $structureMemberships;
 
+    /** @var Collection<int, AnimalReferent> */
+    #[ORM\OneToMany(targetEntity: AnimalReferent::class, mappedBy: 'user')]
+    private Collection $animalReferents;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $activeSpace = null;
+
     public function __construct()
     {
         $this->animals = new ArrayCollection();
         $this->structureMemberships = new ArrayCollection();
+        $this->animalReferents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -648,5 +656,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->structureMemberships->map(
             fn (StructureMembership $m) => $m->getStructure()
         )->toArray();
+    }
+
+    /** @return Collection<int, AnimalReferent> */
+    public function getAnimalReferents(): Collection
+    {
+        return $this->animalReferents;
+    }
+
+    public function getActiveSpace(): ?string
+    {
+        return $this->activeSpace;
+    }
+
+    public function setActiveSpace(?string $activeSpace): static
+    {
+        $this->activeSpace = $activeSpace;
+        return $this;
+    }
+
+    public function hasProSpace(): bool
+    {
+        return in_array('ROLE_PRO', $this->getRoles(), true);
+    }
+
+    public function hasParticulierSpace(): bool
+    {
+        return in_array($this->accountType, ['OWNER', 'BOTH'], true)
+            || (!$this->hasProSpace() && $this->accountType !== 'STRUCTURE');
+    }
+
+    public function hasBothSpaces(): bool
+    {
+        return $this->hasProSpace() && $this->hasParticulierSpace();
+    }
+
+    public function isInProSpace(): bool
+    {
+        if ($this->activeSpace === 'professionnel') {
+            return true;
+        }
+        if ($this->activeSpace === 'particulier') {
+            return false;
+        }
+        return $this->hasProSpace();
+    }
+
+    public function enableProSpace(): static
+    {
+        if (!in_array('ROLE_PRO', $this->roles, true)) {
+            $this->roles[] = 'ROLE_PRO';
+        }
+        if ($this->accountType === 'OWNER') {
+            $this->accountType = 'BOTH';
+        }
+        return $this;
     }
 }

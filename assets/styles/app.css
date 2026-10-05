@@ -4,15 +4,15 @@
 
 :root {
     /* Couleurs AniCare */
-    --primary-color: #0d9488;
-    --primary-hover: #0f766e;
+    --primary-color: #1a4d45;
+    --primary-hover: #153d37;
     --secondary-color: #4A3F33;
     --accent-color: #C8973E;
     --accent-hover: #A67B3C;
     --bg-color: #F7F3ED;
     --card-bg: #ffffff;
     --border-color: #EDE6DB;
-    --soft-teal: #f0fdfa;
+    --soft-teal: #eef7f5;
     --soft-warm: #FFF0CC;
     --taupe: #9C8B75;
 
@@ -29,8 +29,8 @@
     --shadow-md: 0 12px 28px rgba(74, 63, 51, 0.10);
 
     /* Mapping Bootstrap */
-    --bs-primary: #0d9488;
-    --bs-primary-rgb: 13, 148, 136;
+    --bs-primary: #1a4d45;
+    --bs-primary-rgb: 26, 77, 69;
 
     --bs-info: #C8973E;
     --bs-info-rgb: 200, 151, 62;
@@ -48,12 +48,12 @@
     --bs-body-color: #4A3F33;
     --bs-border-color: #EDE6DB;
 
-    --bs-primary-bg-subtle: #f0fdfa;
+    --bs-primary-bg-subtle: #eef7f5;
     --bs-primary-border-subtle: #EDE6DB;
-    --bs-primary-text-emphasis: #0f766e;
+    --bs-primary-text-emphasis: #153d37;
 
-    --bs-link-color: #0d9488;
-    --bs-link-hover-color: #0f766e;
+    --bs-link-color: #1a4d45;
+    --bs-link-hover-color: #153d37;
 }
 
 /* ==========================================================================
@@ -111,7 +111,7 @@ a:hover {
    ========================================================================== */
 
 .anicare-navbar {
-    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+    background: linear-gradient(135deg, #1a4d45 0%, #153d37 100%) !important;
     border-bottom: none !important;
     box-shadow: 0 4px 16px rgba(13, 148, 136, 0.25);
 }
@@ -178,6 +178,123 @@ a:hover {
     vertical-align: 0.15em;
 }
 
+/* ── New header: hamburger menu button ── */
+.btn-navbar-menu {
+    color: #fff;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.btn-navbar-menu:hover,
+.btn-navbar-menu[aria-expanded="true"] {
+    color: #fff;
+    background: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.32);
+}
+.nav-dropdown-menu {
+    border: 1px solid var(--border-color);
+    border-radius: 12px !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.06);
+    padding: 0.5rem;
+    min-width: 14rem;
+    animation: quickAddSlide 0.15s ease-out;
+}
+.nav-dropdown-menu .dropdown-item {
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    color: var(--secondary-color);
+    transition: all 0.15s ease;
+}
+.nav-dropdown-menu .dropdown-item:hover {
+    background: var(--soft-teal);
+    color: var(--primary-color);
+    transform: translateX(2px);
+}
+.nav-dropdown-menu .dropdown-item.active {
+    background: var(--soft-teal);
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* ── Navbar search ── */
+.navbar-search-input {
+    width: 100%;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 0.45rem 0.85rem 0.45rem 2.4rem;
+    color: #fff;
+    font-size: 0.82rem;
+    transition: all 0.2s ease;
+    outline: none;
+}
+.navbar-search-input::placeholder {
+    color: rgba(255,255,255,0.45);
+}
+.navbar-search-input:focus {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.35);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+}
+.navbar-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border: 1px solid var(--border-color);
+    z-index: 1050;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+/* ── Navbar circle buttons (+ and bell) ── */
+.btn-navbar-circle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transition: all 0.2s ease;
+}
+.btn-navbar-circle:hover,
+.btn-navbar-circle[aria-expanded="true"] {
+    background: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.35);
+    color: #fff;
+    transform: scale(1.08);
+}
+.navbar-notif-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--danger-color);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--primary-color);
+}
+
 .btn-navbar-outline {
     color: #ffffff !important;
     border: 2px solid rgba(255, 255, 255, 0.5) !important;
@@ -209,45 +326,64 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
     color: #fff;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
+    font-size: 1.1rem;
 }
 
 .btn-pro-quick-add:hover,
 .btn-pro-quick-add[aria-expanded="true"] {
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff;
     border-color: #fff;
-    color: #fff;
-    transform: rotate(90deg);
+    color: var(--primary-color);
+    transform: rotate(90deg) scale(1.05);
+    box-shadow: 0 4px 16px rgba(26, 77, 69, 0.25);
 }
 
 .quick-add-menu {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md) !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-    padding: 0.35rem;
-    min-width: 14rem;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
+    padding: 0.5rem;
+    min-width: 15rem;
+    animation: quickAddSlide 0.15s ease-out;
+}
+
+@keyframes quickAddSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .quick-add-menu .dropdown-item {
     font-weight: 600;
     font-size: 0.85rem;
-    padding: 0.55rem 0.85rem;
+    padding: 0.6rem 0.85rem;
     border-radius: var(--radius-sm);
     transition: all 0.15s ease;
+    color: var(--secondary-color);
+}
+
+.quick-add-menu .dropdown-item:hover {
+    background: var(--bg-color);
+    transform: translateX(2px);
 }
 
 .quick-add-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+
+.quick-add-menu .dropdown-item:hover .quick-add-icon {
+    transform: scale(1.08);
 }
 
 /* ── Profile dropdown avatar ── */

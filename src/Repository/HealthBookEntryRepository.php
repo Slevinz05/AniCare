@@ -32,11 +32,24 @@ class HealthBookEntryRepository extends ServiceEntityRepository
             ->innerJoin('h.animal', 'a')
             ->leftJoin('a.animalShares', 's')
             ->where('(a.owner = :user OR s.sharedWithEmail = :email)')
-            ->andWhere('h.status = :published OR h.veterinarian = :user')
+            ->andWhere('h.status IN (:visibleStatuses) OR h.veterinarian = :user OR h.createdBy = :user')
             ->setParameter('user', $user)
             ->setParameter('email', $user->getEmail())
-            ->setParameter('published', 'published')
+            ->setParameter('visibleStatuses', ['published', 'shared'])
             ->orderBy('h.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findRecentByVeterinarian(User $user, int $limit = 5): array
+    {
+        return $this->createQueryBuilder('h')
+            ->where('h.veterinarian = :user')
+            ->andWhere('h.status = :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'published')
+            ->orderBy('h.date', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }

@@ -1,0 +1,70 @@
+<style>
+    .rm-form-card {
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+        padding: 2rem; max-width: 700px; margin: 0 auto;
+    }
+    .rm-form-card .form-label {
+        font-weight: 600; font-size: .85rem; color: #374151; margin-bottom: .3rem;
+    }
+    .rm-form-card .form-control,
+    .rm-form-card .form-select {
+        border-radius: var(--radius-sm); border: 1px solid #d1d5db; font-size: .9rem;
+        padding: .55rem .85rem; transition: border-color .2s, box-shadow .2s;
+    }
+    .rm-form-card .form-control:focus,
+    .rm-form-card .form-select:focus {
+        border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(26,77,69,.1);
+    }
+    .rm-form-actions {
+        display: flex; gap: .75rem; justify-content: flex-end; padding-top: 1.5rem;
+        border-top: 1px solid #f0f0f0; margin-top: 1.5rem;
+    }
+    .rm-form-actions .btn-save {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+        color: #fff; border: none; border-radius: var(--radius-md);
+        padding: .55rem 1.5rem; font-weight: 600; font-size: .85rem;
+        transition: all .2s;
+    }
+    .rm-form-actions .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,77,69,.3); }
+    .rm-form-actions .btn-cancel {
+        background: #fff; color: #6c757d; border: 1px solid #d1d5db; border-radius: var(--radius-md);
+        padding: .55rem 1.2rem; font-weight: 600; font-size: .85rem;
+        transition: all .2s; text-decoration: none;
+    }
+    .rm-form-actions .btn-cancel:hover { background: #f8f9fa; color: #333; }
+</style>
+
+<div class="rm-form-card">
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+    <div class="row g-3">
+        <div class="col-12">
+            {{ form_row(form.title) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.category) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.animal) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.scheduledAt) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(form.recurrence) }}
+        </div>
+        <div class="col-12">
+            {{ form_row(form.notes) }}
+        </div>
+    </div>
+
+    <div class="rm-form-actions">
+        <a href="{{ path('app_reminder_index') }}" class="btn-cancel">Annuler</a>
+        <button type="submit" class="btn-save">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align: -1px; margin-right: .3rem;"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+
+    {{ form_end(form) }}
+</div>

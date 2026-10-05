@@ -1,0 +1,51 @@
+<h2>Un compte rendu de consultation a été partagé avec vous</h2>
+
+<p>Bonjour,</p>
+
+<p>
+    <strong>{{ sender_name }}</strong> vous a partagé un compte rendu de consultation sur AniCare.
+</p>
+
+<table style="border-collapse: collapse; margin: 20px 0;">
+    {% if animal_name %}
+    <tr>
+        <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Animal</td>
+        <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">{{ animal_name }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Type</td>
+        <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">{{ entry_type }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Mode d'accès</td>
+        <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">
+            {% if share_mode == 'full' %}
+                Accès complet
+            {% elseif share_mode == 'summary' %}
+                Résumé uniquement
+            {% else %}
+                Lecture seule
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<p>
+    Connectez-vous sur AniCare pour consulter le compte rendu :
+</p>
+
+<p>
+    <a href="{{ app_url }}" style="display: inline-block; padding: 12px 24px; background: #1a4d45; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        Accéder à AniCare
+    </a>
+</p>
+
+<p style="color: #64748b; font-size: 0.85em; margin-top: 30px;">
+    {% if is_new_user %}
+    Un compte AniCare a été créé pour vous avec l'adresse <strong>{{ recipient_email }}</strong>.
+    Cliquez sur le lien ci-dessus pour activer votre compte et définir votre mot de passe.
+    {% else %}
+    Connectez-vous avec votre adresse <strong>{{ recipient_email }}</strong> pour y accéder.
+    {% endif %}
+</p>

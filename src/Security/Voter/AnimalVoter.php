@@ -3,6 +3,7 @@
 namespace App\Security\Voter;
 
 use App\Entity\Animal;
+use App\Entity\AnimalReferent;
 use App\Entity\StructureMembership;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -15,11 +16,12 @@ final class AnimalVoter extends Voter
     public const EDIT_HEALTH = 'ANIMAL_EDIT_HEALTH';
     public const DELETE = 'ANIMAL_DELETE';
     public const REQUEST_DELETE = 'ANIMAL_REQUEST_DELETE';
+    public const MANAGE_SHARE = 'ANIMAL_MANAGE_SHARE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         return $subject instanceof Animal
-            && in_array($attribute, [self::VIEW, self::EDIT, self::EDIT_HEALTH, self::DELETE, self::REQUEST_DELETE], true);
+            && in_array($attribute, [self::VIEW, self::EDIT, self::EDIT_HEALTH, self::DELETE, self::REQUEST_DELETE, self::MANAGE_SHARE], true);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -36,15 +38,20 @@ final class AnimalVoter extends Voter
             self::VIEW => $this->canView($animal, $user),
             self::EDIT => $this->canEdit($animal, $user),
             self::EDIT_HEALTH => $this->canEditHealth($animal, $user),
-            self::DELETE => $animal->getOwner() === $user,
+            self::DELETE => $this->canDelete($animal, $user),
             self::REQUEST_DELETE => $this->isStructureManager($animal, $user),
+            self::MANAGE_SHARE => $this->isPrincipalReferent($animal, $user),
             default => false,
         };
     }
 
     private function canView(Animal $animal, User $user): bool
     {
-        if ($animal->getOwner() === $user) {
+        if ($this->isOwnerOrReferent($animal, $user)) {
+            return true;
+        }
+
+        if ($animal->getCreatedByPro() === $user) {
             return true;
         }
 
@@ -57,7 +64,20 @@ final class AnimalVoter extends Voter
 
     private function canEdit(Animal $animal, User $user): bool
     {
+        if ($this->isPrincipalReferent($animal, $user)) {
+            return true;
+        }
+
         if ($animal->getOwner() === $user) {
+            // PRO who created this animal inline only gets temporary edit access
+            if ($animal->getCreatedByPro() === $user) {
+                return $animal->isProfileIncomplete();
+            }
+            return true;
+        }
+
+        // PRO who created the animal for someone else gets temporary edit access
+        if ($animal->getCreatedByPro() === $user && $animal->isProfileIncomplete()) {
             return true;
         }
 
@@ -70,7 +90,7 @@ final class AnimalVoter extends Voter
 
     private function canEditHealth(Animal $animal, User $user): bool
     {
-        if ($animal->getOwner() === $user) {
+        if ($this->isOwnerOrReferent($animal, $user)) {
             return true;
         }
 
@@ -79,6 +99,45 @@ final class AnimalVoter extends Voter
         }
 
         return $this->hasStructureAccess($animal, $user, [StructureMembership::ROLE_PRO]);
+    }
+
+    private function canDelete(Animal $animal, User $user): bool
+    {
+        if ($this->isPrincipalReferent($animal, $user)) {
+            return true;
+        }
+
+        return $animal->getOwner() === $user;
+    }
+
+    private function isOwnerOrReferent(Animal $animal, User $user): bool
+    {
+        if ($animal->getOwner() === $user) {
+            return true;
+        }
+
+        return $this->isActiveReferent($animal, $user);
+    }
+
+    private function isActiveReferent(Animal $animal, User $user): bool
+    {
+        foreach ($animal->getReferents() as $referent) {
+            if ($referent->getUser() === $user && $referent->isActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function isPrincipalReferent(Animal $animal, User $user): bool
+    {
+        foreach ($animal->getReferents() as $referent) {
+            if ($referent->getUser() === $user && $referent->isPrincipal() && $referent->isActive()) {
+                return true;
+            }
+        }
+        // Legacy fallback
+        return $animal->getOwner() === $user;
     }
 
     private function hasShare(Animal $animal, User $user): bool

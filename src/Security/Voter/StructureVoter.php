@@ -30,10 +30,19 @@ final class StructureVoter extends Voter
         $structure = $subject;
 
         return match ($attribute) {
-            self::VIEW => $this->isMember($structure, $user),
+            self::VIEW => $this->canView($structure, $user),
             self::EDIT => $this->isManager($structure, $user),
             default => false,
         };
+    }
+
+    private function canView(Structure $structure, User $user): bool
+    {
+        if ($this->isMember($structure, $user)) {
+            return true;
+        }
+
+        return in_array('ROLE_PRO', $user->getRoles(), true);
     }
 
     private function isMember(Structure $structure, User $user): bool

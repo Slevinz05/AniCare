@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes invitations - AniCare{% endblock %}
+
+{% block body %}
+<style>
+    .invitation-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .invitation-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    .invitation-header {
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .invitation-avatar {
+        width: 42px; height: 42px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.8rem; color: #fff;
+        flex-shrink: 0;
+    }
+    .invitation-body {
+        padding: 1rem 1.25rem;
+    }
+    .invitation-actions {
+        padding: 0.75rem 1.25rem;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        gap: 0.5rem;
+    }
+    .btn-accept {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        color: #fff; border: none; border-radius: 8px;
+        padding: 0.45rem 1rem; font-weight: 600; font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .btn-accept:hover { background: linear-gradient(135deg, #218838 0%, #1e7e34 100%); color: #fff; transform: translateY(-1px); }
+    .btn-refuse {
+        background: #fff; color: #dc3545;
+        border: 1px solid #dc3545; border-radius: 8px;
+        padding: 0.45rem 1rem; font-weight: 600; font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .btn-refuse:hover { background: #dc3545; color: #fff; }
+    .role-pill {
+        display: inline-flex; align-items: center; gap: 0.25rem;
+        padding: 0.2rem 0.6rem; border-radius: 999px;
+        font-size: 0.72rem; font-weight: 600;
+        background: var(--soft-teal, #eef7f5);
+        color: var(--primary-color, #1a4d45);
+    }
+    .empty-invitations {
+        text-align: center; padding: 3.5rem 2rem;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 2px dashed #dee2e6; border-radius: 12px;
+    }
+</style>
+
+<div class="container py-4" style="max-width: 800px;">
+
+    <div class="card-header medical-header p-4 rounded-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <p class="page-eyebrow mb-2">Référents</p>
+                <h1 class="page-title mb-1" style="font-size: 1.4rem;">Mes invitations</h1>
+                <p class="page-subtitle mb-0">{{ invitations|length }} invitation{{ invitations|length > 1 ? 's' : '' }} en attente</p>
+            </div>
+        </div>
+    </div>
+
+    {% if invitations is empty %}
+        <div class="empty-invitations">
+            <div class="mb-3" style="width: 56px; height: 56px; border-radius: 50%; background: var(--soft-teal); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: 0.3rem;">Aucune invitation en attente</h2>
+            <p class="text-secondary" style="font-size: 0.9rem;">Vous n'avez pas d'invitation de référent secondaire pour le moment.</p>
+        </div>
+    {% else %}
+        <div class="d-flex flex-column gap-3">
+            {% for invitation in invitations %}
+                <div class="invitation-card">
+                    <div class="invitation-header">
+                        <div class="invitation-avatar" style="background: var(--primary-color);">
+                            {{ invitation.animal.name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.95rem;">{{ invitation.animal.name }}</div>
+                            <div class="text-secondary" style="font-size: 0.8rem;">
+                                {{ invitation.animal.species|default('Cheval') }}
+                                {% if invitation.animal.breed %} · {{ invitation.animal.breed }}{% endif %}
+                            </div>
+                        </div>
+                        <span class="role-pill ms-auto">{{ invitation.roleLabel }}</span>
+                    </div>
+                    <div class="invitation-body">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span style="font-size: 0.85rem;">
+                                Invitation de <strong>{{ invitation.designatedBy ? invitation.designatedBy.fullName : 'Inconnu' }}</strong>
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <span style="font-size: 0.85rem; color: #6c757d;">
+                                {{ invitation.designatedAt|date('d/m/Y à H:i') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="invitation-actions">
+                        <form method="post" action="{{ path('app_referent_accept', {id: invitation.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ invitation.id) }}">
+                            <button type="submit" class="btn-accept">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1" style="vertical-align: -1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                Accepter
+                            </button>
+                        </form>
+                        <form method="post" action="{{ path('app_referent_refuse', {id: invitation.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('refuse' ~ invitation.id) }}">
+                            <button type="submit" class="btn-refuse">Refuser</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

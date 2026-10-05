@@ -85,6 +85,27 @@ class HealthBookEntry
     #[ORM\JoinColumn(nullable: true)]
     private ?Appointment $appointment = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $sharedAt = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $sharedWithUser = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $sharedWithEmail = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Structure $sharedWithStructure = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $shareMode = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -409,6 +430,45 @@ class HealthBookEntry
         return $this->status === 'draft';
     }
 
+    public function isPublished(): bool
+    {
+        return $this->status === 'published';
+    }
+
+    public function isShared(): bool
+    {
+        return $this->status === 'shared';
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getSharedAt(): ?\DateTimeImmutable
+    {
+        return $this->sharedAt;
+    }
+
+    public function setSharedAt(?\DateTimeImmutable $sharedAt): static
+    {
+        $this->sharedAt = $sharedAt;
+
+        return $this;
+    }
+
+    public function isAuthor(User $user): bool
+    {
+        return $this->createdBy === $user || $this->veterinarian === $user;
+    }
+
     public function getAnatomicalLocations(): array
     {
         return $this->anatomicalLocations ?? [];
@@ -441,6 +501,50 @@ class HealthBookEntry
     {
         $this->updatedAt = $updatedAt;
 
+        return $this;
+    }
+
+    public function getSharedWithUser(): ?User
+    {
+        return $this->sharedWithUser;
+    }
+
+    public function setSharedWithUser(?User $sharedWithUser): static
+    {
+        $this->sharedWithUser = $sharedWithUser;
+        return $this;
+    }
+
+    public function getSharedWithEmail(): ?string
+    {
+        return $this->sharedWithEmail;
+    }
+
+    public function setSharedWithEmail(?string $sharedWithEmail): static
+    {
+        $this->sharedWithEmail = $sharedWithEmail;
+        return $this;
+    }
+
+    public function getSharedWithStructure(): ?Structure
+    {
+        return $this->sharedWithStructure;
+    }
+
+    public function setSharedWithStructure(?Structure $sharedWithStructure): static
+    {
+        $this->sharedWithStructure = $sharedWithStructure;
+        return $this;
+    }
+
+    public function getShareMode(): ?string
+    {
+        return $this->shareMode;
+    }
+
+    public function setShareMode(?string $shareMode): static
+    {
+        $this->shareMode = $shareMode;
         return $this;
     }
 }

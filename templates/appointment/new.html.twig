@@ -3,13 +3,13 @@
 {% block body %}
 <style>
     .appointment-form-hero {
-        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+        background: linear-gradient(135deg, #1a4d45 0%, #153d37 60%, #0f2e28 100%);
         border-radius: var(--radius-lg);
         padding: 2rem 2rem;
         color: #fff;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
+        box-shadow: 0 8px 32px rgba(26, 77, 69, 0.3);
         margin-bottom: 1.5rem;
     }
     .appointment-form-hero::before {
@@ -165,6 +165,81 @@
         color: var(--text-muted);
         font-size: 0.85rem;
     }
+
+    /* New animal creation form */
+    .new-animal-toggle {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border: 2px dashed var(--primary-color);
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--primary-color);
+        font-weight: 700; font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .new-animal-toggle:hover {
+        background: var(--soft-teal);
+        border-style: solid;
+    }
+    .new-animal-toggle.active {
+        background: var(--soft-teal);
+        border-style: solid;
+    }
+    .new-animal-form {
+        display: none;
+        margin-top: 1rem;
+        padding: 1.25rem;
+        border: 1px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        background: var(--soft-teal);
+    }
+    .new-animal-form.show { display: block; }
+    .new-animal-form .form-label {
+        font-weight: 700; font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--secondary-color);
+    }
+    .na-search-wrapper { position: relative; }
+    .na-search-results {
+        position: absolute; top: 100%; left: 0; right: 0;
+        z-index: 50;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-md);
+        max-height: 240px;
+        overflow-y: auto;
+        display: none;
+    }
+    .na-search-results.show { display: block; }
+    .na-search-result-item {
+        padding: 0.6rem 0.85rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.15s;
+        font-size: 0.85rem;
+    }
+    .na-search-result-item:last-child { border-bottom: none; }
+    .na-search-result-item:hover { background: var(--soft-teal); }
+    .na-search-result-item .result-name { font-weight: 700; color: var(--secondary-color); }
+    .na-search-result-item .result-detail { font-size: 0.75rem; color: var(--text-muted); }
+    .na-selected-badge {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--primary-color);
+        border-radius: 2rem;
+        background: #fff;
+        font-weight: 600; font-size: 0.82rem;
+        color: var(--primary-color);
+    }
+    .na-selected-badge .btn-remove {
+        background: none; border: none; cursor: pointer;
+        color: var(--text-muted); padding: 0; line-height: 1;
+        font-size: 1.1rem;
+    }
+    .na-selected-badge .btn-remove:hover { color: var(--danger-color); }
 </style>
 
 <div class="container py-4">
@@ -274,15 +349,156 @@
                             </div>
                         {% endfor %}
                     </div>
+
+                    {# ── Créer un nouveau cheval (PRO) ── #}
+                    <div class="mt-3">
+                        <button type="button" class="new-animal-toggle" id="btn-new-animal-toggle">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Créer un nouveau cheval
+                        </button>
+                        <div class="new-animal-form" id="new-animal-form">
+                            <input type="hidden" name="new_animal_mode" id="new_animal_mode" value="0">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Nom *</label>
+                                    <input type="text" name="new_animal_name" id="new_animal_name" class="form-control" placeholder="Nom du cheval">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Date de naissance</label>
+                                    <input type="date" name="new_animal_birth_date" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">Sexe *</label>
+                                    <select name="new_animal_gender" class="form-select">
+                                        <option value="Hongre">Hongre</option>
+                                        <option value="Jument">Jument</option>
+                                        <option value="Étalon">Étalon</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">N° SIRE</label>
+                                    <input type="text" name="new_animal_sire" class="form-control" placeholder="Ex: 12345678A">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">N° Puce</label>
+                                    <input type="text" name="new_animal_microchip" class="form-control" placeholder="N° micropuce">
+                                </div>
+
+                                {# Propriétaire (si pas de client déjà sélectionné) #}
+                                <div class="col-12" id="na-owner-section">
+                                    <label class="form-label">Propriétaire</label>
+                                    <div id="na-owner-selected" style="display:none;" class="mb-2">
+                                        <span class="na-selected-badge">
+                                            <span id="na-owner-selected-name"></span>
+                                            <button type="button" class="btn-remove" id="na-owner-remove">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div id="na-owner-search-wrapper" class="na-search-wrapper">
+                                        <input type="text" id="na-owner-search" class="form-control form-control-sm" placeholder="Rechercher un propriétaire..." autocomplete="off">
+                                        <div id="na-owner-results" class="na-search-results"></div>
+                                    </div>
+                                    <input type="hidden" name="new_animal_owner_id" id="new_animal_owner_id" value="">
+                                    <small class="text-muted">Laissez vide pour vous attribuer comme propriétaire.</small>
+                                </div>
+
+                                {# Structure (PRO peut rattacher à une structure) #}
+                                <div class="col-12" id="na-structure-section">
+                                    <label class="form-label">Rattacher à une structure</label>
+                                    <div id="na-structure-selected" style="display:none;" class="mb-2">
+                                        <span class="na-selected-badge">
+                                            <span id="na-structure-selected-name"></span>
+                                            <button type="button" class="btn-remove" id="na-structure-remove">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div id="na-structure-search-wrapper" class="na-search-wrapper">
+                                        <input type="text" id="na-structure-search" class="form-control form-control-sm" placeholder="Rechercher une structure..." autocomplete="off">
+                                        <div id="na-structure-results" class="na-search-results"></div>
+                                    </div>
+                                    <input type="hidden" name="new_animal_structure_id" id="new_animal_structure_id" value="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 {% else %}
-                {# ── Cheval (Propriétaire) ── #}
+                {# ── Cheval (Propriétaire / Structure) ── #}
                 <div class="form-section">
                     <div class="form-section-title">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
                         Cheval
                     </div>
-                    {{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}
+                    <div id="existing-animal-select">
+                        {{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+
+                    {# ── Créer un nouveau cheval (Owner / Structure) ── #}
+                    <div class="mt-3">
+                        <button type="button" class="new-animal-toggle" id="btn-new-animal-toggle-owner">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Créer un nouveau cheval
+                        </button>
+                        <div class="new-animal-form" id="new-animal-form-owner">
+                            <input type="hidden" name="new_animal_mode" id="new_animal_mode_owner" value="0">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Nom *</label>
+                                    <input type="text" name="new_animal_name" class="form-control" placeholder="Nom du cheval">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Date de naissance</label>
+                                    <input type="date" name="new_animal_birth_date" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">Sexe *</label>
+                                    <select name="new_animal_gender" class="form-select">
+                                        <option value="Hongre">Hongre</option>
+                                        <option value="Jument">Jument</option>
+                                        <option value="Étalon">Étalon</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">N° SIRE</label>
+                                    <input type="text" name="new_animal_sire" class="form-control" placeholder="Ex: 12345678A">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">N° Puce</label>
+                                    <input type="text" name="new_animal_microchip" class="form-control" placeholder="N° micropuce">
+                                </div>
+
+                                {% if is_structure %}
+                                {# Structure: propriétaire + professionnel #}
+                                <div class="col-12">
+                                    <label class="form-label">Propriétaire</label>
+                                    <div id="na-owner-selected-o" style="display:none;" class="mb-2">
+                                        <span class="na-selected-badge">
+                                            <span id="na-owner-selected-name-o"></span>
+                                            <button type="button" class="btn-remove" id="na-owner-remove-o">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div id="na-owner-search-wrapper-o" class="na-search-wrapper">
+                                        <input type="text" id="na-owner-search-o" class="form-control form-control-sm" placeholder="Rechercher un propriétaire..." autocomplete="off">
+                                        <div id="na-owner-results-o" class="na-search-results"></div>
+                                    </div>
+                                    <input type="hidden" name="new_animal_owner_id" id="new_animal_owner_id_o" value="">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Lier un professionnel (annuaire)</label>
+                                    <div id="na-pro-selected" style="display:none;" class="mb-2">
+                                        <span class="na-selected-badge">
+                                            <span id="na-pro-selected-name"></span>
+                                            <button type="button" class="btn-remove" id="na-pro-remove">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div id="na-pro-search-wrapper" class="na-search-wrapper">
+                                        <input type="text" id="na-pro-search" class="form-control form-control-sm" placeholder="Rechercher un professionnel..." autocomplete="off">
+                                        <div id="na-pro-results" class="na-search-results"></div>
+                                    </div>
+                                    <input type="hidden" name="new_animal_pro_id" id="new_animal_pro_id" value="">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
 
@@ -450,8 +666,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── PRO: Client search & dynamic animals ──
     const searchInput = document.getElementById('client-search');
-    if (!searchInput) return;
 
+    if (searchInput) {
     const searchResults = document.getElementById('client-search-results');
     const searchWrapper = document.getElementById('client-search-wrapper');
     const selectedDisplay = document.getElementById('selected-client-display');
@@ -606,9 +822,177 @@ document.addEventListener('DOMContentLoaded', function() {
         if (checked.length === 1 && checked[0].dataset.address) {
             locationField.value = checked[0].dataset.address;
         } else if (checked.length > 1) {
-            // Multiple animals: use the first checked one's address
             locationField.value = checked[0].dataset.address;
         }
+    }
+    } // end if (searchInput) — PRO-only block
+
+    // ── New animal toggle (PRO) ──
+    const btnNewAnimalToggle = document.getElementById('btn-new-animal-toggle');
+    if (btnNewAnimalToggle) {
+        const newAnimalForm = document.getElementById('new-animal-form');
+        const newAnimalMode = document.getElementById('new_animal_mode');
+
+        btnNewAnimalToggle.addEventListener('click', function() {
+            const isOpen = newAnimalForm.classList.toggle('show');
+            btnNewAnimalToggle.classList.toggle('active', isOpen);
+            newAnimalMode.value = isOpen ? '1' : '0';
+            if (isOpen) {
+                const cs = document.getElementById('appointment_client');
+                if (cs && cs.value) {
+                    document.getElementById('na-owner-section').style.display = 'none';
+                    document.getElementById('new_animal_owner_id').value = cs.value;
+                } else {
+                    document.getElementById('na-owner-section').style.display = '';
+                }
+            }
+        });
+
+        // Owner search (PRO)
+        setupSearchField(
+            'na-owner-search', 'na-owner-results',
+            '/rendez-vous/api/search-owners', 'owners',
+            function(item) {
+                return '<span class="result-name">' + item.name + '</span>' +
+                    '<span class="result-detail"> — ' + item.email + '</span>';
+            },
+            function(item) {
+                document.getElementById('new_animal_owner_id').value = item.id;
+                document.getElementById('na-owner-selected-name').textContent = item.name;
+                document.getElementById('na-owner-selected').style.display = '';
+                document.getElementById('na-owner-search-wrapper').style.display = 'none';
+            }
+        );
+        document.getElementById('na-owner-remove')?.addEventListener('click', function() {
+            document.getElementById('new_animal_owner_id').value = '';
+            document.getElementById('na-owner-selected').style.display = 'none';
+            document.getElementById('na-owner-search-wrapper').style.display = '';
+            document.getElementById('na-owner-search').value = '';
+        });
+
+        // Structure search (PRO)
+        setupSearchField(
+            'na-structure-search', 'na-structure-results',
+            '/rendez-vous/api/search-structures', 'structures',
+            function(item) {
+                return '<span class="result-name">' + item.name + '</span>' +
+                    (item.city ? '<span class="result-detail"> — ' + item.city + '</span>' : '');
+            },
+            function(item) {
+                document.getElementById('new_animal_structure_id').value = item.id;
+                document.getElementById('na-structure-selected-name').textContent = item.name + (item.city ? ' — ' + item.city : '');
+                document.getElementById('na-structure-selected').style.display = '';
+                document.getElementById('na-structure-search-wrapper').style.display = 'none';
+            }
+        );
+        document.getElementById('na-structure-remove')?.addEventListener('click', function() {
+            document.getElementById('new_animal_structure_id').value = '';
+            document.getElementById('na-structure-selected').style.display = 'none';
+            document.getElementById('na-structure-search-wrapper').style.display = '';
+            document.getElementById('na-structure-search').value = '';
+        });
+    }
+
+    // ── New animal toggle (Owner / Structure) ──
+    const btnNewAnimalToggleOwner = document.getElementById('btn-new-animal-toggle-owner');
+    if (btnNewAnimalToggleOwner) {
+        const newAnimalFormOwner = document.getElementById('new-animal-form-owner');
+        const newAnimalModeOwner = document.getElementById('new_animal_mode_owner');
+        const existingSelect = document.getElementById('existing-animal-select');
+
+        btnNewAnimalToggleOwner.addEventListener('click', function() {
+            const isOpen = newAnimalFormOwner.classList.toggle('show');
+            btnNewAnimalToggleOwner.classList.toggle('active', isOpen);
+            newAnimalModeOwner.value = isOpen ? '1' : '0';
+            if (existingSelect) existingSelect.style.display = isOpen ? 'none' : '';
+        });
+
+        // Owner search (Structure mode)
+        setupSearchField(
+            'na-owner-search-o', 'na-owner-results-o',
+            '/rendez-vous/api/search-owners', 'owners',
+            function(item) {
+                return '<span class="result-name">' + item.name + '</span>' +
+                    '<span class="result-detail"> — ' + item.email + '</span>';
+            },
+            function(item) {
+                document.getElementById('new_animal_owner_id_o').value = item.id;
+                document.getElementById('na-owner-selected-name-o').textContent = item.name;
+                document.getElementById('na-owner-selected-o').style.display = '';
+                document.getElementById('na-owner-search-wrapper-o').style.display = 'none';
+            }
+        );
+        document.getElementById('na-owner-remove-o')?.addEventListener('click', function() {
+            document.getElementById('new_animal_owner_id_o').value = '';
+            document.getElementById('na-owner-selected-o').style.display = 'none';
+            document.getElementById('na-owner-search-wrapper-o').style.display = '';
+            document.getElementById('na-owner-search-o').value = '';
+        });
+
+        // Professional search (Structure mode)
+        setupSearchField(
+            'na-pro-search', 'na-pro-results',
+            '/rendez-vous/api/search-professionals', 'professionals',
+            function(item) {
+                return '<span class="result-name">' + item.name + '</span>' +
+                    (item.specialty ? '<span class="result-detail"> — ' + item.specialty + '</span>' : '');
+            },
+            function(item) {
+                document.getElementById('new_animal_pro_id').value = item.id;
+                document.getElementById('na-pro-selected-name').textContent = item.name + (item.specialty ? ' — ' + item.specialty : '');
+                document.getElementById('na-pro-selected').style.display = '';
+                document.getElementById('na-pro-search-wrapper').style.display = 'none';
+            }
+        );
+        document.getElementById('na-pro-remove')?.addEventListener('click', function() {
+            document.getElementById('new_animal_pro_id').value = '';
+            document.getElementById('na-pro-selected').style.display = 'none';
+            document.getElementById('na-pro-search-wrapper').style.display = '';
+            document.getElementById('na-pro-search').value = '';
+        });
+    }
+
+    // ── Generic search field helper ──
+    function setupSearchField(inputId, resultsId, apiUrl, dataKey, renderItem, onSelect) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const results = document.getElementById(resultsId);
+        let timer = null;
+
+        input.addEventListener('input', function() {
+            clearTimeout(timer);
+            const q = this.value.trim();
+            if (q.length < 2) { results.classList.remove('show'); return; }
+            timer = setTimeout(() => {
+                fetch(apiUrl + '?q=' + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        results.innerHTML = '';
+                        const items = data[dataKey] || [];
+                        if (items.length === 0) {
+                            results.innerHTML = '<div class="na-search-result-item" style="cursor:default;color:var(--text-muted);">Aucun résultat</div>';
+                        } else {
+                            items.forEach(item => {
+                                const div = document.createElement('div');
+                                div.className = 'na-search-result-item';
+                                div.innerHTML = renderItem(item);
+                                div.addEventListener('click', () => {
+                                    onSelect(item);
+                                    results.classList.remove('show');
+                                });
+                                results.appendChild(div);
+                            });
+                        }
+                        results.classList.add('show');
+                    });
+            }, 300);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!input.parentElement.contains(e.target)) {
+                results.classList.remove('show');
+            }
+        });
     }
 });
 </script>

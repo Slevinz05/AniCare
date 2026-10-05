@@ -1,0 +1,255 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ tournee.displayName }} - AniCare{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .ts-page { max-width: 800px; margin: 0 auto; }
+
+    .ts-timeline { position: relative; padding-left: 2.5rem; }
+    .ts-timeline::before {
+        content: ''; position: absolute; left: 15px; top: 0; bottom: 0;
+        width: 2px; background: #e9ecef;
+    }
+
+    .ts-stop {
+        position: relative; margin-bottom: 1rem;
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        padding: 1rem 1.25rem; transition: box-shadow .2s;
+    }
+    .ts-stop:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+    .ts-stop.completed { opacity: .6; }
+    .ts-stop.completed .ts-stop-title { text-decoration: line-through; }
+
+    .ts-stop-dot {
+        position: absolute; left: -2.5rem; top: 1.1rem;
+        width: 14px; height: 14px; border-radius: 50%;
+        border: 3px solid var(--primary-color); background: #fff;
+        z-index: 1;
+    }
+    .ts-stop.completed .ts-stop-dot {
+        background: var(--primary-color);
+    }
+
+    .ts-stop-header { display: flex; align-items: center; gap: .75rem; }
+    .ts-stop-number {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: var(--soft-teal); color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: .8rem; flex-shrink: 0;
+    }
+    .ts-stop-title { font-weight: 700; font-size: .95rem; flex: 1; min-width: 0; }
+    .ts-stop-meta { font-size: .82rem; color: #6c757d; margin-top: .35rem; padding-left: 2.5rem; }
+    .ts-stop-meta svg { width: 13px; height: 13px; vertical-align: -1px; margin-right: .15rem; }
+
+    .ts-stop-actions { display: flex; gap: .3rem; align-items: center; }
+    .ts-btn-sm {
+        width: 28px; height: 28px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid #e9ecef; background: #fff; color: #6c757d;
+        cursor: pointer; transition: all .2s;
+    }
+    .ts-btn-sm:hover { background: var(--soft-teal); color: var(--primary-color); border-color: var(--primary-color); }
+
+    .ts-progress {
+        display: flex; align-items: center; gap: .75rem;
+        margin-bottom: 1.5rem;
+    }
+    .ts-progress-bar {
+        flex: 1; height: 8px; background: #e9ecef; border-radius: 999px; overflow: hidden;
+    }
+    .ts-progress-fill {
+        height: 100%; border-radius: 999px;
+        background: linear-gradient(90deg, var(--primary-color) 0%, #0a7a70 100%);
+        transition: width .3s;
+    }
+    .ts-progress-label { font-size: .82rem; font-weight: 600; color: #6c757d; white-space: nowrap; }
+
+    .ts-add-form {
+        background: #f9fafb; border: 1px dashed #d1d5db; border-radius: var(--radius-md);
+        padding: 1rem 1.25rem; margin-top: 1rem;
+    }
+    .ts-summary {
+        display: flex; gap: 1rem; flex-wrap: wrap;
+    }
+    .ts-summary-item {
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+        padding: .75rem 1rem; display: flex; align-items: center; gap: .5rem; flex: 1; min-width: 140px;
+    }
+    .ts-summary-value { font-size: 1.1rem; font-weight: 700; }
+    .ts-summary-label { font-size: .75rem; color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="ts-page py-4 px-3">
+
+    <div class="card-header medical-header p-4 rounded-3 mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p class="page-eyebrow mb-2">Tournée · {{ tournee.date|date('d/m/Y') }}</p>
+                <h1 class="page-title mb-1" style="font-size: 1.4rem;">{{ tournee.displayName }}</h1>
+                {% if tournee.notes %}
+                    <p class="page-subtitle mb-0">{{ tournee.notes }}</p>
+                {% endif %}
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_tournee_index') }}" class="btn btn-outline-light" style="font-size: .82rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Retour
+                </a>
+                <form method="post" action="{{ path('app_tournee_delete', {id: tournee.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette tournée ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tournee.id) }}">
+                    <button type="submit" class="btn btn-outline-light" style="font-size: .82rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Summary #}
+    {% set completed_count = tournee.stops|filter(s => s.completed)|length %}
+    {% set total_count = tournee.stops|length %}
+    <div class="ts-summary mb-4">
+        <div class="ts-summary-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+            <div>
+                <div class="ts-summary-value">{{ total_count }}</div>
+                <div class="ts-summary-label">Étape{{ total_count > 1 ? 's' : '' }}</div>
+            </div>
+        </div>
+        <div class="ts-summary-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+                <div class="ts-summary-value" style="color: #16a34a;">{{ completed_count }}</div>
+                <div class="ts-summary-label">Terminée{{ completed_count > 1 ? 's' : '' }}</div>
+            </div>
+        </div>
+        {% if tournee.totalTravelTime > 0 %}
+        <div class="ts-summary-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div>
+                <div class="ts-summary-value">{{ tournee.totalTravelTime }} min</div>
+                <div class="ts-summary-label">Trajet total</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Progress bar #}
+    {% if total_count > 0 %}
+    <div class="ts-progress">
+        <div class="ts-progress-bar">
+            <div class="ts-progress-fill" style="width: {{ total_count > 0 ? (completed_count / total_count * 100) : 0 }}%"></div>
+        </div>
+        <div class="ts-progress-label">{{ completed_count }}/{{ total_count }}</div>
+    </div>
+    {% endif %}
+
+    {# Timeline of stops #}
+    {% if tournee.stops is not empty %}
+    <div class="ts-timeline" id="stops-list">
+        {% for stop in tournee.stops %}
+        <div class="ts-stop {{ stop.completed ? 'completed' : '' }}" data-id="{{ stop.id }}">
+            <div class="ts-stop-dot"></div>
+            <div class="ts-stop-header">
+                <div class="ts-stop-number">{{ loop.index }}</div>
+                <div class="ts-stop-title">{{ stop.displayLabel }}</div>
+                <div class="ts-stop-actions">
+                    <form method="post" action="{{ path('app_tournee_stop_toggle', {id: tournee.id, stopId: stop.id}) }}" class="d-inline">
+                        <button type="submit" class="ts-btn-sm" title="{{ stop.completed ? 'Marquer non terminé' : 'Marquer terminé' }}">
+                            {% if stop.completed %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% if stop.displayLocation or (stop.appointment and stop.appointment.scheduledAt) %}
+            <div class="ts-stop-meta">
+                {% if stop.appointment %}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ stop.appointment.scheduledAt|date('H:i') }}
+                    · {{ stop.appointment.duration }} min
+                {% endif %}
+                {% if stop.displayLocation %}
+                    &nbsp;
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+                    {{ stop.displayLocation }}
+                {% endif %}
+                {% if stop.appointment and stop.appointment.client %}
+                    &nbsp;·&nbsp;
+                    {{ stop.appointment.client.fullName }}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <div class="text-center py-4" style="color: #6c757d; font-size: .9rem;">
+            <p>Aucune étape pour le moment.</p>
+        </div>
+    {% endif %}
+
+    {# Add manual stop #}
+    <div class="ts-add-form">
+        <form method="post" action="{{ path('app_tournee_add_stop', {id: tournee.id}) }}" class="d-flex gap-2 align-items-end flex-wrap">
+            <div style="flex: 1; min-width: 180px;">
+                <label class="form-label" style="font-size: .8rem; font-weight: 600;">Ajouter une étape</label>
+                <input type="text" name="label" class="form-control form-control-sm" placeholder="Libellé de l'étape" required>
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+                <label class="form-label" style="font-size: .8rem; font-weight: 600;">Lieu (optionnel)</label>
+                <input type="text" name="location" class="form-control form-control-sm" placeholder="Adresse ou lieu">
+            </div>
+            <button type="submit" class="btn btn-sm" style="background: var(--primary-color); color: #fff; border-radius: var(--radius-sm); font-weight: 600; padding: .4rem .9rem;">
+                Ajouter
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+const list = document.getElementById('stops-list');
+if (list) {
+    let dragEl = null;
+    list.querySelectorAll('.ts-stop').forEach(el => {
+        el.draggable = true;
+        el.addEventListener('dragstart', e => {
+            dragEl = el;
+            el.style.opacity = '0.4';
+        });
+        el.addEventListener('dragend', e => {
+            el.style.opacity = '';
+            dragEl = null;
+        });
+        el.addEventListener('dragover', e => {
+            e.preventDefault();
+            const rect = el.getBoundingClientRect();
+            const mid = rect.top + rect.height / 2;
+            if (e.clientY < mid) {
+                el.parentNode.insertBefore(dragEl, el);
+            } else {
+                el.parentNode.insertBefore(dragEl, el.nextSibling);
+            }
+        });
+    });
+
+    list.addEventListener('drop', e => {
+        e.preventDefault();
+        const order = [...list.querySelectorAll('.ts-stop')].map(el => parseInt(el.dataset.id));
+        fetch('{{ path('app_tournee_reorder', {id: tournee.id}) }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({order})
+        });
+        list.querySelectorAll('.ts-stop-number').forEach((num, i) => { num.textContent = i + 1; });
+    });
+}
+</script>
+{% endblock %}

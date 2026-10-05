@@ -2,53 +2,214 @@
 
 {% block title %}Répertoire - Structures - AniCare{% endblock %}
 
-{% block body %}
+{% block stylesheets %}
+{{ parent() }}
 <style>
-    .structures-hero {
-        background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #115e59 100%);
+    .st-page { max-width: 1140px; margin: 0 auto; }
+
+    .st-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0a7a70 60%, var(--secondary-color) 100%);
         border-radius: var(--radius-lg);
-        padding: 2.5rem 2rem;
+        padding: 2.2rem 2.5rem;
         color: #fff;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
     }
-    .structures-hero::before {
+    .st-hero::before {
         content: '';
-        position: absolute;
-        top: -40px; right: -40px;
-        width: 200px; height: 200px;
+        position: absolute; top: -40%; right: -10%; width: 340px; height: 340px;
+        background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
         border-radius: 50%;
-        background: rgba(255,255,255,0.06);
     }
-    .structures-hero::after {
-        content: '';
-        position: absolute;
-        bottom: -60px; left: 30%;
-        width: 300px; height: 300px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.04);
+    .st-hero-eyebrow {
+        font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+        opacity: .8; margin-bottom: .35rem;
     }
-    .structures-hero > * { position: relative; z-index: 1; }
+    .st-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 .35rem; }
+    .st-hero p { font-size: .92rem; opacity: .85; margin: 0; }
+
+    .st-search-bar {
+        position: relative; max-width: 500px;
+    }
+    .st-search-bar input {
+        width: 100%; padding: .6rem 1rem .6rem 2.5rem;
+        border: 2px solid rgba(255,255,255,.3); border-radius: var(--radius-md);
+        background: rgba(255,255,255,.15); color: #fff; font-size: .9rem;
+        transition: all .2s;
+    }
+    .st-search-bar input::placeholder { color: rgba(255,255,255,.6); }
+    .st-search-bar input:focus { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.5); outline: none; }
+    .st-search-bar svg {
+        position: absolute; left: .8rem; top: 50%; transform: translateY(-50%);
+        opacity: .6;
+    }
+
+    .st-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+
+    .st-card {
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        overflow: hidden; transition: box-shadow .2s, transform .2s;
+        text-decoration: none; color: inherit; display: flex; flex-direction: column;
+    }
+    .st-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); color: inherit; }
+    .st-card-header {
+        padding: 1.25rem; display: flex; align-items: center; gap: .75rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .st-card-avatar {
+        width: 44px; height: 44px; border-radius: var(--radius-sm);
+        background: var(--soft-teal); color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: .85rem; flex-shrink: 0;
+    }
+    .st-card-name { font-weight: 700; font-size: .95rem; }
+    .st-card-type {
+        display: inline-flex; padding: .12rem .5rem; border-radius: 999px;
+        font-size: .68rem; font-weight: 600;
+        background: #f0f0f0; color: #6c757d;
+    }
+    .st-card-body { padding: 1rem 1.25rem; flex: 1; }
+    .st-card-meta { font-size: .82rem; color: #6c757d; }
+    .st-card-meta svg { width: 13px; height: 13px; vertical-align: -1px; margin-right: .2rem; }
+    .st-card-meta + .st-card-meta { margin-top: .3rem; }
+
+    .st-card-footer {
+        padding: .75rem 1.25rem; border-top: 1px solid #f0f0f0;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .st-card-stat { font-size: .78rem; color: #6c757d; }
+
+    .st-empty {
+        text-align: center; padding: 3.5rem 2rem;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 2px dashed #dee2e6; border-radius: var(--radius-md);
+    }
+
+    .st-tabs {
+        display: flex; gap: .5rem; margin-bottom: 1rem;
+    }
+    .st-tab {
+        padding: .4rem .9rem; border-radius: 999px; font-size: .82rem; font-weight: 600;
+        border: 1px solid #e9ecef; background: #fff; color: #6c757d;
+        text-decoration: none; transition: all .2s;
+    }
+    .st-tab:hover, .st-tab.active {
+        background: var(--primary-color); color: #fff; border-color: var(--primary-color);
+    }
 </style>
+{% endblock %}
 
-<div class="container py-4">
-    <div class="structures-hero mb-4">
-        <p class="page-eyebrow mb-2" style="color: rgba(255,255,255,0.6);">Répertoire</p>
-        <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;">Structures</h1>
-        <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 0;">Gérez votre réseau de structures partenaires.</p>
-    </div>
+{% block body %}
+<div class="st-page py-4 px-3">
 
-    <div class="card anicare-card">
-        <div class="card-body p-5 text-center">
-            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="color: var(--primary-color);"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <div class="st-hero mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p class="st-hero-eyebrow">Répertoire</p>
+                <h1>Structures</h1>
+                <p>Annuaire des structures partenaires</p>
             </div>
-            <h2 class="h5 page-title mb-2">Fonctionnalité à venir</h2>
-            <p class="text-secondary mb-0" style="max-width: 400px; margin: 0 auto;">
-                Vous pourrez bientôt ajouter et gérer les structures de votre réseau professionnel : cliniques, centres équestres, laboratoires...
-            </p>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_structure_new') }}" class="btn" style="background: #fff; color: var(--primary-color); border: none; border-radius: var(--radius-md); font-size: .85rem; font-weight: 600; padding: .55rem 1.2rem; display: inline-flex; align-items: center; gap: .4rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nouvelle structure
+                </a>
+            </div>
         </div>
+        <form method="get" class="mt-3">
+            <div class="st-search-bar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" name="q" value="{{ query }}" placeholder="Rechercher par nom, ville, code postal...">
+            </div>
+        </form>
     </div>
+
+    {# Tabs #}
+    <div class="st-tabs">
+        <a href="{{ path('app_repertoire_reseau') }}" class="st-tab">Réseau</a>
+        <a href="{{ path('app_repertoire_structures') }}" class="st-tab active">Structures</a>
+    </div>
+
+    {% if structures is empty %}
+        <div class="st-empty">
+            <div class="mb-3" style="width: 56px; height: 56px; border-radius: 50%; background: var(--soft-teal); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: .3rem;">
+                {% if query %}Aucun résultat pour "{{ query }}"{% else %}Aucune structure{% endif %}
+            </h2>
+            <p class="text-secondary" style="font-size: .9rem; margin-bottom: 1rem;">
+                {% if query %}
+                    Essayez avec d'autres termes de recherche.
+                {% else %}
+                    Ajoutez votre première structure ou rejoignez-en une avec un code.
+                {% endif %}
+            </p>
+            {% if not query %}
+            <div class="d-flex gap-2 justify-content-center">
+                <a href="{{ path('app_structure_new') }}" class="btn" style="background: var(--primary-color); color: #fff; border-radius: var(--radius-md); font-weight: 600; font-size: .85rem; padding: .5rem 1.2rem;">
+                    Créer une structure
+                </a>
+                <a href="{{ path('app_structure_claim') }}" class="btn" style="background: #fff; color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: var(--radius-md); font-weight: 600; font-size: .85rem; padding: .5rem 1.2rem;">
+                    Rejoindre avec un code
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="st-grid">
+            {% for structure in structures %}
+                <a href="{{ path('app_structure_show', {id: structure.id}) }}" class="st-card">
+                    <div class="st-card-header">
+                        <div class="st-card-avatar">
+                            {{ structure.name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="st-card-name">{{ structure.name }}</div>
+                            <div class="d-flex gap-1 flex-wrap mt-1">
+                                {% if structure.type %}
+                                    <span class="st-card-type">{{ structure.type }}</span>
+                                {% endif %}
+                                {% if not structure.hasManager %}
+                                    <span class="st-card-type" style="background: #fef2f2; color: #dc2626;">Sans gérant</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="st-card-body">
+                        {% if structure.city %}
+                        <div class="st-card-meta">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+                            {{ structure.postalCode }} {{ structure.city }}
+                        </div>
+                        {% endif %}
+                        {% if structure.phone %}
+                        <div class="st-card-meta">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            {{ structure.phone }}
+                        </div>
+                        {% endif %}
+                        {% if structure.email %}
+                        <div class="st-card-meta">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            {{ structure.email }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="st-card-footer">
+                        <span class="st-card-stat">
+                            {{ structure.memberships|length }} membre{{ structure.memberships|length > 1 ? 's' : '' }}
+                        </span>
+                        <span class="st-card-stat">
+                            {{ structure.animals|length }} animal{{ structure.animals|length != 1 ? 'ux' : '' }}
+                        </span>
+                        {% if not structure.hasManager and structure.claimCode %}
+                            <span class="st-card-stat" style="color: var(--primary-color); font-weight: 600;">Revendiquer</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

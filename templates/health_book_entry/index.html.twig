@@ -123,6 +123,15 @@
     .ch-pill-vermifuge { background: #e0f2fe; color: #0369a1; }
     .ch-pill-neutral { background: var(--bg-color); color: var(--secondary-color); }
 
+    /* status badges */
+    .ch-status-badge {
+        display: inline-flex; align-items: center; gap: .25rem;
+        padding: .2rem .55rem; border-radius: 999px;
+        font-size: .68rem; font-weight: 700; letter-spacing: .02em;
+    }
+    .ch-status-draft { background: #fff3cd; color: #856404; }
+    .ch-status-shared { background: #cce5ff; color: #004085; }
+
     /* person cell */
     .ch-person-btn {
         background: none; border: none; padding: 0; cursor: pointer;
@@ -257,9 +266,11 @@
         {# ── Stats ── #}
         {% set total = health_book_entries|length %}
         {% set docs_count = 0 %}
+        {% set drafts_count = 0 %}
         {% set animals_set = [] %}
         {% for e in health_book_entries %}
             {% set docs_count = docs_count + e.documents|length %}
+            {% if e.isDraft %}{% set drafts_count = drafts_count + 1 %}{% endif %}
             {% if e.animal and e.animal.name not in animals_set %}
                 {% set animals_set = animals_set|merge([e.animal.name]) %}
             {% endif %}
@@ -293,6 +304,17 @@
                     <div class="ch-stat-label">Document{{ docs_count > 1 ? 's' : '' }}</div>
                 </div>
             </div>
+            {% if drafts_count > 0 %}
+            <div class="ch-stat-card">
+                <div class="ch-stat-icon" style="background: #fff3cd;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#856404" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div>
+                    <div class="ch-stat-value">{{ drafts_count }}</div>
+                    <div class="ch-stat-label">Brouillon{{ drafts_count > 1 ? 's' : '' }}</div>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         {# ── List ── #}
@@ -361,6 +383,17 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                                     {{ pill_label }}
                                 </span>
+                                {% if entry.isDraft %}
+                                    <span class="ch-status-badge ch-status-draft mt-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Brouillon
+                                    </span>
+                                {% elseif entry.isShared %}
+                                    <span class="ch-status-badge ch-status-shared mt-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
+                                        Transmis
+                                    </span>
+                                {% endif %}
                             </div>
 
                             {# ── Client / Intervenant ── #}

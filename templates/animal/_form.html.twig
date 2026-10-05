@@ -11,7 +11,6 @@
     </div>
 {% endif %}
 
-{# Macro pour un champ avec gestion d'erreur inline #}
 {% macro field(f, class, extra_attr) %}
     {% set has_error = f.vars.errors|length %}
     {% set css = (class|default('form-control')) ~ (has_error ? ' is-invalid' : '') %}
@@ -21,276 +20,440 @@
     {% endif %}
 {% endmacro %}
 
-{# Macro pour un label avec étoile rouge si requis #}
 {% macro label(f, required) %}
     <label class="form-label" for="{{ f.vars.id }}">
         {{ f.vars.label }}{% if required|default(false) %} <span class="text-danger">*</span>{% endif %}
     </label>
 {% endmacro %}
 
-<div class="row g-4">
-    {# ══════════════════════════════════════════════════════════
-       COLONNE GAUCHE — Le cheval
-       ══════════════════════════════════════════════════════════ #}
-    <div class="col-12 col-lg-7">
-        <div class="p-4 rounded-3" style="background-color: #F7F3ED; border-left: 4px solid #0d9488;">
-            {# ── Identité ── #}
-            <p class="page-eyebrow mb-2">Identité</p>
-            <div class="row g-3 mb-4">
-                <div class="col-12 col-md-6">
-                    {{ _self.label(form.name, true) }}
-                    {{ _self.field(form.name, 'form-control', {'id': 'animal_name_input'}) }}
-                    <div class="d-flex gap-3 mt-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="letterJeune" checked>
-                            <label class="form-check-label small" for="letterJeune">Jeune à la lettre</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="letterAnimal">
-                            <label class="form-check-label small" for="letterAnimal">Animal à la lettre</label>
-                        </div>
-                    </div>
-                </div>
+{# ══════════════════════════════════════════════════════════
+   SECTION : ESPÈCE
+   ══════════════════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+    <div class="form-section-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="2" cy="16" r="2"/><path d="M7 18c.6-2.3 2.8-4 5-4s4.4 1.7 5 4"/></svg>
+        <span>Espèce <span class="text-danger">*</span></span>
+    </div>
+    <div class="species-selector d-flex flex-wrap gap-2">
+        {% for choice in form.species %}
+            <div class="species-chip">
+                {{ form_widget(choice, {'attr': {'class': 'd-none species-radio'}}) }}
+                <label for="{{ choice.vars.id }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 species-label {% if choice.vars.data == form.species.vars.data %}active{% endif %}">
+                    {% set icon = {
+                        'Cheval': '🐴', 'Chien': '🐕', 'Chat': '🐱', 'Vache': '🐄',
+                        'Lapin': '🐰', 'Cochon': '🐷', 'Chèvre': '🐐', 'Mouton': '🐑', 'Autre': '🐾'
+                    } %}
+                    <span class="me-1">{{ icon[choice.vars.label]|default('🐾') }}</span>
+                    {{ choice.vars.label }}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+    {% if form.species.vars.errors|length %}
+        <div class="text-danger small mt-1">{{ form_errors(form.species) }}</div>
+    {% endif %}
+</div>
 
-                <div class="col-12 col-md-6">
-                    {{ form_label(form.breed, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ _self.field(form.breed) }}
-                </div>
+{# ══════════════════════════════════════════════════════════
+   SECTION : IDENTITÉ
+   ══════════════════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+    <div class="form-section-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Identité</span>
+    </div>
 
-                <div class="col-12 col-md-6">
-                    {{ form_label(form.coat, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ _self.field(form.coat, 'form-select') }}
-                </div>
+    {# Alerte doublons inline #}
+    <div id="duplicateAlert" class="alert d-none mb-3" style="border-left: 4px solid #ff9800; background: #fff8e1; border-radius: 8px;">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <strong class="small" style="color: #e65100;">Doublons potentiels détectés</strong>
+        </div>
+        <div id="duplicateList" class="small"></div>
+    </div>
 
-                <div class="col-12 col-md-6" id="coatCustomGroup" style="{{ form.coat.vars.data != 'Autre' ? 'display:none;' : '' }}">
-                    {{ form_label(form.coatCustom, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ _self.field(form.coatCustom) }}
+    <div class="row g-3">
+        {# Nom + lettre #}
+        <div class="col-12 col-md-6">
+            {{ _self.label(form.name, true) }}
+            {{ _self.field(form.name, 'form-control', {'id': 'animal_name_input'}) }}
+            <div class="d-flex gap-3 mt-2" id="letterCheckboxes">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="letterJeune" checked>
+                    <label class="form-check-label small" for="letterJeune">Jeune à la lettre</label>
                 </div>
-
-                <div class="col-12 col-md-6">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-7">
-                            <label class="form-label" for="{{ form.birthDate.vars.id }}">Date de naissance <span class="text-danger">*</span></label>
-                            {{ _self.field(form.birthDate) }}
-                        </div>
-                        <div class="col-5">
-                            <label class="form-label">Âge</label>
-                            <div class="input-group">
-                                <input type="text" id="ageDisplay" class="form-control" readonly style="background: var(--soft-teal); font-weight: 700; color: var(--primary-color); text-align: center; padding-left: 0; padding-right: 0;"
-                                       value="{{ form.vars.data.age is not null ? form.vars.data.age : '' }}">
-                                <span class="input-group-text" style="background: var(--soft-teal); color: var(--primary-color); font-weight: 700;">ans</span>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div id="letterInfo" class="form-text text-secondary mt-0" style="display: none;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                                <span id="letterInfoText"></span>
-                            </div>
-                            <div id="ageDateError" class="text-danger small mt-1 d-none">Veuillez renseigner la date de naissance.</div>
-                        </div>
-                    </div>
-                    {{ form_widget(form.age, {'attr': {'style': 'display:none', 'id': 'age_hidden_field'}}) }}
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label">{{ form.gender.vars.label }} <span class="text-danger">*</span></label>
-                    <div class="anicare-radio-group">
-                        {% for choice in form.gender %}
-                            <div class="form-check form-check-inline anicare-radio-item">
-                                {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
-                                {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% if form.gender.vars.errors|length %}
-                        <div class="text-danger small mt-1">{{ form_errors(form.gender) }}</div>
-                    {% endif %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="letterAnimal">
+                    <label class="form-check-label small" for="letterAnimal">Animal à la lettre</label>
                 </div>
             </div>
+        </div>
 
-            {# ── Mensurations ── #}
-            <p class="page-eyebrow mb-2">Mensurations</p>
-            <div class="row g-3 mb-4">
-                <div class="col-12 col-md-4">
-                    {{ form_label(form.height, null, {'label_attr': {'class': 'form-label'}}) }}
+        {# Âge + Date de naissance #}
+        <div class="col-12 col-md-6">
+            <div class="row g-3 align-items-end">
+                <div class="col-7">
+                    <label class="form-label" for="{{ form.birthDate.vars.id }}">Date de naissance <span class="text-danger">*</span></label>
+                    {{ _self.field(form.birthDate) }}
+                </div>
+                <div class="col-5">
+                    <label class="form-label">Âge</label>
                     <div class="input-group">
-                        {{ _self.field(form.height) }}
-                        <span class="input-group-text">m</span>
+                        <input type="text" id="ageDisplay" class="form-control" readonly style="background: var(--soft-teal); font-weight: 700; color: var(--primary-color); text-align: center;"
+                               value="{{ form.vars.data.age is not null ? form.vars.data.age : '' }}">
+                        <span class="input-group-text" style="background: var(--soft-teal); color: var(--primary-color); font-weight: 700;">ans</span>
                     </div>
                 </div>
-
-                <div class="col-12 col-md-4">
-                    {{ form_label(form.weight, null, {'label_attr': {'class': 'form-label'}}) }}
-                    <div class="input-group">
-                        {{ _self.field(form.weight) }}
-                        <span class="input-group-text">kg</span>
+                <div class="col-12">
+                    <div id="letterInfo" class="form-text text-secondary mt-0" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span id="letterInfoText"></span>
                     </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-                    {{ form_label(form.averageWeight, null, {'label_attr': {'class': 'form-label'}}) }}
-                    <div class="input-group">
-                        {{ _self.field(form.averageWeight) }}
-                        <span class="input-group-text">kg</span>
-                    </div>
+                    <div id="ageDateError" class="text-danger small mt-1 d-none">Veuillez renseigner la date de naissance.</div>
                 </div>
             </div>
+            {{ form_widget(form.age, {'attr': {'style': 'display:none', 'id': 'age_hidden_field'}}) }}
+        </div>
 
-            {# ── Identification ── #}
-            <p class="page-eyebrow mb-2">Identification</p>
-            <div class="row g-3 mb-4">
-                <div class="col-12 col-md-6">
-                    {{ form_label(form.identificationNumber, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ _self.field(form.identificationNumber) }}
-                </div>
+        {# Race + Robe #}
+        <div class="col-12 col-md-4">
+            {{ form_label(form.breed, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ _self.field(form.breed) }}
+        </div>
+        <div class="col-12 col-md-4">
+            {{ form_label(form.coat, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ _self.field(form.coat, 'form-select') }}
+        </div>
+        <div class="col-12 col-md-4" id="coatCustomGroup" style="{{ form.coat.vars.data != 'Autre' ? 'display:none;' : '' }}">
+            {{ form_label(form.coatCustom, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ _self.field(form.coatCustom) }}
+        </div>
 
-                <div class="col-12 col-md-6">
-                    {{ form_label(form.microchipNumber, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ _self.field(form.microchipNumber) }}
-                </div>
-            </div>
-
-            {# ── Photo & Documents ── #}
-            <p class="page-eyebrow mb-2">Photo & Documents</p>
-            <div class="row g-3">
-                <div class="col-12">
-                    <div class="file-upload-card">
-                        {{ form_label(form.photoFile, null, {'label_attr': {'class': 'form-label'}}) }}
-
-                        {% if form.vars.data.photo is defined and form.vars.data.photo %}
-                            <div class="mb-2">
-                                <img src="{{ asset('uploads/photos/' ~ form.vars.data.photo) }}"
-                                     alt="Photo actuelle"
-                                     class="rounded-3 border"
-                                     style="max-height: 120px; object-fit: cover;">
-                                <span class="text-secondary small d-block mt-1">Photo actuelle — sélectionnez un fichier pour la remplacer.</span>
-                            </div>
-                        {% endif %}
-
-                        {{ _self.field(form.photoFile) }}
-
-                        {% if form.photoFile.vars.help %}
-                            <div class="form-text">{{ form.photoFile.vars.help }}</div>
-                        {% endif %}
+        {# Sexe #}
+        <div class="col-12">
+            <label class="form-label">{{ form.gender.vars.label }} <span class="text-danger">*</span></label>
+            <div class="anicare-radio-group">
+                {% for choice in form.gender %}
+                    <div class="form-check form-check-inline anicare-radio-item">
+                        {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
                     </div>
+                {% endfor %}
+            </div>
+            {% if form.gender.vars.errors|length %}
+                <div class="text-danger small mt-1">{{ form_errors(form.gender) }}</div>
+            {% endif %}
+        </div>
+
+        {# Mensurations #}
+        <div class="col-12 col-md-4">
+            {{ form_label(form.height, null, {'label_attr': {'class': 'form-label'}}) }}
+            <div class="input-group">
+                {{ _self.field(form.height) }}
+                <span class="input-group-text">m</span>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            {{ form_label(form.weight, null, {'label_attr': {'class': 'form-label'}}) }}
+            <div class="input-group">
+                {{ _self.field(form.weight) }}
+                <span class="input-group-text">kg</span>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            {{ form_label(form.averageWeight, null, {'label_attr': {'class': 'form-label'}}) }}
+            <div class="input-group">
+                {{ _self.field(form.averageWeight) }}
+                <span class="input-group-text">kg</span>
+            </div>
+        </div>
+
+        {# SIRE / Puce #}
+        <div class="col-12 col-md-6">
+            {{ form_label(form.identificationNumber, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ _self.field(form.identificationNumber, 'form-control', {'id': 'animal_sire_input'}) }}
+        </div>
+        <div class="col-12 col-md-6">
+            {{ form_label(form.microchipNumber, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ _self.field(form.microchipNumber, 'form-control', {'id': 'animal_chip_input'}) }}
+        </div>
+
+        {# Vétérinaire référent — inline #}
+        <div class="col-12">
+            <div class="vet-inline-block">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00897B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span class="form-label mb-0 fw-bold" style="color: #00897B; font-size: 0.85rem;">Vétérinaire référent</span>
                 </div>
-
-                <div class="col-12">
-                    <div class="file-upload-card">
-                        {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.attachments) }}
-
-                        {% if form.attachments.vars.help %}
-                            <div class="form-text">{{ form.attachments.vars.help }}</div>
-                        {% endif %}
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        {{ _self.field(form.vetReferentName, 'form-control form-control-sm', {'placeholder': 'Nom du vétérinaire'}) }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        {{ _self.field(form.vetReferentPhone, 'form-control form-control-sm', {'placeholder': 'Téléphone du vétérinaire'}) }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    {# ══════════════════════════════════════════════════════════
-       COLONNE DROITE — Lieu de vie
-       ══════════════════════════════════════════════════════════ #}
-    <div class="col-12 col-lg-5">
-        <div class="d-flex flex-column gap-4">
-            {# ── Propriétaire ── #}
-            <div class="p-4 rounded-3 border border-anicare bg-white mb-4" style="border-left: 4px solid #dc3545 !important;">
-                <p class="page-eyebrow mb-2" style="color: #dc3545;">Propriétaire</p>
-                {% if is_granted('ROLE_STRUCTURE') %}
-                    <p class="text-secondary small mb-3">Rattachez un compte propriétaire existant ou renseignez les coordonnées manuellement.</p>
+{# ══════════════════════════════════════════════════════════
+   SECTION : RÉFÉRENT PRINCIPAL
+   ══════════════════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+    <div class="form-section-header" style="border-bottom-color: #2196F3;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
+        <span style="color: #2196F3;">Référent principal</span>
+    </div>
 
-                    <div class="position-relative mb-3">
-                        <input type="text" id="ownerSearchInput" class="form-control" placeholder="Rechercher un propriétaire (nom, email)..." autocomplete="off">
-                        <div id="ownerSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; display: none; max-height: 200px; overflow-y: auto;"></div>
+    {# Bloc explicatif du rôle de référent #}
+    <div class="rounded-3 p-3 mb-3" style="background: #e3f2fd;">
+        <div class="d-flex gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 mt-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <div>
+                <strong class="small" style="color: #1565C0;">Qu'est-ce qu'un référent principal ?</strong>
+                <p class="mb-0 small text-secondary mt-1">Le référent principal est la personne responsable de la fiche animal. Il gère les droits d'accès, le partage de la fiche et peut désigner des référents secondaires. Ce rôle doit être explicitement accepté par la personne désignée.</p>
+            </div>
+        </div>
+    </div>
+
+    {# Cas 1 : Auto-désignation #}
+    <div class="mb-3">
+        <div class="form-check referent-self-check">
+            <input class="form-check-input" type="checkbox" id="referentSelfCheckbox" name="referent_self" value="1">
+            <label class="form-check-label fw-bold" for="referentSelfCheckbox">
+                Je suis le référent principal de cet animal
+            </label>
+            <div class="form-text small text-secondary mt-1">La désignation sera active immédiatement, sans validation supplémentaire.</div>
+        </div>
+    </div>
+
+    {# Cas 2 : Désigner une autre personne (caché quand la coche est active) #}
+    <div id="referentOtherPanel" style="display: none;">
+        <p class="text-secondary small mb-3">Désignez une autre personne comme référent principal. Une invitation lui sera envoyée pour accepter ce rôle.</p>
+
+        {# Cartes d'action #}
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+                <div class="action-card" id="referentSearchCard" style="--action-color: #2196F3;">
+                    <div class="action-card-icon" style="background: #e3f2fd;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </div>
-
-                    <div id="ownerSelected" style="display: none;">
-                        <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-3" style="background-color: #fce4ec;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            <div class="flex-grow-1">
-                                <strong id="ownerSelectedName" class="small" style="color: #dc3545;"></strong>
-                                <span id="ownerSelectedInfo" class="d-block small text-secondary"></span>
-                            </div>
-                            <button type="button" id="ownerRemoveBtn" class="btn btn-sm btn-outline-danger border-0" style="font-size: 0.8rem;">&#10005;</button>
-                        </div>
-                        <input type="hidden" name="owner_id" id="ownerIdInput" value="">
+                    <div class="action-card-body">
+                        <strong>Rechercher dans le répertoire</strong>
+                        <span class="text-secondary small">Utilisateur ou contact existant</span>
                     </div>
-                {% else %}
-                    <p class="text-secondary small mb-3">Coordonnées du propriétaire du cheval.</p>
-                {% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-card-arrow"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="action-card" id="referentCreateCard" style="--action-color: #2196F3;">
+                    <div class="action-card-icon" style="background: #e3f2fd;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    </div>
+                    <div class="action-card-body">
+                        <strong>Créer une fiche contact</strong>
+                        <span class="text-secondary small">Nouvelle personne + invitation</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-card-arrow"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        </div>
 
-                <div class="row g-3" id="ownerManualFields">
+        {# Champ de recherche #}
+        <div id="referentSearchPanel" style="display: none;">
+            <div class="position-relative mb-3">
+                <input type="text" id="referentSearchInput" class="form-control" placeholder="Rechercher un utilisateur (nom, email, téléphone)..." autocomplete="off">
+                <div id="referentSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; display: none; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+        </div>
+
+        {# Formulaire de création de fiche contact #}
+        <div id="referentCreatePanel" style="display: none;">
+            <div class="p-3 rounded-3 mb-3" style="background: #f8f9fa; border: 1px dashed #90caf9;">
+                <p class="small fw-bold mb-2" style="color: #1565C0;">Nouvelle fiche contact</p>
+                <p class="text-secondary small mb-3">Renseignez les coordonnées. Un lien d'invitation sera envoyé pour que cette personne puisse s'inscrire ou se connecter et accepter le rôle de référent.</p>
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <input type="text" name="referent_contact_lastname" class="form-control form-control-sm" placeholder="Nom *">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <input type="text" name="referent_contact_firstname" class="form-control form-control-sm" placeholder="Prénom *">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <input type="email" name="referent_contact_email" class="form-control form-control-sm" placeholder="Email *">
+                    </div>
                     <div class="col-12 col-md-6">
-                        {{ form_label(form.trustedContactLastName, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.trustedContactLastName) }}
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.trustedContactFirstName, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.trustedContactFirstName) }}
-                    </div>
-
-                    <div class="col-12">
-                        {{ form_label(form.trustedContactPhone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.trustedContactPhone) }}
+                        <input type="tel" name="referent_contact_phone" class="form-control form-control-sm" placeholder="Téléphone">
                     </div>
                 </div>
             </div>
+        </div>
 
-            {# ── Lieu de vie ── #}
-            <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #C8973E !important;">
-                <p class="page-eyebrow mb-2" style="color: #C8973E; border-bottom-color: #C8973E;">Lieu de vie</p>
-                <div class="row g-3">
-                    <div class="col-12">
-                        {{ form_label(form.livingPlaceName, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceName) }}
-                    </div>
+        {# Utilisateur sélectionné #}
+        <div id="referentSelected" style="display: none;">
+            <div class="d-flex align-items-center gap-2 p-3 rounded-3 mb-3" style="background-color: #e3f2fd;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="flex-grow-1">
+                    <strong id="referentSelectedName" class="small" style="color: #1565C0;"></strong>
+                    <span id="referentSelectedInfo" class="d-block small text-secondary"></span>
+                </div>
+                <button type="button" id="referentRemoveBtn" class="btn btn-sm btn-outline-primary border-0" style="font-size: 0.8rem;">&#10005;</button>
+            </div>
+            <input type="hidden" name="referent_id" id="referentIdInput" value="">
+        </div>
 
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.livingPlaceManagerLastName, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceManagerLastName) }}
-                    </div>
+        <div class="rounded-3 p-2 mt-2" style="background: #fff8e1;">
+            <p class="mb-0 small" style="color: #e65100;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Une invitation sera envoyée à cette personne. La désignation restera « en attente » tant qu'elle n'a pas accepté.
+            </p>
+        </div>
+    </div>
 
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.livingPlaceManagerFirstName, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceManagerFirstName) }}
-                    </div>
+    {# Rôle pills (toujours visible) #}
+    <div class="mb-2 mt-3">
+        <label class="form-label small fw-bold">Rôle auprès de l'animal <span class="text-danger">*</span></label>
+        <div class="d-flex flex-wrap gap-2" id="referentRoleGroup">
+            <input type="hidden" name="referent_role" id="referentRoleInput" value="proprietaire">
+            {% set roles = {
+                'proprietaire': 'Propriétaire',
+                'cavalier': 'Cavalier',
+                'gerant': 'Gérant',
+                'entraineur': 'Entraîneur',
+                'groom': 'Groom',
+                'autre': 'Autre'
+            } %}
+            {% for value, label in roles %}
+                <button type="button" class="referent-role-btn {{ value == 'proprietaire' ? 'active' : '' }}" data-role="{{ value }}">
+                    {{ label }}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.livingPlaceManagerPhone, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceManagerPhone) }}
-                    </div>
+{# ══════════════════════════════════════════════════════════
+   SECTION : LIEU DE VIE
+   ══════════════════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+    <div class="form-section-header" style="border-bottom-color: var(--accent-color);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span style="color: var(--accent-color);">Lieu de vie</span>
+    </div>
 
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.livingPlaceManagerEmail, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceManagerEmail) }}
-                    </div>
-
-                    <div class="col-12">
-                        {{ form_label(form.livingPlaceStreet, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceStreet) }}
-                    </div>
-
-                    <div class="col-12">
-                        {{ form_label(form.livingPlaceComplement, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceComplement) }}
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.livingPlacePostalCode, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlacePostalCode) }}
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        {{ form_label(form.livingPlaceCity, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ _self.field(form.livingPlaceCity) }}
-                    </div>
-
-                    {{ form_widget(form.livingPlaceCountry) }}
+    {# 3 cartes d'action sélectionnables #}
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-md-4">
+            <div class="action-card action-card-selectable active" data-mode="address" style="--action-color: var(--accent-color);">
+                <div class="action-card-icon" style="background: #FFF0CC;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="action-card-body">
+                    <strong class="small">Rechercher une adresse</strong>
                 </div>
             </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="action-card action-card-selectable" data-mode="structure" style="--action-color: var(--accent-color);">
+                <div class="action-card-icon" style="background: #FFF0CC;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div class="action-card-body">
+                    <strong class="small">Structure existante</strong>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="action-card action-card-selectable" data-mode="referent" style="--action-color: var(--accent-color);">
+                <div class="action-card-icon" style="background: #FFF0CC;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="action-card-body">
+                    <strong class="small">Adresse du référent</strong>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <input type="hidden" name="living_place_mode" id="livingPlaceModeInput" value="address">
+
+    {# Mode : Adresse manuelle #}
+    <div id="livingPlaceFields">
+        <div class="row g-3">
+            <div class="col-12">
+                {{ form_label(form.livingPlaceName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceName) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.livingPlaceManagerLastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceManagerLastName) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.livingPlaceManagerFirstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceManagerFirstName) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.livingPlaceManagerPhone, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceManagerPhone) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.livingPlaceManagerEmail, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceManagerEmail) }}
+            </div>
+            <div class="col-12">
+                {{ form_label(form.livingPlaceStreet, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceStreet) }}
+            </div>
+            <div class="col-12">
+                {{ form_label(form.livingPlaceComplement, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceComplement) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.livingPlacePostalCode, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlacePostalCode) }}
+            </div>
+            <div class="col-12 col-md-6">
+                {{ form_label(form.livingPlaceCity, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.livingPlaceCity) }}
+            </div>
+            {{ form_widget(form.livingPlaceCountry) }}
+        </div>
+    </div>
+
+    <div id="livingPlaceStructureMode" style="display: none;">
+        <div class="position-relative mb-3">
+            <input type="text" id="structureSearchInput" class="form-control" placeholder="Rechercher une structure (nom, ville)..." autocomplete="off">
+            <div id="structureSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; display: none; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <div id="structureSelected" style="display: none;">
+            <div class="d-flex align-items-center gap-2 p-3 rounded-3 mb-2" style="background-color: #fff8e1; border: 1px solid var(--accent-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <div class="flex-grow-1">
+                    <strong id="structureSelectedName" class="small" style="color: var(--accent-color);"></strong>
+                    <span id="structureSelectedInfo" class="d-block small text-secondary"></span>
+                </div>
+                <button type="button" id="structureRemoveBtn" class="btn btn-sm btn-outline-secondary border-0" style="font-size: 0.8rem;">&#10005;</button>
+            </div>
+            <input type="hidden" name="living_place_structure_id" id="structureIdInput" value="">
+        </div>
+
+        <div class="rounded-3 p-2" style="background: #fff8e1;">
+            <p class="text-secondary small mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                L'adresse du lieu de vie sera automatiquement celle de la structure sélectionnée.
+            </p>
+        </div>
+    </div>
+
+    <div id="livingPlaceReferentMode" style="display: none;">
+        <div class="rounded-3 p-3" style="background: #e3f2fd;">
+            <p class="text-secondary small mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                L'adresse du lieu de vie sera celle du référent principal de l'animal.
+            </p>
         </div>
     </div>
 </div>
@@ -302,14 +465,107 @@
 } %}
 
 {# ══════════════════════════════════════════════════════════
-   LIGNE PLEINE LARGEUR — Professionnel & Rappels
+   SECTION : PHOTO & DOCUMENTS
    ══════════════════════════════════════════════════════════ #}
-<div class="row g-4 mt-0">
-    {# ── Inviter un professionnel ── #}
+<div class="form-section mb-4">
+    <div class="form-section-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Photo & Documents</span>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-md-6">
+            <div class="file-upload-card">
+                {{ form_label(form.photoFile, null, {'label_attr': {'class': 'form-label'}}) }}
+                {% if form.vars.data.photo is defined and form.vars.data.photo %}
+                    <div class="mb-2">
+                        <img src="{{ asset('uploads/photos/' ~ form.vars.data.photo) }}" alt="Photo actuelle" class="rounded-3 border" style="max-height: 100px; object-fit: cover;">
+                        <span class="text-secondary small d-block mt-1">Photo actuelle</span>
+                    </div>
+                {% endif %}
+                {{ _self.field(form.photoFile) }}
+                {% if form.photoFile.vars.help %}
+                    <div class="form-text">{{ form.photoFile.vars.help }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="file-upload-card">
+                {{ form_label(form.attachments, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.attachments) }}
+                {% if form.attachments.vars.help %}
+                    <div class="form-text">{{ form.attachments.vars.help }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════
+   SECTION : ANTÉCÉDENTS
+   ══════════════════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+    <div class="form-section-header" style="border-bottom-color: #9C27B0;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9C27B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span style="color: #9C27B0;">Antécédents</span>
+    </div>
+
+    {% if is_granted('ROLE_PRO') %}
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="p-3 rounded-3" style="background: #f3e5f5;">
+                    <label class="form-label small fw-bold" style="color: #7B1FA2;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        Côté professionnel
+                    </label>
+                    {{ _self.field(form.antecedentsPro, 'form-control') }}
+                    <div class="form-text small mt-1">Visible uniquement par les professionnels.</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="p-3 rounded-3" style="background: #e8f5e9;">
+                    <label class="form-label small fw-bold" style="color: #2e7d32;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Côté référent
+                    </label>
+                    {{ _self.field(form.antecedentsReferent, 'form-control') }}
+                    <div class="form-text small mt-1">Renseignés par le propriétaire ou référent.</div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row g-3">
+            <div class="col-12">
+                {{ form_label(form.antecedentsReferent, 'Informations sur les antécédents de l\'animal', {'label_attr': {'class': 'form-label'}}) }}
+                {{ _self.field(form.antecedentsReferent, 'form-control') }}
+                <div class="form-text">Maladies, interventions, comportements particuliers...</div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{# ══════════════════════════════════════════════════════════
+   SECTION : NOTES / PARTICULARITÉS
+   ══════════════════════════════════════════════════════════ #}
+<div class="form-section mb-4">
+    <div class="form-section-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Notes / Particularités</span>
+    </div>
+    <p class="text-secondary small mb-3">Informations complémentaires : allergies, sensibilités, habitudes, etc.</p>
+    {{ _self.field(form.notes, 'form-control', {'rows': '4', 'placeholder': 'Allergies, sensibilités, habitudes, comportements particuliers...'}) }}
+</div>
+
+{# ══════════════════════════════════════════════════════════
+   SECTION : INVITER UN PROFESSIONNEL + RAPPELS
+   ══════════════════════════════════════════════════════════ #}
+<div class="row g-4 mb-4">
     <div class="col-12 col-lg-6">
-        <div class="p-4 rounded-3 border border-anicare bg-white h-100" style="border-left: 4px solid var(--primary-color) !important;">
-            <p class="page-eyebrow mb-2" style="color: var(--primary-color);">Inviter un professionnel</p>
-            <p class="text-secondary small mb-3">Recherchez dans l'annuaire pour partager la fiche du cheval avec un professionnel.</p>
+        <div class="form-section h-100 mb-0">
+            <div class="form-section-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                <span>Inviter un professionnel</span>
+            </div>
+            <p class="text-secondary small mb-3">Recherchez dans l'annuaire pour partager la fiche.</p>
 
             <div class="position-relative mb-2">
                 <input type="text" id="proSearchInput" class="form-control" placeholder="Rechercher un professionnel..." autocomplete="off">
@@ -330,10 +586,12 @@
         </div>
     </div>
 
-    {# ── Rappels ── #}
     <div class="col-12 col-lg-6">
-        <div class="p-4 rounded-3 border border-anicare bg-white h-100" style="border-left: 4px solid var(--warning-color) !important;">
-            <p class="page-eyebrow mb-2" style="color: var(--warning-color);">Rappels</p>
+        <div class="form-section h-100 mb-0">
+            <div class="form-section-header" style="border-bottom-color: var(--warning-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <span style="color: var(--warning-color);">Rappels</span>
+            </div>
             <p class="text-secondary small mb-3">Planifiez des rappels qui apparaitront dans votre agenda.</p>
 
             <div id="remindersContainer"></div>
@@ -346,97 +604,273 @@
     </div>
 </div>
 
-{% if is_granted('ROLE_PRO') %}
-<input type="hidden" name="next_action" id="nextActionValue" value="">
-<div class="row g-4 mt-0">
-    <div class="col-12">
-        <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid var(--primary-color) !important;">
-            <p class="page-eyebrow mb-2" style="color: var(--primary-color);">Après l'enregistrement</p>
-            <div class="d-flex flex-wrap gap-2 mt-2">
-                <button type="submit" class="btn d-inline-flex align-items-center gap-2" style="background: var(--primary-color); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: none; transition: opacity .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onclick="document.getElementById('nextActionValue').value='consultation'">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    Enregistrer + consultation
-                </button>
-                <button type="submit" class="btn d-inline-flex align-items-center gap-2" style="background: var(--accent-color); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: none; transition: opacity .2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" onclick="document.getElementById('nextActionValue').value='appointment'">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Enregistrer + RDV
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
+{# ══════════════════════════════════════════════════════════
+   FOOTER
+   ══════════════════════════════════════════════════════════ #}
 {{ form_rest(form) }}
 
-<button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
-    {{ button_label|default('Enregistrer') }}
-</button>
+<input type="hidden" name="next_action" id="nextActionValue" value="">
+
+<div class="form-footer">
+    <a href="{{ path('app_animal_index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="submit" class="btn btn-lg" style="background: var(--primary-color); color: #fff; font-weight: 600; border: none; border-radius: 10px;">
+            Enregistrer la fiche animal
+        </button>
+        {% if is_granted('ROLE_PRO') %}
+        <button type="submit" class="btn btn-lg" style="background: var(--accent-color); color: #fff; font-weight: 600; border: none; border-radius: 10px;" onclick="document.getElementById('nextActionValue').value='consultation'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Enregistrer + consultation →
+        </button>
+        {% endif %}
+    </div>
+</div>
 
 {{ form_end(form) }}
 
+<style>
+.form-section {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+}
+.form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+.species-selector .species-label {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    border-color: #dee2e6;
+}
+.species-selector .species-label:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: var(--soft-teal);
+}
+.species-selector .species-radio:checked + .species-label,
+.species-selector .species-label.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: var(--radius-md);
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: inherit;
+    min-height: 72px;
+}
+.action-card:hover {
+    border-color: var(--action-color, var(--primary-color));
+    background: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.action-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #f0f7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.action-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.action-card-body strong {
+    font-size: 0.88rem;
+    color: var(--secondary-color);
+}
+.action-card-arrow {
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.action-card:hover .action-card-arrow {
+    opacity: 1;
+    transform: translateX(2px);
+}
+.action-card-selectable.active {
+    border-color: var(--action-color, var(--accent-color));
+    background: linear-gradient(135deg, rgba(200, 151, 62, 0.05), rgba(200, 151, 62, 0.02));
+    box-shadow: 0 0 0 1px var(--action-color, var(--accent-color));
+}
+.action-card-selectable.active .action-card-icon {
+    background: rgba(200, 151, 62, 0.15);
+}
+.referent-role-btn {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 2px solid #dee2e6;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.referent-role-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: #eef7f5;
+}
+.referent-role-btn.active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(26, 77, 69, 0.3);
+}
+.vet-inline-block {
+    background: #f0faf8;
+    border: 1px dashed #b2dfdb;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+}
+.duplicate-card {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .75rem;
+    background: #fff;
+    border: 1px solid #ffe0b2;
+    border-radius: 8px;
+    margin-bottom: .35rem;
+    text-decoration: none;
+    color: inherit;
+    transition: background .15s;
+}
+.duplicate-card:hover {
+    background: #fff3e0;
+    color: inherit;
+}
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    margin-top: 1rem;
+    border-top: 2px solid var(--border-color);
+}
+.form-footer .btn-lg {
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+}
+@media (max-width: 768px) {
+    .form-section { padding: 1rem; }
+    .form-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .form-footer .btn-lg {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Robe "Autre" toggle
-    const coatSelect = document.getElementById('{{ form.coat.vars.id }}');
-    const coatCustomGroup = document.getElementById('coatCustomGroup');
+    // ── Espèce : toggle active class ──
+    document.querySelectorAll('.species-radio').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.species-label').forEach(function(l) { l.classList.remove('active'); });
+            if (this.checked) this.nextElementSibling.classList.add('active');
+            var isEquine = (this.value === 'Cheval');
+            var letterBox = document.getElementById('letterCheckboxes');
+            if (letterBox) letterBox.style.display = isEquine ? '' : 'none';
+        });
+    });
+
+    var currentSpecies = document.querySelector('.species-radio:checked');
+    var letterBox = document.getElementById('letterCheckboxes');
+    if (currentSpecies && letterBox) {
+        letterBox.style.display = (currentSpecies.value === 'Cheval') ? '' : 'none';
+    }
+
+    var coatSelect = document.getElementById('{{ form.coat.vars.id }}');
+    var coatCustomGroup = document.getElementById('coatCustomGroup');
     if (coatSelect && coatCustomGroup) {
         coatSelect.addEventListener('change', function () {
             coatCustomGroup.style.display = this.value === 'Autre' ? '' : 'none';
         });
     }
 
-    // ── Alphabet équidé : calcul automatique date de naissance / âge ──
-    const EQUINE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUV';
-    const JEUNE_CYCLE_START = 2010;
-    const ANIMAL_CYCLE_START = JEUNE_CYCLE_START - 22;
+    // ── Alphabet équidé ──
+    var EQUINE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUV';
+    var JEUNE_CYCLE_START = 2010;
+    var ANIMAL_CYCLE_START = JEUNE_CYCLE_START - 22;
 
-    const nameInput = document.getElementById('animal_name_input') || document.getElementById('{{ form.name.vars.id }}');
-    const birthDateInput = document.getElementById('{{ form.birthDate.vars.id }}');
-    const ageDisplay = document.getElementById('ageDisplay');
-    const ageHidden = document.getElementById('age_hidden_field');
-    const letterJeune = document.getElementById('letterJeune');
-    const letterAnimal = document.getElementById('letterAnimal');
-    const letterInfo = document.getElementById('letterInfo');
-    const letterInfoText = document.getElementById('letterInfoText');
-    const ageDateError = document.getElementById('ageDateError');
+    var nameInput = document.getElementById('animal_name_input') || document.getElementById('{{ form.name.vars.id }}');
+    var birthDateInput = document.getElementById('{{ form.birthDate.vars.id }}');
+    var ageDisplay = document.getElementById('ageDisplay');
+    var ageHidden = document.getElementById('age_hidden_field');
+    var letterJeune = document.getElementById('letterJeune');
+    var letterAnimal = document.getElementById('letterAnimal');
+    var letterInfo = document.getElementById('letterInfo');
+    var letterInfoText = document.getElementById('letterInfoText');
+    var ageDateError = document.getElementById('ageDateError');
 
     function getLetterOffset(name) {
         if (!name) return -1;
-        const first = name.trim().charAt(0).toUpperCase();
-        const idx = EQUINE_LETTERS.indexOf(first);
-        return idx;
+        return EQUINE_LETTERS.indexOf(name.trim().charAt(0).toUpperCase());
     }
 
     function computeAgeFromBirth(dateStr) {
         if (!dateStr) return '';
-        const birth = new Date(dateStr);
-        const today = new Date();
-        let age = today.getFullYear() - birth.getFullYear();
-        const m = today.getMonth() - birth.getMonth();
+        var birth = new Date(dateStr);
+        var today = new Date();
+        var age = today.getFullYear() - birth.getFullYear();
+        var m = today.getMonth() - birth.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
         return Math.max(0, age);
     }
 
     function updateAgeDisplay() {
-        const age = computeAgeFromBirth(birthDateInput.value);
+        var age = computeAgeFromBirth(birthDateInput.value);
         ageDisplay.value = age !== '' ? age : '';
         if (ageHidden) ageHidden.value = age !== '' ? age : '';
     }
 
     function updateBirthFromLetter() {
-        const offset = getLetterOffset(nameInput.value);
+        var offset = getLetterOffset(nameInput.value);
         if (offset < 0) {
             letterInfo.style.display = 'none';
             birthDateInput.value = '';
             updateAgeDisplay();
             return;
         }
-        const letter = EQUINE_LETTERS[offset];
-        const isAnimal = letterAnimal.checked;
-        const cycleStart = isAnimal ? ANIMAL_CYCLE_START : JEUNE_CYCLE_START;
-        const birthYear = cycleStart + offset;
-        const cycleName = isAnimal ? 'ancien cycle' : 'cycle actuel';
+        var letter = EQUINE_LETTERS[offset];
+        var isAnimal = letterAnimal.checked;
+        var cycleStart = isAnimal ? ANIMAL_CYCLE_START : JEUNE_CYCLE_START;
+        var birthYear = cycleStart + offset;
+        var cycleName = isAnimal ? 'ancien cycle' : 'cycle actuel';
 
         birthDateInput.value = birthYear + '-01-01';
         letterInfoText.textContent = 'Lettre « ' + letter + ' » → né(e) en ' + birthYear + ' (' + cycleName + ')';
@@ -455,21 +889,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (nameInput) {
         nameInput.addEventListener('input', function () {
-            if (letterJeune.checked || letterAnimal.checked) {
-                updateBirthFromLetter();
-            }
+            if (letterJeune.checked || letterAnimal.checked) updateBirthFromLetter();
         });
     }
 
     if (birthDateInput) {
-        birthDateInput.addEventListener('change', function () {
-            updateAgeDisplay();
-        });
+        birthDateInput.addEventListener('change', updateAgeDisplay);
         updateAgeDisplay();
     }
 
-    // Validation : date de naissance requise
-    const theForm = document.querySelector('.anicare-form');
+    var theForm = document.querySelector('.anicare-form');
     if (theForm && ageDateError) {
         theForm.addEventListener('submit', function(e) {
             if (!birthDateInput.value) {
@@ -482,14 +911,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Init : si birthDate déjà rempli, afficher l'info lettre
     if (nameInput && birthDateInput && birthDateInput.value) {
-        const offset = getLetterOffset(nameInput.value);
+        var offset = getLetterOffset(nameInput.value);
         if (offset >= 0) {
-            const letter = EQUINE_LETTERS[offset];
-            const birthYear = parseInt(birthDateInput.value.substring(0, 4), 10);
-            const jeuneYear = JEUNE_CYCLE_START + offset;
-            const animalYear = ANIMAL_CYCLE_START + offset;
+            var letter = EQUINE_LETTERS[offset];
+            var birthYear = parseInt(birthDateInput.value.substring(0, 4), 10);
+            var jeuneYear = JEUNE_CYCLE_START + offset;
+            var animalYear = ANIMAL_CYCLE_START + offset;
             if (birthYear === animalYear) {
                 letterAnimal.checked = true;
                 letterJeune.checked = false;
@@ -502,20 +930,263 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ── Recherche professionnel (autocomplete) ──
-    const proInput = document.getElementById('proSearchInput');
-    const proResults = document.getElementById('proSearchResults');
-    const proSelected = document.getElementById('proSelected');
-    const proIdInput = document.getElementById('proIdInput');
-    const proSelectedName = document.getElementById('proSelectedName');
-    const proSelectedInfo = document.getElementById('proSelectedInfo');
-    const proRemoveBtn = document.getElementById('proRemoveBtn');
-    let proDebounce = null;
+    // ── Doublons ──
+    var duplicateAlert = document.getElementById('duplicateAlert');
+    var duplicateList = document.getElementById('duplicateList');
+    var sireInput = document.getElementById('animal_sire_input') || document.getElementById('{{ form.identificationNumber.vars.id }}');
+    var chipInput = document.getElementById('animal_chip_input') || document.getElementById('{{ form.microchipNumber.vars.id }}');
+    var dupDebounce = null;
+
+    function checkDuplicates() {
+        clearTimeout(dupDebounce);
+        var name = (nameInput ? nameInput.value.trim() : '');
+        var sire = (sireInput ? sireInput.value.trim() : '');
+        var chip = (chipInput ? chipInput.value.trim() : '');
+
+        if (name.length < 2 && sire.length < 3 && chip.length < 3) {
+            duplicateAlert.classList.add('d-none');
+            return;
+        }
+
+        dupDebounce = setTimeout(function () {
+            var params = new URLSearchParams();
+            if (name) params.append('name', name);
+            if (sire) params.append('identification', sire);
+            if (chip) params.append('microchip', chip);
+
+            fetch('{{ path("app_animal_check_duplicates") }}?' + params.toString())
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.length === 0) { duplicateAlert.classList.add('d-none'); return; }
+                    duplicateList.innerHTML = '';
+                    data.forEach(function (dup) {
+                        var card = document.createElement('a');
+                        card.href = '/mes-chevaux/' + dup.slug;
+                        card.target = '_blank';
+                        card.className = 'duplicate-card';
+                        var info = '<strong>' + dup.name + '</strong>';
+                        if (dup.breed) info += ' <span class="text-secondary">(' + dup.breed + ')</span>';
+                        var sub = [];
+                        if (dup.owner) sub.push(dup.owner);
+                        if (dup.identificationNumber) sub.push('SIRE: ' + dup.identificationNumber);
+                        if (dup.microchipNumber) sub.push('Puce: ' + dup.microchipNumber);
+                        card.innerHTML = '<div>' + info + (sub.length ? '<br><span class="text-secondary" style="font-size:.78rem;">' + sub.join(' — ') + '</span>' : '') + '</div>';
+                        duplicateList.appendChild(card);
+                    });
+                    duplicateAlert.classList.remove('d-none');
+                });
+        }, 400);
+    }
+
+    if (nameInput) nameInput.addEventListener('input', checkDuplicates);
+    if (sireInput) sireInput.addEventListener('input', checkDuplicates);
+    if (chipInput) chipInput.addEventListener('input', checkDuplicates);
+
+    // ── Référent : checkbox auto-désignation + panels ──
+    var refSelfCheckbox = document.getElementById('referentSelfCheckbox');
+    var refOtherPanel = document.getElementById('referentOtherPanel');
+    var refSearchCard = document.getElementById('referentSearchCard');
+    var refCreateCard = document.getElementById('referentCreateCard');
+    var refSearchPanel = document.getElementById('referentSearchPanel');
+    var refCreatePanel = document.getElementById('referentCreatePanel');
+    var refInput = document.getElementById('referentSearchInput');
+    var refResults = document.getElementById('referentSearchResults');
+    var refSelected = document.getElementById('referentSelected');
+    var refIdInput = document.getElementById('referentIdInput');
+    var refSelectedName = document.getElementById('referentSelectedName');
+    var refSelectedInfo = document.getElementById('referentSelectedInfo');
+    var refRemoveBtn = document.getElementById('referentRemoveBtn');
+    var refRoleInput = document.getElementById('referentRoleInput');
+    var refDebounce = null;
+
+    function toggleReferentSelf() {
+        if (refSelfCheckbox.checked) {
+            refOtherPanel.style.display = 'none';
+            refIdInput.value = '';
+            refSelected.style.display = 'none';
+            refSearchPanel.style.display = 'none';
+            refCreatePanel.style.display = 'none';
+        } else {
+            refOtherPanel.style.display = 'block';
+        }
+    }
+
+    if (refSelfCheckbox) {
+        refSelfCheckbox.addEventListener('change', toggleReferentSelf);
+        toggleReferentSelf();
+    }
+
+    if (refSearchCard) {
+        refSearchCard.addEventListener('click', function () {
+            refSearchPanel.style.display = 'block';
+            refCreatePanel.style.display = 'none';
+            refInput.focus();
+        });
+    }
+
+    if (refCreateCard) {
+        refCreateCard.addEventListener('click', function () {
+            refCreatePanel.style.display = 'block';
+            refSearchPanel.style.display = 'none';
+        });
+    }
+
+    if (refInput) {
+        refInput.addEventListener('input', function () {
+            clearTimeout(refDebounce);
+            var q = this.value.trim();
+            if (q.length < 2) { refResults.style.display = 'none'; return; }
+
+            refDebounce = setTimeout(function () {
+                fetch('{{ path("api_users_search") }}?q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        refResults.innerHTML = '';
+                        if (data.length === 0) {
+                            refResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun utilisateur trouvé.</div>';
+                        } else {
+                            data.forEach(function (user) {
+                                var item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                var badge = user.accountType === 'PRO' ? ' <span class="badge" style="background:#e3f2fd;color:#1565C0;font-size:.65rem;">PRO</span>' : '';
+                                item.innerHTML = '<strong>' + user.fullName + '</strong>' + badge + '<br><span class="small text-secondary">' + user.email + (user.city ? ' — ' + user.city : '') + '</span>';
+                                item.addEventListener('click', function () {
+                                    refIdInput.value = user.id;
+                                    refSelectedName.textContent = user.fullName;
+                                    refSelectedInfo.textContent = user.email + (user.city ? ' — ' + user.city : '');
+                                    refSelected.style.display = 'block';
+                                    refSearchPanel.style.display = 'none';
+                                    refCreatePanel.style.display = 'none';
+                                    refResults.style.display = 'none';
+                                });
+                                refResults.appendChild(item);
+                            });
+                        }
+                        refResults.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        refRemoveBtn.addEventListener('click', function () {
+            refIdInput.value = '';
+            refSelected.style.display = 'none';
+            refSearchPanel.style.display = 'block';
+            refInput.value = '';
+            refInput.focus();
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!refInput.contains(e.target) && !refResults.contains(e.target)) {
+                refResults.style.display = 'none';
+            }
+        });
+    }
+
+    // ── Rôle référent ──
+    document.querySelectorAll('.referent-role-btn').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.referent-role-btn').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            refRoleInput.value = this.getAttribute('data-role');
+        });
+    });
+
+    // ── Lieu de vie : cartes sélectionnables ──
+    var lpCards = document.querySelectorAll('.action-card-selectable');
+    var lpModeInput = document.getElementById('livingPlaceModeInput');
+    var lpFields = document.getElementById('livingPlaceFields');
+    var lpStructure = document.getElementById('livingPlaceStructureMode');
+    var lpReferent = document.getElementById('livingPlaceReferentMode');
+
+    lpCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            lpCards.forEach(function(c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            var mode = this.getAttribute('data-mode');
+            lpModeInput.value = mode;
+            lpFields.style.display = mode === 'address' ? '' : 'none';
+            lpStructure.style.display = mode === 'structure' ? '' : 'none';
+            lpReferent.style.display = mode === 'referent' ? '' : 'none';
+        });
+    });
+
+    // ── Recherche structure (lieu de vie) ──
+    var strInput = document.getElementById('structureSearchInput');
+    var strResults = document.getElementById('structureSearchResults');
+    var strSelected = document.getElementById('structureSelected');
+    var strIdInput = document.getElementById('structureIdInput');
+    var strSelectedName = document.getElementById('structureSelectedName');
+    var strSelectedInfo = document.getElementById('structureSelectedInfo');
+    var strRemoveBtn = document.getElementById('structureRemoveBtn');
+    var strDebounce = null;
+
+    if (strInput) {
+        strInput.addEventListener('input', function () {
+            clearTimeout(strDebounce);
+            var q = this.value.trim();
+            if (q.length < 2) { strResults.style.display = 'none'; return; }
+
+            strDebounce = setTimeout(function () {
+                fetch('{{ path("app_appointment_search_structures") }}?q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        strResults.innerHTML = '';
+                        var list = data.structures || [];
+                        if (list.length === 0) {
+                            strResults.innerHTML = '<div class="list-group-item text-secondary small">Aucune structure trouvée.</div>';
+                        } else {
+                            list.forEach(function (s) {
+                                var item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                var loc = [s.postalCode, s.city].filter(Boolean).join(' ');
+                                item.innerHTML = '<strong>' + s.name + '</strong>' + (s.type ? ' <span class="badge" style="background:#FFF0CC;color:var(--accent-color);font-size:.65rem;">' + s.type + '</span>' : '') + (loc ? '<br><span class="small text-secondary">' + loc + '</span>' : '');
+                                item.addEventListener('click', function () {
+                                    strIdInput.value = s.id;
+                                    strSelectedName.textContent = s.name;
+                                    strSelectedInfo.textContent = [s.street, s.postalCode, s.city].filter(Boolean).join(', ');
+                                    strSelected.style.display = 'block';
+                                    strInput.style.display = 'none';
+                                    strResults.style.display = 'none';
+                                });
+                                strResults.appendChild(item);
+                            });
+                        }
+                        strResults.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        strRemoveBtn.addEventListener('click', function () {
+            strIdInput.value = '';
+            strSelected.style.display = 'none';
+            strInput.style.display = '';
+            strInput.value = '';
+            strInput.focus();
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!strInput.contains(e.target) && !strResults.contains(e.target)) {
+                strResults.style.display = 'none';
+            }
+        });
+    }
+
+    // ── Recherche professionnel ──
+    var proInput = document.getElementById('proSearchInput');
+    var proResults = document.getElementById('proSearchResults');
+    var proSelected = document.getElementById('proSelected');
+    var proIdInput = document.getElementById('proIdInput');
+    var proSelectedName = document.getElementById('proSelectedName');
+    var proSelectedInfo = document.getElementById('proSelectedInfo');
+    var proRemoveBtn = document.getElementById('proRemoveBtn');
+    var proDebounce = null;
 
     if (proInput) {
         proInput.addEventListener('input', function () {
             clearTimeout(proDebounce);
-            const q = this.value.trim();
+            var q = this.value.trim();
             if (q.length < 2) { proResults.style.display = 'none'; return; }
 
             proDebounce = setTimeout(function () {
@@ -524,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(function (data) {
                         proResults.innerHTML = '';
                         if (data.length === 0) {
-                            proResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun professionnel trouve.</div>';
+                            proResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun professionnel trouvé.</div>';
                         } else {
                             data.forEach(function (pro) {
                                 var item = document.createElement('button');
@@ -561,82 +1232,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── Recherche propriétaire (structure) ──
-    const ownerInput = document.getElementById('ownerSearchInput');
-    const ownerResults = document.getElementById('ownerSearchResults');
-    const ownerSelected = document.getElementById('ownerSelected');
-    const ownerIdInput = document.getElementById('ownerIdInput');
-    const ownerSelectedName = document.getElementById('ownerSelectedName');
-    const ownerSelectedInfo = document.getElementById('ownerSelectedInfo');
-    const ownerRemoveBtn = document.getElementById('ownerRemoveBtn');
-    const ownerManualFields = document.getElementById('ownerManualFields');
-    let ownerDebounce = null;
-
-    if (ownerInput) {
-        ownerInput.addEventListener('input', function () {
-            clearTimeout(ownerDebounce);
-            const q = this.value.trim();
-            if (q.length < 2) { ownerResults.style.display = 'none'; return; }
-
-            ownerDebounce = setTimeout(function () {
-                fetch('{{ path("api_owners_search") }}?q=' + encodeURIComponent(q))
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        ownerResults.innerHTML = '';
-                        if (data.length === 0) {
-                            ownerResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun compte trouvé.</div>';
-                        } else {
-                            data.forEach(function (owner) {
-                                var item = document.createElement('button');
-                                item.type = 'button';
-                                item.className = 'list-group-item list-group-item-action py-2';
-                                item.innerHTML = '<strong>' + owner.fullName + '</strong><br><span class="small text-secondary">' + owner.email + (owner.phone ? ' — ' + owner.phone : '') + '</span>';
-                                item.addEventListener('click', function () {
-                                    ownerIdInput.value = owner.id;
-                                    ownerSelectedName.textContent = owner.fullName;
-                                    ownerSelectedInfo.textContent = owner.email + (owner.phone ? ' — ' + owner.phone : '');
-                                    ownerSelected.style.display = 'block';
-                                    ownerInput.style.display = 'none';
-                                    ownerResults.style.display = 'none';
-
-                                    var lastNameField = document.getElementById('{{ form.trustedContactLastName.vars.id }}');
-                                    var firstNameField = document.getElementById('{{ form.trustedContactFirstName.vars.id }}');
-                                    var phoneField = document.getElementById('{{ form.trustedContactPhone.vars.id }}');
-                                    if (lastNameField) lastNameField.value = owner.lastName || '';
-                                    if (firstNameField) firstNameField.value = owner.firstName || '';
-                                    if (phoneField) phoneField.value = owner.phone || '';
-                                });
-                                ownerResults.appendChild(item);
-                            });
-                        }
-                        ownerResults.style.display = 'block';
-                    });
-            }, 300);
-        });
-
-        ownerRemoveBtn.addEventListener('click', function () {
-            ownerIdInput.value = '';
-            ownerSelected.style.display = 'none';
-            ownerInput.style.display = 'block';
-            ownerInput.value = '';
-
-            var lastNameField = document.getElementById('{{ form.trustedContactLastName.vars.id }}');
-            var firstNameField = document.getElementById('{{ form.trustedContactFirstName.vars.id }}');
-            var phoneField = document.getElementById('{{ form.trustedContactPhone.vars.id }}');
-            if (lastNameField) lastNameField.value = '';
-            if (firstNameField) firstNameField.value = '';
-            if (phoneField) phoneField.value = '';
-        });
-
-        document.addEventListener('click', function (e) {
-            if (!ownerInput.contains(e.target) && !ownerResults.contains(e.target)) {
-                ownerResults.style.display = 'none';
-            }
-        });
-    }
-
     // ── Rappels dynamiques ──
-    var reminderIdx = 0;
     var container = document.getElementById('remindersContainer');
     var addBtn = document.getElementById('addReminderBtn');
 
@@ -673,10 +1269,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '</div>' +
                 '</div>';
             container.appendChild(row);
-
-            row.querySelector('.remove-reminder-btn').addEventListener('click', function () {
-                row.remove();
-            });
+            row.querySelector('.remove-reminder-btn').addEventListener('click', function () { row.remove(); });
         });
     }
 });

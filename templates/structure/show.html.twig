@@ -33,6 +33,21 @@
 </div>
 
 <div class="container py-4">
+    {% if not structure.hasManager %}
+        <div class="alert d-flex align-items-center gap-3 mb-4" style="background: #fef7ed; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 1rem 1.25rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div style="flex: 1;">
+                <strong style="font-size: .9rem; color: #92400e;">Structure sans gérant inscrit</strong>
+                <p class="mb-0" style="font-size: .82rem; color: #b45309;">Cette fiche-lieu n'a pas de gérant inscrit. Vous pouvez revendiquer la gérance avec le code de rattachement.</p>
+            </div>
+            {% if structure.claimCode %}
+                <a href="{{ path('app_structure_claim') }}" class="btn btn-sm" style="background: #d97706; color: #fff; border-radius: var(--radius-sm); font-weight: 600; font-size: .82rem; white-space: nowrap;">
+                    Revendiquer
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
     {# ═══════════════════════════════════════════════
        DESCRIPTION + QUICK INFO
        ═══════════════════════════════════════════════ #}
@@ -135,7 +150,7 @@
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="structure-animal-avatar">
                                         {% if animal.photo %}
-                                            <img src="{{ path('app_animal_photo', {slug: animal.slug, fileName: animal.photo}) }}" alt="{{ animal.name }}">
+                                            <img src="{{ asset('uploads/photos/' ~ animal.photo) }}" alt="{{ animal.name }}">
                                         {% else %}
                                             🐴
                                         {% endif %}
@@ -310,7 +325,7 @@
     border-radius: 6px;
 }
 .structure-badge-pro {
-    background: linear-gradient(135deg, var(--primary-color), #0f766e);
+    background: linear-gradient(135deg, var(--primary-color), #153d37);
     color: #fff;
     font-size: 0.68rem;
     font-weight: 700;

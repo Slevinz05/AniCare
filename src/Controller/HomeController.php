@@ -8,7 +8,10 @@ use App\Repository\AnimalRepository;
 use App\Repository\AnimalShareRepository;
 use App\Repository\AppointmentRepository;
 use App\Repository\HealthBookEntryRepository;
+use App\Repository\ReminderRepository;
 use App\Repository\StructureMembershipRepository;
+use App\Repository\StructureRepository;
+use App\Repository\TourneeRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -26,6 +29,8 @@ class HomeController extends AbstractController
         AnimalRepository $animalRepository,
         HealthBookEntryRepository $healthBookRepository,
         AppointmentRepository $appointmentRepository,
+        ReminderRepository $reminderRepository,
+        TourneeRepository $tourneeRepository,
     ): Response {
         $user = $this->getUser();
         $animals = [];
@@ -65,6 +70,10 @@ class HomeController extends AbstractController
                 'upcoming_appointments' => $appointmentRepository->findUpcomingByUser($user),
                 'drafts' => $healthBookRepository->findDraftsByVeterinarian($user),
                 'todays_reminders' => $healthBookRepository->findTodaysRemindersByVeterinarian($user),
+                'recent_consultations' => $healthBookRepository->findRecentByVeterinarian($user, 5),
+                'standalone_reminders_today' => $reminderRepository->findTodayByUser($user),
+                'standalone_reminders_overdue' => $reminderRepository->findOverdueByUser($user),
+                'todays_tournee' => $tourneeRepository->findTodayByUser($user),
             ];
         }
 
@@ -193,8 +202,11 @@ class HomeController extends AbstractController
     }
 
     #[Route('/repertoire', name: 'app_repertoire_reseau', methods: ['GET'])]
-    public function repertoireReseau(Request $request, AnimalShareRepository $animalShareRepository): Response
-    {
+    public function repertoireReseau(
+        Request $request,
+        AnimalShareRepository $animalShareRepository,
+        StructureRepository $structureRepository,
+    ): Response {
         $this->denyAccessUnlessGranted('ROLE_PRO');
 
         /** @var User $user */
@@ -204,11 +216,10 @@ class HomeController extends AbstractController
         $shares = $animalShareRepository->searchSharedWithEmail($user->getEmail(), $query);
 
         $clients = [];
-        $structures = [];
         foreach ($shares as $share) {
             $animal = $share->getAnimal();
             $owner = $animal->getOwner();
-            if (!$owner) {
+            if (!$owner || $owner->getId() === $user->getId()) {
                 continue;
             }
 
@@ -216,31 +227,111 @@ class HomeController extends AbstractController
                 $clients[$owner->getId()] = [
                     'user' => $owner,
                     'animals' => [],
-                    'sharedSince' => $share->getCreatedAt(),
+                    'roles' => [],
                 ];
             }
-            $clients[$owner->getId()]['animals'][] = $animal;
+            $clients[$owner->getId()]['animals'][$animal->getId()] = $animal;
 
-            $lpName = $animal->getLivingPlaceName();
-            if ($lpName) {
-                $key = mb_strtolower($lpName);
-                if (!isset($structures[$key])) {
-                    $structures[$key] = [
-                        'name' => $lpName,
-                        'city' => $animal->getLivingPlaceCity(),
-                        'postalCode' => $animal->getLivingPlacePostalCode(),
-                        'managerName' => trim(($animal->getLivingPlaceManagerFirstName() ?? '') . ' ' . ($animal->getLivingPlaceManagerLastName() ?? '')),
-                        'managerPhone' => $animal->getLivingPlaceManagerPhone(),
-                        'animals' => [],
-                    ];
+            foreach ($animal->getReferents() as $ref) {
+                if ($ref->getUser() && $ref->getUser()->getId() === $owner->getId() && $ref->getStatus() === 'ACTIVE') {
+                    $clients[$owner->getId()]['roles'][$ref->getRole()] = true;
                 }
-                $structures[$key]['animals'][] = $animal;
             }
         }
 
+        foreach ($clients as &$client) {
+            $client['animals'] = array_values($client['animals']);
+            $client['roles'] = array_keys($client['roles']);
+            if (empty($client['roles'])) {
+                $client['roles'] = ['Propriétaire'];
+            }
+        }
+        unset($client);
+
+        $allStructures = $query
+            ? $structureRepository->search($query)
+            : $structureRepository->findAllOrderedByName();
+
+        $structures = [];
+        foreach ($allStructures as $structure) {
+            $members = [];
+            foreach ($structure->getMemberships() as $membership) {
+                $m = $membership->getUser();
+                if ($m) {
+                    $members[$m->getId()] = [
+                        'id' => $m->getId(),
+                        'firstName' => $m->getFirstName(),
+                        'lastName' => $m->getLastName(),
+                        'email' => $m->getEmail(),
+                        'accountType' => $m->getAccountType(),
+                        'role' => $membership->getRole(),
+                    ];
+                }
+            }
+
+            $structures[] = [
+                'entity' => $structure,
+                'name' => $structure->getName(),
+                'city' => $structure->getCity(),
+                'postalCode' => $structure->getPostalCode(),
+                'type' => $structure->getType(),
+                'memberCount' => count($members),
+                'animalCount' => $structure->getAnimals()->count(),
+                'members' => $members,
+            ];
+        }
+
+        $structuresJson = array_map(function ($s) {
+            $animals = [];
+            foreach ($s['entity']->getAnimals() as $a) {
+                $owner = $a->getOwner();
+                $animals[] = [
+                    'name' => $a->getName(),
+                    'slug' => $a->getSlug(),
+                    'owner' => $owner ? [
+                        'id' => $owner->getId(),
+                        'firstName' => $owner->getFirstName(),
+                        'lastName' => $owner->getLastName(),
+                        'email' => $owner->getEmail(),
+                        'accountType' => $owner->getAccountType(),
+                    ] : null,
+                ];
+            }
+
+            return [
+                'id' => $s['entity']->getId(),
+                'name' => $s['name'],
+                'city' => $s['city'],
+                'postalCode' => $s['postalCode'],
+                'type' => $s['type'],
+                'phone' => $s['entity']->getPhone(),
+                'email' => $s['entity']->getEmail(),
+                'street' => $s['entity']->getStreet(),
+                'members' => array_values($s['members']),
+                'animals' => $animals,
+            ];
+        }, $structures);
+
         return $this->render('repertoire/reseau.html.twig', [
             'clients' => array_values($clients),
-            'structures' => array_values($structures),
+            'structures' => $structures,
+            'structures_json' => json_encode($structuresJson),
+            'query' => $query,
+        ]);
+    }
+
+    #[Route('/repertoire/structures', name: 'app_repertoire_structures', methods: ['GET'])]
+    public function repertoireStructures(Request $request, \App\Repository\StructureRepository $structureRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRO');
+
+        $query = $request->query->get('q');
+        $structures = $query
+            ? $structureRepository->search($query)
+            : $structureRepository->findAllOrderedByName();
+
+        return $this->render('repertoire/structures.html.twig', [
+            'structures' => $structures,
             'query' => $query,
         ]);
     }

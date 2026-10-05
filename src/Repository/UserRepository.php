@@ -102,4 +102,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+
+    public function searchAll(string $query, int $limit = 15): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.firstName LIKE :q OR u.lastName LIKE :q OR u.email LIKE :q OR u.phone LIKE :q')
+            ->setParameter('q', '%' . $query . '%')
+            ->orderBy('u.lastName', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

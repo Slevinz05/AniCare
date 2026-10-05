@@ -1,0 +1,270 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes rappels - AniCare{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .rm-page { max-width: 1140px; margin: 0 auto; }
+
+    .rm-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0a7a70 60%, var(--secondary-color) 100%);
+        border-radius: var(--radius-lg);
+        padding: 2.2rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .rm-hero::before {
+        content: '';
+        position: absolute; top: -40%; right: -10%; width: 340px; height: 340px;
+        background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .rm-hero-eyebrow {
+        font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+        opacity: .8; margin-bottom: .35rem;
+    }
+    .rm-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 .35rem; }
+    .rm-hero p { font-size: .92rem; opacity: .85; margin: 0; }
+    .rm-hero-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .rm-hero-actions .btn {
+        border-radius: var(--radius-md); font-size: .85rem; font-weight: 600;
+        padding: .55rem 1.2rem; border: none; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .rm-btn-white { background: #fff; color: var(--primary-color); }
+    .rm-btn-white:hover { background: var(--soft-teal); color: var(--primary-color); }
+
+    .rm-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .rm-stat-card {
+        flex: 1; min-width: 140px;
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        padding: 1.1rem 1.3rem; display: flex; align-items: center; gap: .9rem;
+        transition: box-shadow .2s, transform .2s;
+    }
+    .rm-stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
+    .rm-stat-icon {
+        width: 42px; height: 42px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .rm-stat-icon svg { width: 20px; height: 20px; }
+    .rm-stat-value { font-size: 1.35rem; font-weight: 800; line-height: 1; }
+    .rm-stat-label { font-size: .78rem; color: #6c757d; margin-top: 2px; }
+
+    .rm-card {
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        overflow: hidden; transition: box-shadow .2s, transform .2s;
+    }
+    .rm-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
+    .rm-card-body { padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
+    .rm-card-left { flex: 1; min-width: 0; }
+    .rm-card-right { display: flex; gap: .4rem; align-items: center; flex-shrink: 0; }
+
+    .rm-title-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+    .rm-title { font-weight: 700; font-size: .95rem; color: #1a1a1a; }
+    .rm-cat-pill {
+        display: inline-flex; align-items: center; gap: .2rem;
+        padding: .15rem .55rem; border-radius: 999px;
+        font-size: .7rem; font-weight: 600;
+    }
+    .rm-cat-vaccine { background: #e3f2fd; color: #1565c0; }
+    .rm-cat-vermifuge { background: #fce4ec; color: #c62828; }
+    .rm-cat-dentaire { background: #f3e5f5; color: #6a1b9a; }
+    .rm-cat-marechalerie { background: #fff3e0; color: #e65100; }
+    .rm-cat-osteo { background: #e8f5e9; color: #2e7d32; }
+    .rm-cat-controle { background: #e0f7fa; color: #00695c; }
+    .rm-cat-autre { background: #f5f5f5; color: #616161; }
+
+    .rm-meta { font-size: .82rem; color: #6c757d; margin-top: .25rem; }
+    .rm-meta svg { width: 13px; height: 13px; vertical-align: -1px; margin-right: .2rem; }
+
+    .rm-badge-overdue {
+        display: inline-flex; padding: .15rem .5rem; border-radius: 999px;
+        font-size: .7rem; font-weight: 600; background: #dc3545; color: #fff;
+    }
+    .rm-badge-today {
+        display: inline-flex; padding: .15rem .5rem; border-radius: 999px;
+        font-size: .7rem; font-weight: 600; background: #fd7e14; color: #fff;
+    }
+    .rm-badge-soon {
+        display: inline-flex; padding: .15rem .5rem; border-radius: 999px;
+        font-size: .7rem; font-weight: 600; background: var(--soft-teal); color: var(--primary-color);
+    }
+
+    .rm-btn-icon {
+        width: 32px; height: 32px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid #e9ecef; background: #fff; color: #6c757d;
+        transition: all .2s; cursor: pointer;
+    }
+    .rm-btn-icon:hover { background: var(--soft-teal); color: var(--primary-color); border-color: var(--primary-color); }
+    .rm-btn-icon.danger:hover { background: #fef2f2; color: #dc3545; border-color: #dc3545; }
+
+    .rm-empty {
+        text-align: center; padding: 3.5rem 2rem;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 2px dashed #dee2e6; border-radius: var(--radius-md);
+    }
+
+    .rm-filter-bar {
+        display: flex; gap: .5rem; flex-wrap: wrap; align-items: center;
+    }
+    .rm-filter-btn {
+        padding: .35rem .85rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+        border: 1px solid #e9ecef; background: #fff; color: #6c757d; cursor: pointer;
+        transition: all .2s;
+    }
+    .rm-filter-btn:hover, .rm-filter-btn.active {
+        background: var(--primary-color); color: #fff; border-color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="rm-page py-4 px-3">
+
+    {# Hero #}
+    <div class="rm-hero mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p class="rm-hero-eyebrow">Organisation</p>
+                <h1>Mes rappels</h1>
+                <p>Suivez les échéances de vos animaux</p>
+            </div>
+            <div class="rm-hero-actions">
+                <a href="{{ path('app_reminder_new') }}" class="btn rm-btn-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nouveau rappel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Stats #}
+    <div class="rm-stats mb-4">
+        <div class="rm-stat-card">
+            <div class="rm-stat-icon" style="background: var(--soft-teal);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <div>
+                <div class="rm-stat-value">{{ reminders|length }}</div>
+                <div class="rm-stat-label">Rappels actifs</div>
+            </div>
+        </div>
+        <div class="rm-stat-card">
+            <div class="rm-stat-icon" style="background: #fff3e0;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#e65100" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+                <div class="rm-stat-value" style="color: #e65100;">{{ today_count }}</div>
+                <div class="rm-stat-label">Aujourd'hui</div>
+            </div>
+        </div>
+        <div class="rm-stat-card">
+            <div class="rm-stat-icon" style="background: #fef2f2;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#dc3545" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+                <div class="rm-stat-value" style="color: #dc3545;">{{ overdue_count }}</div>
+                <div class="rm-stat-label">En retard</div>
+            </div>
+        </div>
+    </div>
+
+    {# Filter bar #}
+    {% if reminders is not empty %}
+    <div class="rm-filter-bar mb-3">
+        <button class="rm-filter-btn active" data-filter="all">Tous</button>
+        <button class="rm-filter-btn" data-filter="overdue">En retard</button>
+        <button class="rm-filter-btn" data-filter="today">Aujourd'hui</button>
+        <button class="rm-filter-btn" data-filter="upcoming">À venir</button>
+    </div>
+    {% endif %}
+
+    {# List #}
+    {% if reminders is empty %}
+        <div class="rm-empty">
+            <div class="mb-3" style="width: 56px; height: 56px; border-radius: 50%; background: var(--soft-teal); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: .3rem;">Aucun rappel</h2>
+            <p class="text-secondary" style="font-size: .9rem; margin-bottom: 1rem;">Créez votre premier rappel pour suivre les échéances de vos animaux.</p>
+            <a href="{{ path('app_reminder_new') }}" class="btn" style="background: var(--primary-color); color: #fff; border-radius: var(--radius-md); font-weight: 600; font-size: .85rem; padding: .5rem 1.2rem;">
+                Créer un rappel
+            </a>
+        </div>
+    {% else %}
+        <div class="d-flex flex-column gap-2" id="reminders-list">
+            {% for reminder in reminders %}
+                <div class="rm-card" data-status="{% if reminder.isOverdue %}overdue{% elseif reminder.isDueToday %}today{% else %}upcoming{% endif %}">
+                    <div class="rm-card-body">
+                        <div class="rm-card-left">
+                            <div class="rm-title-row">
+                                <a href="{{ path('app_reminder_show', {id: reminder.id}) }}" class="rm-title text-decoration-none">{{ reminder.title }}</a>
+                                {% if reminder.category %}
+                                    <span class="rm-cat-pill rm-cat-{{ reminder.category }}">{{ reminder.categoryLabel }}</span>
+                                {% endif %}
+                                {% if reminder.isOverdue %}
+                                    <span class="rm-badge-overdue">En retard</span>
+                                {% elseif reminder.isDueToday %}
+                                    <span class="rm-badge-today">Aujourd'hui</span>
+                                {% elseif reminder.isDueSoon %}
+                                    <span class="rm-badge-soon">Bientôt</span>
+                                {% endif %}
+                            </div>
+                            <div class="rm-meta">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                {{ reminder.animal.name }}
+                                &nbsp;·&nbsp;
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                {{ (reminder.nextOccurrence ?? reminder.scheduledAt)|date('d/m/Y') }}
+                                {% if reminder.recurrence %}
+                                    &nbsp;·&nbsp;
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                    {{ reminder.recurrenceLabel }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="rm-card-right">
+                            <a href="{{ path('app_reminder_edit', {id: reminder.id}) }}" class="rm-btn-icon" title="Modifier">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            <form method="post" action="{{ path('app_reminder_toggle', {id: reminder.id}) }}" class="d-inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ reminder.id) }}">
+                                <button type="submit" class="rm-btn-icon" title="{{ reminder.active ? 'Désactiver' : 'Réactiver' }}">
+                                    {% if reminder.active %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('app_reminder_delete', {id: reminder.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce rappel ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reminder.id) }}">
+                                <button type="submit" class="rm-btn-icon danger" title="Supprimer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+{% if reminders is not empty %}
+<script>
+document.querySelectorAll('.rm-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.rm-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.rm-card').forEach(card => {
+            card.style.display = (filter === 'all' || card.dataset.status === filter) ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau rappel - AniCare{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width: 800px;">
+
+    <div class="card-header medical-header p-4 rounded-3 mb-4">
+        <div>
+            <p class="page-eyebrow mb-2">Rappels</p>
+            <h1 class="page-title mb-1" style="font-size: 1.4rem;">Nouveau rappel</h1>
+            <p class="page-subtitle mb-0">Planifiez un rappel pour un animal</p>
+        </div>
+    </div>
+
+    {% include 'reminder/_form.html.twig' with {'button_label': 'Créer le rappel'} %}
+</div>
+{% endblock %}

@@ -4,8 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Animal;
 use App\Entity\AnimalDeletionRequest;
+use App\Entity\AnimalReferent;
 use App\Entity\AnimalShare;
+use App\Repository\AnimalReferentRepository;
 use App\Entity\Reminder;
+use App\Entity\Structure;
 use App\Entity\StructureMembership;
 use App\Entity\User;
 use App\Form\AnimalType;
@@ -56,6 +59,52 @@ final class AnimalController extends AbstractController
         return $this->render('animal/index.html.twig', [
             'animals' => $animals,
         ]);
+    }
+
+    #[Route('/rechercher', name: 'app_animal_search', methods: ['GET'])]
+    public function search(Request $request, AnimalRepository $animalRepository): Response
+    {
+        $query = trim($request->query->get('q', ''));
+        $results = [];
+
+        if (mb_strlen($query) >= 2) {
+            $results = $animalRepository->searchByQuery($query);
+        }
+
+        return $this->render('animal/search.html.twig', [
+            'query' => $query,
+            'results' => $results,
+        ]);
+    }
+
+    #[Route('/api/doublons', name: 'app_animal_check_duplicates', methods: ['GET'])]
+    public function checkDuplicates(Request $request, AnimalRepository $animalRepository): Response
+    {
+        $name = trim($request->query->get('name', ''));
+        $idNum = trim($request->query->get('identification', ''));
+        $chip = trim($request->query->get('microchip', ''));
+
+        if ($name === '' && $idNum === '' && $chip === '') {
+            return $this->json([]);
+        }
+
+        $duplicates = $animalRepository->findDuplicates(
+            $name ?: '__no_match__',
+            $idNum ?: null,
+            $chip ?: null
+        );
+
+        $data = array_map(fn(Animal $a) => [
+            'id' => $a->getId(),
+            'name' => $a->getName(),
+            'breed' => $a->getBreed(),
+            'identificationNumber' => $a->getIdentificationNumber(),
+            'microchipNumber' => $a->getMicrochipNumber(),
+            'owner' => $a->getOwner() ? $a->getOwner()->getFullName() : null,
+            'slug' => $a->getSlug(),
+        ], $duplicates);
+
+        return $this->json($data);
     }
 
     #[Route('/ajouter', name: 'app_animal_new', methods: ['GET', 'POST'])]
@@ -121,8 +170,6 @@ final class AnimalController extends AbstractController
             } else {
                 $animal->setOwner($user);
             }
-            $animal->setSpecies('Cheval');
-
             $this->syncAgeAndBirthDate($form, $animal);
 
             if ($animal->getCoat() === 'Autre' && $form->get('coatCustom')->getData()) {
@@ -132,8 +179,32 @@ final class AnimalController extends AbstractController
             $this->handlePhotoUpload($form, $animal);
             $this->handleUploadedDocuments($form, $animal);
 
+            $livingPlaceMode = $request->request->get('living_place_mode', 'address');
+            if ($livingPlaceMode === 'structure') {
+                $structureId = $request->request->get('living_place_structure_id');
+                if ($structureId) {
+                    $selectedStructure = $entityManager->getRepository(Structure::class)->find((int) $structureId);
+                    if ($selectedStructure) {
+                        $animal->setStructure($selectedStructure);
+                        $animal->setLivingPlaceName($selectedStructure->getName());
+                        $animal->setLivingPlaceStreet($selectedStructure->getStreet());
+                        $animal->setLivingPlaceComplement($selectedStructure->getComplement());
+                        $animal->setLivingPlacePostalCode($selectedStructure->getPostalCode());
+                        $animal->setLivingPlaceCity($selectedStructure->getCity());
+                        $animal->setLivingPlaceCountry($selectedStructure->getCountry() ?? 'FR');
+                    }
+                }
+            } elseif ($livingPlaceMode === 'referent') {
+                $animal->setLivingPlaceName(null);
+                $animal->setLivingPlaceStreet($user->getAddress());
+                $animal->setLivingPlacePostalCode($user->getPostalCode());
+                $animal->setLivingPlaceCity($user->getCity());
+                $animal->setLivingPlaceCountry('FR');
+            }
+
             $entityManager->persist($animal);
 
+            $this->handleReferentDesignation($request, $animal, $user, $userRepository, $entityManager);
             $this->handleProfessionalInvitation($request, $animal, $userRepository, $entityManager);
             $this->handleReminders($request, $animal, $user, $entityManager);
 
@@ -164,7 +235,7 @@ final class AnimalController extends AbstractController
     }
 
     #[Route('/{slug}', name: 'app_animal_show', methods: ['GET'])]
-    public function show(string $slug, AnimalRepository $animalRepository, UserRepository $userRepository, AnimalDeletionRequestRepository $deletionRequestRepository): Response
+    public function show(string $slug, AnimalRepository $animalRepository, UserRepository $userRepository, AnimalDeletionRequestRepository $deletionRequestRepository, AnimalReferentRepository $referentRepository): Response
     {
         $animal = $animalRepository->findOneBySlug($slug);
         if (!$animal) {
@@ -187,10 +258,19 @@ final class AnimalController extends AbstractController
 
         $pendingDeletionRequest = $deletionRequestRepository->findPendingForAnimal($animal->getId());
 
+        $principalReferent = $animal->getPrincipalReferent();
+        $allReferents = $referentRepository->findAllForAnimal($animal);
+        $secondaryReferents = array_filter($allReferents, fn($r) => $r->isSecondaire());
+
+        $canEdit = $this->isGranted('ANIMAL_EDIT', $animal);
+
         return $this->render('animal/show.html.twig', [
             'animal' => $animal,
             'professionals' => $professionals,
             'pending_deletion_request' => $pendingDeletionRequest,
+            'principal_referent' => $principalReferent,
+            'secondary_referents' => $secondaryReferents,
+            'can_edit' => $canEdit,
         ]);
     }
 
@@ -517,6 +597,70 @@ final class AnimalController extends AbstractController
         $share->setCreatedAt(new \DateTimeImmutable());
 
         $entityManager->persist($share);
+    }
+
+    private function handleReferentDesignation(Request $request, Animal $animal, User $currentUser, UserRepository $userRepository, EntityManagerInterface $entityManager): void
+    {
+        $referentSelf = $request->request->get('referent_self');
+        $referentId = $request->request->get('referent_id');
+        $referentRole = $request->request->get('referent_role', AnimalReferent::ROLE_PROPRIETAIRE);
+
+        $validRoles = [
+            AnimalReferent::ROLE_PROPRIETAIRE,
+            AnimalReferent::ROLE_CAVALIER,
+            AnimalReferent::ROLE_GERANT,
+            AnimalReferent::ROLE_ENTRAINEUR,
+            AnimalReferent::ROLE_GROOM,
+            AnimalReferent::ROLE_AUTRE,
+        ];
+        if (!in_array($referentRole, $validRoles, true)) {
+            $referentRole = AnimalReferent::ROLE_PROPRIETAIRE;
+        }
+
+        $referent = new AnimalReferent();
+        $referent->setAnimal($animal);
+        $referent->setType(AnimalReferent::TYPE_PRINCIPAL);
+        $referent->setRole($referentRole);
+        $referent->setDesignatedBy($currentUser);
+
+        // Cas 1 : auto-désignation — actif immédiatement
+        if ($referentSelf) {
+            $referent->setUser($currentUser);
+            $referent->setStatus(AnimalReferent::STATUS_ACTIVE);
+            $entityManager->persist($referent);
+            return;
+        }
+
+        // Cas 2 : désignation d'un utilisateur existant
+        if ($referentId) {
+            $referentUser = $userRepository->find((int) $referentId);
+            if ($referentUser) {
+                $referent->setUser($referentUser);
+                $referent->setStatus(AnimalReferent::STATUS_PENDING);
+                $entityManager->persist($referent);
+                return;
+            }
+        }
+
+        // Cas 2bis : création d'une fiche contact (pas de compte utilisateur)
+        // TODO: créer l'entrée dans le répertoire + envoyer l'invitation
+        $contactEmail = $request->request->get('referent_contact_email');
+        if ($contactEmail) {
+            $referent->setUser($currentUser);
+            $referent->setStatus(AnimalReferent::STATUS_PENDING);
+            $referent->setContactEmail($contactEmail);
+            $referent->setContactName(trim(
+                $request->request->get('referent_contact_lastname', '') . ' ' .
+                $request->request->get('referent_contact_firstname', '')
+            ));
+            $entityManager->persist($referent);
+            return;
+        }
+
+        // Fallback : auto-désignation
+        $referent->setUser($currentUser);
+        $referent->setStatus(AnimalReferent::STATUS_ACTIVE);
+        $entityManager->persist($referent);
     }
 
     private function handleReminders(Request $request, Animal $animal, User $user, EntityManagerInterface $entityManager): void

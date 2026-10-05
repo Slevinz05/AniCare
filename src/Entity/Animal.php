@@ -87,6 +87,21 @@ class Animal
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $livingPlaceCountry = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $vetReferentName = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $vetReferentPhone = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $antecedentsPro = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $antecedentsReferent = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $notes = null;
+
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $trustedContactFirstName = null;
 
@@ -113,6 +128,10 @@ class Animal
     #[ORM\JoinColumn(nullable: true)]
     private ?Structure $structure = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdByPro = null;
+
     /** @var Collection<int, HealthBookEntry> */
     #[ORM\OneToMany(targetEntity: HealthBookEntry::class, mappedBy: 'animal')]
     #[ORM\OrderBy(['date' => 'DESC'])]
@@ -130,12 +149,17 @@ class Animal
     #[ORM\OneToMany(targetEntity: Allergy::class, mappedBy: 'animal', orphanRemoval: true)]
     private Collection $allergies;
 
+    /** @var Collection<int, AnimalReferent> */
+    #[ORM\OneToMany(targetEntity: AnimalReferent::class, mappedBy: 'animal', orphanRemoval: true)]
+    private Collection $referents;
+
     public function __construct()
     {
         $this->healthBookEntries = new ArrayCollection();
         $this->animalShares = new ArrayCollection();
         $this->weightRecords = new ArrayCollection();
         $this->allergies = new ArrayCollection();
+        $this->referents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -434,6 +458,61 @@ class Animal
         return $this;
     }
 
+    public function getVetReferentName(): ?string
+    {
+        return $this->vetReferentName;
+    }
+
+    public function setVetReferentName(?string $vetReferentName): static
+    {
+        $this->vetReferentName = $vetReferentName;
+        return $this;
+    }
+
+    public function getVetReferentPhone(): ?string
+    {
+        return $this->vetReferentPhone;
+    }
+
+    public function setVetReferentPhone(?string $vetReferentPhone): static
+    {
+        $this->vetReferentPhone = $vetReferentPhone;
+        return $this;
+    }
+
+    public function getAntecedentsPro(): ?string
+    {
+        return $this->antecedentsPro;
+    }
+
+    public function setAntecedentsPro(?string $antecedentsPro): static
+    {
+        $this->antecedentsPro = $antecedentsPro;
+        return $this;
+    }
+
+    public function getAntecedentsReferent(): ?string
+    {
+        return $this->antecedentsReferent;
+    }
+
+    public function setAntecedentsReferent(?string $antecedentsReferent): static
+    {
+        $this->antecedentsReferent = $antecedentsReferent;
+        return $this;
+    }
+
+    public function getNotes(): ?string
+    {
+        return $this->notes;
+    }
+
+    public function setNotes(?string $notes): static
+    {
+        $this->notes = $notes;
+        return $this;
+    }
+
     public function getAge(): ?int
     {
         if (!$this->birthDate) {
@@ -661,6 +740,55 @@ class Animal
         return $parts ? implode(' ', $parts) : null;
     }
 
+    /** @return Collection<int, AnimalReferent> */
+    public function getReferents(): Collection
+    {
+        return $this->referents;
+    }
+
+    public function getActiveReferents(): array
+    {
+        return $this->referents->filter(
+            fn(AnimalReferent $r) => $r->isActive()
+        )->toArray();
+    }
+
+    public function getPrincipalReferent(): ?AnimalReferent
+    {
+        foreach ($this->referents as $referent) {
+            if ($referent->isPrincipal() && $referent->isActive()) {
+                return $referent;
+            }
+        }
+        return null;
+    }
+
+    public function getSecondaryReferents(): array
+    {
+        return $this->referents->filter(
+            fn(AnimalReferent $r) => $r->isSecondaire() && $r->isActive()
+        )->toArray();
+    }
+
+    public function addReferent(AnimalReferent $referent): static
+    {
+        if (!$this->referents->contains($referent)) {
+            $this->referents->add($referent);
+            $referent->setAnimal($this);
+        }
+        return $this;
+    }
+
+    public function removeReferent(AnimalReferent $referent): static
+    {
+        if ($this->referents->removeElement($referent)) {
+            if ($referent->getAnimal() === $this) {
+                $referent->setAnimal(null);
+            }
+        }
+        return $this;
+    }
+
     public function getActiveTreatments(): array
     {
         return $this->healthBookEntries->filter(fn(HealthBookEntry $e) => $e->isActiveTreatment())->toArray();
@@ -676,5 +804,21 @@ class Animal
         return $this->healthBookEntries->filter(
             fn(HealthBookEntry $e) => stripos($e->getTitle() ?? '', 'bilan sanguin') !== false
         )->toArray();
+    }
+
+    public function getCreatedByPro(): ?User
+    {
+        return $this->createdByPro;
+    }
+
+    public function setCreatedByPro(?User $createdByPro): static
+    {
+        $this->createdByPro = $createdByPro;
+        return $this;
+    }
+
+    public function isProfileIncomplete(): bool
+    {
+        return !$this->coat && !$this->identificationNumber;
     }
 }
