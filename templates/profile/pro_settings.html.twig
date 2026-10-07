@@ -1,215 +1,1463 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Paramètres professionnels - AniCare{% endblock %}
+{% block title %}Paramètres PRO - AniCare{% endblock %}
+
+{% set user = app.user %}
+{% set agenda = user.agendaSettings ?? {} %}
+{% set report = user.reportSettings ?? {} %}
+{% set hours = user.openingHours ?? {} %}
+{% set rehab = user.rehabilitationTemplates ?? [] %}
+{% set colleagues = user.recommendedColleagues ?? [] %}
+{% set supps = user.supplements ?? [] %}
+{% set locations = user.consultationLocations ?? [] %}
 
 {% block body %}
+<style>
+    .ps-page { max-width: 1100px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .ps-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0f332e 100%);
+        border-radius: 16px;
+        padding: 2rem 2.25rem;
+        color: #fff;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .ps-header::after {
+        content: ''; position: absolute; top: -30px; right: -20px;
+        width: 140px; height: 140px; border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .ps-header h1 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+    .ps-header p { opacity: 0.65; font-size: 0.82rem; margin: 0.3rem 0 0; font-weight: 400; }
+
+    /* ── Tabs ── */
+    .ps-tabs {
+        display: flex; gap: 0.35rem;
+        background: #f5f5f0;
+        border-radius: 12px;
+        padding: 0.3rem;
+        margin-bottom: 1.75rem;
+    }
+    .ps-tab {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.82rem; font-weight: 700;
+        color: var(--taupe);
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.25s ease;
+        flex: 1; justify-content: center;
+    }
+    .ps-tab:hover { color: var(--primary-color); background: rgba(255,255,255,0.6); }
+    .ps-tab.active {
+        color: var(--primary-color);
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .ps-tab .tab-icon {
+        width: 26px; height: 26px; border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s;
+    }
+    .ps-tab.active .tab-icon { background: var(--soft-teal); }
+
+    /* ── Cards ── */
+    .ps-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 14px;
+        padding: 1.5rem 1.75rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .ps-card:hover {
+        border-color: rgba(26,77,69,0.12);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .ps-card-header {
+        display: flex; align-items: flex-start; gap: 0.85rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .ps-card-icon {
+        width: 38px; height: 38px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .ps-card-title { font-size: 0.92rem; font-weight: 700; color: var(--secondary-color); margin: 0; }
+    .ps-card-desc { font-size: 0.73rem; color: var(--taupe); margin: 0.2rem 0 0; line-height: 1.4; }
+
+    /* ── Form inputs ── */
+    .ps-page .form-control,
+    .ps-page .form-control-sm {
+        border: 1.5px solid #e0ddd5;
+        border-radius: 10px;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.82rem;
+        background: #fafaf8;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        color: var(--secondary-color);
+    }
+    .ps-page .form-control:focus,
+    .ps-page .form-control-sm:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(26,77,69,0.08);
+        background: #fff;
+        outline: none;
+    }
+    .ps-page .form-control::placeholder { color: #b5b0a5; }
+    .ps-page textarea.form-control { min-height: 70px; resize: vertical; }
+
+    /* ── Labels ── */
+    .ps-label {
+        font-size: 0.76rem; font-weight: 700;
+        color: var(--secondary-color);
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.01em;
+        display: block;
+    }
+    .ps-help { font-size: 0.7rem; color: var(--taupe); margin-top: 0.25rem; }
+
+    /* ── Custom checkboxes ── */
+    .ps-page .form-check-input[type="checkbox"] {
+        width: 18px; height: 18px;
+        border: 2px solid #c9c5bb;
+        border-radius: 5px;
+        background-color: #fafaf8;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-top: 0;
+        flex-shrink: 0;
+        -webkit-appearance: none;
+        appearance: none;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 12px;
+    }
+    .ps-page .form-check-input[type="checkbox"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+    .ps-page .form-check-input:focus {
+        box-shadow: 0 0 0 3px rgba(26,77,69,0.12);
+        border-color: var(--primary-color);
+    }
+    .ps-page .form-check-input[type="radio"] {
+        width: 18px; height: 18px;
+        border: 2px solid #c9c5bb;
+        border-radius: 50%;
+        background-color: #fafaf8;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-top: 0;
+        flex-shrink: 0;
+        -webkit-appearance: none;
+        appearance: none;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    .ps-page .form-check-input[type="radio"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e");
+    }
+
+    /* ── Custom toggle switch ── */
+    .ps-page .form-switch .form-check-input[type="checkbox"] {
+        width: 40px; height: 22px;
+        border-radius: 22px;
+        border: 2px solid #c9c5bb;
+        background-color: #e0ddd5;
+        background-size: auto;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+        background-position: left center;
+        transition: all 0.25s ease;
+    }
+    .ps-page .form-switch .form-check-input[type="checkbox"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+        background-position: right center;
+    }
+
+    /* ── Switch rows ── */
+    .ps-switch {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.45rem 0;
+        margin-bottom: 0.25rem;
+    }
+    .ps-switch label {
+        font-size: 0.8rem; font-weight: 500;
+        color: var(--secondary-color);
+        cursor: pointer; line-height: 1.3;
+    }
+
+    /* ── Inline inputs & selects ── */
+    .ps-row { display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.5rem; }
+    .ps-inline-input {
+        width: 72px; text-align: center;
+        border: 1.5px solid #e0ddd5; border-radius: 8px;
+        padding: 0.45rem 0.5rem; font-size: 0.82rem;
+        background: #fafaf8; color: var(--secondary-color);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .ps-inline-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(26,77,69,0.08);
+        outline: none; background: #fff;
+    }
+    .ps-select {
+        border: 1.5px solid #e0ddd5; border-radius: 8px;
+        padding: 0.45rem 0.65rem; font-size: 0.82rem;
+        background: #fafaf8; color: var(--secondary-color);
+        cursor: pointer; transition: border-color 0.2s;
+    }
+    .ps-select:focus { border-color: var(--primary-color); outline: none; }
+
+    /* ── Day rows (horaires) ── */
+    .ps-day-row {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.6rem 0.5rem;
+        border-radius: 8px;
+        transition: background 0.15s;
+        margin: 0 -0.5rem;
+    }
+    .ps-day-row:hover { background: rgba(0,0,0,0.015); }
+    .ps-day-row + .ps-day-row { border-top: 1px solid rgba(0,0,0,0.03); }
+    .ps-day-label { min-width: 90px; font-size: 0.8rem; font-weight: 600; color: var(--secondary-color); }
+
+    /* ── List items (protocoles, confrères, etc.) ── */
+    .ps-list-item {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.6rem 0.85rem;
+        background: linear-gradient(135deg, var(--soft-teal) 0%, #f4faf8 100%);
+        border: 1px solid rgba(26,77,69,0.06);
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .ps-list-item:hover {
+        border-color: rgba(26,77,69,0.15);
+        box-shadow: 0 1px 4px rgba(26,77,69,0.06);
+    }
+    .ps-list-item .form-control-sm {
+        background: rgba(255,255,255,0.7);
+        border-color: rgba(26,77,69,0.1);
+    }
+
+    /* ── Add button ── */
+    .ps-btn-add {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-size: 0.78rem; font-weight: 700;
+        color: var(--primary-color);
+        background: none; border: 1.5px dashed rgba(26,77,69,0.25);
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        margin-top: 0.35rem;
+        transition: all 0.2s;
+    }
+    .ps-btn-add:hover {
+        background: var(--soft-teal);
+        border-color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    /* ── Remove button ── */
+    .ps-remove-btn {
+        background: none; border: none; cursor: pointer;
+        color: #c9c5bb;
+        padding: 0.3rem; border-radius: 6px;
+        display: flex; align-items: center;
+        transition: all 0.15s;
+    }
+    .ps-remove-btn:hover { color: #dc3545; background: rgba(220,53,69,0.08); }
+
+    /* ── Species pills ── */
+    .ps-species-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .ps-species-pill {
+        display: flex; align-items: center; gap: 0.3rem;
+        padding: 0.4rem 0.85rem;
+        border: 1.5px solid #e0ddd5;
+        border-radius: 20px;
+        font-size: 0.78rem; font-weight: 600;
+        color: var(--taupe);
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fafaf8;
+    }
+    .ps-species-pill:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    .ps-species-pill input { display: none; }
+    .ps-species-pill:has(input:checked) {
+        background: var(--soft-teal);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    /* ── Notification table ── */
+    .ps-notif-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .ps-notif-table th {
+        font-size: 0.72rem; font-weight: 700; color: var(--taupe);
+        text-transform: uppercase; letter-spacing: 0.03em;
+        padding: 0.4rem 0.75rem; text-align: center;
+    }
+    .ps-notif-table td {
+        padding: 0.5rem 0.75rem; font-size: 0.8rem;
+        color: var(--secondary-color);
+        border-top: 1px solid rgba(0,0,0,0.04);
+    }
+    .ps-notif-table td:not(:first-child) { text-align: center; }
+
+    /* ── Radio group ── */
+    .ps-radio-group {
+        display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.35rem;
+    }
+    .ps-radio-pill {
+        display: flex; align-items: center; gap: 0.3rem;
+        padding: 0.35rem 0.75rem;
+        border: 1.5px solid #e0ddd5;
+        border-radius: 20px;
+        font-size: 0.76rem; font-weight: 600;
+        color: var(--taupe);
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fafaf8;
+    }
+    .ps-radio-pill:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    .ps-radio-pill input { display: none; }
+    .ps-radio-pill:has(input:checked) {
+        background: var(--soft-teal);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    /* ── Footer sticky ── */
+    .ps-footer {
+        position: sticky; bottom: 0;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+        padding: 1rem 0;
+        margin-top: 1.5rem;
+        display: flex; align-items: center; gap: 1rem;
+        border-radius: 14px 14px 0 0;
+        z-index: 10;
+    }
+    .ps-footer .btn-save {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #153d37 100%);
+        color: #fff;
+        border: none; border-radius: 10px;
+        padding: 0.7rem 2rem; font-weight: 700; font-size: 0.85rem;
+        display: flex; align-items: center; gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        box-shadow: 0 2px 8px rgba(26,77,69,0.2);
+    }
+    .ps-footer .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(26,77,69,0.3);
+    }
+    .ps-footer .btn-back {
+        color: var(--taupe); text-decoration: none;
+        font-size: 0.82rem; font-weight: 600;
+        transition: color 0.2s;
+    }
+    .ps-footer .btn-back:hover { color: var(--secondary-color); }
+
+    /* ── Dept badges ── */
+    .dept-badge {
+        background: var(--soft-teal) !important;
+        color: var(--primary-color) !important;
+        font-size: 0.78rem !important;
+        padding: 0.4rem 0.75rem !important;
+        border-radius: 20px !important;
+        font-weight: 600 !important;
+        border: 1px solid rgba(26,77,69,0.1);
+        transition: all 0.15s;
+    }
+    .dept-badge:hover { border-color: var(--primary-color); }
+
+    /* ── Flash ── */
+    .ps-page .alert-success {
+        background: var(--soft-teal);
+        color: var(--primary-color);
+        border: 1px solid rgba(26,77,69,0.15);
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 0.65rem 1rem;
+    }
+
+    /* ── France SVG map ── */
+    .france-map-wrap {
+        position: relative;
+        background: #f0f7f5;
+        border-radius: 14px;
+        padding: 1rem;
+        border: 1px solid rgba(26,77,69,0.08);
+    }
+    .france-map-wrap svg {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        height: auto;
+        max-height: 480px;
+    }
+    .france-map-wrap svg path[id] {
+        fill: #b8d8d0;
+        stroke: #f0f7f5;
+        stroke-width: 1;
+        cursor: pointer;
+        transition: fill 0.15s ease, stroke 0.12s ease;
+    }
+    .france-map-wrap svg path[id]:hover {
+        fill: #8ec4b8;
+        stroke: #fff;
+        stroke-width: 1.5;
+    }
+    .france-map-wrap svg path[id].selected {
+        fill: var(--primary-color);
+        stroke: #fff;
+        stroke-width: 1.2;
+    }
+    .france-map-wrap svg path[id].selected:hover {
+        fill: #0f332e;
+    }
+    .france-map-loading {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--taupe);
+        font-size: 0.8rem;
+    }
+    .france-map-tooltip {
+        position: absolute;
+        background: var(--primary-color);
+        color: #fff;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 10;
+        white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .france-map-tooltip.visible { opacity: 1; }
+
+    /* ── Dept region grid (fallback) ── */
+    .dept-region-toggle {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        color: var(--taupe); font-size: 0.75rem; font-weight: 600;
+        background: none; border: none; cursor: pointer;
+        padding: 0.4rem 0;
+    }
+    .dept-region-toggle:hover { color: var(--primary-color); }
+    .dept-region-toggle svg { transition: transform 0.2s; }
+    .dept-region-toggle.open svg { transform: rotate(180deg); }
+    .dept-map-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.5rem;
+    }
+    .dept-region {
+        background: #fafaf8;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 10px;
+        padding: 0.6rem;
+        transition: border-color 0.2s;
+    }
+    .dept-region:hover { border-color: rgba(26,77,69,0.15); }
+    .dept-region-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 0.4rem; cursor: pointer;
+    }
+    .dept-region-name {
+        font-size: 0.7rem; font-weight: 700; color: var(--secondary-color);
+        letter-spacing: 0.01em;
+    }
+    .dept-region-count {
+        font-size: 0.65rem; font-weight: 700;
+        background: var(--soft-teal); color: var(--primary-color);
+        padding: 0.1rem 0.4rem; border-radius: 10px;
+        min-width: 18px; text-align: center;
+        display: none;
+    }
+    .dept-region-count.has-selection { display: inline-block; }
+    .dept-region-grid {
+        display: flex; flex-wrap: wrap; gap: 0.25rem;
+    }
+    .dept-btn {
+        width: 32px; height: 28px;
+        border: 1.5px solid #e0ddd5;
+        border-radius: 6px;
+        background: #fff;
+        color: var(--taupe);
+        font-size: 0.68rem; font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        padding: 0;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .dept-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: var(--soft-teal);
+    }
+    .dept-btn.selected {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: #fff;
+        box-shadow: 0 1px 3px rgba(26,77,69,0.25);
+    }
+    .dept-region-header.all-selected .dept-region-name {
+        color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        .ps-tabs { flex-direction: column; gap: 0.25rem; }
+        .ps-tab { justify-content: flex-start; }
+        .ps-card { padding: 1.25rem; }
+        .ps-header { padding: 1.5rem; }
+        .dept-map-container { grid-template-columns: 1fr; }
+    }
+</style>
+
 <div class="container py-4">
     <div class="row g-4">
         <div class="col-12 col-lg-3">
             {{ include('profile/_sidebar.html.twig') }}
         </div>
-
         <div class="col-12 col-lg-9">
-            <div class="card anicare-card">
-                <div class="card-body p-4 p-lg-5">
-                    <p class="page-eyebrow mb-2">Compte PRO</p>
-                    <h1 class="page-title mb-1">Paramètres professionnels</h1>
-                    <p class="page-subtitle mb-4">Configurez vos disponibilités et votre visibilité.</p>
+<div class="ps-page">
+    <div class="ps-header">
+        <h1>Paramètres professionnels</h1>
+        <p>Configurez votre profil, votre agenda et vos comptes rendus.</p>
+    </div>
 
-                    {{ form_start(form, {'attr': {'class': 'anicare-form needs-validation', 'novalidate': 'novalidate'}}) }}
+    {# ── TABS ── #}
+    <nav class="ps-tabs">
+        <a href="{{ path('app_profile_pro_settings', {tab: 'profil'}) }}" class="ps-tab {{ tab == 'profil' ? 'active' : '' }}">
+            <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            Profil
+        </a>
+        <a href="{{ path('app_profile_pro_settings', {tab: 'agenda'}) }}" class="ps-tab {{ tab == 'agenda' ? 'active' : '' }}">
+            <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            Agenda
+        </a>
+        <a href="{{ path('app_profile_pro_settings', {tab: 'comptes-rendus'}) }}" class="ps-tab {{ tab == 'comptes-rendus' ? 'active' : '' }}">
+            <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            Comptes rendus
+        </a>
+    </nav>
 
-                        {# ══════════════════════════════════════ #}
-                        {# ── SECTION 1 : Rendez-vous ────────── #}
-                        {# ══════════════════════════════════════ #}
-                        <fieldset class="mb-4 pb-4 border-bottom border-light">
-                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                Rendez-vous
-                            </legend>
-                            <div class="row g-3">
-                                <div class="col-12 col-md-6">
-                                    {{ form_label(form.defaultConsultationDuration, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                                    <div class="input-group">
-                                        {{ form_widget(form.defaultConsultationDuration, {'attr': {'class': 'form-control', 'step': '5', 'min': '5', 'max': '480'}}) }}
-                                        <span class="input-group-text">min</span>
-                                    </div>
-                                    {{ form_errors(form.defaultConsultationDuration) }}
-                                </div>
-                                <div class="col-12">
-                                    {{ form_label(form.defaultAppointmentNotes, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                                    {{ form_widget(form.defaultAppointmentNotes, {'attr': {'class': 'form-control'}}) }}
-                                    {% if form.defaultAppointmentNotes.vars.help %}
-                                        <div class="form-text mt-1">{{ form.defaultAppointmentNotes.vars.help }}</div>
-                                    {% endif %}
-                                    {{ form_errors(form.defaultAppointmentNotes) }}
-                                </div>
-                            </div>
-                        </fieldset>
+    {# ╔══════════════════════════════════════════════════════════╗ #}
+    {# ║  TAB 1 : PROFIL                                        ║ #}
+    {# ╚══════════════════════════════════════════════════════════╝ #}
+    {% if tab == 'profil' %}
+    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'profil'}) }}">
+        <input type="hidden" name="_section" value="profil">
 
-                        {# ══════════════════════════════════════ #}
-                        {# ── SECTION 2 : Compte rendu ───────── #}
-                        {# ══════════════════════════════════════ #}
-                        <fieldset class="mb-4 pb-4 border-bottom border-light">
-                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                                Compte rendu
-                            </legend>
-
-                            <div class="mb-3">
-                                <p class="form-label fw-bold mb-2">Types de rééducation</p>
-                                <p class="text-secondary small mb-3">Créez des modèles de rééducation que vous pourrez sélectionner lors de la rédaction d'un compte rendu.</p>
-
-                                <div id="rehab-templates-list" class="mb-3">
-                                    {% for tpl in app.user.rehabilitationTemplates %}
-                                        <div class="rehab-template-row d-flex align-items-center gap-2 mb-2">
-                                            <input type="text" class="form-control form-control-sm rehab-tpl-name" value="{{ tpl.name }}" placeholder="Nom du type">
-                                            <input type="text" class="form-control form-control-sm rehab-tpl-desc" value="{{ tpl.description|default('') }}" placeholder="Description (optionnel)">
-                                            <button type="button" class="btn btn-outline-danger btn-sm rehab-tpl-remove" title="Supprimer">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                            </button>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-
-                                <button type="button" id="rehab-add-btn" class="btn btn-outline-primary btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                    Ajouter un type
-                                </button>
-
-                                <input type="hidden" name="rehabilitation_templates_data" id="rehab-templates-data">
-                            </div>
-
-                            <hr class="my-3 border-light">
-
-                            <div>
-                                {{ form_label(form.defaultPublicNotes, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                                {{ form_widget(form.defaultPublicNotes, {'attr': {'class': 'form-control'}}) }}
-                                {% if form.defaultPublicNotes.vars.help %}
-                                    <div class="form-text mt-1">{{ form.defaultPublicNotes.vars.help }}</div>
-                                {% endif %}
-                                {{ form_errors(form.defaultPublicNotes) }}
-                            </div>
-                        </fieldset>
-
-                        {# ── Visibilité annuaire ── #}
-                        <fieldset class="mb-4 pb-4 border-bottom border-light">
-                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Annuaire</legend>
-                            <div class="form-check form-switch">
-                                {{ form_widget(form.directoryVisible, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
-                                {{ form_label(form.directoryVisible, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                            </div>
-                            <p class="form-text mt-1 mb-0">
-                                Lorsque activé, votre profil apparaîtra dans le répertoire des professionnels et sera visible par les propriétaires.
-                            </p>
-                        </fieldset>
-
-                        {# ── Horaires d'ouverture ── #}
-                        <fieldset class="mb-4">
-                            <legend class="page-eyebrow mb-3" style="font-size: 0.75rem;">Horaires de consultation</legend>
-
-                            <div class="form-check form-switch mb-3">
-                                {{ form_widget(form.openingHoursVisible, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
-                                {{ form_label(form.openingHoursVisible, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                            </div>
-
-                            <p class="text-secondary small mb-3">Cochez les jours où vous êtes disponible et indiquez vos horaires.</p>
-
-                            <div class="opening-hours-grid">
-                                {% set days = [
-                                    {key: 'lundi', label: 'Lundi'},
-                                    {key: 'mardi', label: 'Mardi'},
-                                    {key: 'mercredi', label: 'Mercredi'},
-                                    {key: 'jeudi', label: 'Jeudi'},
-                                    {key: 'vendredi', label: 'Vendredi'},
-                                    {key: 'samedi', label: 'Samedi'},
-                                    {key: 'dimanche', label: 'Dimanche'}
-                                ] %}
-
-                                {% for day in days %}
-                                    {% set enabledField = 'hours_' ~ day.key ~ '_enabled' %}
-                                    {% set startField = 'hours_' ~ day.key ~ '_start' %}
-                                    {% set endField = 'hours_' ~ day.key ~ '_end' %}
-                                    <div class="opening-hours-row d-flex align-items-center gap-3 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
-                                        <div class="form-check" style="min-width: 130px;">
-                                            {{ form_widget(form[enabledField], {'attr': {'class': 'form-check-input opening-hour-toggle', 'data-day': day.key}}) }}
-                                            <label class="form-check-label fw-bold" for="{{ form[enabledField].vars.id }}">{{ day.label }}</label>
-                                        </div>
-                                        <div class="d-flex align-items-center gap-2 opening-hour-times" data-day="{{ day.key }}" style="{{ not form[enabledField].vars.data ? 'opacity: 0.4; pointer-events: none;' : '' }}">
-                                            {{ form_widget(form[startField], {'attr': {'class': 'form-control form-control-sm', 'style': 'width: 80px;'}}) }}
-                                            <span class="text-secondary">à</span>
-                                            {{ form_widget(form[endField], {'attr': {'class': 'form-control form-control-sm', 'style': 'width: 80px;'}}) }}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </fieldset>
-
-                        {{ form_rest(form) }}
-
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
-                            <a href="{{ path('app_profile') }}" class="btn btn-outline-primary btn-lg">Retour</a>
-                        </div>
-
-                    {{ form_end(form) }}
+        {# ── Activité professionnelle ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Activité professionnelle</p>
+                    <p class="ps-card-desc">Informations liées à votre activité et votre entreprise.</p>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="ps-label">Nom de l'entreprise</label>
+                    <input type="text" name="company_name" class="form-control form-control-sm" value="{{ user.companyName }}" placeholder="Nom de votre entreprise">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="ps-label">SIREN</label>
+                    <input type="text" name="siren" class="form-control form-control-sm" value="{{ user.siren }}" placeholder="123 456 789" maxlength="14">
+                </div>
+                <div class="col-12">
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="show_company_name" value="1" id="showCompany" {{ user.showCompanyName ? 'checked' : '' }}>
+                        <label for="showCompany">Afficher le nom de l'entreprise sur mes comptes rendus</label>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="ps-label">Site web</label>
+                    <input type="url" name="website" class="form-control form-control-sm" value="{{ user.website }}" placeholder="https://www.votre-site.fr">
+                </div>
+                <div class="col-12">
+                    <label class="ps-label">Biographie / Description</label>
+                    <textarea name="profile_description" class="form-control form-control-sm" rows="3" placeholder="Quelques mots sur votre parcours...">{{ user.profileDescription }}</textarea>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
+        {# ── Lieux de consultation ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Lieux de consultation</p>
+                    <p class="ps-card-desc">Définissez vos lieux d'exercice en cabinet.</p>
+                </div>
+            </div>
+            <div id="locationsList">
+                {% for loc in locations %}
+                <div class="ps-list-item loc-row">
+                    <input type="text" class="form-control form-control-sm loc-name" value="{{ loc.name }}" placeholder="Ex : Cabinet principal" style="flex:1;">
+                    <input type="text" class="form-control form-control-sm loc-address" value="{{ loc.address }}" placeholder="Adresse" style="flex:2;">
+                    <button type="button" class="ps-remove-btn loc-remove"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="ps-btn-add" id="addLocation">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un lieu de consultation
+            </button>
+            <input type="hidden" name="consultation_locations_data" id="locationsData">
+        </div>
+
+        {# ── Zones d'intervention ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Zones d'intervention</p>
+                    <p class="ps-card-desc">Cliquez sur les départements où vous intervenez.</p>
+                </div>
+            </div>
+
+            {# Sélection badges #}
+            <div id="deptsList" class="d-flex flex-wrap gap-2 mb-3">
+                {% for dept in user.interventionDepartments ?? [] %}
+                <span class="badge dept-badge">
+                    {{ dept }} <button type="button" class="btn-close btn-close-sm ms-1 dept-remove" style="font-size: 0.5rem;" data-dept="{{ dept }}"></button>
+                </span>
+                {% endfor %}
+            </div>
+            <p id="deptsCount" class="small mb-3" style="color: var(--taupe);"><strong id="deptsNum">{{ (user.interventionDepartments ?? [])|length }}</strong> département{{ (user.interventionDepartments ?? [])|length > 1 ? 's' : '' }} sélectionné{{ (user.interventionDepartments ?? [])|length > 1 ? 's' : '' }}</p>
+
+            {# ── Carte de France SVG ── #}
+            <div class="france-map-wrap" id="franceMapWrap">
+                <div class="france-map-tooltip" id="mapTooltip"></div>
+                <div id="franceMap"><div class="france-map-loading">Chargement de la carte…</div></div>
+            </div>
+
+            <div class="mt-3 mb-2">
+                <button type="button" class="dept-region-toggle" id="regionGridToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    Sélection par région
+                </button>
+            </div>
+            <div id="regionGridWrap" style="display:none;">
+            {# Grille par régions (alternative) #}
+            <div class="dept-map-container">
+                {% set regions = {
+                    'Île-de-France': ['75','77','78','91','92','93','94','95'],
+                    'Hauts-de-France': ['02','59','60','62','80'],
+                    'Grand Est': ['08','10','51','52','54','55','57','67','68','88'],
+                    'Normandie': ['14','27','50','61','76'],
+                    'Bretagne': ['22','29','35','56'],
+                    'Pays de la Loire': ['44','49','53','72','85'],
+                    'Centre-Val de Loire': ['18','28','36','37','41','45'],
+                    'Bourgogne-Franche-Comté': ['21','25','39','58','70','71','89','90'],
+                    'Nouvelle-Aquitaine': ['16','17','19','23','24','33','40','47','64','79','86','87'],
+                    'Occitanie': ['09','11','12','30','31','32','34','46','48','65','66','81','82'],
+                    'Auvergne-Rhône-Alpes': ['01','03','07','15','26','38','42','43','63','69','73','74'],
+                    'Provence-Alpes-Côte d\'Azur': ['04','05','06','13','83','84'],
+                    'Corse': ['2A','2B']
+                } %}
+                {% set selectedDepts = user.interventionDepartments ?? [] %}
+                {% for region, depts in regions %}
+                <div class="dept-region">
+                    <div class="dept-region-header" data-region="{{ region }}">
+                        <span class="dept-region-name">{{ region }}</span>
+                        <span class="dept-region-count" data-region-count="{{ region }}">0</span>
+                    </div>
+                    <div class="dept-region-grid">
+                        {% for dept in depts %}
+                        <button type="button" class="dept-btn {{ dept in selectedDepts ? 'selected' : '' }}" data-dept="{{ dept }}">{{ dept }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            </div>
+
+            <div class="d-flex gap-2 align-items-center mt-3">
+                <input type="text" class="form-control form-control-sm" id="deptInput" placeholder="Ou saisir un numéro..." style="max-width: 200px;">
+                <button type="button" class="btn btn-sm" style="background: var(--soft-teal); color: var(--primary-color); font-weight: 600; border-radius: 8px;" id="addDept">Ajouter</button>
+            </div>
+            <input type="hidden" name="intervention_departments_data" id="deptsData">
+        </div>
+
+        {# ── Visibilité annuaire ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Visibilité dans l'annuaire</p>
+                    <p class="ps-card-desc">Contrôlez quelles informations sont visibles publiquement.</p>
+                </div>
+            </div>
+            <div class="ps-switch">
+                <input type="checkbox" class="form-check-input" name="directory_visible" value="1" id="dirVisible" {{ user.directoryVisible ? 'checked' : '' }}>
+                <label for="dirVisible">Apparaître dans l'annuaire des professionnels</label>
+            </div>
+            <div class="ps-switch">
+                <input type="checkbox" class="form-check-input" name="opening_hours_visible" value="1" id="hoursVisible" {{ user.openingHoursVisible ? 'checked' : '' }}>
+                <label for="hoursVisible">Afficher mes horaires sur mon profil public</label>
+            </div>
+        </div>
+
+        <div class="ps-footer">
+            <button type="submit" class="btn-save">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('app_profile') }}" class="btn-back">← Retour</a>
+        </div>
+    </form>
+    {% endif %}
+
+    {# ╔══════════════════════════════════════════════════════════╗ #}
+    {# ║  TAB 2 : AGENDA                                        ║ #}
+    {# ╚══════════════════════════════════════════════════════════╝ #}
+    {% if tab == 'agenda' %}
+    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'agenda'}) }}">
+        <input type="hidden" name="_section" value="agenda">
+
+        <div class="row g-4">
+            {# ── Colonne gauche : RDV ── #}
+            <div class="col-12 col-lg-6">
+                {# Rendez-vous #}
+                <div class="ps-card">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Rendez-vous</p>
+                            <p class="ps-card-desc">Durée, rappels et visibilité de vos rendez-vous.</p>
+                        </div>
+                    </div>
+
+                    <label class="ps-label">Durée par défaut</label>
+                    <div class="ps-row mb-3">
+                        <input type="number" name="default_duration" class="ps-inline-input" value="{{ agenda.default_duration ?? user.defaultConsultationDuration ?? 60 }}" min="5" max="480" step="5">
+                        <span style="font-size: 0.8rem; color: var(--taupe);">minutes</span>
+                    </div>
+
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="allow_custom_duration" value="1" id="customDuration" {{ (agenda.allow_custom_duration ?? false) ? 'checked' : '' }}>
+                        <label for="customDuration">Autoriser une durée personnalisée</label>
+                    </div>
+
+                    <label class="ps-label mt-2">Temps entre deux rendez-vous</label>
+                    <div class="ps-row mb-3">
+                        <input type="number" name="time_between" class="ps-inline-input" value="{{ agenda.time_between ?? 15 }}" min="0" max="120" step="5">
+                        <select name="time_between_unit" class="ps-select"><option>minutes</option></select>
+                    </div>
+                </div>
+
+                {# Visibilité et notes #}
+                <div class="ps-card">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Visibilité et notes</p>
+                            <p class="ps-card-desc">Informations envoyées à vos clients.</p>
+                        </div>
+                    </div>
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="visible_by_client" value="1" id="visClient" {{ (agenda.visible_by_client ?? true) ? 'checked' : '' }}>
+                        <label for="visClient">Rendez-vous visible par défaut par le client</label>
+                    </div>
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="send_notes_on_confirm" value="1" id="notesConfirm" {{ (agenda.send_notes_on_confirm ?? false) ? 'checked' : '' }}>
+                        <label for="notesConfirm">Notes envoyées au client lors de la confirmation</label>
+                    </div>
+                    <label class="ps-label mt-2">Notes par défaut</label>
+                    <textarea name="default_appointment_notes" class="form-control form-control-sm" rows="3" placeholder="Mode de règlement, temps de consultation, consignes...">{{ agenda.default_notes ?? user.defaultAppointmentNotes }}</textarea>
+                    <p class="ps-help">Visibilité des notes :</p>
+                    <div class="ps-radio-group">
+                        <label class="ps-radio-pill"><input type="radio" name="notes_visibility" value="private" {{ (agenda.notes_visibility ?? 'shared') == 'private' ? 'checked' : '' }}> Privée</label>
+                        <label class="ps-radio-pill"><input type="radio" name="notes_visibility" value="client" {{ (agenda.notes_visibility ?? '') == 'client' ? 'checked' : '' }}> Visible par mon client</label>
+                        <label class="ps-radio-pill"><input type="radio" name="notes_visibility" value="shared" {{ (agenda.notes_visibility ?? 'shared') == 'shared' ? 'checked' : '' }}> Visible par tous</label>
+                    </div>
+                </div>
+
+                {# Confirmation et rappels #}
+                <div class="ps-card">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Confirmation et rappels</p>
+                            <p class="ps-card-desc">Notifications automatiques à vos clients.</p>
+                        </div>
+                    </div>
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="notify_on_confirm" value="1" id="notifyConfirm" {{ (agenda.notify_on_confirm ?? true) ? 'checked' : '' }}>
+                        <label for="notifyConfirm">Notifier le client à la confirmation</label>
+                    </div>
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="send_reminders" value="1" id="sendReminders" {{ (agenda.send_reminders ?? true) ? 'checked' : '' }}>
+                        <label for="sendReminders">Envoyer les rappels par défaut</label>
+                    </div>
+                    <div class="ps-species-group ms-4 mb-2">
+                        <label class="ps-species-pill"><input type="checkbox" name="reminder_channels[]" value="email" {{ 'email' in (agenda.reminder_channels ?? ['email']) ? 'checked' : '' }}> Email</label>
+                        <label class="ps-species-pill"><input type="checkbox" name="reminder_channels[]" value="sms" {{ 'sms' in (agenda.reminder_channels ?? []) ? 'checked' : '' }}> SMS</label>
+                    </div>
+                    <label class="ps-label">Rappel avant le rendez-vous</label>
+                    <div class="ps-row">
+                        <input type="number" name="reminder_before_days" class="ps-inline-input" value="{{ agenda.reminder_before_days ?? 1 }}" min="1" max="30">
+                        <select name="reminder_before_unit" class="ps-select">
+                            <option value="jour" {{ (agenda.reminder_before_unit ?? 'jour') == 'jour' ? 'selected' : '' }}>jour</option>
+                            <option value="heures" {{ (agenda.reminder_before_unit ?? '') == 'heures' ? 'selected' : '' }}>heures</option>
+                        </select>
+                    </div>
+                    <div class="ps-switch mt-2">
+                        <input type="checkbox" class="form-check-input" name="notify_me_reminder" value="1" id="notifyMe" {{ (agenda.notify_me ?? false) ? 'checked' : '' }}>
+                        <label for="notifyMe">Me notifier également</label>
+                    </div>
+                </div>
+
+                {# Annulation #}
+                <div class="ps-card">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(220,53,69,0.1); color: #dc3545;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Annulation par le client</p>
+                            <p class="ps-card-desc">Conditions d'annulation de vos rendez-vous.</p>
+                        </div>
+                    </div>
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="allow_cancellation" value="1" id="allowCancel" {{ (agenda.allow_cancellation ?? true) ? 'checked' : '' }}>
+                        <label for="allowCancel">Autoriser l'annulation en ligne</label>
+                    </div>
+                    <label class="ps-label">Délai minimum avant le rendez-vous</label>
+                    <div class="ps-row">
+                        <input type="number" name="cancel_min_hours" class="ps-inline-input" value="{{ agenda.cancel_min_hours ?? 24 }}" min="1">
+                        <select name="cancel_min_unit" class="ps-select">
+                            <option value="heures" {{ (agenda.cancel_min_unit ?? 'heures') == 'heures' ? 'selected' : '' }}>heures</option>
+                            <option value="jours" {{ (agenda.cancel_min_unit ?? '') == 'jours' ? 'selected' : '' }}>jours</option>
+                        </select>
+                    </div>
+                    <div class="ps-switch mt-2">
+                        <input type="checkbox" class="form-check-input" name="notify_me_cancel" value="1" id="notifyCancel" {{ (agenda.notify_me_cancel ?? true) ? 'checked' : '' }}>
+                        <label for="notifyCancel">Me notifier en cas d'annulation</label>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Colonne droite : Réservation / Horaires ── #}
+            <div class="col-12 col-lg-6">
+                {# Réservation en ligne #}
+                <div class="ps-card">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Réservation en ligne</p>
+                            <p class="ps-card-desc">Activez la réservation et définissez qui peut réserver.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <label class="ps-label mb-0">Activation</label>
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" name="booking_enabled" value="1" id="bookingEnabled" {{ (agenda.booking_enabled ?? false) ? 'checked' : '' }}>
+                        </div>
+                    </div>
+                    <label class="ps-label">Qui peut réserver ?</label>
+                    <select name="booking_who" class="form-control form-control-sm mb-3">
+                        <option value="clients" {{ (agenda.booking_who ?? 'clients') == 'clients' ? 'selected' : '' }}>Clients du répertoire</option>
+                        <option value="all" {{ (agenda.booking_who ?? '') == 'all' ? 'selected' : '' }}>Tous les utilisateurs</option>
+                    </select>
+
+                    <label class="ps-label">Espèces possibles en cabinet</label>
+                    <div class="ps-species-group">
+                        {% for sp in ['Équidé', 'Chien', 'Chat', 'Bovin', 'Lapin', 'NAC'] %}
+                        <label class="ps-species-pill">
+                            <input type="checkbox" name="booking_species[]" value="{{ sp }}" {{ sp in (agenda.booking_species ?? ['Équidé']) ? 'checked' : '' }}>
+                            {{ sp }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Horaires de consultation #}
+                <div class="ps-card">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Horaires de consultation</p>
+                            <p class="ps-card-desc">Vos disponibilités hebdomadaires.</p>
+                        </div>
+                    </div>
+                    {% set days = [
+                        {key: 'lundi', label: 'Lun'},
+                        {key: 'mardi', label: 'Mar'},
+                        {key: 'mercredi', label: 'Mer'},
+                        {key: 'jeudi', label: 'Jeu'},
+                        {key: 'vendredi', label: 'Ven'},
+                        {key: 'samedi', label: 'Sam'},
+                        {key: 'dimanche', label: 'Dim'}
+                    ] %}
+                    {% for day in days %}
+                    {% set dh = hours[day.key] ?? {} %}
+                    <div class="ps-day-row">
+                        <div class="form-check" style="min-width: 65px;">
+                            <input type="checkbox" class="form-check-input hour-toggle" name="hours_{{ day.key }}_enabled" value="1" id="h_{{ day.key }}" data-day="{{ day.key }}" {{ (dh.enabled ?? false) ? 'checked' : '' }}>
+                            <label class="form-check-label ps-day-label" for="h_{{ day.key }}">{{ day.label }}</label>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 hour-times" data-day="{{ day.key }}" style="{{ not (dh.enabled ?? false) ? 'opacity:0.35;pointer-events:none;' : '' }}">
+                            <input type="text" name="hours_{{ day.key }}_start" class="ps-inline-input" value="{{ dh.start ?? '09:00' }}" placeholder="09:00">
+                            <span style="font-size:0.78rem;color:var(--taupe);">→</span>
+                            <input type="text" name="hours_{{ day.key }}_end" class="ps-inline-input" value="{{ dh.end ?? '18:00' }}" placeholder="18:00">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="ps-footer">
+            <button type="submit" class="btn-save">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('app_profile') }}" class="btn-back">← Retour</a>
+        </div>
+    </form>
+    {% endif %}
+
+    {# ╔══════════════════════════════════════════════════════════╗ #}
+    {# ║  TAB 3 : COMPTES RENDUS                                ║ #}
+    {# ╚══════════════════════════════════════════════════════════╝ #}
+    {% if tab == 'comptes-rendus' %}
+    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'comptes-rendus'}) }}">
+        <input type="hidden" name="_section" value="comptes-rendus">
+
+        {# ── Coordonnées de l'intervenant ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Coordonnées de l'intervenant</p>
+                    <p class="ps-card-desc">Choisissez les informations affichées sur vos comptes rendus.</p>
+                </div>
+            </div>
+            <div class="row g-2">
+                {% for key, label in {report_show_name: 'Afficher mon nom et prénom', report_show_company: 'Afficher le nom de l\'entreprise', report_show_phone: 'Afficher le téléphone', report_show_email: 'Afficher l\'adresse mail', report_show_website: 'Afficher le site internet', report_show_siren: 'Afficher le SIREN'} %}
+                <div class="col-12 col-md-6">
+                    <div class="ps-switch">
+                        <input type="checkbox" class="form-check-input" name="{{ key }}" value="1" id="{{ key }}" {{ (report[key|replace({'report_': ''})] ?? true) ? 'checked' : '' }}>
+                        <label for="{{ key }}">{{ label }}</label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# ── Antécédents ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Antécédents</p>
+                    <p class="ps-card-desc">Afficher systématiquement les antécédents de la fiche animal.</p>
+                </div>
+            </div>
+            <div class="ps-switch">
+                <input type="checkbox" class="form-check-input" name="report_show_antecedents" value="1" id="showAntecedents" {{ (report.show_antecedents ?? true) ? 'checked' : '' }}>
+                <label for="showAntecedents">Par défaut</label>
+            </div>
+        </div>
+
+        {# ── Localisation anatomique ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Localisation anatomique</p>
+                    <p class="ps-card-desc">Configuration de l'affichage anatomique.</p>
+                </div>
+            </div>
+            <label class="ps-label">Espèce par défaut</label>
+            <select name="default_species" class="form-control form-control-sm" style="max-width: 200px;">
+                {% for sp in ['Cheval', 'Chien', 'Chat', 'Bovin'] %}
+                <option value="{{ sp }}" {{ (report.default_species ?? 'Cheval') == sp ? 'selected' : '' }}>{{ sp }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {# ── Protocoles de rééducation ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Conseils / Protocoles de rééducation</p>
+                    <p class="ps-card-desc">Modèles pré-enregistrés pour vos comptes rendus.</p>
+                </div>
+            </div>
+            <div id="rehabList">
+                {% for tpl in rehab %}
+                <div class="ps-list-item rehab-row">
+                    <input type="text" class="form-control form-control-sm rehab-name" value="{{ tpl.name }}" placeholder="Nom du protocole" style="flex:1;">
+                    <input type="text" class="form-control form-control-sm rehab-desc" value="{{ tpl.description|default('') }}" placeholder="Description" style="flex:2;">
+                    <div class="ps-switch mb-0" style="flex-shrink:0;">
+                        <input type="checkbox" class="form-check-input rehab-default" {{ (tpl.isDefault ?? false) ? 'checked' : '' }}>
+                        <label style="font-size:0.7rem;">Par défaut</label>
+                    </div>
+                    <button type="button" class="ps-remove-btn rehab-remove"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="ps-btn-add" id="addRehab">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un protocole
+            </button>
+            <input type="hidden" name="rehabilitation_templates_data" id="rehabData">
+        </div>
+
+        {# ── Confrère recommandé ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Confrère recommandé</p>
+                    <p class="ps-card-desc">Liste de confrères à recommander dans vos comptes rendus.</p>
+                </div>
+            </div>
+            <div id="colleaguesList">
+                {% for col in colleagues %}
+                <div class="ps-list-item colleague-row">
+                    <input type="text" class="form-control form-control-sm col-name" value="{{ col.name }}" placeholder="Nom" style="flex:1;">
+                    <input type="text" class="form-control form-control-sm col-specialty" value="{{ col.specialty|default('') }}" placeholder="Métier" style="flex:1;">
+                    <input type="text" class="form-control form-control-sm col-phone" value="{{ col.phone|default('') }}" placeholder="Téléphone" style="flex:1;">
+                    <button type="button" class="ps-remove-btn colleague-remove"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="ps-btn-add" id="addColleague">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un confrère
+            </button>
+            <input type="hidden" name="recommended_colleagues_data" id="colleaguesData">
+        </div>
+
+        {# ── Compléments alimentaires ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Compléments alimentaires</p>
+                    <p class="ps-card-desc">Compléments recommandés dans vos comptes rendus.</p>
+                </div>
+            </div>
+            <div id="suppsList">
+                {% for sup in supps %}
+                <div class="ps-list-item supp-row">
+                    <input type="text" class="form-control form-control-sm supp-name" value="{{ sup.name }}" placeholder="Nom" style="flex:1;">
+                    <input type="text" class="form-control form-control-sm supp-brand" value="{{ sup.brand|default('') }}" placeholder="Marque" style="flex:1;">
+                    <input type="text" class="form-control form-control-sm supp-benefit" value="{{ sup.benefit|default('') }}" placeholder="Bénéfice" style="flex:2;">
+                    <button type="button" class="ps-remove-btn supp-remove"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="ps-btn-add" id="addSupp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un complément
+            </button>
+            <input type="hidden" name="supplements_data" id="suppsData">
+        </div>
+
+        {# ── Rappels, suivi et documents ── #}
+        <div class="ps-card">
+            <div class="ps-card-header">
+                <div class="ps-card-icon" style="background: rgba(220,53,69,0.1); color: #dc3545;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </div>
+                <div>
+                    <p class="ps-card-title">Rappels, suivi et documents</p>
+                    <p class="ps-card-desc">Paramétrez les rappels et notifications par défaut.</p>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="ps-label">Rappel par défaut</label>
+                    <div class="ps-row">
+                        <input type="number" name="default_reminder_months" class="ps-inline-input" value="{{ report.default_reminder_months ?? 12 }}" min="1">
+                        <select name="default_reminder_unit" class="ps-select">
+                            <option value="mois" {{ (report.default_reminder_unit ?? '') == 'mois' ? 'selected' : '' }}>mois</option>
+                            <option value="années" {{ (report.default_reminder_unit ?? 'années') == 'années' ? 'selected' : '' }}>années</option>
+                            <option value="semaines" {{ (report.default_reminder_unit ?? '') == 'semaines' ? 'selected' : '' }}>semaines</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="ps-label">Récurrence systématique</label>
+                    <div class="ps-row">
+                        <input type="checkbox" class="form-check-input" name="auto_recurrence" value="1" {{ (report.auto_recurrence ?? false) ? 'checked' : '' }}>
+                        <input type="number" name="recurrence_months" class="ps-inline-input" value="{{ report.recurrence_months ?? 12 }}" min="1">
+                        <select name="recurrence_unit" class="ps-select">
+                            <option value="mois" {{ (report.recurrence_unit ?? '') == 'mois' ? 'selected' : '' }}>mois</option>
+                            <option value="années" {{ (report.recurrence_unit ?? 'années') == 'années' ? 'selected' : '' }}>années</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <label class="ps-label">Notifications à envoyer</label>
+                <table class="ps-notif-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>SMS</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Référent</td>
+                            <td><input type="checkbox" class="form-check-input" name="notify_referent_sms" value="1" {{ (report.notify_referent_sms ?? false) ? 'checked' : '' }}></td>
+                            <td><input type="checkbox" class="form-check-input" name="notify_referent_email" value="1" {{ (report.notify_referent_email ?? true) ? 'checked' : '' }}></td>
+                        </tr>
+                        <tr>
+                            <td>Moi-même</td>
+                            <td><input type="checkbox" class="form-check-input" name="notify_me_sms" value="1" {{ (report.notify_me_sms ?? false) ? 'checked' : '' }}></td>
+                            <td><input type="checkbox" class="form-check-input" name="notify_me_email" value="1" {{ (report.notify_me_email ?? true) ? 'checked' : '' }}></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <label class="ps-label mt-3">Notes publiques par défaut</label>
+            <textarea name="default_public_notes" class="form-control form-control-sm" rows="3" placeholder="Tarif, recommandations post-séance...">{{ report.default_public_notes ?? user.defaultPublicNotes }}</textarea>
+        </div>
+
+        <div class="ps-footer">
+            <button type="submit" class="btn-save">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('app_profile') }}" class="btn-back">← Retour</a>
+        </div>
+    </form>
+    {% endif %}
+</div>
+        </div>{# col-lg-9 #}
+    </div>{# row #}
+</div>{# container #}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.opening-hour-toggle').forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            var day = this.dataset.day;
-            var times = document.querySelector('.opening-hour-times[data-day="' + day + '"]');
-            if (times) {
-                times.style.opacity = this.checked ? '1' : '0.4';
-                times.style.pointerEvents = this.checked ? '' : 'none';
-            }
+    // ── France Tile Map ──
+    // ── Load France SVG map from CDN ──
+    (function() {
+        var mapEl = document.getElementById('franceMap');
+        var mapWrap = document.getElementById('franceMapWrap');
+        var tooltip = document.getElementById('mapTooltip');
+        if (!mapEl) return;
+
+        fetch('https://cdn.jsdelivr.net/npm/@svg-maps/france.departments@2.0.0/france.departments.svg')
+            .then(function(r) { return r.text(); })
+            .then(function(svgText) {
+                mapEl.innerHTML = svgText;
+                var svg = mapEl.querySelector('svg');
+                if (!svg) return;
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.maxWidth = '100%';
+                svg.style.height = 'auto';
+
+                // Click handler
+                svg.addEventListener('click', function(e) {
+                    var el = e.target;
+                    if (el.tagName.toLowerCase() !== 'path' || !el.id) return;
+                    var d = el.id;
+                    if (typeof window._deptAddDept === 'function' && typeof window._deptRemoveDept === 'function') {
+                        if (el.classList.contains('selected')) { window._deptRemoveDept(d); }
+                        else { window._deptAddDept(d); }
+                    }
+                });
+
+                // Tooltip on hover
+                svg.addEventListener('mouseover', function(e) {
+                    var el = e.target;
+                    if (el.tagName.toLowerCase() !== 'path' || !el.id || !tooltip) return;
+                    var name = el.getAttribute('aria-label') || el.id;
+                    tooltip.textContent = el.id + ' — ' + name;
+                    tooltip.classList.add('visible');
+                });
+                svg.addEventListener('mousemove', function(e) {
+                    if (!tooltip) return;
+                    var rect = mapWrap.getBoundingClientRect();
+                    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+                    tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+                });
+                svg.addEventListener('mouseout', function(e) {
+                    var el = e.target;
+                    if (el.tagName.toLowerCase() === 'path' && tooltip) tooltip.classList.remove('visible');
+                });
+
+                // Trigger initial sync
+                if (typeof window._deptUpdateUI === 'function') window._deptUpdateUI();
+            })
+            .catch(function() {
+                mapEl.innerHTML = '<p class="france-map-loading" style="color:#c00;">Impossible de charger la carte. Utilisez la sélection par région ci-dessous.</p>';
+            });
+    })();
+
+    // ── Region grid toggle ──
+    var regionToggle = document.getElementById('regionGridToggle');
+    var regionWrap = document.getElementById('regionGridWrap');
+    if (regionToggle && regionWrap) {
+        regionToggle.addEventListener('click', function() {
+            var open = regionWrap.style.display !== 'none';
+            regionWrap.style.display = open ? 'none' : 'block';
+            regionToggle.classList.toggle('open', !open);
         });
-    });
-
-    var rehabList = document.getElementById('rehab-templates-list');
-    var rehabData = document.getElementById('rehab-templates-data');
-
-    function createRow(name, desc) {
-        var row = document.createElement('div');
-        row.className = 'rehab-template-row d-flex align-items-center gap-2 mb-2';
-        row.innerHTML =
-            '<input type="text" class="form-control form-control-sm rehab-tpl-name" value="' + (name || '') + '" placeholder="Nom du type">' +
-            '<input type="text" class="form-control form-control-sm rehab-tpl-desc" value="' + (desc || '') + '" placeholder="Description (optionnel)">' +
-            '<button type="button" class="btn btn-outline-danger btn-sm rehab-tpl-remove" title="Supprimer">' +
-            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
-            '</button>';
-        return row;
     }
 
-    document.getElementById('rehab-add-btn').addEventListener('click', function() {
-        rehabList.appendChild(createRow('', ''));
-        rehabList.lastElementChild.querySelector('.rehab-tpl-name').focus();
+    // ── Hour toggles ──
+    document.querySelectorAll('.hour-toggle').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var times = document.querySelector('.hour-times[data-day="' + this.dataset.day + '"]');
+            if (times) { times.style.opacity = this.checked ? '1' : '0.35'; times.style.pointerEvents = this.checked ? '' : 'none'; }
+        });
     });
 
-    rehabList.addEventListener('click', function(e) {
-        var btn = e.target.closest('.rehab-tpl-remove');
-        if (btn) btn.closest('.rehab-template-row').remove();
-    });
+    // ── Generic list management ──
+    function setupList(listId, addBtnId, dataId, fieldDefs) {
+        var list = document.getElementById(listId);
+        var addBtn = document.getElementById(addBtnId);
+        var dataInput = document.getElementById(dataId);
+        if (!list || !addBtn) return;
 
-    rehabData.closest('form').addEventListener('submit', function() {
-        var templates = [];
-        rehabList.querySelectorAll('.rehab-template-row').forEach(function(row) {
-            var name = row.querySelector('.rehab-tpl-name').value.trim();
-            if (name) {
-                templates.push({
-                    name: name,
-                    description: row.querySelector('.rehab-tpl-desc').value.trim()
+        function createRow(values) {
+            var row = document.createElement('div');
+            row.className = 'ps-list-item ' + listId.replace('List', '-row');
+            var html = '';
+            fieldDefs.forEach(function(f) {
+                if (f.type === 'checkbox') {
+                    html += '<div class="ps-switch mb-0" style="flex-shrink:0;"><input type="checkbox" class="form-check-input ' + f.cls + '" ' + (values[f.key] ? 'checked' : '') + '><label style="font-size:0.7rem;">' + f.placeholder + '</label></div>';
+                } else {
+                    html += '<input type="text" class="form-control form-control-sm ' + f.cls + '" value="' + (values[f.key] || '') + '" placeholder="' + f.placeholder + '" style="flex:' + (f.flex || 1) + ';">';
+                }
+            });
+            html += '<button type="button" class="ps-remove-btn ' + listId.replace('List', '-remove') + '"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+            row.innerHTML = html;
+            return row;
+        }
+
+        addBtn.addEventListener('click', function() {
+            var empty = {}; fieldDefs.forEach(function(f) { empty[f.key] = ''; });
+            list.appendChild(createRow(empty));
+            var firstInput = list.lastElementChild.querySelector('input[type="text"]');
+            if (firstInput) firstInput.focus();
+        });
+
+        list.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ps-remove-btn');
+            if (btn) btn.closest('.ps-list-item').remove();
+        });
+
+        if (dataInput) {
+            dataInput.closest('form').addEventListener('submit', function() {
+                var items = [];
+                list.querySelectorAll('.ps-list-item').forEach(function(row) {
+                    var item = {};
+                    fieldDefs.forEach(function(f) {
+                        if (f.type === 'checkbox') {
+                            item[f.key] = row.querySelector('.' + f.cls).checked;
+                        } else {
+                            item[f.key] = (row.querySelector('.' + f.cls) || {}).value || '';
+                        }
+                    });
+                    if (fieldDefs.some(function(f) { return f.type !== 'checkbox' && item[f.key]; })) items.push(item);
                 });
+                dataInput.value = JSON.stringify(items);
+            });
+        }
+    }
+
+    // Profile tab - locations
+    setupList('locationsList', 'addLocation', 'locationsData', [
+        {key: 'name', cls: 'loc-name', placeholder: 'Ex : Cabinet principal', flex: 1},
+        {key: 'address', cls: 'loc-address', placeholder: 'Adresse', flex: 2}
+    ]);
+
+    // Departments map + badges
+    var deptsList = document.getElementById('deptsList');
+    var deptsData = document.getElementById('deptsData');
+    var deptInput = document.getElementById('deptInput');
+    var addDeptBtn = document.getElementById('addDept');
+    var deptsNum = document.getElementById('deptsNum');
+    var deptsCount = document.getElementById('deptsCount');
+
+    if (deptsList) {
+        function getSelectedDepts() {
+            var depts = [];
+            deptsList.querySelectorAll('.dept-badge').forEach(function(b) {
+                var rm = b.querySelector('.dept-remove');
+                if (rm) depts.push(rm.dataset.dept);
+            });
+            return depts;
+        }
+
+        function updateDeptsUI() {
+            var depts = getSelectedDepts();
+            if (deptsNum) deptsNum.textContent = depts.length;
+            if (deptsCount) deptsCount.innerHTML = '<strong>' + depts.length + '</strong> département' + (depts.length > 1 ? 's' : '') + ' sélectionné' + (depts.length > 1 ? 's' : '');
+            // Sync region grid buttons
+            document.querySelectorAll('.dept-btn').forEach(function(btn) {
+                btn.classList.toggle('selected', depts.indexOf(btn.dataset.dept) !== -1);
+            });
+            // Sync SVG geographic map paths
+            document.querySelectorAll('#franceMap svg path[id]').forEach(function(path) {
+                path.classList.toggle('selected', depts.indexOf(path.id) !== -1);
+            });
+            // Update region counts
+            document.querySelectorAll('.dept-region').forEach(function(region) {
+                var count = region.querySelectorAll('.dept-btn.selected').length;
+                var countEl = region.querySelector('.dept-region-count');
+                if (countEl) {
+                    countEl.textContent = count;
+                    countEl.classList.toggle('has-selection', count > 0);
+                }
+                var total = region.querySelectorAll('.dept-btn').length;
+                var header = region.querySelector('.dept-region-header');
+                if (header) header.classList.toggle('all-selected', count === total && count > 0);
+            });
+        }
+        // Expose for async SVG map
+        window._deptAddDept = addDept;
+        window._deptRemoveDept = removeDept;
+        window._deptUpdateUI = updateDeptsUI;
+
+        function addDept(d) {
+            d = d.trim();
+            if (!d || getSelectedDepts().indexOf(d) !== -1) return;
+            var span = document.createElement('span');
+            span.className = 'badge dept-badge';
+            span.innerHTML = d + ' <button type="button" class="btn-close btn-close-sm ms-1 dept-remove" style="font-size:0.5rem;" data-dept="' + d + '"></button>';
+            deptsList.appendChild(span);
+            updateDeptsUI();
+        }
+
+        function removeDept(d) {
+            deptsList.querySelectorAll('.dept-badge').forEach(function(b) {
+                var rm = b.querySelector('.dept-remove');
+                if (rm && rm.dataset.dept === d) b.remove();
+            });
+            updateDeptsUI();
+        }
+
+        // Map button clicks
+        document.querySelectorAll('.dept-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var d = this.dataset.dept;
+                if (this.classList.contains('selected')) { removeDept(d); }
+                else { addDept(d); }
+            });
+        });
+
+        // Region header click = select/deselect all
+        document.querySelectorAll('.dept-region-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var region = this.closest('.dept-region');
+                var btns = region.querySelectorAll('.dept-btn');
+                var allSelected = region.querySelectorAll('.dept-btn.selected').length === btns.length;
+                btns.forEach(function(btn) {
+                    if (allSelected) { removeDept(btn.dataset.dept); }
+                    else { addDept(btn.dataset.dept); }
+                });
+            });
+        });
+
+        // Badge remove click
+        deptsList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dept-remove')) {
+                removeDept(e.target.dataset.dept);
             }
         });
-        rehabData.value = JSON.stringify(templates);
-    });
+
+        // Manual input
+        if (addDeptBtn) {
+            addDeptBtn.addEventListener('click', function() {
+                var val = deptInput.value.trim();
+                if (!val) return;
+                val.split(',').forEach(function(d) { addDept(d.trim()); });
+                deptInput.value = '';
+            });
+        }
+
+        // Serialize on submit
+        if (deptsData) {
+            deptsData.closest('form').addEventListener('submit', function() {
+                deptsData.value = JSON.stringify(getSelectedDepts());
+            });
+        }
+
+        updateDeptsUI();
+    }
+
+    // Report tab
+    setupList('rehabList', 'addRehab', 'rehabData', [
+        {key: 'name', cls: 'rehab-name', placeholder: 'Nom du protocole', flex: 1},
+        {key: 'description', cls: 'rehab-desc', placeholder: 'Description', flex: 2},
+        {key: 'isDefault', cls: 'rehab-default', placeholder: 'Par défaut', type: 'checkbox'}
+    ]);
+    setupList('colleaguesList', 'addColleague', 'colleaguesData', [
+        {key: 'name', cls: 'col-name', placeholder: 'Nom', flex: 1},
+        {key: 'specialty', cls: 'col-specialty', placeholder: 'Métier', flex: 1},
+        {key: 'phone', cls: 'col-phone', placeholder: 'Téléphone', flex: 1}
+    ]);
+    setupList('suppsList', 'addSupp', 'suppsData', [
+        {key: 'name', cls: 'supp-name', placeholder: 'Nom', flex: 1},
+        {key: 'brand', cls: 'supp-brand', placeholder: 'Marque', flex: 1},
+        {key: 'benefit', cls: 'supp-benefit', placeholder: 'Bénéfice', flex: 2}
+    ]);
 });
 </script>
 {% endblock %}

@@ -24,7 +24,7 @@
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
                     <div class="container mt-3">
-                        <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'danger' : 'info') }} alert-dismissible fade show" role="alert">
+                        <div class="alert alert-{{ label == 'success' ? 'success' : (label == 'error' ? 'danger' : 'info') }} alert-dismissible fade show flash-auto-dismiss" role="alert">
                             {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
@@ -37,6 +37,18 @@
         {{ include('_partials/_footer.html.twig') }}
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.flash-auto-dismiss').forEach(function(el) {
+                setTimeout(function() {
+                    el.style.transition = 'opacity 0.5s ease';
+                    el.style.opacity = '0';
+                    setTimeout(function() { el.remove(); }, 500);
+                }, 2000);
+            });
+        });
+        </script>
 
         {{ include('_partials/_chatbot.html.twig') }}
 

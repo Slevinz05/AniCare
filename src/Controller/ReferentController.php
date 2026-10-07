@@ -206,7 +206,7 @@ final class ReferentController extends AbstractController
         $this->denyAccessUnlessGranted('ANIMAL_EDIT', $referent->getAnimal());
 
         if ($referent->isPrincipal()) {
-            $this->addFlash('danger', 'Le référent principal ne peut pas être révoqué.');
+            $this->addFlash('danger', 'Le référent principal ne peut pas être révoqué. Utilisez le transfert de principal.');
             return $this->redirectToRoute('app_animal_show', ['slug' => $referent->getAnimal()->getSlug()]);
         }
 
@@ -221,5 +221,173 @@ final class ReferentController extends AbstractController
         }
 
         return $this->redirectToRoute('app_animal_show', ['slug' => $referent->getAnimal()->getSlug()]);
+    }
+
+    #[Route('/transfert/{animalId}', name: 'app_referent_transfer', requirements: ['animalId' => '\d+'], methods: ['GET', 'POST'])]
+    public function transfer(
+        int $animalId,
+        Request $request,
+        AnimalRepository $animalRepository,
+        UserRepository $userRepository,
+        AnimalReferentRepository $referentRepository,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $animal = $animalRepository->find($animalId);
+        if (!$animal) {
+            throw $this->createNotFoundException();
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $currentPrincipal = $referentRepository->findPrincipal($animal);
+        $isPrincipal = $currentPrincipal && $currentPrincipal->getUser() === $user;
+        $isOwnerLegacy = $animal->getOwner() === $user && !$currentPrincipal;
+
+        if (!$isPrincipal && !$isOwnerLegacy) {
+            throw $this->createAccessDeniedException('Seul le référent principal peut proposer un transfert.');
+        }
+
+        $pendingTransfer = $referentRepository->findPendingTransfer($animal);
+
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('transfer_principal', $request->request->get('_token'))) {
+                $this->addFlash('danger', 'Token CSRF invalide.');
+                return $this->redirectToRoute('app_referent_transfer', ['animalId' => $animalId]);
+            }
+
+            if ($pendingTransfer) {
+                $this->addFlash('warning', 'Un transfert est déjà en attente pour cet animal.');
+                return $this->redirectToRoute('app_referent_transfer', ['animalId' => $animalId]);
+            }
+
+            $email = trim($request->request->get('email', ''));
+            if (!$email) {
+                $this->addFlash('danger', 'Veuillez saisir un email.');
+                return $this->redirectToRoute('app_referent_transfer', ['animalId' => $animalId]);
+            }
+
+            $successor = $userRepository->findOneBy(['email' => $email]);
+            if (!$successor) {
+                $this->addFlash('danger', 'Aucun utilisateur trouvé avec cet email.');
+                return $this->redirectToRoute('app_referent_transfer', ['animalId' => $animalId]);
+            }
+
+            if ($successor === $user) {
+                $this->addFlash('warning', 'Vous êtes déjà le référent principal.');
+                return $this->redirectToRoute('app_referent_transfer', ['animalId' => $animalId]);
+            }
+
+            $transferInvitation = new AnimalReferent();
+            $transferInvitation->setAnimal($animal);
+            $transferInvitation->setUser($successor);
+            $transferInvitation->setType(AnimalReferent::TYPE_PRINCIPAL);
+            $transferInvitation->setRole($request->request->get('role', AnimalReferent::ROLE_PROPRIETAIRE));
+            $transferInvitation->setStatus(AnimalReferent::STATUS_PENDING);
+            $transferInvitation->setDesignatedBy($user);
+
+            $entityManager->persist($transferInvitation);
+            $entityManager->flush();
+
+            $this->addFlash('success', sprintf(
+                'Proposition de transfert envoyée à %s. Le transfert sera effectif après son acceptation.',
+                $successor->getFullName()
+            ));
+
+            return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+        }
+
+        return $this->render('referent/transfer.html.twig', [
+            'animal' => $animal,
+            'pendingTransfer' => $pendingTransfer,
+            'roles' => [
+                'Propriétaire' => AnimalReferent::ROLE_PROPRIETAIRE,
+                'Cavalier' => AnimalReferent::ROLE_CAVALIER,
+                'Entraîneur' => AnimalReferent::ROLE_ENTRAINEUR,
+                'Gérant' => AnimalReferent::ROLE_GERANT,
+                'Éleveur' => AnimalReferent::ROLE_ELEVEUR,
+                'Autre' => AnimalReferent::ROLE_AUTRE,
+            ],
+        ]);
+    }
+
+    #[Route('/{id}/accepter-transfert', name: 'app_referent_accept_transfer', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function acceptTransfer(
+        AnimalReferent $referent,
+        Request $request,
+        AnimalReferentRepository $referentRepository,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($referent->getUser() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($referent->getStatus() !== AnimalReferent::STATUS_PENDING || !$referent->isPrincipal()) {
+            $this->addFlash('warning', 'Cette proposition de transfert n\'est plus valide.');
+            return $this->redirectToRoute('app_referent_invitations');
+        }
+
+        if (!$this->isCsrfTokenValid('accept_transfer' . $referent->getId(), $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_referent_invitations');
+        }
+
+        $animal = $referent->getAnimal();
+        $oldPrincipal = $referentRepository->findPrincipal($animal);
+
+        if ($oldPrincipal) {
+            $oldPrincipal->setType(AnimalReferent::TYPE_SECONDAIRE);
+        }
+
+        $referent->setStatus(AnimalReferent::STATUS_ACTIVE);
+        $entityManager->flush();
+
+        $this->addFlash('success', sprintf(
+            'Vous êtes maintenant référent principal de %s.',
+            $animal->getName()
+        ));
+
+        return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
+    }
+
+    #[Route('/{id}/annuler-transfert', name: 'app_referent_cancel_transfer', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function cancelTransfer(
+        AnimalReferent $referent,
+        Request $request,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $isDesignator = $referent->getDesignatedBy() === $user;
+        $isRecipient = $referent->getUser() === $user;
+
+        if (!$isDesignator && !$isRecipient) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($referent->getStatus() !== AnimalReferent::STATUS_PENDING || !$referent->isPrincipal()) {
+            $this->addFlash('warning', 'Cette proposition de transfert n\'est plus valide.');
+            return $this->redirectToRoute('app_referent_invitations');
+        }
+
+        if (!$this->isCsrfTokenValid('cancel_transfer' . $referent->getId(), $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_referent_invitations');
+        }
+
+        $referent->setStatus(AnimalReferent::STATUS_REFUSED);
+        $entityManager->flush();
+
+        $this->addFlash('info', 'Proposition de transfert annulée.');
+
+        if ($isDesignator) {
+            return $this->redirectToRoute('app_animal_show', ['slug' => $referent->getAnimal()->getSlug()]);
+        }
+
+        return $this->redirectToRoute('app_referent_invitations');
     }
 }

@@ -2,462 +2,1028 @@
 
 {% block title %}{{ health_book_entry.title }} - Consultation - AniCare{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .cr-page { max-width: 1280px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .cr-header {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.25rem 2rem;
+        margin-bottom: 1.25rem;
+        box-shadow: var(--shadow-subtle);
+    }
+    .cr-header-eyebrow {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--primary-color); margin-bottom: 0.15rem;
+    }
+    .cr-header-title {
+        font-size: 1.45rem; font-weight: 800; color: var(--secondary-color);
+        letter-spacing: -0.02em; margin: 0;
+    }
+    .cr-header-sub {
+        font-size: 0.82rem; color: var(--taupe); margin: 0.15rem 0 0;
+    }
+    .cr-header-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cr-back-btn {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: var(--soft-teal); color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center;
+        border: none; text-decoration: none; transition: all 0.15s; flex-shrink: 0;
+    }
+    .cr-back-btn:hover { background: var(--primary-color); color: #fff; }
+    .cr-nav-prev, .cr-nav-next {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: #f1f5f9; color: #64748b;
+        display: flex; align-items: center; justify-content: center;
+        border: none; text-decoration: none; transition: all 0.15s; flex-shrink: 0;
+    }
+    .cr-nav-prev:hover, .cr-nav-next:hover { background: var(--soft-teal); color: var(--primary-color); }
+    .cr-action-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+        padding: 0.4rem 0.75rem; border-radius: 10px; border: 1px solid var(--border-color);
+        background: #fff; color: var(--secondary-color); text-decoration: none;
+        font-size: 0.68rem; font-weight: 600; transition: all 0.15s; cursor: pointer;
+    }
+    .cr-action-btn:hover { background: var(--soft-teal); border-color: rgba(26,77,69,0.2); color: var(--primary-color); }
+    .cr-action-btn svg { flex-shrink: 0; }
+
+    /* ── Status banner ── */
+    .cr-status-bar {
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        display: flex; align-items: center; gap: 0.6rem;
+        font-weight: 600; font-size: 0.82rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ── Step tabs ── */
+    .cr-steps {
+        display: flex; gap: 0; margin-bottom: 1.25rem;
+        border-radius: var(--radius-md); overflow: hidden;
+        border: 1px solid var(--border-color); box-shadow: var(--shadow-subtle);
+    }
+    .cr-step {
+        flex: 1; display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.75rem 1rem; background: #fff;
+        cursor: pointer; border: none; text-align: left;
+        transition: all 0.2s; border-right: 1px solid var(--border-color);
+        text-decoration: none; color: var(--secondary-color); font-size: 0.8rem; font-weight: 700;
+    }
+    .cr-step:last-child { border-right: none; }
+    .cr-step:hover { background: var(--bg-color); }
+    .cr-step.active { background: var(--soft-teal); color: var(--primary-color); }
+    .cr-step-icon {
+        width: 36px; height: 36px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ── Info cards (animal, referent, structure) ── */
+    .cr-info-card {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); overflow: hidden;
+        box-shadow: var(--shadow-subtle); height: 100%;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .cr-info-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .cr-info-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .cr-info-card-header .card-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cr-info-card-header .card-title {
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.06em; margin: 0;
+    }
+    .cr-info-card-body { padding: 1rem; }
+    .cr-info-card .info-row {
+        display: flex; gap: 0.4rem; font-size: 0.82rem; margin-bottom: 0.3rem; align-items: baseline;
+    }
+    .cr-info-card .info-label { color: var(--taupe); font-weight: 500; white-space: nowrap; }
+    .cr-info-card .info-val { color: var(--secondary-color); font-weight: 600; }
+    .cr-info-card .contact-row {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.82rem; color: var(--secondary-color); margin-bottom: 0.35rem;
+    }
+    .cr-info-card .contact-row svg { color: var(--taupe); flex-shrink: 0; }
+
+    /* ── Section cards (content sections) ── */
+    .cr-section {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); margin-bottom: 1rem;
+        box-shadow: var(--shadow-subtle); overflow: hidden;
+    }
+    .cr-section-header {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);
+        background: #fafaf8;
+    }
+    .cr-section-header .s-icon {
+        width: 30px; height: 30px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cr-section-header .s-title {
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.06em; margin: 0;
+    }
+    .cr-section-header .s-toggle {
+        margin-left: auto; background: none; border: none; padding: 0.25rem;
+        cursor: pointer; color: var(--taupe); transition: transform 0.3s;
+    }
+    .cr-section-body { padding: 1rem 1.25rem; }
+    .cr-text-block {
+        line-height: 1.75; color: #333; font-size: 0.88rem;
+        white-space: pre-line;
+    }
+
+    /* ── Rating dots ── */
+    .cr-rating-dots { display: flex; gap: 0.35rem; align-items: center; }
+    .cr-rating-dot {
+        width: 20px; height: 20px; border-radius: 50%;
+        border: 2px solid #d1d5db; background: #fff;
+    }
+    .cr-rating-dot.filled, .cr-rating-dot.active { background: var(--primary-color); border-color: var(--primary-color); }
+    .cr-rating-label {
+        font-size: 0.82rem; font-weight: 700; color: var(--secondary-color);
+        margin-left: 0.4rem;
+    }
+
+    /* ── Work slider (read-only) ── */
+    .cr-work-bar {
+        height: 8px; border-radius: 999px; position: relative;
+        background: linear-gradient(to right, #22c55e 0%, #f59e0b 50%, #ef4444 100%);
+    }
+    .cr-work-dot {
+        width: 18px; height: 18px; border-radius: 50%;
+        background: #fff; border: 3px solid var(--primary-color);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        position: absolute; top: 50%; transform: translate(-50%, -50%);
+    }
+
+    /* ── Anatomy sticky ── */
+    .cr-anatomy-sticky { position: sticky; top: 80px; }
+
+    /* ── Compact side-by-side cards ── */
+    .cr-compact-card {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); padding: 1rem 1.25rem;
+        box-shadow: var(--shadow-subtle); height: 100%;
+    }
+    .cr-compact-header {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.06em; margin-bottom: 0.75rem;
+    }
+    .cr-compact-header .c-icon {
+        width: 28px; height: 28px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cr-compact-value { font-weight: 700; font-size: 0.9rem; color: var(--primary-color); }
+    .cr-compact-motif { font-size: 0.78rem; color: var(--taupe); margin-top: 0.15rem; }
+
+    /* ── Footer meta ── */
+    .cr-footer-meta {
+        text-align: center; font-size: 0.72rem; color: var(--taupe);
+        padding: 1rem 0 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+
+    /* ── Share panel ── */
+    .share-type-card {
+        border: 2px solid #e9ecef; border-radius: 10px;
+        cursor: pointer; transition: all 0.2s; padding: 0.5rem;
+        text-align: center; flex: 1;
+    }
+    .share-type-card:hover { border-color: var(--primary-color); background: var(--soft-teal); }
+
+    /* ── Responsive ── */
+    @media (max-width: 991.98px) {
+        .cr-steps { flex-direction: column; }
+        .cr-step { border-right: none; border-bottom: 1px solid var(--border-color); }
+        .cr-step:last-child { border-bottom: none; }
+    }
+    @media (max-width: 767.98px) {
+        .cr-header { padding: 1rem; }
+        .cr-header-title { font-size: 1.15rem; }
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 {% set entry = health_book_entry %}
 {% set entry_type = entry.type|default('')|lower %}
 {% set is_author = is_author|default(false) %}
+{% set share_mode = viewer_share_mode|default(null) %}
+{% set is_summary = share_mode == 'summary' %}
+{% set animal = entry.animal %}
+{% set referent = animal ? animal.owner : null %}
+{% set vet = entry.veterinarian %}
 
-<style>
-    .consultation-status-bar {
-        padding: 0.75rem 1.25rem;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-    .status-draft {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
-        color: #856404;
-        border: 1px solid #ffc107;
-    }
-    .status-published {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        color: #155724;
-        border: 1px solid #28a745;
-    }
-    .status-shared {
-        background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
-        color: #004085;
-        border: 1px solid #007bff;
-    }
-    .consultation-section {
-        background: #fff;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-        overflow: hidden;
-        transition: box-shadow 0.2s;
-    }
-    .consultation-section:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-    .section-header {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid #e9ecef;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    .section-header .section-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    .section-body {
-        padding: 1.25rem;
-    }
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    .info-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #6c757d;
-    }
-    .info-value {
-        font-size: 0.925rem;
-        color: #212529;
-    }
-    .text-block {
-        background: var(--soft-teal, #eef7f5);
-        border-left: 3px solid var(--primary-color, #1a4d45);
-        border-radius: 0 8px 8px 0;
-        padding: 1rem 1.25rem;
-        line-height: 1.7;
-        color: #333;
-    }
-    .action-bar {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    .btn-validate {
-        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1.25rem;
-        font-weight: 600;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-    .btn-validate:hover { background: linear-gradient(135deg, #218838 0%, #1e7e34 100%); color: #fff; transform: translateY(-1px); }
-    .btn-share {
-        background: linear-gradient(135deg, #007bff 0%, #0069d9 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1.25rem;
-        font-weight: 600;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-    .btn-share:hover { background: linear-gradient(135deg, #0069d9 0%, #0062cc 100%); color: #fff; transform: translateY(-1px); }
-</style>
+<div class="cr-page px-3 py-4">
 
-<div class="container py-4" style="max-width: 900px;">
+    {# ═══════════════════════════════════════════════
+       STATUS BANNERS
+       ═══════════════════════════════════════════════ #}
 
-    {# --- Breadcrumb --- #}
-    <nav class="mb-3">
-        <ol class="breadcrumb small mb-0">
-            <li class="breadcrumb-item"><a href="{{ path('app_health_book_entry_index') }}" class="text-decoration-none" style="color: var(--primary-color);">Consultations</a></li>
-            {% if entry.animal %}
-                <li class="breadcrumb-item"><a href="{{ path('app_animal_show', {slug: entry.animal.slug}) }}" class="text-decoration-none" style="color: var(--primary-color);">{{ entry.animal.name }}</a></li>
-            {% endif %}
-            <li class="breadcrumb-item active">{{ entry.title }}</li>
-        </ol>
-    </nav>
-
-    {# --- Status banner --- #}
-    {% if entry.isDraft %}
-        <div class="consultation-status-bar status-draft mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Brouillon — visible uniquement par vous
+    {% if share_mode == 'summary' %}
+        <div class="cr-status-bar" style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); color: #7b6b2e; border: 1px solid #ffc107;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Résumé uniquement — seules les informations générales sont visibles
         </div>
-    {% elseif entry.isShared %}
-        <div class="consultation-status-bar status-shared mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
-            Compte-rendu transmis{{ entry.sharedAt ? ' le ' ~ entry.sharedAt|date('d/m/Y à H\\hi') : '' }}
-        </div>
-    {% elseif entry.isPublished %}
-        <div class="consultation-status-bar status-published mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Consultation validée{% if is_author %} — prête à être transmise{% endif %}
+    {% elseif share_mode == 'readonly' %}
+        <div class="cr-status-bar" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); color: #2e7d32; border: 1px solid #66bb6a;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Consultation partagée en lecture seule
         </div>
     {% endif %}
 
-    {# --- Header card --- #}
-    <div class="consultation-section mb-4">
-        <div class="card-header medical-header p-4">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    {# ═══════════════════════════════════════════════
+       PAGE HEADER
+       ═══════════════════════════════════════════════ #}
+    <div class="cr-header">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ path('app_health_book_entry_index') }}" class="cr-back-btn" title="Retour">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </a>
                 <div>
-                    <h1 class="page-title mb-1" style="font-size: 1.5rem;">{{ entry.title }}</h1>
-                    <p class="page-subtitle mb-0">
-                        {{ entry.date ? entry.date|date('d/m/Y') : '' }}
-                        {% if entry.animal %}
-                            · {{ entry.animal.species|default('Cheval') }} {{ entry.animal.name }}
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
-                        <span class="badge-medical badge-vaccin">Vaccination</span>
-                    {% elseif entry_type == 'chirurgie' %}
-                        <span class="badge-medical badge-surgery">Chirurgie</span>
-                    {% elseif entry_type == 'consultation' %}
-                        <span class="badge-medical badge-consultation">Consultation</span>
-                    {% else %}
-                        <span class="badge-medical badge-neutral">{{ entry.type ?: 'Non renseigné' }}</span>
-                    {% endif %}
+                    <p class="cr-header-eyebrow">Compte rendu {{ entry.type ?: '' }}</p>
+                    <h1 class="cr-header-title">{{ animal ? animal.name : entry.title }}</h1>
+                    <p class="cr-header-sub">{{ entry.date ? entry.date|date('d/m/Y') : '' }}</p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    {# --- Workflow actions (author only) --- #}
-    {% if is_author %}
-        <div class="action-bar mb-4">
-            {% if entry.isDraft %}
-                <form method="post" action="{{ path('app_health_book_entry_validate', {id: entry.id}) }}" class="d-inline">
-                    <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ entry.id) }}">
-                    <button type="submit" class="btn-validate" onclick="return confirm('Valider cette consultation ? Elle deviendra visible par les personnes ayant accès à l\'animal.')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        Valider la consultation
-                    </button>
-                </form>
-            {% elseif entry.isPublished %}
-                <form method="post" action="{{ path('app_health_book_entry_share', {id: entry.id}) }}" class="d-inline">
-                    <input type="hidden" name="_token" value="{{ csrf_token('share' ~ entry.id) }}">
-                    <button type="submit" class="btn-share" onclick="return confirm('Transmettre le compte-rendu au référent de l\'animal ?')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
-                        Transmettre au référent
-                    </button>
-                </form>
-            {% endif %}
-
-            <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="btn btn-outline-primary" style="border-radius: 8px; font-size: 0.875rem;">
-                Modifier
-            </a>
-        </div>
-    {% endif %}
-
-    {# --- Section : Informations générales --- #}
-    <div class="consultation-section mb-4">
-        <div class="section-header">
-            <div class="section-icon" style="background: var(--soft-teal, #eef7f5); color: var(--primary-color, #1a4d45);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            </div>
-            <h2 class="h6 mb-0 fw-bold">Informations générales</h2>
-        </div>
-        <div class="section-body">
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Animal</span>
-                    <span class="info-value">
-                        {% if entry.animal %}
-                            <a href="{{ path('app_animal_show', {slug: entry.animal.slug}) }}" class="text-decoration-none fw-semibold" style="color: var(--primary-color);">
-                                {{ entry.animal.name }}
-                            </a>
-                        {% else %}
-                            Non spécifié
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Date</span>
-                    <span class="info-value">{{ entry.date ? entry.date|date('d/m/Y') : 'Non renseignée' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Intervenant</span>
-                    <span class="info-value">
-                        {% if entry.veterinarian %}
-                            <a href="{{ path('app_professional_show', {id: entry.veterinarian.id}) }}" class="text-decoration-none fw-semibold" style="color: var(--primary-color);">
-                                {{ entry.veterinarian.fullName }}
-                            </a>
-                            {% if entry.veterinarian.specialty %}
-                                <span class="badge ms-1" style="background-color: var(--primary-color); font-size: 0.6rem;">{{ entry.veterinarian.specialty }}</span>
-                            {% endif %}
-                        {% elseif entry.veterinarianName %}
-                            {{ entry.veterinarianName }}
-                        {% else %}
-                            Non renseigné
-                        {% endif %}
-                    </span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Type</span>
-                    <span class="info-value">{{ entry.type ?: 'Non renseigné' }}</span>
-                </div>
-                {% if entry.appointment %}
-                    <div class="info-item">
-                        <span class="info-label">Rendez-vous associé</span>
-                        <span class="info-value">
-                            <a href="{{ path('app_appointment_show', {id: entry.appointment.id}) }}" class="text-decoration-none" style="color: var(--accent-color);">
-                                {{ entry.appointment.scheduledAt|date('d/m/Y à H:i') }}
-                            </a>
-                        </span>
-                    </div>
+            {% if is_author %}
+            <div class="d-flex align-items-center gap-2">
+                {% if entry.isDraft %}
+                    <form method="post" action="{{ path('app_health_book_entry_validate', {id: entry.id}) }}" class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ entry.id) }}">
+                        <button type="submit" class="cr-action-btn" style="border-color: #28a745; color: #28a745;" onclick="return confirm('Valider cette consultation ?')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Valider
+                        </button>
+                    </form>
+                {% endif %}
+                <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="cr-action-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Modifier
+                </a>
+                {% if not entry.isDraft %}
+                <a href="#step-partages" class="cr-action-btn" id="scrollToShareBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Partager
+                </a>
                 {% endif %}
             </div>
-
-            {# Posologie / traitement #}
-            {% if entry.dosage or entry.frequency or entry.endDate or entry.batchNumber %}
-                <hr class="my-3" style="border-color: #e9ecef;">
-                <div class="info-grid">
-                    {% if entry.dosage %}
-                        <div class="info-item">
-                            <span class="info-label">Posologie</span>
-                            <span class="info-value">{{ entry.dosage }}</span>
-                        </div>
-                    {% endif %}
-                    {% if entry.frequency %}
-                        <div class="info-item">
-                            <span class="info-label">Fréquence</span>
-                            <span class="info-value">{{ entry.frequency }}</span>
-                        </div>
-                    {% endif %}
-                    {% if entry.endDate %}
-                        <div class="info-item">
-                            <span class="info-label">Date de fin</span>
-                            <span class="info-value">{{ entry.endDate|date('d/m/Y') }}</span>
-                        </div>
-                    {% endif %}
-                    {% if entry.batchNumber %}
-                        <div class="info-item">
-                            <span class="info-label">Numéro de lot</span>
-                            <span class="info-value">{{ entry.batchNumber }}</span>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endif %}
-
-            {# Rappel #}
-            {% if entry.nextReminderAt %}
-                <hr class="my-3" style="border-color: #e9ecef;">
-                <div class="info-item">
-                    <span class="info-label">Prochain rappel</span>
-                    <span class="info-value">
-                        {{ entry.nextReminderAt|date('d/m/Y') }}
-                        {% if entry.isOverdueReminder %}
-                            <span class="badge bg-danger ms-1">En retard</span>
-                        {% elseif entry.isDueSoon %}
-                            <span class="badge bg-warning text-dark ms-1">Bientôt</span>
-                        {% endif %}
-                        {% if entry.recurrenceLabel %}
-                            <span class="text-secondary small ms-1">({{ entry.recurrenceLabel }})</span>
-                        {% elseif entry.recurrenceMonths %}
-                            <span class="text-secondary small ms-1">(tous les {{ entry.recurrenceMonths }} mois)</span>
-                        {% endif %}
-                    </span>
-                </div>
             {% endif %}
         </div>
     </div>
 
-    {# --- Section : Anamnèse --- #}
-    {% if entry.anamnesis %}
-    <div class="consultation-section mb-4">
-        <div class="section-header">
-            <div class="section-icon" style="background: #fff3e0; color: #e65100;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    {# ═══════════════════════════════════════════════
+       3-STEP TABS
+       ═══════════════════════════════════════════════ #}
+    <div class="cr-steps">
+        <a href="#step-compte-rendu" class="cr-step active" data-step="1">
+            <div class="cr-step-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
-            <h2 class="h6 mb-0 fw-bold">Anamnèse / Commémoratif</h2>
-        </div>
-        <div class="section-body">
-            <div class="text-block">
-                {{ entry.anamnesis|e('html')|nl2br }}
+            1. Compte rendu
+        </a>
+        <a href="#step-rappel-docs" class="cr-step" data-step="2">
+            <div class="cr-step-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {# --- Section : Notes / Observations --- #}
-    {% if entry.description %}
-    <div class="consultation-section mb-4">
-        <div class="section-header">
-            <div class="section-icon" style="background: var(--soft-teal, #eef7f5); color: var(--primary-color, #1a4d45);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            </div>
-            <h2 class="h6 mb-0 fw-bold">Notes / Observations</h2>
-        </div>
-        <div class="section-body">
-            <div class="text-block">
-                {{ entry.description|e('html')|nl2br }}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {# --- Section : Examen statique --- #}
-    {% if entry.staticExamination %}
-    <div class="consultation-section mb-4">
-        <div class="section-header">
-            <div class="section-icon" style="background: #e8f5e9; color: #2e7d32;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </div>
-            <h2 class="h6 mb-0 fw-bold">Bilan de l'examen statique / palpation</h2>
-        </div>
-        <div class="section-body">
-            <div class="text-block">
-                {{ entry.staticExamination|e('html')|nl2br }}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {# --- Section : Rééducation --- #}
-    {% if entry.rehabilitation %}
-    <div class="consultation-section mb-4">
-        <div class="section-header">
-            <div class="section-icon" style="background: #f3e5f5; color: #7b1fa2;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </div>
-            <h2 class="h6 mb-0 fw-bold">
-                Rééducation{% if entry.rehabilitationType %} — {{ entry.rehabilitationType }}{% endif %}
-            </h2>
-        </div>
-        <div class="section-body">
-            <div class="text-block">
-                {{ entry.rehabilitation|e('html')|nl2br }}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {# --- Section : Schéma anatomique --- #}
-    {{ include('_partials/_horse_anatomy_show.html.twig') }}
-
-    {# --- Section : Documents --- #}
-    <div class="consultation-section mb-4">
-        <div class="section-header">
-            <div class="section-icon" style="background: #e3f2fd; color: #1565c0;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-            </div>
-            <div class="d-flex justify-content-between align-items-center flex-grow-1">
-                <h2 class="h6 mb-0 fw-bold">Documents ({{ entry.documents|length }})</h2>
-                {% if is_author %}
-                    <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 0.75rem;">
-                        + Ajouter
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-        <div class="section-body">
-            {% if entry.documents is empty %}
-                <p class="text-secondary mb-0 small">Aucun document associé.</p>
-            {% else %}
-                {% for document in entry.documents %}
-                    <div class="d-flex justify-content-between align-items-center py-2 {{ not loop.last ? 'border-bottom' : '' }}" style="border-color: #f0f0f0 !important;">
-                        <div>
-                            <a href="{{ path('app_document_download_health_entry', {entryId: entry.id, fileName: document.fileName}) }}"
-                               target="_blank" rel="noopener" class="text-decoration-none fw-semibold" style="color: var(--primary-color);">
-                                {{ document.originalName|default(document.fileName) }}
-                            </a>
-                            <span class="d-block small text-secondary">
-                                {% if document.size is defined %}{{ (document.size / 1024)|round(0, 'ceil') }} Ko{% endif %}
-                                {% if document.uploadedAt is defined %} · {{ document.uploadedAt|date('d/m/Y') }}{% endif %}
-                            </span>
-                        </div>
-                        {% if is_author %}
-                        <form method="post"
-                              action="{{ path('app_health_book_entry_document_delete', {id: entry.id, fileName: document.fileName}) }}"
-                              onsubmit="return confirm('Supprimer ce document ?');"
-                              style="display: inline;">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete_doc' ~ document.fileName) }}">
-                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Supprimer" style="border-radius: 6px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-
-    {# --- Footer actions --- #}
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3">
-        <div class="d-flex gap-2">
-            <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-secondary" style="border-radius: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                Retour
-            </a>
-        </div>
-
+            2. Rappel et suivi / Documents
+        </a>
         {% if is_author %}
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ path('app_health_book_entry_edit', {id: entry.id}) }}" class="btn btn-primary" style="border-radius: 8px;">
-                Modifier
-            </a>
-            {{ include('health_book_entry/_delete_form.html.twig') }}
-        </div>
+        <a href="#step-partages" class="cr-step" data-step="3">
+            <div class="cr-step-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </div>
+            3. Partages
+        </a>
         {% endif %}
     </div>
+
+    {# ═══════════════════════════════════════════════
+       STEP 1: COMPTE RENDU
+       ═══════════════════════════════════════════════ #}
+    <div id="step-compte-rendu">
+
+        {# ── 3 info cards: Animal, Référent, Structure ── #}
+        <div class="row g-3 mb-3">
+            {# Fiche Animal #}
+            <div class="col-12 col-md-4">
+                <div class="cr-info-card">
+                    <div class="cr-info-card-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="card-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </div>
+                            <p class="card-title" style="color: var(--primary-color);">Fiche animal</p>
+                        </div>
+                        {% if animal and is_granted('ANIMAL_VIEW', animal) %}
+                        <a href="{{ path('app_animal_show', {slug: animal.slug}) }}" style="color: var(--taupe);" title="Voir la fiche animal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="cr-info-card-body">
+                        {% if animal %}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div style="width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0;">
+                                    {{ animal.name|first|upper }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--secondary-color);">{{ animal.name }}</div>
+                                    {% if animal.breed %}<div style="font-size: 0.72rem; color: var(--taupe);">{{ animal.breed }}</div>{% endif %}
+                                </div>
+                            </div>
+                            {% if animal.gender %}<div class="info-row"><span class="info-label">Sexe :</span> <span class="info-val">{{ animal.gender }}</span></div>{% endif %}
+                            {% if animal.birthdate %}<div class="info-row"><span class="info-label">Né le :</span> <span class="info-val">{{ animal.birthdate|date('d/m/Y') }}</span></div>{% endif %}
+                            {% if animal.coat %}<div class="info-row"><span class="info-label">Robe :</span> <span class="info-val">{{ animal.coat }}</span></div>{% endif %}
+                        {% else %}
+                            <p class="text-secondary small mb-0">Animal non spécifié</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# Référent #}
+            <div class="col-12 col-md-4">
+                <div class="cr-info-card">
+                    <div class="cr-info-card-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="card-icon" style="background: rgba(34,197,94,0.12); color: #16a34a;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <p class="card-title" style="color: #16a34a;">Référent</p>
+                        </div>
+                        {% if referent and referent.accountType == 'PRO' %}
+                        <a href="{{ path('app_professional_show', {id: referent.id}) }}" style="color: var(--taupe);" title="Voir le profil du référent">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="cr-info-card-body">
+                        {% if referent %}
+                            <div class="fw-bold mb-2" style="color: var(--secondary-color); font-size: 0.9rem;">
+                                {{ referent.fullName }}
+                                <span style="font-size: 0.68rem; color: var(--taupe); font-weight: 500;">(Propriétaire)</span>
+                            </div>
+                            {% if referent.phone %}
+                            <div class="contact-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                {{ referent.phone }}
+                            </div>
+                            {% endif %}
+                            {% if referent.email %}
+                            <div class="contact-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                {{ referent.email }}
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-secondary small mb-0">Non spécifié</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# Structure / Intervenant #}
+            <div class="col-12 col-md-4">
+                <div class="cr-info-card">
+                    <div class="cr-info-card-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="card-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <p class="card-title" style="color: var(--accent-color);">Intervenant</p>
+                        </div>
+                    </div>
+                    <div class="cr-info-card-body">
+                        {% if vet %}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div style="width: 38px; height: 38px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-color), #b8882e); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0;">
+                                    {{ vet.fullName|first|upper }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--secondary-color);">{{ vet.fullName }}</div>
+                                    {% if vet.specialty %}<div style="font-size: 0.72rem; color: var(--accent-color); font-weight: 600;">{{ vet.specialty }}</div>{% endif %}
+                                </div>
+                            </div>
+                            {% if vet.phone %}
+                            <div class="contact-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                {{ vet.phone }}
+                            </div>
+                            {% endif %}
+                            {% if vet.email %}
+                            <div class="contact-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                {{ vet.email }}
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-secondary small mb-0">Non spécifié</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Motif + Comportement / État corporel / Travail ── #}
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-md-5">
+                <div class="cr-section" style="margin-bottom: 0;">
+                    <div class="cr-section-header">
+                        <div class="s-icon" style="background: rgba(26,77,69,0.12); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <p class="s-title" style="color: var(--primary-color);">Motif de consultation</p>
+                    </div>
+                    <div class="cr-section-body">
+                        <div style="font-size: 0.92rem; color: var(--secondary-color);">{{ entry.title }}</div>
+                        {% if entry.type %}<div style="font-size: 0.78rem; color: var(--taupe); margin-top: 0.15rem;">Type : {{ entry.type }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-7">
+                <div class="cr-section" style="margin-bottom: 0;">
+                    <div class="cr-section-body">
+                        <div class="row g-3">
+                            <div class="col-4">
+                                <div class="mb-1" style="font-size: 0.72rem; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.04em;">Comportement</div>
+                                <div class="cr-rating-dots">
+                                    {% for i in 1..5 %}
+                                        <div class="cr-rating-dot{% if entry.behaviorScore and i <= entry.behaviorScore %} active{% endif %}"></div>
+                                    {% endfor %}
+                                </div>
+                                {% if entry.behaviorScore %}
+                                <div style="font-size: 0.68rem; color: var(--taupe); margin-top: 0.25rem;">{{ entry.behaviorScore }}/5</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-1" style="font-size: 0.72rem; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.04em;">État corporel</div>
+                                <div class="cr-rating-dots">
+                                    {% for i in 1..6 %}
+                                        <div class="cr-rating-dot{% if entry.bodyConditionScore and i <= entry.bodyConditionScore %} active{% endif %}"></div>
+                                    {% endfor %}
+                                </div>
+                                {% if entry.bodyConditionScore %}
+                                <div style="font-size: 0.68rem; color: var(--taupe); margin-top: 0.25rem;">{{ entry.bodyConditionScore }}/6</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-4">
+                                <div class="mb-1" style="font-size: 0.72rem; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.04em;">Travail effectué</div>
+                                <div class="cr-work-bar" style="margin-top: 0.5rem;">
+                                    <div class="cr-work-dot" style="left: {{ entry.workDone ?? 50 }}%;"></div>
+                                </div>
+                                {% if entry.workDone is not null %}
+                                <div style="font-size: 0.68rem; color: var(--taupe); margin-top: 0.25rem;">{{ entry.workDone }}%</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not is_summary %}
+        {# ── 2-column: Content left, Anatomy right ── #}
+        <div class="row g-3">
+            <div class="col-12 col-lg-6">
+
+                {# Antécédents #}
+                {% if entry.anamnesis %}
+                <div class="cr-section">
+                    <div class="cr-section-header">
+                        <div class="s-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <p class="s-title" style="color: var(--accent-color);">Antécédents</p>
+                        <button type="button" class="s-toggle" data-bs-toggle="collapse" data-bs-target="#antecedentsShow" aria-expanded="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="antecedentsShow">
+                        <div class="cr-section-body">
+                            <div class="cr-text-block">{{ entry.anamnesis|e('html')|nl2br }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Observations #}
+                {% if entry.staticExamination %}
+                <div class="cr-section">
+                    <div class="cr-section-header">
+                        <div class="s-icon" style="background: rgba(34,197,94,0.12); color: #16a34a;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        </div>
+                        <p class="s-title" style="color: #16a34a;">Observations</p>
+                        <button type="button" class="s-toggle" data-bs-toggle="collapse" data-bs-target="#observationsShow" aria-expanded="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="observationsShow">
+                        <div class="cr-section-body">
+                            <div class="cr-text-block">{{ entry.staticExamination|e('html')|nl2br }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Conseils / Rééducation #}
+                {% if entry.rehabilitation %}
+                <div class="cr-section">
+                    <div class="cr-section-header">
+                        <div class="s-icon" style="background: rgba(124,58,237,0.1); color: #7c3aed;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <p class="s-title" style="color: #7c3aed;">Conseils / Rééducation</p>
+                    </div>
+                    <div class="cr-section-body">
+                        <div class="cr-text-block">{{ entry.rehabilitation|e('html')|nl2br }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Notes #}
+                {% if entry.description %}
+                <div class="cr-section">
+                    <div class="cr-section-header">
+                        <div class="s-icon" style="background: rgba(26,77,69,0.12); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        </div>
+                        <p class="s-title" style="color: var(--primary-color);">Notes</p>
+                    </div>
+                    <div class="cr-section-body">
+                        <div class="cr-text-block">{{ entry.description|e('html')|nl2br }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Localisation anatomique #}
+            <div class="col-12 col-lg-6">
+                <div class="cr-anatomy-sticky">
+                    {{ include('_partials/_horse_anatomy_show.html.twig') }}
+                </div>
+            </div>
+        </div>
+        {% endif %}{# end not is_summary #}
+    </div>
+
+    {# ═══════════════════════════════════════════════
+       STEP 2: RAPPEL ET SUIVI / DOCUMENTS
+       ═══════════════════════════════════════════════ #}
+    <div class="row g-3 mt-2" id="step-rappel-docs">
+        <div class="col-12 col-md-6">
+            <div class="cr-compact-card">
+                <div class="cr-compact-header" style="color: var(--primary-color);">
+                    <div class="c-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    Rappel et suivi / Documents
+                </div>
+
+                {% if entry.nextReminderAt %}
+                <div class="mb-2">
+                    <span class="fw-bold small" style="color: var(--primary-color);">Rappel et suivi :</span>
+                    <span class="small text-secondary">
+                        Rappel dans {{ entry.recurrenceLabel ?: 'N/A' }}
+                        — Date de rappel : {{ entry.nextReminderAt|date('d/m/Y') }}
+                        {% if entry.isOverdueReminder %}
+                            <span class="badge bg-danger" style="font-size: 0.6rem;">En retard</span>
+                        {% elseif entry.isDueSoon %}
+                            <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Bientôt</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% else %}
+                <p class="text-secondary small mb-2">Aucun rappel programmé.</p>
+                {% endif %}
+
+                {% if not is_summary %}
+                <div>
+                    <span class="fw-bold small" style="color: var(--primary-color);">Documents :</span>
+                    {% if entry.documents is empty %}
+                        <span class="text-secondary small">Aucun document</span>
+                    {% else %}
+                        {% for document in entry.documents %}
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                            <a href="{{ path('app_document_download_health_entry', {entryId: entry.id, fileName: document.fileName}) }}"
+                               target="_blank" rel="noopener" class="text-decoration-none small fw-semibold" style="color: var(--primary-color);">
+                                {{ document.originalName|default(document.fileName) }}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="cr-compact-card">
+                <div class="cr-compact-header" style="color: var(--accent-color);">
+                    <div class="c-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    </div>
+                    Notes
+                </div>
+                {% if entry.description %}
+                    <p class="small mb-0" style="color: var(--secondary-color); line-height: 1.6;">{{ entry.description|e('html')|nl2br }}</p>
+                {% else %}
+                    <p class="text-secondary small mb-0">Aucune note.</p>
+                {% endif %}
+
+                {% if entry.dosage or entry.frequency or entry.endDate or entry.batchNumber %}
+                <hr class="my-2" style="border-color: rgba(26,77,69,0.1);">
+                <div class="small text-secondary">
+                    {% if entry.dosage %}<div>Posologie : <strong>{{ entry.dosage }}</strong></div>{% endif %}
+                    {% if entry.frequency %}<div>Fréquence : <strong>{{ entry.frequency }}</strong></div>{% endif %}
+                    {% if entry.endDate %}<div>Date de fin : <strong>{{ entry.endDate|date('d/m/Y') }}</strong></div>{% endif %}
+                    {% if entry.batchNumber %}<div>N° lot : <strong>{{ entry.batchNumber }}</strong></div>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ═══════════════════════════════════════════════
+       STEP 3: PARTAGES
+       ═══════════════════════════════════════════════ #}
+    {% if is_author %}
+    <div id="step-partages" class="mt-3">
+        <div class="cr-section">
+            <div class="cr-section-header">
+                <div class="s-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </div>
+                <p class="s-title" style="color: var(--accent-color);">Partages</p>
+                {% if entry.shares|length > 0 %}
+                <span class="badge" style="background: var(--accent-color); color: #fff; font-size: 0.6rem; border-radius: 6px; padding: 0.2rem 0.45rem; font-weight: 700;">{{ entry.shares|length }}</span>
+                {% endif %}
+            </div>
+            <div class="cr-section-body">
+                {# Draft warning: shares suspended #}
+                {% if entry.isDraft and entry.shares|length > 0 %}
+                <div class="d-flex align-items-start gap-2 p-3 mb-3" style="background: #fff8e1; border-radius: 10px; border: 1px solid #ffe082;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#b45309" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0; margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <div>
+                        <p class="fw-bold small mb-1" style="color: #b45309;">Partages suspendus</p>
+                        <p class="small mb-0" style="color: #92400e;">Cette consultation est repassée en brouillon. Les partages existants sont temporairement bloqués. Validez la consultation pour les réactiver.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Existing shares #}
+                {% if entry.shares|length > 0 %}
+                <div class="mb-3" style="{% if entry.isDraft %}opacity: 0.5; pointer-events: none;{% endif %}">
+                    {% for sh in entry.shares %}
+                    <div class="d-flex align-items-center justify-content-between gap-2 p-2 mb-2" style="background: var(--soft-teal); border-radius: 10px; border: 1px solid rgba(26,77,69,0.15);">
+                        <div class="d-flex align-items-center gap-2" style="min-width:0;">
+                            <div style="width:28px;height:28px;border-radius:8px;background:{% if sh.sharedWithStructure %}var(--accent-color){% else %}var(--primary-color){% endif %};color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                {% if sh.sharedWithStructure %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                {% endif %}
+                            </div>
+                            <div style="min-width:0;">
+                                <div class="fw-bold small text-truncate" style="color: var(--secondary-color);">{{ sh.targetLabel }}</div>
+                                <div class="text-secondary text-truncate" style="font-size: 0.68rem;">{{ sh.sharedWithEmail }}</div>
+                            </div>
+                        </div>
+                        <span class="badge" style="font-size: 0.65rem; font-weight: 600; border-radius: 6px; padding: 0.25rem 0.5rem; {% if sh.mode == 'readonly' %}background: var(--primary-color); color: #fff;{% else %}background: var(--accent-color); color: #fff;{% endif %}">
+                            {{ sh.modeLabel }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {# New share form #}
+                {% if not entry.isDraft %}
+                <div style="{% if entry.shares|length > 0 %}border-top: 1px solid rgba(26,77,69,0.1); padding-top: 0.75rem;{% endif %}">
+                    <p class="fw-bold small mb-2" style="color: var(--secondary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="var(--accent-color)" stroke-width="2" viewBox="0 0 24 24" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Ajouter un partage
+                    </p>
+                    <form method="post" action="{{ path('app_health_book_entry_share', {id: entry.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('share' ~ entry.id) }}">
+                        <input type="hidden" id="sharesDataInput" name="shares_data" value="">
+
+                        <div id="sharesList" class="mb-3"></div>
+
+                        <div id="shareActionCards" class="d-flex gap-2 mb-3">
+                            <div class="share-type-card" data-panel="shareUserSearchPanel">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--soft-teal); color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.35rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </div>
+                                <div class="small fw-bold" style="font-size: 0.7rem;">Un utilisateur<br>du répertoire</div>
+                            </div>
+                            <div class="share-type-card" data-panel="shareNewUserPanel">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--soft-teal); color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.35rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                </div>
+                                <div class="small fw-bold" style="font-size: 0.7rem;">Un nouvel<br>utilisateur</div>
+                            </div>
+                            <div class="share-type-card" data-panel="shareStructurePanel">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(200,151,62,0.12); color: var(--accent-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.35rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                </div>
+                                <div class="small fw-bold" style="font-size: 0.7rem;">Une<br>structure</div>
+                            </div>
+                        </div>
+
+                        <div id="shareUserSearchPanel" class="share-panel" style="display: none;">
+                            <input type="text" id="shareUserSearchInput" class="form-control form-control-sm mb-2" placeholder="Nom, email ou téléphone..." style="border-radius: 8px;">
+                            <div id="shareUserSearchResults" class="list-group" style="display: none; max-height: 200px; overflow-y: auto; border-radius: 8px;"></div>
+                        </div>
+                        <div id="shareNewUserPanel" class="share-panel" style="display: none;">
+                            <div class="row g-2 mb-2">
+                                <div class="col-6"><input type="text" id="shareNewUserFirstName" class="form-control form-control-sm" placeholder="Prénom" style="border-radius: 8px;"></div>
+                                <div class="col-6"><input type="text" id="shareNewUserLastName" class="form-control form-control-sm" placeholder="Nom" style="border-radius: 8px;"></div>
+                            </div>
+                            <input type="email" id="shareNewUserEmail" class="form-control form-control-sm mb-2" placeholder="Email" style="border-radius: 8px;">
+                            <button type="button" id="shareNewUserValidate" class="btn btn-sm w-100" style="background: var(--primary-color); color: #fff; border-radius: 8px; font-weight: 600; font-size: 0.78rem;">Ajouter</button>
+                        </div>
+                        <div id="shareStructurePanel" class="share-panel" style="display: none;">
+                            <input type="text" id="shareStructureSearchInput" class="form-control form-control-sm mb-2" placeholder="Rechercher une structure..." style="border-radius: 8px;">
+                            <div id="shareStructureSearchResults" class="list-group" style="display: none; max-height: 200px; overflow-y: auto; border-radius: 8px;"></div>
+                            <div class="text-center mt-2">
+                                <button type="button" id="shareStructureCreateToggle" class="btn btn-link btn-sm text-decoration-none" style="color: var(--accent-color); font-size: 0.72rem;">+ Créer une nouvelle structure</button>
+                            </div>
+                            <div id="shareStructureCreateForm" style="display: none;">
+                                <input type="text" id="shareNewStructureName" class="form-control form-control-sm mb-2 mt-2" placeholder="Nom de la structure" style="border-radius: 8px;">
+                                <input type="email" id="shareNewStructureEmail" class="form-control form-control-sm mb-2" placeholder="Email de la structure" style="border-radius: 8px;">
+                                <button type="button" id="shareNewStructureValidate" class="btn btn-sm w-100" style="background: var(--accent-color); color: #fff; border-radius: 8px; font-weight: 600; font-size: 0.78rem;">Ajouter cette structure</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="shareSubmitBtn" class="btn btn-sm w-100 mt-3" style="display: none; background: var(--primary-color); color: #fff; border-radius: 8px; font-weight: 700; font-size: 0.85rem; padding: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
+                            Envoyer les partages
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Footer meta ── #}
+    <div class="cr-footer-meta mt-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Cette fiche a été renseignée le {{ entry.date ? entry.date|date('d/m/Y') : 'N/A' }}
+        {% if vet %} par {{ vet.fullName }}{% if vet.specialty %} ({{ vet.specialty }}){% endif %}{% endif %}
+    </div>
 </div>
+
+{# ═══════════════════════════════════════════════
+   SHARE JAVASCRIPT
+   ═══════════════════════════════════════════════ #}
+{% if is_author and not entry.isDraft %}
+<script>
+(function() {
+    // Step tab navigation
+    document.querySelectorAll('.cr-step').forEach(function(step) {
+        step.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.cr-step').forEach(function(s) { s.classList.remove('active'); });
+            this.classList.add('active');
+            var target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                var y = target.getBoundingClientRect().top + window.pageYOffset - 90;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Scroll to share from header button
+    var scrollBtn = document.getElementById('scrollToShareBtn');
+    if (scrollBtn) {
+        scrollBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.cr-step').forEach(function(s) { s.classList.remove('active'); });
+            var step3 = document.querySelector('.cr-step[data-step="3"]');
+            if (step3) step3.classList.add('active');
+            var target = document.getElementById('step-partages');
+            if (target) {
+                var y = target.getBoundingClientRect().top + window.pageYOffset - 90;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    }
+
+    var sharesList = document.getElementById('sharesList');
+    var sharesDataInput = document.getElementById('sharesDataInput');
+    var submitBtn = document.getElementById('shareSubmitBtn');
+    var shares = [];
+
+    var userSearchPanel = document.getElementById('shareUserSearchPanel');
+    var newUserPanel = document.getElementById('shareNewUserPanel');
+    var structurePanel = document.getElementById('shareStructurePanel');
+    var allPanels = [userSearchPanel, newUserPanel, structurePanel];
+    var activeCard = null;
+    var allCards = document.querySelectorAll('.share-type-card');
+
+    function hideAllPanels() { allPanels.forEach(function(p) { if (p) p.style.display = 'none'; }); }
+    function clearActiveCards() { allCards.forEach(function(c) { c.style.borderColor = '#e9ecef'; c.style.background = ''; }); }
+    function resetToCards() { hideAllPanels(); clearActiveCards(); }
+
+    allCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            var panelId = this.getAttribute('data-panel');
+            var panel = document.getElementById(panelId);
+            if (activeCard === this) { resetToCards(); activeCard = null; return; }
+            hideAllPanels(); clearActiveCards();
+            if (panel) panel.style.display = '';
+            this.style.borderColor = 'var(--primary-color)';
+            this.style.background = 'var(--soft-teal)';
+            activeCard = this;
+        });
+    });
+
+    function renderShares() {
+        sharesList.innerHTML = '';
+        sharesDataInput.value = shares.length ? JSON.stringify(shares) : '';
+        submitBtn.style.display = shares.length ? '' : 'none';
+        shares.forEach(function(s, i) {
+            var isStr = s.type === 'structure' || s.type === 'new_structure';
+            var iconBg = isStr ? 'var(--accent-color)' : 'var(--primary-color)';
+            var iconSvg = isStr
+                ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+            var readonlyActive = s.mode === 'readonly';
+            var badge = document.createElement('div');
+            badge.className = 'd-flex align-items-center justify-content-between gap-2 p-2 mb-2';
+            badge.style.cssText = 'background: var(--soft-teal); border-radius: 10px; border: 1px solid rgba(26,77,69,0.15);';
+            badge.innerHTML =
+                '<div class="d-flex align-items-center gap-2" style="min-width:0;">' +
+                    '<div style="width:28px;height:28px;border-radius:8px;background:' + iconBg + ';color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + iconSvg + '</div>' +
+                    '<div style="min-width:0;"><div class="fw-bold small text-truncate" style="color:var(--secondary-color);">' + s.name + '</div><div class="text-secondary text-truncate" style="font-size:0.68rem;">' + (s.info || '') + '</div></div>' +
+                '</div>' +
+                '<div class="d-flex align-items-center gap-1 flex-shrink-0">' +
+                    '<div class="share-mode-toggle d-flex" data-index="' + i + '" style="border-radius:8px;overflow:hidden;border:1px solid rgba(26,77,69,0.2);cursor:pointer;font-size:0.65rem;font-weight:600;">' +
+                        '<span class="share-toggle-opt px-2 py-1" data-mode="readonly" style="' + (readonlyActive ? 'background:var(--primary-color);color:#fff;' : 'background:#fff;color:var(--primary-color);') + '">Lecture</span>' +
+                        '<span class="share-toggle-opt px-2 py-1" data-mode="summary" style="' + (!readonlyActive ? 'background:var(--accent-color);color:#fff;' : 'background:#fff;color:var(--accent-color);') + '">Résumé</span>' +
+                    '</div>' +
+                    '<button type="button" class="btn btn-sm share-remove-btn" data-index="' + i + '" style="background:none;border:none;color:#dc3545;padding:0.15rem;line-height:1;">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                    '</button>' +
+                '</div>';
+            sharesList.appendChild(badge);
+        });
+        sharesList.querySelectorAll('.share-toggle-opt').forEach(function(opt) {
+            opt.addEventListener('click', function() {
+                var idx = parseInt(this.parentElement.getAttribute('data-index'));
+                var newMode = this.getAttribute('data-mode');
+                if (shares[idx].mode !== newMode) { shares[idx].mode = newMode; renderShares(); }
+            });
+        });
+        sharesList.querySelectorAll('.share-remove-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() { shares.splice(parseInt(this.getAttribute('data-index')), 1); renderShares(); });
+        });
+    }
+
+    var userSearchInput = document.getElementById('shareUserSearchInput');
+    var userSearchResults = document.getElementById('shareUserSearchResults');
+    var userSearchTimeout = null;
+    if (userSearchInput) {
+        userSearchInput.addEventListener('input', function() {
+            var q = this.value.trim();
+            clearTimeout(userSearchTimeout);
+            if (q.length < 2) { userSearchResults.style.display = 'none'; return; }
+            userSearchTimeout = setTimeout(function() {
+                fetch('/api/users/search?q=' + encodeURIComponent(q))
+                    .then(function(r) { return r.json(); })
+                    .then(function(users) {
+                        userSearchResults.innerHTML = '';
+                        if (users.length === 0) {
+                            userSearchResults.innerHTML = '<div class="list-group-item text-secondary small">Aucun résultat</div>';
+                        } else {
+                            users.forEach(function(u) {
+                                var item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                item.innerHTML = '<strong class="small">' + u.fullName + '</strong><span class="d-block small text-secondary">' + u.email + (u.phone ? ' · ' + u.phone : '') + '</span>';
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    shares.push({ type: 'user', user_id: u.id, name: u.fullName, info: u.email, mode: 'readonly' });
+                                    renderShares(); resetToCards();
+                                    userSearchInput.value = ''; userSearchResults.style.display = 'none';
+                                });
+                                userSearchResults.appendChild(item);
+                            });
+                        }
+                        userSearchResults.style.display = '';
+                    });
+            }, 300);
+        });
+    }
+
+    var newUserValidate = document.getElementById('shareNewUserValidate');
+    if (newUserValidate) {
+        newUserValidate.addEventListener('click', function() {
+            var fn = document.getElementById('shareNewUserFirstName').value.trim();
+            var ln = document.getElementById('shareNewUserLastName').value.trim();
+            var em = document.getElementById('shareNewUserEmail').value.trim();
+            if (!fn || !ln || !em) { alert('Veuillez remplir tous les champs.'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { alert('Adresse email invalide.'); return; }
+            shares.push({ type: 'new_user', email: em, first_name: fn, last_name: ln, name: fn + ' ' + ln, info: em + ' (nouvel utilisateur)', mode: 'readonly' });
+            renderShares(); resetToCards();
+            document.getElementById('shareNewUserFirstName').value = '';
+            document.getElementById('shareNewUserLastName').value = '';
+            document.getElementById('shareNewUserEmail').value = '';
+        });
+    }
+
+    var structureSearchInput = document.getElementById('shareStructureSearchInput');
+    var structureSearchResults = document.getElementById('shareStructureSearchResults');
+    var strSearchTimeout = null;
+    if (structureSearchInput) {
+        structureSearchInput.addEventListener('input', function() {
+            var q = this.value.trim();
+            clearTimeout(strSearchTimeout);
+            if (q.length < 2) { structureSearchResults.style.display = 'none'; return; }
+            strSearchTimeout = setTimeout(function() {
+                fetch('/rendez-vous/api/search-structures?q=' + encodeURIComponent(q))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var structures = data.structures || [];
+                        structureSearchResults.innerHTML = '';
+                        if (structures.length === 0) {
+                            structureSearchResults.innerHTML = '<div class="list-group-item text-secondary small">Aucune structure trouvée</div>';
+                        } else {
+                            structures.forEach(function(s) {
+                                var item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                var addr = [s.street, s.postalCode, s.city].filter(Boolean).join(', ');
+                                item.innerHTML = '<strong class="small">' + s.name + '</strong>' + (addr ? '<span class="d-block small text-secondary">' + addr + '</span>' : '');
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    shares.push({ type: 'structure', structure_id: s.id, name: s.name, info: s.type || addr, mode: 'summary' });
+                                    renderShares(); resetToCards();
+                                    structureSearchInput.value = ''; structureSearchResults.style.display = 'none';
+                                });
+                                structureSearchResults.appendChild(item);
+                            });
+                        }
+                        structureSearchResults.style.display = '';
+                    });
+            }, 300);
+        });
+    }
+
+    var createToggle = document.getElementById('shareStructureCreateToggle');
+    var createForm = document.getElementById('shareStructureCreateForm');
+    if (createToggle) createToggle.addEventListener('click', function() { createForm.style.display = createForm.style.display === 'none' ? '' : 'none'; });
+
+    var newStrValidate = document.getElementById('shareNewStructureValidate');
+    if (newStrValidate) {
+        newStrValidate.addEventListener('click', function() {
+            var name = document.getElementById('shareNewStructureName').value.trim();
+            var email = document.getElementById('shareNewStructureEmail').value.trim();
+            if (!name || !email) { alert('Nom et email requis.'); return; }
+            shares.push({ type: 'new_structure', structure_name: name, structure_email: email, name: name, info: email + ' (nouvelle)', mode: 'summary' });
+            renderShares(); resetToCards();
+            document.getElementById('shareNewStructureName').value = '';
+            document.getElementById('shareNewStructureEmail').value = '';
+            createForm.style.display = 'none';
+        });
+    }
+})();
+</script>
+{% elseif not is_author %}
+<script>
+document.querySelectorAll('.cr-step').forEach(function(step) {
+    step.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.cr-step').forEach(function(s) { s.classList.remove('active'); });
+        this.classList.add('active');
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            var y = target.getBoundingClientRect().top + window.pageYOffset - 90;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    });
+});
+</script>
+{% endif %}
 
 {% if app.request.get('complete_animal') and health_book_entry.animal %}
 <div class="modal fade" id="completeAnimalModal" tabindex="-1" aria-labelledby="completeAnimalModalLabel" aria-hidden="true">
@@ -465,7 +1031,7 @@
         <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
             <div class="modal-body text-center p-4">
                 <div style="width: 60px; height: 60px; border-radius: 14px; background: var(--soft-teal); color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <h5 class="fw-bold mb-2" style="color: var(--secondary-color);">Consultation enregistrée !</h5>
                 <p class="text-secondary mb-3" style="font-size: 0.88rem;">
@@ -473,13 +1039,8 @@
                     Souhaitez-vous compléter le profil maintenant ?
                 </p>
                 <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600; padding: 0.5rem 1.25rem;">
-                        Plus tard
-                    </button>
-                    <a href="{{ path('app_animal_edit', {slug: health_book_entry.animal.slug}) }}" class="btn d-flex align-items-center gap-2" style="background: var(--primary-color); color: #fff; border-radius: 10px; font-weight: 600; padding: 0.5rem 1.25rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        Compléter la fiche
-                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600;">Plus tard</button>
+                    <a href="{{ path('app_animal_edit', {slug: health_book_entry.animal.slug}) }}" class="btn" style="background: var(--primary-color); color: #fff; border-radius: 10px; font-weight: 600;">Compléter la fiche</a>
                 </div>
             </div>
         </div>

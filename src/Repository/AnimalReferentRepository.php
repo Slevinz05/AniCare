@@ -114,6 +114,15 @@ class AnimalReferentRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findPendingTransfer(Animal $animal): ?AnimalReferent
+    {
+        return $this->findOneBy([
+            'animal' => $animal,
+            'type' => AnimalReferent::TYPE_PRINCIPAL,
+            'status' => AnimalReferent::STATUS_PENDING,
+        ]);
+    }
+
     public function hasExistingRelation(Animal $animal, User $user): bool
     {
         return (bool) $this->createQueryBuilder('r')

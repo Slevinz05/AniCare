@@ -20,9 +20,7 @@
     <tr>
         <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Mode d'accès</td>
         <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">
-            {% if share_mode == 'full' %}
-                Accès complet
-            {% elseif share_mode == 'summary' %}
+            {% if share_mode == 'summary' %}
                 Résumé uniquement
             {% else %}
                 Lecture seule
@@ -31,6 +29,18 @@
     </tr>
 </table>
 
+{% if is_new_user and activation_url is defined and activation_url %}
+<p>
+    Un compte AniCare a été créé pour vous avec l'adresse <strong>{{ recipient_email }}</strong>.
+    Cliquez sur le bouton ci-dessous pour activer votre compte et choisir votre mot de passe :
+</p>
+
+<p>
+    <a href="{{ activation_url }}" style="display: inline-block; padding: 12px 24px; background: #1a4d45; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        Activer mon compte
+    </a>
+</p>
+{% else %}
 <p>
     Connectez-vous sur AniCare pour consulter le compte rendu :
 </p>
@@ -42,10 +52,6 @@
 </p>
 
 <p style="color: #64748b; font-size: 0.85em; margin-top: 30px;">
-    {% if is_new_user %}
-    Un compte AniCare a été créé pour vous avec l'adresse <strong>{{ recipient_email }}</strong>.
-    Cliquez sur le lien ci-dessus pour activer votre compte et définir votre mot de passe.
-    {% else %}
     Connectez-vous avec votre adresse <strong>{{ recipient_email }}</strong> pour y accéder.
-    {% endif %}
 </p>
+{% endif %}

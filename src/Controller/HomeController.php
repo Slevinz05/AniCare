@@ -40,13 +40,13 @@ class HomeController extends AbstractController
         if ($user instanceof User) {
             $animals = $animalRepository->findAccessibleAnimals($user);
             $upcomingReminders = $healthBookRepository->findUpcomingRemindersByOwner($user, 5);
-            if (!$this->isGranted('ROLE_PRO')) {
+            if (!$user->isInProSpace()) {
                 $ownerAppointments = $appointmentRepository->findUpcomingByUser($user);
             }
         }
 
         $proData = [];
-        if ($user instanceof User && $this->isGranted('ROLE_PRO')) {
+        if ($user instanceof User && $user->isInProSpace()) {
             $view = $request->query->get('agenda', 'week');
             $now = new \DateTimeImmutable();
 
@@ -333,6 +333,24 @@ class HomeController extends AbstractController
         return $this->render('repertoire/structures.html.twig', [
             'structures' => $structures,
             'query' => $query,
+        ]);
+    }
+
+    #[Route('/repertoire/patients', name: 'app_repertoire_patients', methods: ['GET'])]
+    public function repertoirePatients(Request $request, AnimalRepository $animalRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRO');
+
+        /** @var User $user */
+        $user = $this->getUser();
+        $query = $request->query->get('q');
+
+        $patients = $animalRepository->findByProHistoryWithStats($user, $query);
+
+        return $this->render('repertoire/patients.html.twig', [
+            'patients' => $patients,
+            'query' => $query,
+            'total_patients' => count($patients),
         ]);
     }
 

@@ -1,0 +1,243 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Transférer le rôle de principal — {{ animal.name }} - AniCare{% endblock %}
+
+{% block body %}
+<style>
+    .transfer-card { max-width: 640px; margin: 0 auto; }
+    .search-results {
+        position: absolute; top: 100%; left: 0; right: 0; z-index: 10;
+        background: #fff; border: 1px solid #dee2e6; border-top: none;
+        border-radius: 0 0 10px 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        max-height: 300px; overflow-y: auto; display: none;
+    }
+    .search-results.show { display: block; }
+    .search-result-item {
+        padding: 0.75rem 1rem; cursor: pointer;
+        border-bottom: 1px solid #f0f0f0; transition: background 0.15s;
+    }
+    .search-result-item:hover { background: var(--soft-teal, #eef7f5); }
+    .search-result-item:last-child { border-bottom: none; }
+    .result-name { font-weight: 600; color: #212529; font-size: 0.9rem; }
+    .result-email { font-size: 0.8rem; color: #6c757d; }
+    .result-badge { font-size: 0.65rem; padding: 0.15rem 0.45rem; border-radius: 999px; font-weight: 600; }
+    .role-option {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.75rem 1rem; border: 1px solid #dee2e6; border-radius: 10px;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .role-option:hover { border-color: var(--primary-color); background: var(--soft-teal, #eef7f5); }
+    .role-option.selected { border-color: var(--primary-color); background: var(--soft-teal, #eef7f5); box-shadow: 0 0 0 2px var(--primary-color); }
+    .role-option input { display: none; }
+    .role-icon {
+        width: 36px; height: 36px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; font-size: 1.1rem;
+    }
+    .transfer-warning {
+        background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px;
+        padding: 1rem 1.25rem; font-size: 0.85rem; color: #664d03;
+    }
+    .pending-transfer-box {
+        background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 10px;
+        padding: 1.25rem; text-align: center;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="transfer-card">
+
+        <nav class="mb-3">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item"><a href="{{ path('app_animal_show', {slug: animal.slug}) }}" class="text-decoration-none" style="color: var(--primary-color);">{{ animal.name }}</a></li>
+                <li class="breadcrumb-item active">Transfert de principal</li>
+            </ol>
+        </nav>
+
+        <div class="card anicare-card overflow-hidden">
+            <div class="card-header medical-header p-4">
+                <p class="page-eyebrow mb-2" style="color: #dc3545;">Référent principal</p>
+                <h1 class="page-title mb-1" style="font-size: 1.4rem;">Proposer un transfert</h1>
+                <p class="page-subtitle mb-0">Transférez le rôle de référent principal de {{ animal.name }} à une autre personne</p>
+            </div>
+
+            <div class="card-body p-4">
+                {% if pendingTransfer %}
+                    <div class="pending-transfer-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="#0dcaf0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="mb-2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <h3 style="font-size: 1rem; font-weight: 700; color: #0c5460; margin-bottom: 0.5rem;">Transfert en attente</h3>
+                        <p style="font-size: 0.85rem; color: #0c5460; margin-bottom: 1rem;">
+                            Une proposition de transfert a été envoyée à <strong>{{ pendingTransfer.user.fullName }}</strong>
+                            le {{ pendingTransfer.designatedAt|date('d/m/Y') }}.
+                        </p>
+                        <form method="post" action="{{ path('app_referent_cancel_transfer', {id: pendingTransfer.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('cancel_transfer' ~ pendingTransfer.id) }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" style="border-radius: 8px;" onclick="return confirm('Annuler la proposition de transfert ?');">
+                                Annuler la proposition
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="transfer-warning mb-4">
+                        <div class="d-flex align-items-start gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="flex-shrink-0 mt-1"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <div>
+                                <strong>Cette action est irréversible après acceptation.</strong><br>
+                                Si le successeur accepte, vous perdrez le rôle de référent principal et deviendrez référent secondaire de {{ animal.name }}.
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ path('app_referent_transfer', {animalId: animal.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('transfer_principal') }}">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Rechercher le successeur</label>
+                            <div style="position: relative;">
+                                <input type="text" id="user-search" class="form-control" placeholder="Nom, prénom ou email..." autocomplete="off">
+                                <input type="hidden" name="email" id="selected-email" required>
+                                <div id="search-results" class="search-results"></div>
+                            </div>
+                            <div id="selected-user" class="mt-2" style="display: none;">
+                                <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: var(--soft-teal, #eef7f5); border: 1px solid var(--primary-color);">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: var(--primary-color); color: #fff; font-weight: 700; font-size: 0.75rem;" id="selected-avatar"></div>
+                                    <div>
+                                        <div class="fw-semibold" style="font-size: 0.875rem;" id="selected-name"></div>
+                                        <div class="text-secondary" style="font-size: 0.75rem;" id="selected-email-display"></div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm ms-auto" id="clear-selection" style="color: var(--primary-color);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold mb-3">Rôle du futur principal</label>
+                            <div class="d-flex flex-column gap-2">
+                                {% set role_icons = {
+                                    'proprietaire': '👑',
+                                    'cavalier': '🏇',
+                                    'entraineur': '🎯',
+                                    'gerant': '🏠',
+                                    'eleveur': '🌾',
+                                    'autre': '👤'
+                                } %}
+                                {% set role_colors = {
+                                    'proprietaire': '#fef3c7',
+                                    'cavalier': '#e3f2fd',
+                                    'entraineur': '#fff3e0',
+                                    'gerant': '#e8f5e9',
+                                    'eleveur': '#f3e5f5',
+                                    'autre': '#f5f5f5'
+                                } %}
+                                {% for label, value in roles %}
+                                    <label class="role-option {{ loop.first ? 'selected' : '' }}" id="role-{{ value }}">
+                                        <input type="radio" name="role" value="{{ value }}" {{ loop.first ? 'checked' : '' }}>
+                                        <div class="role-icon" style="background: {{ role_colors[value]|default('#f5f5f5') }};">
+                                            {{ role_icons[value]|default('👤') }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold" style="font-size: 0.9rem;">{{ label }}</div>
+                                        </div>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 pt-3 border-top">
+                            <a href="{{ path('app_animal_show', {slug: animal.slug}) }}" class="btn btn-outline-secondary" style="border-radius: 8px;">Annuler</a>
+                            <button type="submit" class="btn btn-danger" style="border-radius: 8px;" id="submit-btn" disabled onclick="return confirm('Confirmer la proposition de transfert ? Le successeur devra accepter pour que le transfert soit effectif.');">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                                Proposer le transfert
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not pendingTransfer %}
+<script>
+(function() {
+    const searchInput = document.getElementById('user-search');
+    const resultsDiv = document.getElementById('search-results');
+    const emailInput = document.getElementById('selected-email');
+    const selectedDiv = document.getElementById('selected-user');
+    const submitBtn = document.getElementById('submit-btn');
+    let debounce = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounce);
+        const q = this.value.trim();
+        if (q.length < 2) { resultsDiv.classList.remove('show'); return; }
+        debounce = setTimeout(function() {
+            fetch('{{ path('app_referent_search_user') }}?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(function(users) {
+                    if (!users.length) {
+                        resultsDiv.innerHTML = '<div class="p-3 text-secondary small">Aucun résultat</div>';
+                        resultsDiv.classList.add('show');
+                        return;
+                    }
+                    resultsDiv.innerHTML = users.map(function(u) {
+                        const badge = u.type === 'PRO'
+                            ? '<span class="result-badge" style="background: var(--soft-teal); color: var(--primary-color);">PRO</span>'
+                            : '<span class="result-badge" style="background: #fff3e0; color: #e65100;">Particulier</span>';
+                        return '<div class="search-result-item" data-email="' + u.email + '" data-name="' + u.name + '">'
+                            + '<div class="d-flex align-items-center justify-content-between">'
+                            + '<div><div class="result-name">' + u.name + '</div>'
+                            + '<div class="result-email">' + u.email + '</div></div>'
+                            + badge + '</div></div>';
+                    }).join('');
+                    resultsDiv.classList.add('show');
+                });
+        }, 300);
+    });
+
+    resultsDiv.addEventListener('click', function(e) {
+        const item = e.target.closest('.search-result-item');
+        if (!item) return;
+        selectUser(item.dataset.name, item.dataset.email);
+    });
+
+    function selectUser(name, email) {
+        emailInput.value = email;
+        searchInput.style.display = 'none';
+        resultsDiv.classList.remove('show');
+        document.getElementById('selected-name').textContent = name;
+        document.getElementById('selected-email-display').textContent = email;
+        document.getElementById('selected-avatar').textContent = name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substring(0, 2);
+        selectedDiv.style.display = 'block';
+        submitBtn.disabled = false;
+    }
+
+    document.getElementById('clear-selection').addEventListener('click', function() {
+        emailInput.value = '';
+        searchInput.value = '';
+        searchInput.style.display = 'block';
+        selectedDiv.style.display = 'none';
+        submitBtn.disabled = true;
+        searchInput.focus();
+    });
+
+    document.querySelectorAll('.role-option').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('.role-option').forEach(function(o) { o.classList.remove('selected'); });
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+        });
+        if (opt.querySelector('input').checked) opt.classList.add('selected');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#user-search') && !e.target.closest('#search-results')) {
+            resultsDiv.classList.remove('show');
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

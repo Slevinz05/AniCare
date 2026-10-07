@@ -1,0 +1,33 @@
+<h2>Nouvelle consultation pour votre cheval</h2>
+
+<p>Bonjour {{ referent_name }},</p>
+
+<p>
+    <strong>{{ sender_name }}</strong> a créé un compte rendu de consultation
+    pour <strong>{{ animal_name }}</strong> sur AniCare.
+</p>
+
+<table style="border-collapse: collapse; margin: 20px 0;">
+    <tr>
+        <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Animal</td>
+        <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">{{ animal_name }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Type</td>
+        <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">{{ entry_type }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px 16px; background: #eef7f5; border: 1px solid #d5ebe7; font-weight: bold;">Date</td>
+        <td style="padding: 8px 16px; border: 1px solid #d5ebe7;">{{ entry_date }}</td>
+    </tr>
+</table>
+
+<p>
+    <a href="{{ app_url }}" style="display: inline-block; padding: 12px 24px; background: #1a4d45; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        Consulter le compte rendu
+    </a>
+</p>
+
+<p style="color: #64748b; font-size: 0.85em; margin-top: 30px;">
+    Vous recevez cet email car vous êtes référent(e) de {{ animal_name }} sur AniCare.
+</p>

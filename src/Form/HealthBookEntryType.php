@@ -6,7 +6,6 @@ use App\Entity\Animal;
 use App\Entity\Appointment;
 use App\Entity\HealthBookEntry;
 use App\Entity\User;
-use App\Repository\AnimalRepository;
 use App\Repository\AppointmentRepository;
 use App\Repository\UserRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -38,12 +37,7 @@ class HealthBookEntryType extends AbstractType
                 'class' => Animal::class,
                 'choice_label' => 'name',
                 'placeholder' => 'Sélectionner un cheval',
-                'query_builder' => fn (AnimalRepository $repo) => $repo->createQueryBuilder('a')
-                    ->leftJoin('a.animalShares', 's')
-                    ->where('a.owner = :user')
-                    ->orWhere('s.sharedWithEmail = :email')
-                    ->setParameter('user', $user)
-                    ->setParameter('email', $user->getEmail()),
+                'required' => false,
             ])
 
             ->add('title', TextType::class, [

@@ -54,8 +54,9 @@ class RegistrationFormType extends AbstractType
             ->add('accountType', ChoiceType::class, [
                 'label' => 'Type de profil',
                 'choices'  => [
-                    'Je suis un Particulier (Propriétaire d\'animal)' => 'OWNER',
+                    'Je suis un Particulier (Cavalier, Propriétaire...)' => 'OWNER',
                     'Je suis un Professionnel (Vétérinaire, Soignant, Éducateur...)' => 'PRO',
+                    'Les deux (Professionnel & Propriétaire)' => 'BOTH',
                     'Je représente une Structure (Écurie, Centre équestre, Haras...)' => 'STRUCTURE',
                 ],
                 'expanded' => true,

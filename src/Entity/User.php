@@ -131,6 +131,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $activeSpace = null;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $activationToken = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $companyName = null;
+
+    #[ORM\Column(length: 14, nullable: true)]
+    private ?string $siren = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $showCompanyName = true;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $consultationLocations = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $agendaSettings = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $reportSettings = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $recommendedColleagues = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $supplements = null;
+
     public function __construct()
     {
         $this->animals = new ArrayCollection();
@@ -677,7 +704,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function hasProSpace(): bool
     {
-        return in_array('ROLE_PRO', $this->getRoles(), true);
+        $roles = $this->getRoles();
+        return in_array('ROLE_PRO', $roles, true) || in_array('ROLE_ADMIN', $roles, true);
     }
 
     public function hasParticulierSpace(): bool
@@ -702,6 +730,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->hasProSpace();
     }
 
+    public function enableParticulierSpace(): static
+    {
+        if ($this->accountType === 'PRO') {
+            $this->accountType = 'BOTH';
+        }
+        return $this;
+    }
+
     public function enableProSpace(): static
     {
         if (!in_array('ROLE_PRO', $this->roles, true)) {
@@ -712,4 +748,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
+
+    public function getActivationToken(): ?string
+    {
+        return $this->activationToken;
+    }
+
+    public function setActivationToken(?string $activationToken): static
+    {
+        $this->activationToken = $activationToken;
+        return $this;
+    }
+
+    public function getCompanyName(): ?string { return $this->companyName; }
+    public function setCompanyName(?string $v): static { $this->companyName = $v; return $this; }
+
+    public function getSiren(): ?string { return $this->siren; }
+    public function setSiren(?string $v): static { $this->siren = $v; return $this; }
+
+    public function getShowCompanyName(): ?bool { return $this->showCompanyName; }
+    public function setShowCompanyName(?bool $v): static { $this->showCompanyName = $v; return $this; }
+
+    public function getConsultationLocations(): ?array { return $this->consultationLocations; }
+    public function setConsultationLocations(?array $v): static { $this->consultationLocations = $v; return $this; }
+
+    public function getAgendaSettings(): ?array { return $this->agendaSettings; }
+    public function setAgendaSettings(?array $v): static { $this->agendaSettings = $v; return $this; }
+
+    public function getReportSettings(): ?array { return $this->reportSettings; }
+    public function setReportSettings(?array $v): static { $this->reportSettings = $v; return $this; }
+
+    public function getRecommendedColleagues(): ?array { return $this->recommendedColleagues; }
+    public function setRecommendedColleagues(?array $v): static { $this->recommendedColleagues = $v; return $this; }
+
+    public function getSupplements(): ?array { return $this->supplements; }
+    public function setSupplements(?array $v): static { $this->supplements = $v; return $this; }
 }

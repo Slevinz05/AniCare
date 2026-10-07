@@ -2,75 +2,993 @@
 
 {% block title %}Modifier la consultation - AniCare{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .consult-page { max-width: 1280px; margin: 0 auto; }
+
+    .consult-header {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.25rem;
+        box-shadow: var(--shadow-subtle);
+    }
+    .consult-header-eyebrow {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--primary-color); margin-bottom: 0.25rem;
+    }
+    .consult-header-title {
+        font-size: 1.5rem; font-weight: 800; color: var(--secondary-color);
+        letter-spacing: -0.02em; margin: 0;
+    }
+    .consult-header-sub {
+        font-size: 0.82rem; color: var(--taupe); margin: 0.25rem 0 0;
+    }
+    .consult-header-icon {
+        width: 52px; height: 52px; border-radius: 14px;
+        background: var(--soft-teal); color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .consult-meta-group {
+        display: flex; align-items: stretch; gap: 0;
+        background: var(--soft-teal); border-radius: 12px; padding: 0.15rem;
+        border: 1px solid rgba(26,77,69,0.1);
+    }
+    .consult-meta-cell {
+        padding: 0.5rem 1rem; position: relative;
+        display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .consult-meta-cell + .consult-meta-cell::before {
+        content: ''; position: absolute; left: 0; top: 20%; height: 60%;
+        width: 1px; background: rgba(26,77,69,0.15);
+    }
+    .consult-meta-label {
+        font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.08em; color: var(--taupe); margin-bottom: 0.1rem;
+    }
+    .consult-meta-cell .meta-value {
+        font-size: 0.85rem; font-weight: 600; color: var(--primary-color);
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+    .intervenant-badge {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: #fff; border: 1px solid rgba(26,77,69,0.12);
+        padding: 0.3rem 0.75rem; border-radius: 8px;
+        font-size: 0.82rem; font-weight: 600; color: var(--primary-color);
+    }
+    .intervenant-badge .badge-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #22c55e; flex-shrink: 0;
+    }
+
+    .consult-steps {
+        display: flex; gap: 0; margin-bottom: 1.25rem;
+        border-radius: var(--radius-md); overflow: hidden;
+        border: 1px solid var(--border-color); box-shadow: var(--shadow-subtle);
+    }
+    .consult-step {
+        flex: 1; display: flex; align-items: center; gap: 0.75rem;
+        padding: 1rem 1.25rem; background: #fff;
+        cursor: pointer; border: none; text-align: left;
+        transition: all 0.2s; border-right: 1px solid var(--border-color);
+        text-decoration: none; color: var(--secondary-color);
+    }
+    .consult-step:last-child { border-right: none; }
+    .consult-step:hover { background: var(--bg-color); }
+    .consult-step.active { background: var(--soft-teal); }
+    .consult-step-icon {
+        width: 44px; height: 44px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .consult-step-num {
+        font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.08em; color: var(--taupe);
+    }
+    .consult-step-label {
+        font-size: 0.82rem; font-weight: 700; color: var(--secondary-color);
+    }
+
+    .consult-section {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); margin-bottom: 1rem;
+        box-shadow: var(--shadow-subtle); overflow: hidden;
+    }
+    .consult-section-header {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color);
+        background: #fafaf8;
+    }
+    .consult-section-header .section-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .consult-section-header .section-title {
+        font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.08em; margin: 0;
+    }
+    .consult-section-header .section-toggle {
+        margin-left: auto; background: none; border: none; padding: 0.25rem;
+        cursor: pointer; color: var(--taupe); transition: transform 0.3s;
+    }
+    .consult-section-header .section-toggle[aria-expanded="true"] {
+        transform: rotate(180deg);
+    }
+    .consult-section-body { padding: 1.25rem; }
+
+    .rating-dots { display: flex; gap: 0.4rem; align-items: center; }
+    .rating-dot {
+        width: 24px; height: 24px; border-radius: 50%;
+        border: 2px solid var(--border-color); background: #fff;
+        cursor: pointer; transition: all 0.15s; padding: 0;
+    }
+    .rating-dot.filled { background: var(--primary-color); border-color: var(--primary-color); }
+    .rating-dots .rating-label {
+        font-size: 0.82rem; font-weight: 700; color: var(--secondary-color);
+        margin-left: 0.5rem;
+    }
+
+    .work-slider {
+        -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
+        border-radius: 999px; outline: none;
+        background: linear-gradient(to right, #22c55e 0%, #f59e0b 50%, #ef4444 100%);
+    }
+    .work-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+        background: #fff; border: 3px solid var(--primary-color);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15); cursor: pointer;
+    }
+
+    .animal-selected-badge {
+        display: flex; align-items: center; gap: 0.6rem;
+        background: var(--soft-teal); border: 1.5px solid rgba(26,77,69,0.2);
+        border-radius: 10px; padding: 0.6rem 0.85rem;
+    }
+    .animal-selected-badge .badge-avatar {
+        width: 38px; height: 38px; border-radius: 8px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.75rem;
+    }
+    .animal-selected-badge .badge-info { flex: 1; }
+    .animal-selected-badge .badge-name { font-weight: 700; font-size: 0.85rem; color: var(--primary-color); }
+    .animal-selected-badge .badge-meta { font-size: 0.72rem; color: #64748b; }
+
+    .antecedent-tabs .nav-link {
+        font-size: 0.78rem; font-weight: 700; border-radius: 8px;
+        padding: 0.4rem 0.85rem; color: var(--secondary-color);
+        border: 1px solid var(--border-color); background: #fff;
+    }
+    .antecedent-tabs .nav-link.active {
+        background: var(--primary-color); color: #fff;
+        border-color: var(--primary-color);
+    }
+
+    .conseil-col {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); padding: 1.25rem;
+        box-shadow: var(--shadow-subtle);
+    }
+    .conseil-col-collapsible { padding: 0; }
+    .conseil-col-collapsible .conseil-col-header {
+        margin-bottom: 0; padding: 0.85rem 1.25rem; border-radius: var(--radius-md);
+    }
+    .conseil-col-collapsible .conseil-col-header:hover { background: #fafaf8; }
+    .conseil-col-collapsible.open .conseil-col-header { border-bottom: 1px solid var(--border-color); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+    .conseil-col-collapsible.open .conseil-chevron { transform: rotate(180deg); }
+    .conseil-col-header {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.06em; margin-bottom: 0.85rem;
+    }
+
+    .bottom-section {
+        background: #fff; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); padding: 1.25rem;
+        box-shadow: var(--shadow-subtle);
+    }
+    .bottom-section-title {
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.06em; padding: 0.75rem 1rem;
+        border-radius: 8px; margin-bottom: 1rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .consult-footer {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 1060;
+        background: #fff; border-top: 1px solid var(--border-color);
+        padding: 0.5rem 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    .consult-footer .footer-inner {
+        max-width: 900px; margin: 0 auto;
+    }
+    .consult-page { padding-bottom: 3.5rem; }
+    #anicare-chatbot #chatbot-toggle { bottom: 4.5rem !important; }
+    #anicare-chatbot #chatbot-hint { bottom: 5rem !important; }
+    #anicare-chatbot #chatbot-panel { bottom: 8rem !important; }
+
+    .anatomy-sticky { position: sticky; top: 80px; }
+
+    .dictaphone-wrap { position: relative; }
+    .dictaphone-wrap textarea { padding-right: 2.5rem; }
+    .btn-dictaphone {
+        position: absolute; top: 0.5rem; right: 0.5rem;
+        background: none; border: 1.5px solid #ccc; border-radius: 50%;
+        width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: #8a7f72; transition: all 0.2s; padding: 0;
+    }
+    .btn-dictaphone:hover { border-color: var(--primary-color); color: var(--primary-color); background: var(--soft-teal); }
+    .btn-dictaphone.recording { border-color: #ef4444; color: #ef4444; background: #fef2f2; animation: dictPulse 1.2s ease-in-out infinite; }
+    @keyframes dictPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); } 50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); } }
+
+    .readonly-badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        background: #f1f5f9; border: 1px solid #e2e8f0;
+        border-radius: 6px; padding: 0.2rem 0.5rem;
+        font-size: 0.68rem; font-weight: 600; color: #64748b;
+    }
+
+    .existing-doc-item {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.6rem 0.85rem; border-radius: 8px;
+        border: 1px solid var(--border-color); background: #fff;
+        text-decoration: none; color: inherit; transition: all 0.15s;
+        margin-bottom: 0.5rem;
+    }
+    .existing-doc-item:hover {
+        background: var(--soft-teal); border-color: rgba(26,77,69,0.2);
+        color: inherit;
+    }
+    .existing-doc-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: var(--soft-teal); color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .existing-doc-name { font-weight: 600; font-size: 0.82rem; color: var(--secondary-color); }
+    .existing-doc-meta { font-size: 0.68rem; color: #94a3b8; }
+
+    @media (max-width: 991.98px) {
+        .consult-steps { flex-direction: column; }
+        .consult-step { border-right: none; border-bottom: 1px solid var(--border-color); }
+        .consult-step:last-child { border-bottom: none; }
+    }
+</style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8 col-xl-7">
-            <div class="card form-card">
-                <div class="card-body p-0">
-                    <div class="mb-4 pb-4 border-bottom border-anicare">
-                        <p class="page-eyebrow mb-2">Consultations</p>
+{{ form_start(form, {
+    'attr': {
+        'class': 'health-entry-form needs-validation',
+        'novalidate': 'novalidate',
+        'id': 'consultForm'
+    }
+}) }}
 
-                        <h1 class="page-title mb-2">
-                            Modifier la consultation
-                        </h1>
+<div class="consult-page px-3 py-4">
 
-                        <p class="page-subtitle mb-0">
-                            Mettez à jour les informations du soin et ajoutez les documents associés.
-                        </p>
+    {# ═══════════════════════════════════════════════
+       PAGE HEADER
+       ═══════════════════════════════════════════════ #}
+    <div class="consult-header">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="consult-header-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div>
+                    <p class="consult-header-eyebrow">Consultations</p>
+                    <h1 class="consult-header-title">Modifier la consultation</h1>
+                    <p class="consult-header-sub">Mettez à jour les informations du soin et les documents associés.</p>
+                </div>
+            </div>
+            <div class="consult-meta-group">
+                <div class="consult-meta-cell">
+                    <div class="consult-meta-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -1px; margin-right: 2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Date
                     </div>
-
-                    {{ include('health_book_entry/_form.html.twig', {
-                        'button_label': 'Enregistrer les modifications'
-                    }) }}
-
-                    <div class="mt-5 pt-4 border-top border-anicare">
-                        <h2 class="h5 page-title mb-3">
-                            Documents existants
-                        </h2>
-
-                        {% if health_book_entry.documents is empty %}
-                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                                Aucun document n'est encore associé à cette consultation.
-                            </div>
-                        {% else %}
-                            <div class="document-list">
-                                {% for document in health_book_entry.documents %}
-                                    <a
-                                        href="{{ asset('uploads/health-book-entries/' ~ document.fileName) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                        class="document-item"
-                                    >
-                                        <span class="document-name">
-                                            {{ document.originalName|default(document.fileName) }}
-                                        </span>
-
-                                        <span class="document-meta">
-                                            {% if document.size is defined %}
-                                                {{ (document.size / 1024)|round(0, 'ceil') }} Ko
-                                            {% endif %}
-
-                                            {% if document.uploadedAt is defined %}
-                                                · {{ document.uploadedAt|date('d/m/Y') }}
-                                            {% endif %}
-                                        </span>
-                                    </a>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                    <div class="meta-value">
+                        <input type="date" id="hbe-date" style="width: auto; max-width: 115px; border: 1px solid rgba(26,77,69,0.15); border-radius: 6px; font-size: 0.8rem; padding: 0.2rem 0.3rem; color: var(--secondary-color); background: #fff; outline: none;">
                     </div>
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-4 border-top border-anicare">
-                        <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary">
-                            Retour
-                        </a>
-
-                        {{ include('health_book_entry/_delete_form.html.twig') }}
+                </div>
+                <div class="consult-meta-cell">
+                    <div class="consult-meta-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -1px; margin-right: 2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Heure
+                    </div>
+                    <div class="meta-value">
+                        <div class="d-flex align-items-center gap-0" style="background: #fff; border: 1px solid rgba(26,77,69,0.15); border-radius: 8px; overflow: hidden;">
+                            <button type="button" id="hbe-h-down" style="background: none; border: none; padding: 0.15rem 0.35rem; cursor: pointer; color: #8a7f72; font-size: 0.8rem; line-height: 1;">−</button>
+                            <input type="text" id="hbe-hours" maxlength="2" style="width: 26px; font-size: 0.85rem; font-weight: 700; padding: 0.2rem 0; outline: none; background: transparent; color: var(--secondary-color); border: none; text-align: center;" value="00">
+                            <button type="button" id="hbe-h-up" style="background: none; border: none; padding: 0.15rem 0.35rem; cursor: pointer; color: #8a7f72; font-size: 0.8rem; line-height: 1;">+</button>
+                            <span style="font-weight: 700; font-size: 0.85rem; color: var(--secondary-color);">:</span>
+                            <button type="button" id="hbe-m-down" style="background: none; border: none; padding: 0.15rem 0.35rem; cursor: pointer; color: #8a7f72; font-size: 0.8rem; line-height: 1;">−</button>
+                            <input type="text" id="hbe-minutes" maxlength="2" style="width: 26px; font-size: 0.85rem; font-weight: 700; padding: 0.2rem 0; outline: none; background: transparent; color: var(--secondary-color); border: none; text-align: center;" value="00">
+                            <button type="button" id="hbe-m-up" style="background: none; border: none; padding: 0.15rem 0.35rem; cursor: pointer; color: #8a7f72; font-size: 0.8rem; line-height: 1;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="consult-meta-cell">
+                    <div class="consult-meta-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -1px; margin-right: 2px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Intervenant
+                    </div>
+                    <div class="meta-value">
+                        <div class="intervenant-badge">
+                            <span class="badge-dot"></span>
+                            {{ health_book_entry.veterinarian ? health_book_entry.veterinarian.fullName : app.user.fullName }}
+                        </div>
+                        <div style="display:none;">{{ form_widget(form.veterinarian) }}</div>
                     </div>
                 </div>
             </div>
         </div>
+        <div style="display:none;">{{ form_widget(form.date, {'attr': {'id': 'health_book_entry_date'}}) }}</div>
+    </div>
+
+    {# ═══════════════════════════════════════════════
+       2-STEP TABS (no partage in edit)
+       ═══════════════════════════════════════════════ #}
+    <div class="consult-steps">
+        <a href="#step-compte-rendu" class="consult-step active" data-step="1">
+            <div class="consult-step-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div>
+                <div class="consult-step-num">1. Compte rendu</div>
+                <div class="consult-step-label">Modifier le compte rendu</div>
+            </div>
+        </a>
+        <a href="#step-rappel-docs" class="consult-step" data-step="2">
+            <div class="consult-step-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div>
+                <div class="consult-step-num">2. Rappel et suivi / Documents</div>
+                <div class="consult-step-label">Rappel, suivi et documents</div>
+            </div>
+        </a>
+    </div>
+
+    {# ═══════════════════════════════════════════════
+       STEP 1 : COMPTE RENDU
+       ═══════════════════════════════════════════════ #}
+    <div id="step-compte-rendu">
+
+        <div class="row g-3">
+            {# ── LEFT COLUMN : Form fields ── #}
+            <div class="col-12 col-lg-6">
+
+                {# ── INFORMATIONS PRINCIPALES ── #}
+                <div class="consult-section">
+                    <div class="consult-section-header">
+                        <span class="section-icon" style="background: rgba(26,77,69,0.12); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <p class="section-title" style="color: var(--primary-color);">Informations principales</p>
+                    </div>
+                    <div class="consult-section-body">
+                        {# ── Référent (read-only) ── #}
+                        {% set referent = health_book_entry.animal ? health_book_entry.animal.owner : null %}
+                        {% if referent %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold d-flex align-items-center gap-2">
+                                Référent principal
+                                <span class="readonly-badge">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Non modifiable
+                                </span>
+                            </label>
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: var(--soft-teal);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <div class="flex-grow-1">
+                                    <strong class="small" style="color: var(--primary-color);">{{ referent.fullName }}</strong>
+                                    <span class="d-block small text-secondary">{{ referent.email }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {# ── Animal (read-only) ── #}
+                        {% set animal = health_book_entry.animal %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold d-flex align-items-center gap-2">
+                                Animal concerné
+                                <span class="readonly-badge">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Non modifiable
+                                </span>
+                            </label>
+                            {{ form_widget(form.animal, {'attr': {'class': 'd-none'}}) }}
+                            {% if animal %}
+                            <div class="animal-selected-badge">
+                                <div class="badge-avatar">{{ animal.name|first|upper }}</div>
+                                <div class="badge-info">
+                                    <div class="badge-name">{{ animal.name }}</div>
+                                    <div class="badge-meta">
+                                        {% set meta_parts = [] %}
+                                        {% if animal.breed %}{% set meta_parts = meta_parts|merge([animal.breed]) %}{% endif %}
+                                        {% if animal.coat %}{% set meta_parts = meta_parts|merge([animal.coat]) %}{% endif %}
+                                        {% if animal.gender %}{% set meta_parts = meta_parts|merge([animal.gender]) %}{% endif %}
+                                        {{ meta_parts|join(' · ') }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {# ── Type d'acte + Motif + Comportement ── #}
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-4">
+                                {{ form_label(form.type, "Type d'acte", {'label_attr': {'class': 'form-label fw-bold small'}}) }}
+                                {{ form_widget(form.type, {'attr': {'class': 'form-select form-select-sm', 'id': 'health_type_select'}}) }}
+                                {{ form_errors(form.type) }}
+                                <div id="typeCustomGroup" style="{{ form.type.vars.data != 'Autre' ? 'display:none;' : '' }}; margin-top: 0.5rem;">
+                                    {{ form_widget(form.typeCustom, {'attr': {'class': 'form-control form-control-sm', 'placeholder': 'Précisez...'}}) }}
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                {{ form_label(form.title, 'Motif de consultation', {'label_attr': {'class': 'form-label fw-bold small'}}) }}
+                                {{ form_widget(form.title, {'attr': {'class': 'form-control form-control-sm', 'placeholder': 'Suivi annuel, dorsalgie...'}}) }}
+                                {{ form_errors(form.title) }}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold small">Comportement</label>
+                                <div class="rating-dots" id="behaviorRating" data-field="behavior">
+                                    <button type="button" class="rating-dot" data-value="1"></button>
+                                    <button type="button" class="rating-dot" data-value="2"></button>
+                                    <button type="button" class="rating-dot" data-value="3"></button>
+                                    <button type="button" class="rating-dot" data-value="4"></button>
+                                    <button type="button" class="rating-dot" data-value="5"></button>
+                                    <span class="rating-label" id="behaviorLabel">0/5</span>
+                                </div>
+                                <input type="hidden" name="behavior_score" id="behaviorInput" value="{{ health_book_entry.behaviorScore }}">
+                            </div>
+                        </div>
+
+                        {# ── État corporel + Travail effectué ── #}
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small">État corporel</label>
+                                <div class="rating-dots" id="bodyConditionRating" data-field="bodyCondition">
+                                    <button type="button" class="rating-dot" data-value="1"></button>
+                                    <button type="button" class="rating-dot" data-value="2"></button>
+                                    <button type="button" class="rating-dot" data-value="3"></button>
+                                    <button type="button" class="rating-dot" data-value="4"></button>
+                                    <button type="button" class="rating-dot" data-value="5"></button>
+                                    <button type="button" class="rating-dot" data-value="6"></button>
+                                    <span class="rating-label" id="bodyConditionLabel">0/6</span>
+                                </div>
+                                <input type="hidden" name="body_condition_score" id="bodyConditionInput" value="{{ health_book_entry.bodyConditionScore }}">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small">Travail effectué</label>
+                                <input type="range" class="work-slider" id="workSlider" name="work_done" min="0" max="100" value="{{ health_book_entry.workDone ?? 50 }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# ── ANTÉCÉDENTS ── #}
+                <div class="consult-section">
+                    <div class="consult-section-header">
+                        <span class="section-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </span>
+                        <p class="section-title" style="color: var(--accent-color);">Antécédents</p>
+                        <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#antecedentsCollapse" aria-expanded="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="antecedentsCollapse">
+                        <div class="consult-section-body">
+                            <ul class="nav antecedent-tabs gap-2 mb-3">
+                                <li class="nav-item"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabRediger">Rédiger un antécédent</button></li>
+                                <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFiche">Antécédents de la fiche animal</button></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="tabRediger">
+                                    <p class="text-secondary small mb-2">Rédigez les antécédents connus.</p>
+                                    <div class="dictaphone-wrap">
+                                        {{ form_widget(form.anamnesis, {'attr': {'class': 'form-control dictaphone-target', 'rows': 3, 'placeholder': 'Saisissez ou dictez les informations...'}}) }}
+                                        <button type="button" class="btn-dictaphone" title="Dicter">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="tabFiche">
+                                    <p class="text-secondary small">Les antécédents seront chargés depuis la fiche de l'animal sélectionné.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# ── OBSERVATIONS ── #}
+                <div class="consult-section">
+                    <div class="consult-section-header">
+                        <span class="section-icon" style="background: rgba(34,197,94,0.12); color: #16a34a;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        </span>
+                        <p class="section-title" style="color: #16a34a;">Observations</p>
+                        <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#observationsCollapse" aria-expanded="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="observationsCollapse">
+                        <div class="consult-section-body">
+                            <p class="text-secondary small mb-2">Saisissez vos observations cliniques.</p>
+                            <div class="dictaphone-wrap">
+                                {{ form_widget(form.staticExamination, {'attr': {'class': 'form-control dictaphone-target', 'rows': 3, 'placeholder': 'Précisez ou dictez vos observations...'}}) }}
+                                <button type="button" class="btn-dictaphone" title="Dicter">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# ── RIGHT COLUMN : Horse anatomy ── #}
+            <div class="col-12 col-lg-6">
+                <div class="anatomy-sticky">
+                    <div class="consult-section">
+                        <div class="consult-section-header">
+                            <span class="section-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+                            </span>
+                            <p class="section-title" style="color: #ef4444;">Localisation anatomique</p>
+                        </div>
+                        <div class="consult-section-body">
+                            {% if is_granted('ROLE_PRO') %}
+                                {{ include('_partials/_horse_anatomy.html.twig') }}
+                            {% else %}
+                                <p class="text-secondary small text-center py-4">Disponible en mode PRO</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── CONSEILS / RÉÉDUCATION (pleine largeur) ── #}
+        <div class="conseil-col mt-3">
+            <div class="conseil-col-header" style="color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Conseils / Rééducation
+            </div>
+            {% set rehab_tpls = app.user.rehabilitationTemplates|default([]) %}
+            <div class="row g-2 mb-2">
+                <div class="col-12 col-md-4">
+                    {{ form_widget(form.rehabilitationType, {'attr': {'class': 'form-select form-select-sm', 'id': 'rehab-type-select', 'data-templates': rehab_tpls|json_encode}}) }}
+                </div>
+            </div>
+            <div class="dictaphone-wrap">
+                {{ form_widget(form.rehabilitation, {'attr': {'class': 'form-control dictaphone-target form-control-sm', 'rows': 3, 'placeholder': 'Précisez vos conseils de rééducation, exercices à réaliser...'}}) }}
+                <button type="button" class="btn-dictaphone" title="Dicter" style="top: 0.3rem; right: 0.3rem; width: 28px; height: 28px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+            </div>
+        </div>
+
+        {# ── Confrère + Complément (collapsibles, côte à côte) ── #}
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-md-6">
+                <div class="conseil-col conseil-col-collapsible">
+                    <div class="conseil-col-header conseil-col-toggle" data-target="colleagueBody" style="color: var(--primary-color); cursor: pointer;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Confrère recommandé
+                        <svg class="conseil-chevron ms-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div id="colleagueBody" class="conseil-col-body" style="display: none; padding: 0.85rem 1.25rem 1.25rem;">
+                        <select class="form-select form-select-sm mb-2" name="recommended_colleague">
+                            <option value="">Sélectionner un professionnel</option>
+                        </select>
+                        <div class="dictaphone-wrap">
+                            <textarea class="form-control form-control-sm dictaphone-target" rows="2" name="colleague_notes" placeholder="Précisez la recommandation..."></textarea>
+                            <button type="button" class="btn-dictaphone" title="Dicter" style="top: 0.3rem; right: 0.3rem; width: 28px; height: 28px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="conseil-col conseil-col-collapsible">
+                    <div class="conseil-col-header conseil-col-toggle" data-target="supplementBody" style="color: var(--primary-color); cursor: pointer;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                        Complément alimentaire
+                        <svg class="conseil-chevron ms-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div id="supplementBody" class="conseil-col-body" style="display: none; padding: 0.85rem 1.25rem 1.25rem;">
+                        <select class="form-select form-select-sm mb-2" name="recommended_supplement">
+                            <option value="">Sélectionner un complément alimentaire</option>
+                        </select>
+                        <div class="dictaphone-wrap">
+                            <textarea class="form-control form-control-sm dictaphone-target" rows="2" name="supplement_notes" placeholder="Précisez la recommandation..."></textarea>
+                            <button type="button" class="btn-dictaphone" title="Dicter" style="top: 0.3rem; right: 0.3rem; width: 28px; height: 28px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── NOTES (collapsibles côte à côte) ── #}
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-md-6">
+                <div class="conseil-col conseil-col-collapsible">
+                    <div class="conseil-col-header conseil-col-toggle" data-target="notesPublicBody" style="color: var(--primary-color); cursor: pointer;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Notes complémentaires
+                        <svg class="conseil-chevron ms-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div id="notesPublicBody" class="conseil-col-body" style="display: none; padding: 0.85rem 1.25rem 1.25rem;">
+                        <div class="dictaphone-wrap">
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control dictaphone-target form-control-sm', 'rows': 3, 'placeholder': 'Saisissez vos notes ou particularités (allergies, sensibilités, habitudes, etc.)...'}}) }}
+                            <button type="button" class="btn-dictaphone" title="Dicter" style="top: 0.3rem; right: 0.3rem; width: 28px; height: 28px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="conseil-col conseil-col-collapsible">
+                    <div class="conseil-col-header conseil-col-toggle" data-target="notesPrivateBody" style="color: var(--primary-color); cursor: pointer;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Notes privées
+                        <svg class="conseil-chevron ms-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div id="notesPrivateBody" class="conseil-col-body" style="display: none; padding: 0.85rem 1.25rem 1.25rem;">
+                        <p class="text-secondary small mb-2" style="font-size: 0.72rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            Visibles uniquement par vous
+                        </p>
+                        <div class="dictaphone-wrap">
+                            <textarea class="form-control form-control-sm dictaphone-target" rows="3" name="private_notes" placeholder="Saisissez vos notes personnelles (à usage interne uniquement)..."></textarea>
+                            <button type="button" class="btn-dictaphone" title="Dicter" style="top: 0.3rem; right: 0.3rem; width: 28px; height: 28px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {# ═══════════════════════════════════════════════
+       STEP 2 : RAPPEL / DOCS
+       ═══════════════════════════════════════════════ #}
+    <div class="row g-3 mt-2" id="step-rappel-docs">
+        <div class="col-12 col-md-6">
+            <div class="bottom-section">
+                <div class="bottom-section-title" style="background: var(--soft-teal); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    2. Rappel et suivi / Documents
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <p class="fw-bold small mb-2" style="color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            Rappel & Suivi
+                        </p>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold">Rappel dans</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            {{ form_widget(form.recurrenceType, {'attr': {'class': 'form-select form-select-sm'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold">Date du rappel</label>
+                        {{ form_widget(form.nextReminderAt, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Récurrence</label>
+                        <p class="text-secondary small mb-0">Pas de récurrence</p>
+                    </div>
+                </div>
+
+                <hr class="my-3" style="border-color: rgba(26,77,69,0.1);">
+
+                <div>
+                    <p class="fw-bold small mb-2" style="color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Ajouter des documents
+                    </p>
+                    <div class="p-3 rounded-3" style="background: var(--soft-teal); border: 1px dashed rgba(26,77,69,0.25);">
+                        {{ form_widget(form.attachments, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                        <p class="text-secondary small mb-0 mt-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Glissez-déposez vos fichiers ici ou cliquez pour parcourir
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Documents existants ── #}
+        <div class="col-12 col-md-6">
+            <div class="bottom-section">
+                <div class="bottom-section-title" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Documents existants
+                </div>
+
+                {% if health_book_entry.documents is empty %}
+                    <div class="text-center py-4">
+                        <div class="mb-2" style="width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <p class="text-secondary small mb-0">Aucun document associé</p>
+                    </div>
+                {% else %}
+                    {% for document in health_book_entry.documents %}
+                        <a href="{{ asset('uploads/health-book-entries/' ~ document.fileName) }}" target="_blank" rel="noopener" class="existing-doc-item">
+                            <div class="existing-doc-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="existing-doc-name">{{ document.originalName|default(document.fileName) }}</div>
+                                <div class="existing-doc-meta">
+                                    {% if document.size is defined %}
+                                        {{ (document.size / 1024)|round(0, 'ceil') }} Ko
+                                    {% endif %}
+                                    {% if document.uploadedAt is defined %}
+                                        · {{ document.uploadedAt|date('d/m/Y') }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Hidden fields for form validation #}
+    <div style="display: none;">
+        {{ form_widget(form.dosage) }}
+        {{ form_widget(form.frequency) }}
+        {{ form_widget(form.endDate) }}
+        {{ form_widget(form.batchNumber) }}
+        {{ form_widget(form.appointment) }}
+        {{ form_widget(form.anatomicalLocations) }}
+    </div>
+
+    {{ form_rest(form) }}
+</div>
+
+{# ═══════════════════════════════════════════════
+   STICKY FOOTER
+   ═══════════════════════════════════════════════ #}
+<div class="consult-footer">
+    <div class="footer-inner d-flex align-items-center justify-content-between gap-3 px-3">
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ path('app_health_book_entry_show', {id: health_book_entry.id}) }}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Retour
+            </a>
+            <form method="post" action="{{ path('app_health_book_entry_delete', {'id': health_book_entry.id}) }}" class="d-inline" onsubmit="return confirm('Confirmez-vous la suppression de cette consultation ? Cette action est irréversible.');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ health_book_entry.id) }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" style="font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Supprimer
+                </button>
+            </form>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-sm d-flex align-items-center gap-2" style="background: var(--primary-color); color: #fff; font-weight: 700; border-radius: 8px; padding: 0.4rem 1.25rem; font-size: 0.82rem;">
+                Enregistrer les modifications
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            {% if is_granted('ROLE_PRO') %}
+                <button type="submit" name="save_draft" class="btn btn-sm d-flex align-items-center gap-1" style="background: var(--secondary-color); color: #fff; font-weight: 600; border-radius: 8px; padding: 0.4rem 1rem; font-size: 0.8rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Brouillon
+                </button>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+{{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ── Type custom toggle ──
+    var typeSelect = document.getElementById('health_type_select');
+    var typeCustomGroup = document.getElementById('typeCustomGroup');
+    if (typeSelect && typeCustomGroup) {
+        typeSelect.addEventListener('change', function () {
+            typeCustomGroup.style.display = this.value === 'Autre' ? '' : 'none';
+        });
+    }
+
+    // ── Date + time picker ──
+    (function() {
+        var hiddenDate = document.getElementById('health_book_entry_date');
+        var hbeDate = document.getElementById('hbe-date');
+        var hbeH = document.getElementById('hbe-hours');
+        var hbeM = document.getElementById('hbe-minutes');
+        if (!hiddenDate || !hbeDate || !hbeH || !hbeM) return;
+
+        var h = 0, m = 0;
+        function pad2(n) { return String(n).padStart(2, '0'); }
+        function render() { hbeH.value = pad2(h); hbeM.value = pad2(m); }
+        function sync() { if (!hbeDate.value) return; hiddenDate.value = hbeDate.value + 'T' + pad2(h) + ':' + pad2(m); }
+
+        hbeH.addEventListener('change', function() {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v)) { h = Math.max(0, Math.min(23, v)); }
+            render(); sync();
+        });
+        hbeH.addEventListener('blur', function() { this.value = pad2(h); });
+        hbeM.addEventListener('change', function() {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v)) { m = Math.max(0, Math.min(59, v)); }
+            render(); sync();
+        });
+        hbeM.addEventListener('blur', function() { this.value = pad2(m); });
+
+        var now;
+        if (hiddenDate.value) {
+            now = new Date(hiddenDate.value);
+            if (isNaN(now.getTime())) now = new Date();
+        } else {
+            now = new Date();
+        }
+        hbeDate.value = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+        h = now.getHours(); m = now.getMinutes();
+        render(); sync();
+
+        hbeDate.addEventListener('change', sync);
+        document.getElementById('hbe-h-up').addEventListener('click', function() { h = (h + 1) % 24; render(); sync(); });
+        document.getElementById('hbe-h-down').addEventListener('click', function() { h = (h - 1 + 24) % 24; render(); sync(); });
+        document.getElementById('hbe-m-up').addEventListener('click', function() { m += 5; if (m >= 60) { m = 0; h = (h + 1) % 24; } render(); sync(); });
+        document.getElementById('hbe-m-down').addEventListener('click', function() { m -= 5; if (m < 0) { m = 55; h = (h - 1 + 24) % 24; } render(); sync(); });
+    })();
+
+    // ── Rating dots (pre-fill from existing values) ──
+    document.querySelectorAll('.rating-dots').forEach(function(group) {
+        var field = group.dataset.field;
+        var dots = group.querySelectorAll('.rating-dot');
+        var label = group.querySelector('.rating-label');
+        var input = document.getElementById(field + 'Input');
+
+        var currentVal = input ? parseInt(input.value, 10) : 0;
+        if (currentVal > 0) {
+            dots.forEach(function(d) {
+                d.classList.toggle('filled', parseInt(d.dataset.value) <= currentVal);
+            });
+            if (label) label.textContent = currentVal + '/' + dots.length;
+        }
+
+        dots.forEach(function(dot) {
+            dot.addEventListener('click', function() {
+                var val = parseInt(this.dataset.value);
+                dots.forEach(function(d) {
+                    d.classList.toggle('filled', parseInt(d.dataset.value) <= val);
+                });
+                if (label) label.textContent = val + '/' + dots.length;
+                if (input) input.value = val;
+            });
+        });
+    });
+
+    // ── Step tabs (scroll to anchor) ──
+    document.querySelectorAll('.consult-step').forEach(function(step) {
+        step.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.consult-step').forEach(function(s) { s.classList.remove('active'); });
+            this.classList.add('active');
+            var target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                var y = target.getBoundingClientRect().top + window.pageYOffset - 90;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    });
+
+    // ── Collapsible conseil blocks ──
+    document.querySelectorAll('.conseil-col-toggle').forEach(function(toggle) {
+        toggle.addEventListener('click', function() {
+            var targetId = this.getAttribute('data-target');
+            var body = document.getElementById(targetId);
+            var card = this.closest('.conseil-col-collapsible');
+            if (!body || !card) return;
+            var isOpen = card.classList.contains('open');
+            card.classList.toggle('open', !isOpen);
+            body.style.display = isOpen ? 'none' : '';
+        });
+    });
+
+    // ── Rehab templates ──
+    var rehabSelect = document.getElementById('health_book_entry_rehabilitationType');
+    if (rehabSelect) {
+        var templates = [];
+        try { templates = JSON.parse(rehabSelect.dataset.templates || '[]'); } catch(e) {}
+        var rehabTextarea = document.getElementById('health_book_entry_rehabilitation');
+        rehabSelect.addEventListener('change', function() {
+            var selected = this.value;
+            if (!selected || !rehabTextarea) return;
+            var tpl = templates.find(function(t) { return t.name === selected; });
+            if (!tpl || !tpl.description) return;
+            var current = rehabTextarea.value.trim();
+            var block = '▸ ' + tpl.name + '\n' + tpl.description;
+            rehabTextarea.value = current ? current + '\n\n' + block : block;
+            rehabTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            this.value = '';
+        });
+    }
+
+    // ── Footer dock: switch from fixed to inline when site footer is visible ──
+    (function() {
+        var cf = document.querySelector('.consult-footer');
+        var sf = document.querySelector('.site-footer');
+        if (!cf || !sf) return;
+        function check() {
+            var sfTop = sf.getBoundingClientRect().top;
+            var viewH = window.innerHeight;
+            if (sfTop <= viewH) {
+                cf.style.position = 'relative';
+                cf.style.boxShadow = 'none';
+            } else {
+                cf.style.position = 'fixed';
+                cf.style.boxShadow = '0 -2px 10px rgba(0,0,0,0.05)';
+            }
+        }
+        window.addEventListener('scroll', check, { passive: true });
+        window.addEventListener('resize', check, { passive: true });
+        check();
+    })();
+
+    // ── Dictaphone ──
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        document.querySelectorAll('.btn-dictaphone').forEach(function(btn) { btn.style.display = 'none'; });
+        return;
+    }
+    document.querySelectorAll('.btn-dictaphone').forEach(function(btn) {
+        var textarea = btn.closest('.dictaphone-wrap').querySelector('.dictaphone-target, textarea');
+        if (!textarea) return;
+        var recognition = null;
+        btn.addEventListener('click', function() {
+            if (btn.classList.contains('recording')) { if (recognition) recognition.stop(); return; }
+            recognition = new SpeechRecognition();
+            recognition.lang = 'fr-FR'; recognition.continuous = true; recognition.interimResults = true;
+            var baseText = textarea.value; var finalTranscript = '';
+            btn.classList.add('recording');
+            recognition.onresult = function(e) {
+                var interim = '';
+                for (var i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) {
+                        var chunk = e.results[i][0].transcript;
+                        if (finalTranscript && chunk) { if (!finalTranscript.endsWith(' ')) finalTranscript += ' '; chunk = chunk.charAt(0).toLowerCase() + chunk.slice(1); }
+                        finalTranscript += chunk;
+                    } else { interim += e.results[i][0].transcript; }
+                }
+                var sep = baseText && !baseText.endsWith(' ') && !baseText.endsWith('\n') ? ' ' : '';
+                textarea.value = baseText + sep + finalTranscript + (interim ? ' ' + interim + ' [...]' : '');
+            };
+            recognition.onend = function() {
+                btn.classList.remove('recording');
+                var sep = baseText && !baseText.endsWith(' ') && !baseText.endsWith('\n') ? ' ' : '';
+                textarea.value = baseText + sep + finalTranscript;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                recognition = null;
+            };
+            recognition.onerror = function(e) { btn.classList.remove('recording'); recognition = null; };
+            recognition.start();
+        });
+    });
+});
+</script>
 {% endblock %}

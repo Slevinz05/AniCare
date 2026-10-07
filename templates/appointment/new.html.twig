@@ -246,6 +246,20 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
 
+            <a href="#" onclick="history.back(); return false;" id="backBtn" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-3" style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Retour
+            </a>
+            <script>
+            (function(){
+                var btn = document.getElementById('backBtn');
+                if (window.history.length <= 1) {
+                    btn.href = '{{ path('app_calendar') }}';
+                    btn.onclick = null;
+                }
+            })();
+            </script>
+
             <div class="appointment-form-hero">
                 <p class="page-eyebrow mb-1" style="color: rgba(255,255,255,0.6);">Nouveau</p>
                 <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0;">

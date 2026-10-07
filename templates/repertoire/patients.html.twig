@@ -1,0 +1,341 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Répertoire - Mes patients - AniCare{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .st-page { max-width: 1140px; margin: 0 auto; }
+
+    .st-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0a7a70 60%, var(--secondary-color) 100%);
+        border-radius: var(--radius-lg);
+        padding: 2.2rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .st-hero::before {
+        content: '';
+        position: absolute; top: -40%; right: -10%; width: 340px; height: 340px;
+        background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .st-hero-eyebrow {
+        font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+        opacity: .8; margin-bottom: .35rem;
+    }
+    .st-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 .35rem; }
+    .st-hero p { font-size: .92rem; opacity: .85; margin: 0; }
+
+    .st-search-bar {
+        position: relative; max-width: 500px;
+    }
+    .st-search-bar input {
+        width: 100%; padding: .6rem 1rem .6rem 2.5rem;
+        border: 2px solid rgba(255,255,255,.3); border-radius: var(--radius-md);
+        background: rgba(255,255,255,.15); color: #fff; font-size: .9rem;
+        transition: all .2s;
+    }
+    .st-search-bar input::placeholder { color: rgba(255,255,255,.6); }
+    .st-search-bar input:focus { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.5); outline: none; }
+    .st-search-bar svg {
+        position: absolute; left: .8rem; top: 50%; transform: translateY(-50%);
+        opacity: .6;
+    }
+
+    .st-tabs {
+        display: flex; gap: .5rem; margin-bottom: 1rem;
+    }
+    .st-tab {
+        padding: .4rem .9rem; border-radius: 999px; font-size: .82rem; font-weight: 600;
+        border: 1px solid #e9ecef; background: #fff; color: #6c757d;
+        text-decoration: none; transition: all .2s;
+    }
+    .st-tab:hover, .st-tab.active {
+        background: var(--primary-color); color: #fff; border-color: var(--primary-color);
+    }
+
+    /* Stats */
+    .pt-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .pt-stat-card {
+        flex: 1; min-width: 140px;
+        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        padding: 1rem 1.2rem; display: flex; align-items: center; gap: .8rem;
+        transition: box-shadow .2s;
+    }
+    .pt-stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+    .pt-stat-icon {
+        width: 40px; height: 40px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .pt-stat-icon svg { width: 18px; height: 18px; }
+    .pt-stat-value { font-size: 1.3rem; font-weight: 800; color: var(--secondary-color); line-height: 1; }
+    .pt-stat-label { font-size: .76rem; color: var(--taupe); font-weight: 500; margin-top: 2px; }
+
+    /* Patient list */
+    .pt-list { display: flex; flex-direction: column; gap: 0; }
+    .pt-list-header {
+        display: grid;
+        grid-template-columns: 2.5fr 2fr 1.5fr 1fr .6fr;
+        padding: .7rem 1.4rem;
+        font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+        color: var(--taupe); border-bottom: 2px solid var(--border-color);
+    }
+    .pt-row {
+        display: grid;
+        grid-template-columns: 2.5fr 2fr 1.5fr 1fr .6fr;
+        padding: .85rem 1.4rem;
+        align-items: center;
+        background: #fff;
+        border-bottom: 1px solid var(--border-color);
+        transition: background .15s;
+        text-decoration: none; color: inherit;
+    }
+    .pt-row:hover { background: var(--soft-teal); }
+    .pt-row:last-child { border-bottom: none; }
+
+    .pt-animal { display: flex; align-items: center; gap: .7rem; }
+    .pt-animal-avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--soft-teal) 0%, #d5f5f0 100%);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        color: var(--primary-color); font-weight: 700; font-size: .85rem;
+        border: 2px solid var(--primary-color);
+    }
+    .pt-animal-name { font-weight: 700; color: var(--secondary-color); font-size: .9rem; transition: color .15s; }
+    .pt-row:hover .pt-animal-name { color: var(--primary-color); }
+    .pt-animal-breed { font-size: .72rem; color: var(--taupe); }
+
+    .pt-owner { display: flex; align-items: center; gap: .5rem; }
+    .pt-owner-avatar {
+        width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: .65rem; color: #fff;
+        background: var(--accent-color);
+    }
+    .pt-owner-name { font-weight: 600; font-size: .85rem; color: var(--secondary-color); }
+    .pt-owner-email { font-size: .72rem; color: var(--taupe); }
+
+    .pt-consult-count {
+        display: inline-flex; align-items: center; gap: .3rem;
+        padding: .2rem .6rem; border-radius: 999px;
+        font-size: .78rem; font-weight: 600;
+        background: var(--soft-teal); color: var(--primary-color);
+    }
+
+    .pt-date { font-size: .85rem; color: var(--secondary-color); font-weight: 600; }
+    .pt-date-relative { font-size: .72rem; color: var(--taupe); }
+
+    .pt-action-btn {
+        width: 34px; height: 34px; border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color); background: #fff;
+        display: inline-flex; align-items: center; justify-content: center;
+        color: var(--taupe); transition: all .15s; text-decoration: none;
+    }
+    .pt-action-btn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+    .pt-action-btn svg { width: 15px; height: 15px; }
+
+    .pt-empty {
+        text-align: center; padding: 3.5rem 2rem;
+        background: linear-gradient(135deg, #fff 0%, var(--bg-color) 100%);
+        border: 2px dashed var(--border-color); border-radius: var(--radius-lg);
+    }
+    .pt-empty-icon {
+        width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 1.2rem;
+        background: var(--soft-teal); display: flex; align-items: center; justify-content: center;
+    }
+    .pt-empty-icon svg { width: 28px; height: 28px; color: var(--primary-color); }
+
+    .pt-filter-input {
+        padding: .45rem .75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        font-size: .82rem; width: 100%;
+    }
+    .pt-filter-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(26,77,69,.1); }
+
+    @media (max-width: 768px) {
+        .pt-list-header { display: none; }
+        .pt-row {
+            display: flex; flex-direction: column; gap: .5rem;
+            padding: 1rem; border-radius: var(--radius-md); margin-bottom: .5rem;
+            border: 1px solid var(--border-color);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="st-page py-4 px-3">
+
+    <div class="st-hero mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p class="st-hero-eyebrow">Répertoire</p>
+                <h1>Mes patients</h1>
+                <p>Tous les animaux que vous avez consultés ou créés</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_health_book_entry_new') }}" class="btn" style="background: #fff; color: var(--primary-color); border: none; border-radius: var(--radius-md); font-size: .85rem; font-weight: 600; padding: .55rem 1.2rem; display: inline-flex; align-items: center; gap: .4rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nouvelle consultation
+                </a>
+            </div>
+        </div>
+        <form method="get" class="mt-3">
+            <div class="st-search-bar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" name="q" value="{{ query }}" placeholder="Rechercher par nom d'animal ou de propriétaire...">
+            </div>
+        </form>
+    </div>
+
+    {# Tabs #}
+    <div class="st-tabs">
+        <a href="{{ path('app_repertoire_reseau') }}" class="st-tab">Réseau</a>
+        <a href="{{ path('app_repertoire_structures') }}" class="st-tab">Structures</a>
+        <a href="{{ path('app_repertoire_patients') }}" class="st-tab active">Patients</a>
+    </div>
+
+    {% if patients is not empty %}
+
+        {# Stats #}
+        <div class="pt-stats">
+            <div class="pt-stat-card">
+                <div class="pt-stat-icon" style="background: var(--soft-teal);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </div>
+                <div>
+                    <div class="pt-stat-value">{{ total_patients }}</div>
+                    <div class="pt-stat-label">Patient{{ total_patients > 1 ? 's' : '' }}</div>
+                </div>
+            </div>
+            {% set total_consultations = 0 %}
+            {% for p in patients %}
+                {% set total_consultations = total_consultations + p.consultation_count %}
+            {% endfor %}
+            <div class="pt-stat-card">
+                <div class="pt-stat-icon" style="background: var(--soft-warm, #fdf6ee);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--accent-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div>
+                    <div class="pt-stat-value">{{ total_consultations }}</div>
+                    <div class="pt-stat-label">Consultation{{ total_consultations > 1 ? 's' : '' }}</div>
+                </div>
+            </div>
+        </div>
+
+        {# List #}
+        <div class="card anicare-card overflow-hidden">
+            <div class="card-body p-0">
+                <div class="pt-list">
+                    <div class="pt-list-header">
+                        <span>Animal</span>
+                        <span>Propriétaire</span>
+                        <span>Dernière consultation</span>
+                        <span>Consultations</span>
+                        <span></span>
+                    </div>
+
+                    {% for p in patients %}
+                        {% set animal = p.animal %}
+                        <div class="pt-row">
+                            {# Animal #}
+                            <div class="pt-animal">
+                                <div class="pt-animal-avatar">
+                                    {{ animal.name|first|upper }}
+                                </div>
+                                <div>
+                                    <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="pt-animal-name text-decoration-none d-block">
+                                        {{ animal.name }}
+                                    </a>
+                                    {% if animal.breed %}
+                                        <span class="pt-animal-breed">{{ animal.breed }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {# Owner #}
+                            <div>
+                                {% if animal.owner %}
+                                    <div class="pt-owner">
+                                        <div class="pt-owner-avatar">
+                                            {{ animal.owner.firstName|first|upper }}{{ animal.owner.lastName|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="pt-owner-name">{{ animal.owner.fullName }}</div>
+                                            {% if animal.owner.email %}
+                                                <div class="pt-owner-email">{{ animal.owner.email }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted fst-italic" style="font-size: .82rem;">Non renseigné</span>
+                                {% endif %}
+                            </div>
+
+                            {# Last consultation #}
+                            <div>
+                                {% if p.last_consultation_date %}
+                                    <div class="pt-date">{{ p.last_consultation_date|date('d/m/Y') }}</div>
+                                    {% set diff = date().diff(p.last_consultation_date) %}
+                                    {% set days_ago = diff.days %}
+                                    <div class="pt-date-relative">
+                                        {% if days_ago == 0 %}
+                                            Aujourd'hui
+                                        {% elseif days_ago == 1 %}
+                                            Hier
+                                        {% elseif days_ago < 30 %}
+                                            Il y a {{ days_ago }} jours
+                                        {% elseif days_ago < 365 %}
+                                            Il y a {{ (days_ago / 30)|round(0, 'floor') }} mois
+                                        {% else %}
+                                            Il y a {{ (days_ago / 365)|round(0, 'floor') }} an{{ (days_ago / 365)|round(0, 'floor') > 1 ? 's' : '' }}
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted fst-italic" style="font-size: .82rem;">—</span>
+                                {% endif %}
+                            </div>
+
+                            {# Count #}
+                            <div>
+                                <span class="pt-consult-count">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    {{ p.consultation_count }}
+                                </span>
+                            </div>
+
+                            {# Actions #}
+                            <div class="d-flex justify-content-end gap-1">
+                                <a href="{{ path('app_animal_show', {'slug': animal.slug}) }}" class="pt-action-btn" title="Voir la fiche">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                                <a href="{{ path('app_health_book_entry_index', {'animal': animal.id}) }}" class="pt-action-btn" title="Voir les consultations">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+
+        <div class="pt-empty">
+            <div class="pt-empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary-color); margin-bottom: .35rem;">
+                {% if query %}Aucun résultat pour "{{ query }}"{% else %}Aucun patient{% endif %}
+            </h2>
+            <p style="color: var(--taupe); font-size: .9rem; margin-bottom: 1.2rem;">
+                {% if query %}Essayez un autre terme de recherche.{% else %}Créez une consultation pour qu'un animal apparaisse ici.{% endif %}
+            </p>
+            <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary">Nouvelle consultation</a>
+        </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}

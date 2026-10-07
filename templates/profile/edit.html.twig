@@ -105,14 +105,6 @@
                                     {{ form_errors(form.experienceYears) }}
                                 </div>
 
-                                <div class="col-12">
-                                    {{ form_label(form.interventionDepartments, null, {'label_attr': {'class': 'form-label'}}) }}
-                                    {{ form_widget(form.interventionDepartments) }}
-                                    {% if form.interventionDepartments.vars.help %}
-                                        <div class="form-text mt-1">{{ form.interventionDepartments.vars.help }}</div>
-                                    {% endif %}
-                                    {{ form_errors(form.interventionDepartments) }}
-                                </div>
 
                                 {# Photos existantes #}
                                 {% set existingPhotos = app.user.profilePhotos ?? [] %}

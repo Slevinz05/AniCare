@@ -1,51 +1,54 @@
 {% set current_route = app.request.attributes.get('_route') %}
 
 <nav class="profile-sidebar">
-    <div class="profile-sidebar-header mb-3">
-        <div class="d-flex align-items-center gap-3 mb-2">
+    <div class="profile-sidebar-header">
+        <div class="d-flex align-items-center gap-3">
             <div class="profile-sidebar-avatar">
                 {{ app.user.firstName|default('?')|first|upper }}
             </div>
             <div>
-                <div class="fw-bold" style="color: var(--secondary-color);">{{ app.user.fullName }}</div>
-                <div class="small text-secondary">{{ app.user.email }}</div>
+                <div class="profile-sidebar-name">{{ app.user.fullName }}</div>
+                <div class="profile-sidebar-email">{{ app.user.email }}</div>
             </div>
         </div>
         {% if is_granted('ROLE_PRO') %}
-            <span class="badge bg-anicare-soft text-teal border-anicare" style="font-weight: 800; font-size: 0.65rem;">PRO</span>
+            <span class="profile-sidebar-badge">PRO</span>
         {% endif %}
     </div>
 
     <ul class="profile-nav list-unstyled mb-0">
         <li>
             <a href="{{ path('app_profile') }}" class="profile-nav-link {{ current_route == 'app_profile' ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="profile-nav-icon" style="--icon-bg: var(--soft-teal); --icon-color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
                 Mon profil
-            </a>
-        </li>
-        <li>
-            <a href="{{ path('app_profile_edit') }}" class="profile-nav-link {{ current_route == 'app_profile_edit' ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Modifier le profil
             </a>
         </li>
         {% if is_granted('ROLE_PRO') %}
             <li>
                 <a href="{{ path('app_profile_pro_settings') }}" class="profile-nav-link {{ current_route == 'app_profile_pro_settings' ? 'active' : '' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span class="profile-nav-icon" style="--icon-bg: #f0edff; --icon-color: #7c3aed;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </span>
                     Paramètres PRO
                 </a>
             </li>
         {% endif %}
         <li>
             <a href="{{ path('app_profile_password') }}" class="profile-nav-link {{ current_route == 'app_profile_password' ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span class="profile-nav-icon" style="--icon-bg: #fef3c7; --icon-color: #d97706;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
                 Mot de passe
             </a>
         </li>
-        <li class="mt-2 pt-2 border-top border-light">
-            <a href="{{ path('app_logout') }}" class="profile-nav-link text-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <li class="profile-nav-separator"></li>
+        <li>
+            <a href="{{ path('app_logout') }}" class="profile-nav-link profile-nav-link--danger">
+                <span class="profile-nav-icon" style="--icon-bg: #fef2f2; --icon-color: #dc3545;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </span>
                 Se déconnecter
             </a>
         </li>
@@ -55,46 +58,114 @@
 <style>
 .profile-sidebar {
     background: var(--card-bg, #fff);
-    border: 1px solid var(--border-color, #EDE6DB);
-    border-radius: 0.75rem;
-    padding: 1.25rem;
+    border: 1px solid rgba(26,77,69,0.08);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(26,77,69,0.06);
+}
+.profile-sidebar-header {
+    padding: 1.2rem 1.2rem 1rem;
+    background: linear-gradient(135deg, #f7fbfa 0%, var(--soft-teal, #eef7f5) 100%);
+    border-bottom: 1px solid rgba(26,77,69,0.07);
 }
 .profile-sidebar-avatar {
-    width: 42px;
-    height: 42px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color, #1a4d45), var(--primary-hover, #153d37));
+    background: linear-gradient(135deg, var(--primary-color, #1a4d45), #2a7a6e);
     color: #fff;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(26,77,69,0.25);
+}
+.profile-sidebar-name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--secondary-color, #4a3f33);
+    line-height: 1.3;
+}
+.profile-sidebar-email {
+    font-size: 0.75rem;
+    color: var(--text-muted, #8c8476);
+    line-height: 1.3;
+}
+.profile-sidebar-badge {
+    display: inline-block;
+    margin-top: 0.6rem;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: var(--primary-color, #1a4d45);
+    background: rgba(26,77,69,0.08);
+    border: 1px solid rgba(26,77,69,0.15);
+    border-radius: 6px;
+}
+.profile-nav {
+    padding: 0.5rem;
 }
 .profile-nav-link {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.55rem 0.75rem;
-    border-radius: 0.5rem;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
     text-decoration: none;
     color: var(--secondary-color, #4a3f33);
     font-size: 0.88rem;
-    font-weight: 500;
-    transition: all 0.15s;
+    font-weight: 600;
+    transition: all 0.18s;
 }
 .profile-nav-link:hover {
     background: var(--soft-teal, #eef7f5);
     color: var(--primary-color, #1a4d45);
+    transform: translateX(2px);
 }
 .profile-nav-link.active {
     background: var(--primary-color, #1a4d45);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(26,77,69,0.25);
 }
-.profile-nav-link.active svg {
+.profile-nav-link.active .profile-nav-icon {
+    background: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+}
+.profile-nav-link.active .profile-nav-icon svg {
     stroke: #fff;
 }
-.profile-nav-link.text-danger:hover {
+.profile-nav-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--icon-bg);
+    color: var(--icon-color);
+    transition: all 0.18s;
+}
+.profile-nav-icon svg {
+    stroke: var(--icon-color);
+}
+.profile-nav-link:hover .profile-nav-icon {
+    transform: scale(1.08);
+}
+.profile-nav-link--danger {
+    color: #b91c1c;
+}
+.profile-nav-link--danger:hover {
     background: #fef2f2;
+    color: #dc3545;
+}
+.profile-nav-separator {
+    height: 1px;
+    background: rgba(26,77,69,0.07);
+    margin: 0.35rem 0.75rem;
 }
 </style>

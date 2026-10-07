@@ -12,8 +12,15 @@
         <div class="col-12 col-lg-9">
             <div class="card anicare-card mb-4">
                 <div class="card-body p-4">
-                    <p class="page-eyebrow mb-2">Informations personnelles</p>
-                    <h2 class="h5 page-title mb-4">Identité</h2>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="page-eyebrow mb-2">Informations personnelles</p>
+                            <h2 class="h5 page-title mb-4">Identité</h2>
+                        </div>
+                        <a href="{{ path('app_profile_edit') }}" class="btn-edit-pencil" title="Modifier le profil">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </a>
+                    </div>
 
                     <div class="table-responsive">
                         <table class="table table-hover table-medical align-middle mb-0">
@@ -62,97 +69,200 @@
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-12 col-md-6">
-                    <div class="card anicare-card h-100">
-                        <div class="card-body p-4">
+            <div class="card anicare-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
                             <p class="page-eyebrow mb-2">Paramètres</p>
-                            <h2 class="h5 page-title mb-3">Compte</h2>
+                            <h2 class="h5 page-title mb-0">Compte{% if is_granted('ROLE_PRO') %} & PRO{% endif %}</h2>
+                        </div>
+                        {% if is_granted('ROLE_PRO') %}
+                            <a href="{{ path('app_profile_pro_settings') }}" class="btn-edit-pencil" title="Configurer les paramètres PRO">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            </a>
+                        {% endif %}
+                    </div>
 
-                            <div class="mb-3">
-                                <span class="small fw-bold text-secondary d-block mb-1">Type de compte</span>
-                                {% if is_granted('ROLE_PRO') %}
-                                    <span class="badge bg-anicare-soft text-teal border-anicare" style="font-weight: 800;">PRO</span>
-                                {% else %}
-                                    <span class="badge bg-light text-secondary border">Particulier</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                <span class="small fw-bold text-secondary d-block mb-1">Notifications e-mail</span>
-                                {% if app.user.acceptsNotifications %}
-                                    <span class="text-success small">Activées</span>
-                                {% else %}
-                                    <span class="text-secondary small">Désactivées</span>
-                                {% endif %}
-                            </div>
-
+                    <div class="profile-settings-grid">
+                        {# ── Type de compte ── #}
+                        <div class="profile-setting-item">
+                            <span class="profile-setting-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
                             <div>
-                                <span class="small fw-bold text-secondary d-block mb-1">Chevaux</span>
+                                <span class="profile-setting-label">Type de compte</span>
+                                {% if is_granted('ROLE_PRO') %}
+                                    <span class="badge bg-anicare-soft text-teal border-anicare" style="font-weight: 800; font-size: 0.65rem;">PRO</span>
+                                {% else %}
+                                    <span class="badge bg-light text-secondary border" style="font-size: 0.65rem;">Particulier</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {# ── Notifications ── #}
+                        <div class="profile-setting-item">
+                            <span class="profile-setting-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            </span>
+                            <div>
+                                <span class="profile-setting-label">Notifications</span>
+                                {% if app.user.acceptsNotifications %}
+                                    <span class="small text-success">Activées</span>
+                                {% else %}
+                                    <span class="small text-secondary">Désactivées</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {# ── Chevaux ── #}
+                        <div class="profile-setting-item">
+                            <span class="profile-setting-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 512 512" fill="currentColor"><path d="M0 464V316.9C0 208.5 68.3 111.8 170.5 75.6L340.2 15.5C361.6 7.9 384 23.8 384 46.4c0 11-5.5 21.2-14.6 27.3L336 96c48.1 0 91.2 29.8 108.1 74.9l48.6 129.5c11.8 31.4 4.1 66.8-19.6 90.5c-16 16-37.8 25.1-60.5 25.1h-3.4c-26.1 0-50.9-11.6-67.6-31.7l-32.3-38.7c-11.7 4.1-24.2 6.4-37.3 6.4c-6.3 0-12.5-.5-18.6-1.5c-3.6-.6-7.2-1.4-10.7-2.3c-28.9-7.8-53.1-26.8-67.8-52.2c-4.4-7.6-14.2-10.3-21.9-5.8s-10.3 14.2-5.8 21.9c24 41.5 68.3 70 119.3 71.9l47.2 70.8c4 6.1 6.2 13.2 6.2 20.4c0 20.3-16.5 36.8-36.8 36.8H48c-26.5 0-48-21.5-48-48zm328-240a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
+                            </span>
+                            <div>
+                                <span class="profile-setting-label">Chevaux</span>
                                 <span class="small">{{ app.user.animals|length }} enregistré{{ app.user.animals|length > 1 ? 's' : '' }}</span>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {% if is_granted('ROLE_PRO') %}
-                <div class="col-12 col-md-6">
-                    <div class="card anicare-card h-100">
-                        <div class="card-body p-4">
-                            <p class="page-eyebrow mb-2">Professionnel</p>
-                            <h2 class="h5 page-title mb-3">Paramètres PRO</h2>
-
-                            <div class="mb-3">
-                                <span class="small fw-bold text-secondary d-block mb-1">Visibilité annuaire</span>
-                                {% if app.user.directoryVisible %}
-                                    <span class="text-success small">Visible</span>
-                                {% else %}
-                                    <span class="text-secondary small">Masqué</span>
-                                {% endif %}
+                        {% if is_granted('ROLE_PRO') %}
+                            {# ── Annuaire ── #}
+                            <div class="profile-setting-item">
+                                <span class="profile-setting-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                </span>
+                                <div>
+                                    <span class="profile-setting-label">Annuaire</span>
+                                    {% if app.user.directoryVisible %}
+                                        <span class="small text-success">Visible</span>
+                                    {% else %}
+                                        <span class="small text-secondary">Masqué</span>
+                                    {% endif %}
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <span class="small fw-bold text-secondary d-block mb-1">Durée de séance</span>
-                                <span class="small">{{ app.user.defaultConsultationDuration ? app.user.defaultConsultationDuration ~ ' min' : 'Non définie' }}</span>
+                            {# ── Durée de séance ── #}
+                            <div class="profile-setting-item">
+                                <span class="profile-setting-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </span>
+                                <div>
+                                    <span class="profile-setting-label">Séance</span>
+                                    <span class="small">{{ app.user.defaultConsultationDuration ? app.user.defaultConsultationDuration ~ ' min' : 'Non définie' }}</span>
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <span class="small fw-bold text-secondary d-block mb-1">Visibilité horaires</span>
-                                {% if app.user.openingHoursVisible %}
-                                    <span class="text-success small">Visibles</span>
-                                {% else %}
-                                    <span class="text-secondary small">Masqués</span>
-                                {% endif %}
-                            </div>
+                            {# ── Départements d'intervention ── #}
+                            {% if app.user.interventionDepartments is not empty %}
+                                <div class="profile-setting-item">
+                                    <span class="profile-setting-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    </span>
+                                    <div>
+                                        <span class="profile-setting-label">Départements</span>
+                                        <span class="small">{{ app.user.interventionDepartments|length }} sélectionné{{ app.user.interventionDepartments|length > 1 ? 's' : '' }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
 
+                            {# ── Horaires ── #}
                             {% set hours = app.user.openingHours ?? [] %}
                             {% set hasHours = false %}
                             {% for day, data in hours %}
                                 {% if data.enabled|default(false) %}{% set hasHours = true %}{% endif %}
                             {% endfor %}
-                            <div>
-                                <span class="small fw-bold text-secondary d-block mb-1">Horaires</span>
-                                {% if hasHours %}
-                                    {% set dayLabels = {lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu', vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'} %}
-                                    {% for day, data in hours %}
-                                        {% if data.enabled|default(false) %}
-                                            <div class="small">
-                                                <strong>{{ dayLabels[day]|default(day) }}</strong> {{ data.start }} – {{ data.end }}
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="small text-secondary">Non définis</span>
-                                {% endif %}
+                            <div class="profile-setting-item">
+                                <span class="profile-setting-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                </span>
+                                <div>
+                                    <span class="profile-setting-label">Horaires</span>
+                                    {% if hasHours %}
+                                        {% set dayLabels = {lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu', vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim'} %}
+                                        {% set enabledDays = [] %}
+                                        {% for day, data in hours %}
+                                            {% if data.enabled|default(false) %}
+                                                {% set enabledDays = enabledDays|merge([dayLabels[day]|default(day)]) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="small">{{ enabledDays|join(', ') }}</span>
+                                    {% else %}
+                                        <span class="small text-secondary">Non définis</span>
+                                    {% endif %}
+                                </div>
                             </div>
-
-                            <a href="{{ path('app_profile_pro_settings') }}" class="btn btn-outline-primary btn-sm mt-3">Configurer</a>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.btn-edit-pencil {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--soft-teal);
+    color: var(--primary-color);
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid rgba(26,77,69,0.1);
+    flex-shrink: 0;
+}
+.btn-edit-pencil:hover {
+    background: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(26,77,69,0.2);
+}
+.profile-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+.profile-setting-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.7rem;
+    border-radius: 10px;
+    background: #fafaf8;
+    border: 1px solid rgba(26,77,69,0.05);
+    transition: all 0.15s;
+}
+.profile-setting-item:hover {
+    background: var(--soft-teal);
+    border-color: rgba(26,77,69,0.1);
+}
+.profile-setting-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--soft-teal);
+    color: var(--primary-color);
+}
+.profile-setting-icon svg {
+    stroke: var(--primary-color);
+    fill: none;
+}
+.profile-setting-icon svg[fill="currentColor"] {
+    fill: var(--primary-color);
+    stroke: none;
+}
+.profile-setting-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    margin-bottom: 1px;
+}
+</style>
 {% endblock %}

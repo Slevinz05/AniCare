@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\HealthBookEntryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -105,6 +107,27 @@ class HealthBookEntry
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $shareMode = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $shareStructureMode = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $behaviorScore = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $bodyConditionScore = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $workDone = null;
+
+    /** @var Collection<int, HealthBookEntryShare> */
+    #[ORM\OneToMany(targetEntity: HealthBookEntryShare::class, mappedBy: 'entry', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $shares;
+
+    public function __construct()
+    {
+        $this->shares = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -545,6 +568,104 @@ class HealthBookEntry
     public function setShareMode(?string $shareMode): static
     {
         $this->shareMode = $shareMode;
+        return $this;
+    }
+
+    public function getShareStructureMode(): ?string
+    {
+        return $this->shareStructureMode;
+    }
+
+    public function setShareStructureMode(?string $shareStructureMode): static
+    {
+        $this->shareStructureMode = $shareStructureMode;
+        return $this;
+    }
+
+    /** @return Collection<int, HealthBookEntryShare> */
+    public function getShares(): Collection
+    {
+        return $this->shares;
+    }
+
+    public function addShare(HealthBookEntryShare $share): static
+    {
+        if (!$this->shares->contains($share)) {
+            $this->shares->add($share);
+            $share->setEntry($this);
+        }
+        return $this;
+    }
+
+    public function removeShare(HealthBookEntryShare $share): static
+    {
+        $this->shares->removeElement($share);
+        return $this;
+    }
+
+    public function getShareModeFor(User $user): ?string
+    {
+        foreach ($this->shares as $share) {
+            if ($share->getSharedWithUser() === $user) {
+                return $share->getMode();
+            }
+            if ($share->getSharedWithEmail() === $user->getEmail()) {
+                return $share->getMode();
+            }
+            if ($share->getSharedWithStructure()) {
+                foreach ($share->getSharedWithStructure()->getMemberships() as $membership) {
+                    if ($membership->getUser() === $user) {
+                        return $share->getMode();
+                    }
+                }
+            }
+        }
+
+        // Fallback: anciens champs (données pré-migration)
+        if ($this->sharedWithUser === $user || $this->sharedWithEmail === $user->getEmail()) {
+            return $this->shareMode ?? 'readonly';
+        }
+        if ($this->sharedWithStructure) {
+            foreach ($this->sharedWithStructure->getMemberships() as $membership) {
+                if ($membership->getUser() === $user) {
+                    return $this->shareStructureMode ?? 'summary';
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function getBehaviorScore(): ?int
+    {
+        return $this->behaviorScore;
+    }
+
+    public function setBehaviorScore(?int $behaviorScore): static
+    {
+        $this->behaviorScore = $behaviorScore;
+        return $this;
+    }
+
+    public function getBodyConditionScore(): ?int
+    {
+        return $this->bodyConditionScore;
+    }
+
+    public function setBodyConditionScore(?int $bodyConditionScore): static
+    {
+        $this->bodyConditionScore = $bodyConditionScore;
+        return $this;
+    }
+
+    public function getWorkDone(): ?int
+    {
+        return $this->workDone;
+    }
+
+    public function setWorkDone(?int $workDone): static
+    {
+        $this->workDone = $workDone;
         return $this;
     }
 }

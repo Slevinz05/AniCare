@@ -30,7 +30,7 @@ class RegistrationController extends AbstractController
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
             $accountType = $user->getAccountType();
-            if ($accountType === 'PRO') {
+            if ($accountType === 'PRO' || $accountType === 'BOTH') {
                 $user->setRoles(['ROLE_PRO']);
             } elseif ($accountType === 'STRUCTURE') {
                 $user->setRoles(['ROLE_STRUCTURE']);

@@ -44,17 +44,55 @@
                         <div class="form-text text-secondary">Minimum 12 caractères, une majuscule, une minuscule et un chiffre.</div>
                     </div>
 
-                    {# Champ Type de Profil (Boutons Radio intégrés) #}
+                    {# Champ Type de Profil — deux groupes visuels #}
                     <div class="mb-4">
                         {{ form_label(registrationForm.accountType, null, {'label_attr': {'class': 'form-label'}}) }}
-                        <div class="anicare-radio-group d-flex flex-column gap-2">
+
+                        {# Groupe 1 : Individuel #}
+                        <div class="register-group">
+                            <div class="register-group__label">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Individuel</span>
+                            </div>
                             {% for child in registrationForm.accountType %}
-                                <div class="anicare-radio-item d-flex align-items-center">
-                                    {{ form_widget(child, {'attr': {'class': 'form-check-input me-2 m-0'}}) }}
-                                    {{ form_label(child, null, {'label_attr': {'class': 'form-check-label w-100 style-pointer'}}) }}
-                                </div>
+                                {% if child.vars.value in ['OWNER', 'PRO', 'BOTH'] %}
+                                    <div class="register-radio-card {% if child.vars.value == 'BOTH' %}register-radio-card--accent{% endif %}">
+                                        {{ form_widget(child, {'attr': {'class': 'form-check-input m-0'}}) }}
+                                        <div class="register-radio-card__content">
+                                            {{ form_label(child, null, {'label_attr': {'class': 'form-check-label style-pointer'}}) }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="register-space-hint mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <span>Pas sûr ? Vous pourrez ajouter un espace professionnel ou particulier plus tard depuis votre profil.</span>
+                            </div>
+                        </div>
+
+                        {# Séparateur #}
+                        <div class="register-separator">
+                            <span>ou</span>
+                        </div>
+
+                        {# Groupe 2 : Structure #}
+                        <div class="register-group">
+                            <div class="register-group__label">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                <span>Structure</span>
+                            </div>
+                            {% for child in registrationForm.accountType %}
+                                {% if child.vars.value == 'STRUCTURE' %}
+                                    <div class="register-radio-card">
+                                        {{ form_widget(child, {'attr': {'class': 'form-check-input m-0'}}) }}
+                                        <div class="register-radio-card__content">
+                                            {{ form_label(child, null, {'label_attr': {'class': 'form-check-label style-pointer'}}) }}
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
+
                         {% if registrationForm.accountType.vars.errors|length %}
                             <div class="text-danger small mt-1">{{ form_errors(registrationForm.accountType) }}</div>
                         {% endif %}
@@ -96,11 +134,109 @@
 </div>
 
 <style>
-    .style-pointer {
+    .style-pointer { cursor: pointer; }
+    .letter-spacing-wide { letter-spacing: 0.05em; }
+
+    /* Groupes de profil */
+    .register-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .register-group__label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--primary-color, #1a4d45);
+        opacity: 0.6;
+        margin-bottom: 0.1rem;
+    }
+    .register-group__label svg {
+        opacity: 0.7;
+    }
+
+    /* Cartes radio */
+    .register-radio-card {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 0.55rem;
+        border: 1.5px solid var(--border-color, #EDE6DB);
+        background: #fff;
+        transition: all 0.15s ease;
         cursor: pointer;
     }
-    .letter-spacing-wide {
-        letter-spacing: 0.05em;
+    .register-radio-card:hover {
+        border-color: var(--primary-color, #1a4d45);
+        background: var(--soft-teal, #eef7f5);
+    }
+    .register-radio-card:has(input:checked) {
+        border-color: var(--primary-color, #1a4d45);
+        background: var(--soft-teal, #eef7f5);
+        box-shadow: 0 0 0 1px var(--primary-color, #1a4d45);
+    }
+    .register-radio-card__content {
+        flex: 1;
+    }
+    .register-radio-card__content .form-check-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #333;
+        line-height: 1.35;
+    }
+
+    /* Variante accent pour "Les deux" */
+    .register-radio-card--accent {
+        border-color: rgba(200,151,62,0.25);
+        background: rgba(200,151,62,0.04);
+    }
+    .register-radio-card--accent:has(input:checked) {
+        border-color: var(--accent-color, #C8973E);
+        background: rgba(200,151,62,0.08);
+        box-shadow: 0 0 0 1px var(--accent-color, #C8973E);
+    }
+
+    /* Séparateur "ou" */
+    .register-separator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0.65rem 0;
+    }
+    .register-separator::before,
+    .register-separator::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-color, #EDE6DB);
+    }
+    .register-separator span {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #999;
+    }
+
+    /* Hint info */
+    .register-space-hint {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+        font-size: 0.73rem;
+        color: var(--primary-color, #1a4d45);
+        opacity: 0.7;
+        padding: 0.15rem 0.2rem;
+        line-height: 1.35;
+    }
+    .register-space-hint svg {
+        flex-shrink: 0;
+        margin-top: 0.1rem;
     }
 </style>
 {% endblock %}

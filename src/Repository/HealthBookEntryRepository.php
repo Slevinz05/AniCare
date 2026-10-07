@@ -17,26 +17,55 @@ class HealthBookEntryRepository extends ServiceEntityRepository
         parent::__construct($registry, HealthBookEntry::class);
     }
 
-    public function findAccessibleByUser(User $user, bool $isPro = false): array
+    public function findAccessibleByUser(User $user, bool $isPro = false, array $filters = []): array
     {
         if ($isPro) {
-            return $this->createQueryBuilder('h')
+            $qb = $this->createQueryBuilder('h')
+                ->leftJoin('h.animal', 'a')
                 ->where('h.veterinarian = :user')
+                ->setParameter('user', $user);
+        } else {
+            $qb = $this->createQueryBuilder('h')
+                ->innerJoin('h.animal', 'a')
+                ->leftJoin('a.animalShares', 's')
+                ->where('(a.owner = :user OR s.sharedWithEmail = :email)')
+                ->andWhere('h.status IN (:visibleStatuses) OR h.veterinarian = :user OR h.createdBy = :user')
                 ->setParameter('user', $user)
-                ->orderBy('h.date', 'DESC')
-                ->getQuery()
-                ->getResult();
+                ->setParameter('email', $user->getEmail())
+                ->setParameter('visibleStatuses', ['published', 'shared']);
         }
 
-        return $this->createQueryBuilder('h')
-            ->innerJoin('h.animal', 'a')
-            ->leftJoin('a.animalShares', 's')
-            ->where('(a.owner = :user OR s.sharedWithEmail = :email)')
-            ->andWhere('h.status IN (:visibleStatuses) OR h.veterinarian = :user OR h.createdBy = :user')
-            ->setParameter('user', $user)
-            ->setParameter('email', $user->getEmail())
-            ->setParameter('visibleStatuses', ['published', 'shared'])
-            ->orderBy('h.date', 'DESC')
+        if (!empty($filters['animal_id'])) {
+            $qb->andWhere('a.id = :animalId')
+                ->setParameter('animalId', $filters['animal_id']);
+        }
+
+        if (!empty($filters['type'])) {
+            $qb->andWhere('h.type = :type')
+                ->setParameter('type', $filters['type']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $qb->andWhere('h.date >= :dateFrom')
+                ->setParameter('dateFrom', new \DateTimeImmutable($filters['date_from']));
+        }
+
+        if (!empty($filters['date_to'])) {
+            $qb->andWhere('h.date <= :dateTo')
+                ->setParameter('dateTo', new \DateTimeImmutable($filters['date_to'] . ' 23:59:59'));
+        }
+
+        if (!empty($filters['status'])) {
+            $qb->andWhere('h.status = :filterStatus')
+                ->setParameter('filterStatus', $filters['status']);
+        }
+
+        if (!empty($filters['q'])) {
+            $qb->andWhere('LOWER(a.name) LIKE LOWER(:searchQ) OR LOWER(h.title) LIKE LOWER(:searchQ) OR LOWER(h.description) LIKE LOWER(:searchQ)')
+                ->setParameter('searchQ', '%' . $filters['q'] . '%');
+        }
+
+        return $qb->orderBy('h.date', 'DESC')
             ->getQuery()
             ->getResult();
     }

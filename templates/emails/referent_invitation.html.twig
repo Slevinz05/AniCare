@@ -1,0 +1,36 @@
+<h2>Vous êtes désigné(e) comme référent(e) sur AniCare</h2>
+
+<p>Bonjour {{ referent_name }},</p>
+
+<p>
+    <strong>{{ sender_name }}</strong> vous a désigné(e) comme référent(e) principal(e)
+    de <strong>{{ animal_name }}</strong> sur AniCare.
+</p>
+
+<p>
+    En tant que référent, vous pouvez suivre le dossier médical de votre cheval, consulter les comptes rendus
+    et recevoir les rappels de soins.
+</p>
+
+{% if is_new_user and activation_url is defined and activation_url %}
+<p>
+    Un compte AniCare a été créé pour vous avec l'adresse <strong>{{ referent_email }}</strong>.
+    Cliquez sur le bouton ci-dessous pour activer votre compte et choisir votre mot de passe :
+</p>
+
+<p>
+    <a href="{{ activation_url }}" style="display: inline-block; padding: 12px 24px; background: #1a4d45; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        Activer mon compte
+    </a>
+</p>
+{% else %}
+<p>
+    <a href="{{ app_url }}" style="display: inline-block; padding: 12px 24px; background: #1a4d45; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        Accéder à AniCare
+    </a>
+</p>
+
+<p style="color: #64748b; font-size: 0.85em; margin-top: 30px;">
+    Connectez-vous avec votre adresse <strong>{{ referent_email }}</strong> pour accéder au dossier.
+</p>
+{% endif %}

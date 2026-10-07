@@ -146,6 +146,14 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                {% if principal_referent.user == app.user %}
+                                    <div class="mt-3 pt-3 border-top">
+                                        <a href="{{ path('app_referent_transfer', {animalId: animal.id}) }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" style="border-radius: 6px; font-size: 0.75rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                                            Proposer un transfert
+                                        </a>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="d-flex align-items-center gap-3 mb-3">
                                     <div class="rounded-circle bg-anicare-soft d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
@@ -156,6 +164,14 @@
                                         <span class="text-secondary small">{{ animal.owner.email }}</span>
                                     </div>
                                 </div>
+                                {% if animal.owner == app.user %}
+                                    <div class="mt-2 pt-2 border-top">
+                                        <a href="{{ path('app_referent_transfer', {animalId: animal.id}) }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" style="border-radius: 6px; font-size: 0.75rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                                            Proposer un transfert
+                                        </a>
+                                    </div>
+                                {% endif %}
                             {% endif %}
                         </div>
 

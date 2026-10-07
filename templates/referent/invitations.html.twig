@@ -78,17 +78,69 @@
         </div>
     </div>
 
+    {% set transfers = invitations|filter(i => i.isPrincipal()) %}
+    {% set secondaires = invitations|filter(i => i.isSecondaire()) %}
+
     {% if invitations is empty %}
         <div class="empty-invitations">
             <div class="mb-3" style="width: 56px; height: 56px; border-radius: 50%; background: var(--soft-teal); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
             <h2 style="font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: 0.3rem;">Aucune invitation en attente</h2>
-            <p class="text-secondary" style="font-size: 0.9rem;">Vous n'avez pas d'invitation de référent secondaire pour le moment.</p>
+            <p class="text-secondary" style="font-size: 0.9rem;">Vous n'avez pas d'invitation pour le moment.</p>
         </div>
     {% else %}
         <div class="d-flex flex-column gap-3">
-            {% for invitation in invitations %}
+            {# Transferts de principal en premier #}
+            {% for invitation in transfers %}
+                <div class="invitation-card" style="border-left: 4px solid #dc3545;">
+                    <div class="invitation-header">
+                        <div class="invitation-avatar" style="background: #dc3545;">
+                            {{ invitation.animal.name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.95rem;">{{ invitation.animal.name }}</div>
+                            <div class="text-secondary" style="font-size: 0.8rem;">
+                                {{ invitation.animal.species|default('Cheval') }}
+                                {% if invitation.animal.breed %} · {{ invitation.animal.breed }}{% endif %}
+                            </div>
+                        </div>
+                        <span class="role-pill ms-auto" style="background: #fef2f2; color: #dc3545;">Transfert principal</span>
+                    </div>
+                    <div class="invitation-body">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                            <span style="font-size: 0.85rem;">
+                                <strong>{{ invitation.designatedBy ? invitation.designatedBy.fullName : 'Inconnu' }}</strong> vous propose de devenir référent principal
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span style="font-size: 0.85rem;">Rôle : <strong>{{ invitation.roleLabel }}</strong></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <span style="font-size: 0.85rem; color: #6c757d;">{{ invitation.designatedAt|date('d/m/Y à H:i') }}</span>
+                        </div>
+                    </div>
+                    <div class="invitation-actions">
+                        <form method="post" action="{{ path('app_referent_accept_transfer', {id: invitation.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('accept_transfer' ~ invitation.id) }}">
+                            <button type="submit" class="btn-accept" onclick="return confirm('Accepter de devenir référent principal de {{ invitation.animal.name }} ?');">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1" style="vertical-align: -1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                Accepter le transfert
+                            </button>
+                        </form>
+                        <form method="post" action="{{ path('app_referent_cancel_transfer', {id: invitation.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('cancel_transfer' ~ invitation.id) }}">
+                            <button type="submit" class="btn-refuse">Refuser</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {# Invitations secondaires #}
+            {% for invitation in secondaires %}
                 <div class="invitation-card">
                     <div class="invitation-header">
                         <div class="invitation-avatar" style="background: var(--primary-color);">

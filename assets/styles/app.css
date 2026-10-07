@@ -414,49 +414,155 @@ a:hover {
     border: 1.5px solid rgba(255,255,255,0.35);
 }
 .profile-dropdown-menu {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0.5rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    min-width: 240px;
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 12px 40px rgba(26,77,69,0.15), 0 2px 8px rgba(0,0,0,0.06);
+    min-width: 260px;
+    overflow: hidden;
 }
 .profile-dropdown-header {
-    padding: 0.6rem 0.75rem;
+    padding: 1.1rem 1.1rem 0.9rem;
     white-space: normal;
     color: var(--secondary-color);
+    background: linear-gradient(135deg, #f7fbfa 0%, var(--soft-teal) 100%);
+    border-bottom: 1px solid rgba(26,77,69,0.07);
 }
 .profile-dropdown-avatar {
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    background: linear-gradient(135deg, var(--primary-color), #2a7a6e);
     color: #fff;
-    font-weight: 700;
-    font-size: 0.9rem;
+    font-weight: 800;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(26,77,69,0.25);
+}
+.profile-dropdown-menu .profile-dropdown-items {
+    padding: 0.45rem 0.5rem;
 }
 .profile-dropdown-menu .dropdown-item {
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    padding: 0.55rem 0.8rem;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--secondary-color);
     transition: all 0.15s;
 }
 .profile-dropdown-menu .dropdown-item:hover {
     background: var(--soft-teal);
     color: var(--primary-color);
+    transform: translateX(2px);
+}
+.profile-dropdown-menu .dropdown-item .profile-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+.profile-dropdown-menu .dropdown-item:hover .profile-item-icon {
+    transform: scale(1.08);
 }
 .profile-dropdown-menu .dropdown-item.text-danger:hover {
     background: #fef2f2;
     color: var(--danger-color);
 }
 .profile-dropdown-menu .dropdown-divider {
-    margin: 0.3rem 0;
-    border-color: var(--border-color);
+    margin: 0;
+    border-color: rgba(26,77,69,0.07);
+}
+.profile-dropdown-footer {
+    padding: 0.45rem 0.5rem;
+    background: #fafaf8;
+    border-top: 1px solid rgba(26,77,69,0.07);
+}
+/* ── Space badge (header) ── */
+.navbar-space-badge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2rem;
+    line-height: 1;
+    text-transform: uppercase;
+}
+.navbar-space-badge--pro {
+    background: rgba(200,151,62,0.35);
+    color: #fff;
+    border: 1px solid rgba(200,151,62,0.5);
+}
+.navbar-space-badge--perso {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+.navbar-space-badge--structure {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* ── Space switcher (header quick toggle) ── */
+.navbar-space-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2rem;
+    padding: 2px;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+.navbar-space-switcher__btn {
+    background: none;
+    border: 1px solid transparent;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+}
+.navbar-space-switcher__btn:hover {
+    color: rgba(255,255,255,0.8);
+}
+.navbar-space-switcher__btn--active {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    cursor: default;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.navbar-space-switcher__btn--pro.navbar-space-switcher__btn--active {
+    background: rgba(200,151,62,0.4);
+    border: 1px solid rgba(200,151,62,0.5);
+}
+
+.btn-switch-space {
+    background: var(--soft-teal);
+    color: var(--primary-color);
+    border: 1px solid rgba(26,77,69,0.12);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.45rem 0.75rem;
+    transition: all 0.2s;
+}
+.btn-switch-space:hover {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
 }
 
 /* ==========================================================================

@@ -100,20 +100,20 @@
             .qa-fiche:hover { border-color: var(--primary-color); background: var(--soft-teal); }
 
             .qa-repertoire { background: #fff; color: var(--secondary-color); }
-            .qa-repertoire .qa-icon { background: #dbeafe; color: #2563eb; }
-            .qa-repertoire:hover { border-color: #2563eb; background: #eff6ff; }
+            .qa-repertoire .qa-icon { background: var(--soft-teal); color: var(--primary-color); }
+            .qa-repertoire:hover { border-color: var(--primary-color); background: var(--soft-teal); }
 
             .qa-consultation { background: var(--soft-teal); color: var(--primary-color); border: 2px dashed rgba(26,77,69,0.35); }
             .qa-consultation .qa-icon { background: rgba(26,77,69,0.12); color: var(--primary-color); }
             .qa-consultation:hover { border-color: var(--primary-color); background: #e0f2f0; box-shadow: 0 8px 24px rgba(26, 77, 69, 0.15); }
 
             .qa-agenda { background: #fff; color: var(--secondary-color); }
-            .qa-agenda .qa-icon { background: #fef3c7; color: #d97706; }
-            .qa-agenda:hover { border-color: #d97706; background: #fffbeb; }
+            .qa-agenda .qa-icon { background: var(--soft-warm); color: var(--accent-color); }
+            .qa-agenda:hover { border-color: var(--accent-color); background: var(--soft-warm); }
 
             .qa-factures { background: #fff; color: var(--secondary-color); }
-            .qa-factures .qa-icon { background: #ede9fe; color: #7c3aed; }
-            .qa-factures:hover { border-color: #7c3aed; background: #f5f3ff; }
+            .qa-factures .qa-icon { background: rgba(26,77,69,0.08); color: var(--secondary-color); }
+            .qa-factures:hover { border-color: var(--secondary-color); background: #f5f5f3; }
 
             .qa-rdv { background: #fff; color: var(--secondary-color); }
             .qa-rdv .qa-icon { background: var(--accent-color); color: #fff; }
@@ -190,13 +190,7 @@
                 background: #fff;
             }
             .section-card::after {
-                content: '';
-                position: absolute;
-                bottom: 0; left: 0; right: 0;
-                height: 40%;
-                border-radius: 50% 50% 0 0 / 80% 80% 0 0;
-                opacity: 0.45;
-                pointer-events: none;
+                content: none;
                 z-index: 0;
             }
             .section-card > * { position: relative; z-index: 1; }
@@ -207,33 +201,21 @@
             }
             .section-card-body { padding: 1rem 1.5rem 1.5rem; }
 
-            .section-card.card-teal {
-                background: linear-gradient(180deg, #ffffff 0%, #eef7f5 100%);
-                border-color: #d5ebe7;
-            }
-            .section-card.card-teal::after { background: none; }
-            .section-card.card-teal .section-card-header { border-bottom-color: rgba(26, 77, 69, 0.08); }
-
-            .section-card.card-purple {
-                background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%);
-                border-color: #ede9fe;
-            }
-            .section-card.card-purple::after { background: none; }
-            .section-card.card-purple .section-card-header { border-bottom-color: rgba(124, 58, 237, 0.08); }
-
-            .section-card.card-amber {
-                background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
-                border-color: #fef3c7;
-            }
-            .section-card.card-amber::after { background: none; }
-            .section-card.card-amber .section-card-header { border-bottom-color: rgba(217, 119, 6, 0.08); }
-
+            .section-card.card-teal,
+            .section-card.card-purple,
+            .section-card.card-amber,
             .section-card.card-blue {
-                background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
-                border-color: #dbeafe;
+                background: #fff;
+                border-color: var(--border-color);
             }
+            .section-card.card-teal::after,
+            .section-card.card-purple::after,
+            .section-card.card-amber::after,
             .section-card.card-blue::after { background: none; }
-            .section-card.card-blue .section-card-header { border-bottom-color: rgba(37, 99, 235, 0.08); }
+            .section-card.card-teal .section-card-header,
+            .section-card.card-purple .section-card-header,
+            .section-card.card-amber .section-card-header,
+            .section-card.card-blue .section-card-header { border-bottom-color: var(--border-color); }
 
             .section-icon {
                 width: 32px; height: 32px;
@@ -285,6 +267,25 @@
             }
             .agenda-event.event-appointment { border-left-color: var(--accent-color); }
             .agenda-event.event-consultation { border-left-color: var(--primary-color); }
+            .agenda-event.event-past {
+                opacity: 0.5;
+                background: #f8f8f8 !important;
+            }
+            .agenda-event.event-past:hover { opacity: 0.75; }
+            .agenda-separator {
+                display: flex; align-items: center; gap: 0.75rem;
+                margin: 0.5rem 0;
+                font-size: 0.75rem; font-weight: 700;
+                color: var(--primary-color);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .agenda-separator::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: var(--border-color);
+            }
 
             .draft-item {
                 display: flex; align-items: center; gap: 0.75rem;
@@ -376,13 +377,13 @@
                         </p>
                         <p class="hero-email mb-0">
                             {{ app.user.userIdentifier }}
-                            {% if is_granted('ROLE_PRO') %}
+                            {% if app.user.isInProSpace() %}
                                 <span style="background: rgba(200,151,62,0.3); border: 1px solid rgba(200,151,62,0.5); padding: 0.15rem 0.5rem; border-radius: 2rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.05em; margin-left: 0.5rem;">PRO</span>
                             {% endif %}
                         </p>
                     </div>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
-                        {% if is_granted('ROLE_PRO') %}
+                        {% if app.user.isInProSpace() %}
                             <a href="{{ path('app_profile_pro_settings') }}" class="btn-hero text-decoration-none d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px; padding: 0; border-radius: 50%;" title="Paramètres">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                             </a>
@@ -395,7 +396,7 @@
                     </div>
                 </div>
 
-                {% if not is_granted('ROLE_PRO') and animals is not empty %}
+                {% if not app.user.isInProSpace() and animals is not empty %}
                     <div class="d-flex gap-2 mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,0.15); flex-wrap: wrap;">
                         <span style="font-size: 0.75rem; opacity: 0.6; align-self: center;">{{ animals|length }} {{ animals|length > 1 ? 'chevaux' : 'cheval' }}</span>
                         {% for animal in animals|slice(0, 4) %}
@@ -412,7 +413,7 @@
             </div>
         </div>
 
-        {% if is_granted('ROLE_PRO') %}
+        {% if app.user.isInProSpace() %}
         {# ======================================================================
            DASHBOARD PRO
            ====================================================================== #}
@@ -422,7 +423,7 @@
             <div class="col-6 col-md">
                 <a href="{{ path('app_animal_search') }}" class="quick-action qa-fiche">
                     <span class="qa-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512" fill="currentColor"><path d="M0 464V316.9C0 208.5 68.3 111.8 170.5 75.6L340.2 15.5C361.6 7.9 384 23.8 384 46.4c0 11-5.5 21.2-14.6 27.3L336 96c48.1 0 91.2 29.8 108.1 74.9l48.6 129.5c11.8 31.4 4.1 66.8-19.6 90.5c-16 16-37.8 25.1-60.5 25.1h-3.4c-26.1 0-50.9-11.6-67.6-31.7l-32.3-38.7c-11.7 4.1-24.2 6.4-37.3 6.4c-6.3 0-12.5-.5-18.6-1.5c-3.6-.6-7.2-1.4-10.7-2.3c-28.9-7.8-53.1-26.8-67.8-52.2c-4.4-7.6-14.2-10.3-21.9-5.8s-10.3 14.2-5.8 21.9c24 41.5 68.3 70 119.3 71.9l47.2 70.8c4 6.1 6.2 13.2 6.2 20.4c0 20.3-16.5 36.8-36.8 36.8H48c-26.5 0-48-21.5-48-48zm328-240a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
+                        <img src="{{ asset('images/horse-icon.svg') }}" alt="Cheval" width="30" height="30">
                     </span>
                     Nouvelle fiche
                 </a>
@@ -479,7 +480,7 @@
                     {% if pro.agenda_view == 'day' %}
                         {{ pro.agenda_start|format_datetime('full', 'none', locale='fr') }}
                     {% elseif pro.agenda_view == 'week' %}
-                        Semaine du {{ pro.agenda_start|format_datetime('short', 'none', locale='fr') }} au {{ pro.agenda_end|format_datetime('long', 'none', locale='fr') }}
+                        Semaine du {{ pro.agenda_start|format_datetime(pattern='dd MMMM', locale='fr') }} au {{ pro.agenda_end|format_datetime(pattern='dd MMMM yyyy', locale='fr') }}
                     {% else %}
                         {{ pro.agenda_start|format_datetime(pattern='MMMM Y', locale='fr') }}
                     {% endif %}
@@ -493,6 +494,17 @@
                     {% set all_events = all_events|merge([{type: 'consultation', date: entry.date, title: entry.title, animal: entry.animal.name, entryType: entry.type, id: entry.id}]) %}
                 {% endfor %}
 
+                {% set now = "now"|date("U") %}
+                {% set past_events = [] %}
+                {% set upcoming_events = [] %}
+                {% for event in all_events %}
+                    {% if event.date|date("U") < now %}
+                        {% set past_events = past_events|merge([event]) %}
+                    {% else %}
+                        {% set upcoming_events = upcoming_events|merge([event]) %}
+                    {% endif %}
+                {% endfor %}
+
                 {% if all_events is empty %}
                     <div class="text-center py-4">
                         <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3;">
@@ -502,16 +514,23 @@
                     </div>
                 {% else %}
                     <div class="d-flex flex-column gap-2">
-                        {% for event in all_events|slice(0, 8) %}
+                        {# À venir #}
+                        {% if upcoming_events|length > 0 and pro.agenda_view != 'day' %}
+                            <div class="agenda-separator">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                À venir ({{ upcoming_events|length }})
+                            </div>
+                        {% endif %}
+                        {% for event in upcoming_events|slice(0, 8) %}
                             {% if event.type == 'appointment' and event.status == 'CONFIRMED' %}
                                 {% set ev_bg = 'var(--soft-teal)' %}
                                 {% set ev_color = 'var(--primary-color)' %}
                                 {% set ev_border = 'var(--primary-color)' %}
                                 {% set ev_pill_label = 'Confirmé' %}
                             {% elseif event.type == 'appointment' %}
-                                {% set ev_bg = '#fef7ed' %}
-                                {% set ev_color = '#b45309' %}
-                                {% set ev_border = '#b45309' %}
+                                {% set ev_bg = 'var(--soft-warm)' %}
+                                {% set ev_color = 'var(--accent-color)' %}
+                                {% set ev_border = 'var(--accent-color)' %}
                                 {% set ev_pill_label = 'En attente' %}
                             {% else %}
                                 {% set ev_bg = 'var(--soft-teal)' %}
@@ -532,8 +551,40 @@
                                 </span>
                             </a>
                         {% endfor %}
+
+                        {# Passés #}
+                        {% if past_events|length > 0 and pro.agenda_view != 'day' %}
+                            <div class="agenda-separator" style="color: var(--text-light);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                                Passés ({{ past_events|length }})
+                            </div>
+                        {% endif %}
+                        {% for event in past_events|slice(0, 8) %}
+                            {% if event.type == 'appointment' and event.status == 'CONFIRMED' %}
+                                {% set ev_border = 'var(--primary-color)' %}
+                                {% set ev_pill_label = 'Confirmé' %}
+                            {% elseif event.type == 'appointment' %}
+                                {% set ev_border = 'var(--accent-color)' %}
+                                {% set ev_pill_label = 'En attente' %}
+                            {% else %}
+                                {% set ev_border = 'var(--primary-color)' %}
+                                {% set ev_pill_label = event.entryType %}
+                            {% endif %}
+                            <a href="{{ event.type == 'appointment' ? path('app_appointment_show', {id: event.id}) : path('app_health_book_entry_show', {id: event.id}) }}"
+                               class="agenda-event event-past" style="border-left: 3px solid {{ ev_border }};">
+                                <div class="flex-grow-1">
+                                    <strong style="font-size: 0.88rem; color: var(--secondary-color);">{{ event.title }}</strong>
+                                    <span class="d-block text-secondary" style="font-size: 0.78rem;">
+                                        {{ event.animal }} · {{ event.date|date('d/m H:i') }}
+                                    </span>
+                                </div>
+                                <span class="stat-pill" style="background: #f0f0f0; color: var(--text-light);">
+                                    {{ ev_pill_label }}
+                                </span>
+                            </a>
+                        {% endfor %}
                     </div>
-                    {% if all_events|length > 8 %}
+                    {% if all_events|length > 16 %}
                         <a href="{{ path('app_calendar') }}" class="btn btn-outline-primary btn-sm w-100 mt-3">
                             Voir tout le planning
                         </a>
@@ -556,7 +607,7 @@
                         <div class="d-flex gap-2 align-items-center">
                             {% set pro_pending = pro.upcoming_appointments|filter(a => a.status == 'PENDING')|length %}
                             {% if pro_pending > 0 %}
-                                <span class="stat-pill" style="background: #fef7ed; color: #b45309;">
+                                <span class="stat-pill" style="background: var(--soft-warm); color: var(--accent-color);">
                                     {{ pro_pending }} en attente
                                 </span>
                             {% endif %}
@@ -580,8 +631,8 @@
                             <div class="d-flex flex-column gap-2" style="max-height: 320px; overflow-y: auto;">
                                 {% for appt in pro.upcoming_appointments %}
                                     {% if appt.status == 'PENDING' %}
-                                        {% set appt_badge_bg = '#fef7ed' %}
-                                        {% set appt_badge_color = '#b45309' %}
+                                        {% set appt_badge_bg = 'var(--soft-warm)' %}
+                                        {% set appt_badge_color = 'var(--accent-color)' %}
                                         {% set appt_pill_label = 'En attente' %}
                                     {% elseif appt.status == 'CONFIRMED' %}
                                         {% set appt_badge_bg = 'var(--soft-teal)' %}
@@ -629,7 +680,7 @@
                 <div class="section-card card-purple h-100 d-flex flex-column">
                     <div class="section-card-header">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="section-icon" style="background: rgba(124,58,237,0.15); color: #7c3aed;">
+                            <span class="section-icon" style="background: var(--soft-warm); color: var(--accent-color);">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                             </span>
                             <p class="page-eyebrow mb-0">Brouillons</p>
@@ -680,7 +731,7 @@
         <div class="section-card card-amber mb-4">
             <div class="section-card-header">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="section-icon" style="background: rgba(217,119,6,0.15); color: #d97706;">
+                    <span class="section-icon" style="background: rgba(26,77,69,0.15); color: var(--primary-color);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     </span>
                     <p class="page-eyebrow mb-0">Rappels</p>
@@ -727,7 +778,7 @@
 
                 {% if all_reminders_today is not empty %}
                     {% if overdue_reminders is not empty %}
-                        <p style="font-size: .78rem; font-weight: 700; color: #d97706; margin-bottom: .5rem;">Aujourd'hui</p>
+                        <p style="font-size: .78rem; font-weight: 700; color: var(--primary-color); margin-bottom: .5rem;">Aujourd'hui</p>
                     {% endif %}
                     <div class="d-flex flex-column gap-2">
                         {% for reminder in all_reminders_today %}
@@ -774,7 +825,7 @@
         <div class="section-card card-blue mb-4">
             <div class="section-card-header">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="section-icon" style="background: rgba(37,99,235,0.15); color: #2563eb;">
+                    <span class="section-icon" style="background: rgba(26,77,69,0.15); color: var(--primary-color);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </span>
                     <p class="page-eyebrow mb-0">Historique des consultations</p>
@@ -921,7 +972,7 @@
                         </div>
                         {% set pending_appts = owner_appointments|filter(a => a.status == 'PENDING') %}
                         {% if pending_appts|length > 0 %}
-                            <span class="stat-pill" style="background: #fef7ed; color: #b45309;">
+                            <span class="stat-pill" style="background: var(--soft-warm); color: var(--accent-color);">
                                 {{ pending_appts|length }} en attente
                             </span>
                         {% endif %}
@@ -968,8 +1019,8 @@
                             <div class="d-flex flex-column gap-2">
                                 {% for event in timeline|slice(0, 6) %}
                                     {% if event.status == 'PENDING' %}
-                                        {% set badge_bg = '#fef7ed' %}
-                                        {% set badge_color = '#b45309' %}
+                                        {% set badge_bg = 'var(--soft-warm)' %}
+                                        {% set badge_color = 'var(--accent-color)' %}
                                         {% set pill_label = 'En attente' %}
                                     {% elseif event.status == 'CONFIRMED' %}
                                         {% set badge_bg = 'var(--soft-teal)' %}

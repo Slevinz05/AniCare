@@ -261,6 +261,73 @@
         </div>
     </div>
 
+    {# ── Filters ── #}
+    <div class="card anicare-card mb-4" id="filtersCard">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+            <div class="d-flex align-items-center justify-content-between mb-0" id="filtersToggle" style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    <span style="font-weight: 700; font-size: .88rem; color: var(--secondary-color);">Filtrer les consultations</span>
+                    {% if has_filters|default(false) %}
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--primary-color); color: #fff; font-size: .65rem; font-weight: 700;">!</span>
+                    {% endif %}
+                </div>
+                <svg id="filtersChevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--taupe)" stroke-width="2" viewBox="0 0 24 24" style="transition: transform .2s; {{ has_filters|default(false) ? 'transform: rotate(180deg);' : '' }}"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <form method="get" id="filtersForm" style="{{ has_filters|default(false) ? '' : 'display: none;' }} margin-top: 1rem;">
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 col-md-3">
+                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Recherche</label>
+                        <input type="text" name="q" value="{{ filters.q|default('') }}" class="form-control form-control-sm" placeholder="Nom, titre, description..." style="border-radius: var(--radius-sm); font-size: .82rem;">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Animal</label>
+                        <select name="animal" class="form-select form-select-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
+                            <option value="">Tous</option>
+                            {% for animal in animals|default([]) %}
+                                <option value="{{ animal.id }}" {{ filters.animal_id|default('') == animal.id ? 'selected' : '' }}>{{ animal.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Type</label>
+                        <select name="type" class="form-select form-select-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
+                            <option value="">Tous</option>
+                            <option value="Ostéopathe" {{ filters.type|default('') == 'Ostéopathe' ? 'selected' : '' }}>Ostéopathe</option>
+                            <option value="Vétérinaire" {{ filters.type|default('') == 'Vétérinaire' ? 'selected' : '' }}>Vétérinaire</option>
+                            <option value="Dentiste" {{ filters.type|default('') == 'Dentiste' ? 'selected' : '' }}>Dentiste</option>
+                            <option value="Maréchal-ferrant" {{ filters.type|default('') == 'Maréchal-ferrant' ? 'selected' : '' }}>Maréchal-ferrant</option>
+                            <option value="Vaccination" {{ filters.type|default('') == 'Vaccination' ? 'selected' : '' }}>Vaccination</option>
+                            <option value="Vermifuge" {{ filters.type|default('') == 'Vermifuge' ? 'selected' : '' }}>Vermifuge</option>
+                            <option value="Chirurgie" {{ filters.type|default('') == 'Chirurgie' ? 'selected' : '' }}>Chirurgie</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Du</label>
+                        <input type="date" name="date_from" value="{{ filters.date_from|default('') }}" class="form-control form-control-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Au</label>
+                        <input type="date" name="date_to" value="{{ filters.date_to|default('') }}" class="form-control form-control-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
+                    </div>
+                    <div class="col-12 col-md-1 d-flex gap-1">
+                        <button type="submit" class="btn btn-sm w-100" style="background: var(--primary-color); color: #fff; border-radius: var(--radius-sm); font-weight: 600; font-size: .78rem; padding: .4rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </button>
+                    </div>
+                </div>
+                {% if has_filters|default(false) %}
+                    <div class="mt-2 text-end">
+                        <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-link btn-sm text-decoration-none" style="font-size: .78rem; color: var(--taupe);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            Réinitialiser les filtres
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
     {% if health_book_entries is not empty %}
 
         {# ── Stats ── #}
@@ -527,8 +594,19 @@
             <div class="ch-empty-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary-color); margin-bottom: .35rem;">Aucune consultation enregistrée</h2>
-            <p style="color: var(--taupe); font-size: .9rem; margin-bottom: 1.2rem;">Ajoutez une première consultation pour commencer le suivi médical.</p>
+            <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary-color); margin-bottom: .35rem;">
+                {% if has_filters|default(false) %}Aucun résultat{% else %}Aucune consultation enregistrée{% endif %}
+            </h2>
+            <p style="color: var(--taupe); font-size: .9rem; margin-bottom: 1.2rem;">
+                {% if has_filters|default(false) %}
+                    Aucune consultation ne correspond aux filtres sélectionnés.
+                {% else %}
+                    Ajoutez une première consultation pour commencer le suivi médical.
+                {% endif %}
+            </p>
+            {% if has_filters|default(false) %}
+                <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary me-2">Réinitialiser les filtres</a>
+            {% endif %}
             <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary">Créer une consultation</a>
         </div>
 
@@ -584,6 +662,18 @@
             p.classList.remove('is-open');
         });
     }, true);
+})();
+
+(function() {
+    var toggle = document.getElementById('filtersToggle');
+    var form = document.getElementById('filtersForm');
+    var chevron = document.getElementById('filtersChevron');
+    if (!toggle || !form) return;
+    toggle.addEventListener('click', function() {
+        var open = form.style.display !== 'none';
+        form.style.display = open ? 'none' : '';
+        chevron.style.transform = open ? '' : 'rotate(180deg)';
+    });
 })();
 </script>
 {% endblock %}
