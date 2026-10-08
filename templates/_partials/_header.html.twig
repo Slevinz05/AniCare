@@ -66,7 +66,7 @@
                                     {{ is_granted('ROLE_STRUCTURE') ? 'Chevaux de la structure' : 'Mes chevaux' }}
                                 </a>
                             </li>
-                            {% if not is_granted('ROLE_STRUCTURE') %}
+                            {% if not is_granted('ROLE_STRUCTURE') and is_granted('ROLE_PRO') and app.user.activeSpace == 'professionnel' %}
                             <li>
                                 <a class="dropdown-item d-flex align-items-center gap-2 {{ current_route starts with 'app_health_book_entry' ? 'active' : '' }}" href="{{ path('app_health_book_entry_index') }}">
                                     Consultations

@@ -474,10 +474,10 @@
                 {# ── ANTÉCÉDENTS ── #}
                 <div class="consult-section">
                     <div class="consult-section-header">
-                        <span class="section-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                        <span class="section-icon" style="background: rgba(26,77,69,0.08); color: var(--primary-color);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         </span>
-                        <p class="section-title" style="color: var(--accent-color);">Antécédents</p>
+                        <p class="section-title" style="color: var(--primary-color);">Antécédents</p>
                         <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#antecedentsCollapse" aria-expanded="true">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
@@ -509,10 +509,10 @@
                 {# ── OBSERVATIONS ── #}
                 <div class="consult-section">
                     <div class="consult-section-header">
-                        <span class="section-icon" style="background: rgba(34,197,94,0.12); color: #16a34a;">
+                        <span class="section-icon" style="background: var(--soft-teal); color: var(--primary-color);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         </span>
-                        <p class="section-title" style="color: #16a34a;">Observations</p>
+                        <p class="section-title" style="color: var(--primary-color);">Observations</p>
                         <button type="button" class="section-toggle" data-bs-toggle="collapse" data-bs-target="#observationsCollapse" aria-expanded="true">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
@@ -536,10 +536,10 @@
                 <div class="anatomy-sticky">
                     <div class="consult-section">
                         <div class="consult-section-header">
-                            <span class="section-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
+                            <span class="section-icon" style="background: rgba(26,77,69,0.08); color: var(--primary-color);">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
                             </span>
-                            <p class="section-title" style="color: #ef4444;">Localisation anatomique</p>
+                            <p class="section-title" style="color: var(--primary-color);">Localisation anatomique</p>
                         </div>
                         <div class="consult-section-body">
                             {% if is_granted('ROLE_PRO') %}
@@ -716,7 +716,7 @@
         {# ── Documents existants ── #}
         <div class="col-12 col-md-6">
             <div class="bottom-section">
-                <div class="bottom-section-title" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                <div class="bottom-section-title" style="background: var(--soft-teal); color: var(--primary-color);">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     Documents existants
                 </div>
@@ -766,6 +766,19 @@
     {{ form_rest(form) }}
 </div>
 
+{% if health_book_entry.status != 'draft' %}
+<div class="px-3 mb-3">
+    <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 1rem 1.25rem;">
+        <label for="correction_reason" style="font-weight: 600; font-size: 0.82rem; color: #856404; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Motif de la correction (v{{ health_book_entry.version + 1 }})
+        </label>
+        <textarea id="correction_reason" name="correction_reason" rows="2" placeholder="Erreur de saisie, complément d'information..." style="width: 100%; border: 1px solid #ffe082; border-radius: 6px; padding: 0.5rem; font-size: 0.82rem; resize: vertical; background: #fff;"></textarea>
+        <p style="font-size: 0.72rem; color: #a08837; margin: 0.35rem 0 0;">La provenance et l'historique des versions sont conservés (D7).</p>
+    </div>
+</div>
+{% endif %}
+
 {# ═══════════════════════════════════════════════
    STICKY FOOTER
    ═══════════════════════════════════════════════ #}
@@ -776,20 +789,27 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 Retour
             </a>
-            <form method="post" action="{{ path('app_health_book_entry_delete', {'id': health_book_entry.id}) }}" class="d-inline" onsubmit="return confirm('Confirmez-vous la suppression de cette consultation ? Cette action est irréversible.');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ health_book_entry.id) }}">
-                <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" style="font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 8px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    Supprimer
+            {% if health_book_entry.isDraft %}
+                <form method="post" action="{{ path('app_health_book_entry_delete', {'id': health_book_entry.id}) }}" class="d-inline" onsubmit="return confirm('Confirmez-vous la suppression de ce brouillon ? Cette action est irréversible.');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ health_book_entry.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" style="font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        Supprimer
+                    </button>
+                </form>
+            {% elseif health_book_entry.isPublished %}
+                <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-weight: 600; font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 8px;" onclick="document.getElementById('archiveModal').style.display='flex'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                    Archiver
                 </button>
-            </form>
+            {% endif %}
         </div>
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-sm d-flex align-items-center gap-2" style="background: var(--primary-color); color: #fff; font-weight: 700; border-radius: 8px; padding: 0.4rem 1.25rem; font-size: 0.82rem;">
                 Enregistrer les modifications
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
-            {% if is_granted('ROLE_PRO') %}
+            {% if health_book_entry.isDraft and is_granted('ROLE_PRO') %}
                 <button type="submit" name="save_draft" class="btn btn-sm d-flex align-items-center gap-1" style="background: var(--secondary-color); color: #fff; font-weight: 600; border-radius: 8px; padding: 0.4rem 1rem; font-size: 0.8rem;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     Brouillon
@@ -800,6 +820,27 @@
 </div>
 
 {{ form_end(form) }}
+
+{# Modal d'archivage #}
+{% if health_book_entry.isPublished %}
+<div id="archiveModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:1.5rem; max-width:480px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <h5 style="margin:0 0 0.75rem; color:var(--primary-color); font-size:1rem;">Archiver cette consultation</h5>
+        <p style="font-size:0.82rem; color:#666; margin-bottom:1rem;">
+            L'archivage retire la consultation de la vue active. Elle reste accessible en lecture dans le dossier. Cette action est irréversible.
+        </p>
+        <form method="post" action="{{ path('app_health_book_entry_archive', {id: health_book_entry.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('archive' ~ health_book_entry.id) }}">
+            <label for="archive_reason" style="font-weight:600; font-size:0.82rem; color:#333; margin-bottom:0.35rem; display:block;">Motif (facultatif)</label>
+            <textarea id="archive_reason" name="archive_reason" rows="2" placeholder="Suivi terminé, erreur de rattachement..." style="width:100%; border:1px solid var(--border-color); border-radius:6px; padding:0.5rem; font-size:0.82rem; resize:vertical; margin-bottom:1rem;"></textarea>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('archiveModal').style.display='none'" style="border-radius:8px;">Annuler</button>
+                <button type="submit" class="btn btn-sm" style="background:#856404; color:#fff; border-radius:8px; font-weight:600;" onclick="return confirm('Confirmer l\'archivage ?')">Archiver</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

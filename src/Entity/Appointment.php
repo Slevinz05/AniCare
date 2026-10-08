@@ -112,9 +112,9 @@ class Appointment
     public function getEventTypeLabel(): string
     {
         return match ($this->eventType) {
-            self::TYPE_APPOINTMENT => 'Rendez-vous',
+            self::TYPE_APPOINTMENT => 'RDV Pro',
             self::TYPE_REST => 'Temps de repos',
-            self::TYPE_PERSONAL => 'Formation / Personnel',
+            self::TYPE_PERSONAL => 'Rendez-vous personnel',
             default => $this->eventType,
         };
     }

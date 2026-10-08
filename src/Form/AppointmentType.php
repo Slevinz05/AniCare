@@ -29,9 +29,8 @@ class AppointmentType extends AbstractType
             ->add('eventType', ChoiceType::class, [
                 'label' => false,
                 'choices' => [
-                    'Rendez-vous' => Appointment::TYPE_APPOINTMENT,
-                    'Temps de repos' => Appointment::TYPE_REST,
-                    'Formation / RDV personnel' => Appointment::TYPE_PERSONAL,
+                    'RDV Pro' => Appointment::TYPE_APPOINTMENT,
+                    'Rendez-vous personnel' => Appointment::TYPE_PERSONAL,
                 ],
                 'expanded' => true,
             ])

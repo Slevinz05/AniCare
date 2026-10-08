@@ -29,6 +29,7 @@
         box-shadow: var(--shadow-subtle);
         padding: 1.5rem;
         margin-bottom: 1.25rem;
+        position: relative;
     }
     .form-section-title {
         font-size: 0.7rem;
@@ -40,17 +41,26 @@
         display: flex; align-items: center; gap: 0.5rem;
     }
     .form-section-title svg { color: var(--primary-color); }
+    .form-section-title .section-icon {
+        width: 26px; height: 26px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .form-section-title .section-icon.icon-teal { background: var(--soft-teal); }
+    .form-section-title .section-icon.icon-gold { background: rgba(200,151,62,0.1); }
+    .form-section-title .section-icon.icon-gold svg { color: var(--accent-color); }
 
-    .event-type-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .event-type-group .form-check { flex: 1; min-width: 140px; }
+    .event-type-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .event-type-group .form-check { flex: 1; min-width: 180px; }
     .event-type-group .form-check input[type="radio"] { display: none; }
     .event-type-group .form-check-label {
-        display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
-        padding: 1rem 0.75rem;
+        display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+        padding: 1.25rem 1rem;
         border: 2px solid var(--border-color);
         border-radius: var(--radius-md);
         cursor: pointer;
-        font-weight: 700; font-size: 0.82rem;
+        font-weight: 700; font-size: 0.85rem;
         text-align: center;
         transition: all 0.2s;
         background: #fff;
@@ -60,22 +70,118 @@
         background: var(--soft-teal);
         color: var(--primary-color);
     }
+    .event-type-group .form-check-label:hover { border-color: var(--primary-color); }
     .event-type-icon {
-        width: 36px; height: 36px;
-        border-radius: 10px;
+        width: 40px; height: 40px;
+        border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
     }
-
-    .duration-display {
-        background: var(--soft-teal);
-        border-radius: var(--radius-sm);
-        padding: 0.6rem 1rem;
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        display: flex; align-items: center; gap: 0.5rem;
+    .event-type-desc {
+        font-size: 0.72rem; font-weight: 400; color: var(--text-muted); margin-top: 0.15rem;
     }
 
+    /* ── Date/Time/Duration row ── */
+    .datetime-row {
+        display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .datetime-field label {
+        font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 0.04em;
+        margin-bottom: 0.35rem;
+    }
+    .datetime-field input[type="date"] { width: 155px; }
+    .time-picker-group {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+    }
+    .time-picker-group input {
+        width: 52px; text-align: center; font-weight: 700;
+        font-size: 0.95rem; padding: 0.375rem 0.25rem;
+    }
+    .time-picker-group .time-sep {
+        font-weight: 800; font-size: 1.1rem; color: var(--text-muted);
+        user-select: none; line-height: 1;
+    }
+    .duration-input-group {
+        display: flex; align-items: center; gap: 0.35rem;
+    }
+    .duration-input-group input { width: 72px; font-weight: 700; text-align: center; }
+    .duration-unit {
+        font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
+    }
+    .location-field-wrapper label {
+        display: flex; align-items: center; gap: 0.35rem;
+        font-size: 0.8rem; font-weight: 700;
+    }
+
+    /* ── Search dropdown ── */
+    .search-wrapper { position: relative; }
+    .search-results {
+        position: absolute; top: 100%; left: 0; right: 0;
+        z-index: 50; background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-md);
+        max-height: 320px; overflow-y: auto;
+        display: none;
+    }
+    .search-results.show { display: block; }
+    .search-result-item {
+        padding: 0.75rem 1rem; cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.15s;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover, .search-result-item.active { background: var(--soft-teal); }
+    .search-result-name { font-weight: 700; font-size: 0.88rem; color: var(--secondary-color); }
+    .search-result-detail { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .search-result-animals {
+        display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem;
+    }
+    .search-result-animals span {
+        font-size: 0.7rem; font-weight: 600;
+        padding: 0.15rem 0.5rem; border-radius: 1rem;
+        background: var(--soft-teal); color: var(--primary-color);
+    }
+
+    .selected-client-card {
+        display: flex; align-items: center; gap: 0.65rem;
+        background: linear-gradient(135deg, var(--soft-teal) 0%, #e8f3f0 100%);
+        border: 1px solid rgba(26,77,69,0.2);
+        border-radius: var(--radius-md);
+        padding: 0.65rem 0.85rem;
+    }
+    .selected-client-icon {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: var(--primary-color); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .selected-client-card .client-info { flex: 1; }
+    .selected-client-card .client-name { font-weight: 700; font-size: 0.85rem; color: var(--primary-color); }
+    .selected-client-card .client-email { font-size: 0.72rem; color: var(--text-muted); }
+    .btn-remove-client {
+        background: none; border: none; cursor: pointer;
+        color: var(--text-muted); padding: 0.25rem;
+        transition: color 0.15s; opacity: 0.6;
+    }
+    .btn-remove-client:hover { color: var(--danger-color); opacity: 1; }
+
+    .client-animals-section {
+        margin-top: 0.5rem; padding: 0.85rem;
+        border-radius: var(--radius-sm);
+        background: rgba(26,77,69,0.02);
+        border: 1px dashed rgba(26,77,69,0.12);
+    }
+    .client-animals-label {
+        font-size: 0.7rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.04em;
+        color: var(--text-muted); margin-bottom: 0.5rem;
+        display: flex; align-items: center; gap: 0.35rem;
+    }
+    .client-animals-label svg { color: var(--primary-color); opacity: 0.5; }
     .animal-checkbox-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .animal-checkbox-grid .form-check { margin: 0; }
     .animal-checkbox-grid .form-check input[type="checkbox"] { display: none; }
@@ -94,11 +200,245 @@
         background: var(--soft-teal);
         color: var(--primary-color);
     }
+
+    #animals-container.hidden { display: none; }
+    .animals-empty {
+        text-align: center; padding: 1.5rem;
+        color: var(--text-muted); font-size: 0.85rem;
+    }
+
+    /* New animal creation form */
+    .new-animal-toggle {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border: 2px dashed var(--primary-color);
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--primary-color);
+        font-weight: 700; font-size: 0.82rem;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .new-animal-toggle:hover { background: var(--soft-teal); border-style: solid; }
+    .new-animal-toggle.active { background: var(--soft-teal); border-style: solid; }
+    .new-animal-form {
+        display: none; margin-top: 1rem;
+        padding: 1.25rem;
+        border: 1px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        background: var(--soft-teal);
+    }
+    .new-animal-form.show { display: block; }
+    .new-animal-form .form-label {
+        font-weight: 700; font-size: 0.78rem;
+        text-transform: uppercase; letter-spacing: 0.04em;
+        color: var(--secondary-color);
+    }
+
+    /* Referent action cards */
+    .ref-action-card {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.6rem 0.75rem; border-radius: var(--radius-md);
+        border: 1px solid var(--border-color); cursor: pointer;
+        transition: all 0.15s;
+    }
+    .ref-action-card:hover { border-color: var(--primary-color); background: var(--soft-teal); }
+    .ref-action-card .ref-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ref-action-card strong { font-size: 0.82rem; }
+    .ref-action-card small { font-size: 0.72rem; }
+
+    .na-search-wrapper { position: relative; }
+    .na-search-results {
+        position: absolute; top: 100%; left: 0; right: 0;
+        z-index: 50; background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-md);
+        max-height: 240px; overflow-y: auto;
+        display: none;
+    }
+    .na-search-results.show { display: block; }
+    .na-search-result-item {
+        padding: 0.6rem 0.85rem; cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.15s; font-size: 0.85rem;
+    }
+    .na-search-result-item:last-child { border-bottom: none; }
+    .na-search-result-item:hover { background: var(--soft-teal); }
+    .na-search-result-item .result-name { font-weight: 700; color: var(--secondary-color); }
+    .na-search-result-item .result-detail { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Duplicate detection */
+    .duplicate-alert {
+        display: none; padding: 0.85rem 1rem;
+        border: 1px solid #f0ad4e; border-radius: var(--radius-sm);
+        background: #fff8f0; margin-top: 0.75rem;
+    }
+    .duplicate-alert.show { display: block; }
+    .duplicate-alert-title {
+        font-weight: 700; font-size: 0.82rem; color: #a66d00;
+        margin-bottom: 0.5rem;
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+    .duplicate-card {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #f0ad4e; border-radius: var(--radius-sm);
+        background: #fff; margin-bottom: 0.35rem;
+        cursor: pointer; transition: all 0.15s;
+        text-decoration: none; color: inherit;
+    }
+    .duplicate-card:hover { border-color: var(--accent-color); background: rgba(200,151,62,0.06); }
+    .duplicate-card-name { font-weight: 700; font-size: 0.85rem; color: var(--secondary-color); }
+    .duplicate-card-detail { font-size: 0.73rem; color: var(--text-muted); }
+
+    /* Validated animal cards */
+    .btn-close-form {
+        width: 28px; height: 28px; border-radius: 50%;
+        border: 1px solid rgba(26,77,69,0.2); background: #fff;
+        color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.15s ease;
+        padding: 0; flex-shrink: 0;
+    }
+    .btn-close-form:hover { background: rgba(26,77,69,0.08); border-color: rgba(26,77,69,0.35); color: #c0392b; }
+
+    #validated-animals-list { margin-top: 1.25rem; }
+    .validated-animals-header {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.55rem 0.75rem;
+        background: linear-gradient(135deg, var(--soft-teal) 0%, #e8f3f0 100%);
+        border: 1px solid rgba(26,77,69,0.15);
+        border-bottom: none;
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        margin-bottom: 0;
+    }
+    .validated-animals-header .va-header-icon {
+        width: 22px; height: 22px; border-radius: 6px;
+        background: var(--primary-color); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .validated-animals-header .va-header-text {
+        font-size: 0.7rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.05em;
+        color: var(--primary-color);
+    }
+    .validated-animals-header .va-header-count {
+        margin-left: auto; font-size: 0.7rem; font-weight: 700;
+        color: var(--primary-color);
+        background: rgba(26,77,69,0.1);
+        padding: 0.1rem 0.5rem; border-radius: 10px;
+    }
+    .validated-animal-card {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.6rem 0.8rem;
+        border: 1px solid rgba(26,77,69,0.15);
+        border-top: none; border-radius: 0;
+        background: #fff; margin-bottom: 0;
+        animation: fadeInCard 0.25s ease;
+    }
+    .validated-animal-card + .validated-animal-card { border-top: 1px solid rgba(26,77,69,0.08); }
+    .validated-animal-card:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+    @keyframes fadeInCard {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .validated-animal-card .va-icon {
+        width: 26px; height: 26px; border-radius: 50%;
+        background: var(--primary-color); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+    .validated-animal-card .va-info { flex-grow: 1; min-width: 0; }
+    .validated-animal-card .va-name { font-weight: 700; font-size: 0.85rem; color: var(--primary-color); }
+    .validated-animal-card .va-detail { font-size: 0.73rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .validated-animal-card .va-remove {
+        background: none; border: none; color: var(--text-muted); cursor: pointer;
+        padding: 0.2rem; font-size: 0.85rem; line-height: 1; opacity: 0.6;
+        transition: opacity 0.15s;
+    }
+    .validated-animal-card .va-remove:hover { opacity: 1; color: #c0392b; }
+
+    /* Mode separator */
+    .mode-separator {
+        display: flex; align-items: center; gap: 0.75rem;
+        margin: 1.25rem 0 0.75rem;
+    }
+    .mode-separator::before, .mode-separator::after {
+        content: ''; flex: 1; height: 1px;
+        background: var(--border-color, #EDE6DB);
+    }
+    .mode-separator span {
+        font-size: 0.72rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.08em; color: #999;
+    }
+    .mode-hidden { display: none !important; }
+    .btn-cancel-mode {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        background: none; border: none; cursor: pointer;
+        font-size: 0.78rem; font-weight: 600;
+        color: var(--text-muted); padding: 0.3rem 0; margin-top: 0.5rem;
+        transition: color 0.15s;
+    }
+    .btn-cancel-mode:hover { color: var(--primary-color); }
+
+    /* Location pills */
+    .location-suggestions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+    .location-pill {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.25rem 0.6rem; border: 1px solid var(--border-color);
+        border-radius: 2rem; background: #fff;
+        font-size: 0.73rem; font-weight: 600;
+        color: var(--primary-color); cursor: pointer;
+        transition: all 0.15s;
+    }
+    .location-pill:hover { border-color: var(--primary-color); background: var(--soft-teal); }
+    .location-pill svg { opacity: 0.6; }
+    .location-pill .pill-label { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Share & Notes */
+    .share-field label { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .field-hint {
+        display: flex; align-items: center; gap: 0.3rem;
+        font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; margin-bottom: 0;
+    }
+    .field-hint svg { flex-shrink: 0; opacity: 0.6; }
+    .field-hint-private { color: var(--accent-color); }
+    .field-hint-private svg { color: var(--accent-color); opacity: 0.8; }
+    .notes-block { display: flex; flex-direction: column; gap: 1.25rem; }
+    .note-field label {
+        display: flex; align-items: center; gap: 0.35rem;
+        font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem;
+    }
+    .note-field label svg { color: var(--primary-color); }
+    .note-field-private {
+        padding: 0.85rem; border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, #fdf8f0 0%, #faf5eb 100%);
+        border: 1px dashed rgba(200,151,62,0.3);
+    }
+    .note-field-private label svg { color: var(--accent-color); }
+    .note-field textarea { resize: vertical; min-height: 72px; }
+
+    /* PRO sections toggle */
+    .pro-only-section { transition: opacity 0.25s ease, max-height 0.3s ease; }
+    .pro-only-section.hidden-section {
+        opacity: 0; max-height: 0; margin-bottom: 0; padding: 0;
+        overflow: hidden; border: none; pointer-events: none;
+    }
 </style>
 
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
+
+            <a href="{{ path('app_appointment_show', {id: appointment.id}) }}" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-3" style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Retour au rendez-vous
+            </a>
 
             <div class="appointment-form-hero">
                 <p class="page-eyebrow mb-1" style="color: rgba(255,255,255,0.6);">Modifier</p>
@@ -109,7 +449,12 @@
 
                 {# ── Type d'événement ── #}
                 <div class="form-section">
-                    <div class="form-section-title">Type d'événement</div>
+                    <div class="form-section-title">
+                        <span class="section-icon icon-teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </span>
+                        Type d'événement
+                    </div>
                     <div class="event-type-group">
                         {% for child in form.eventType %}
                             <div class="form-check">
@@ -117,18 +462,17 @@
                                 <label class="form-check-label" for="{{ child.vars.id }}">
                                     {% if child.vars.value == 'appointment' %}
                                         <span class="event-type-icon" style="background: var(--soft-teal); color: var(--primary-color);">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                                         </span>
-                                    {% elseif child.vars.value == 'rest' %}
-                                        <span class="event-type-icon" style="background: #ede9fe; color: #7c3aed;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                                        </span>
+                                        RDV Pro
+                                        <span class="event-type-desc">Client, animaux, consultation</span>
                                     {% else %}
-                                        <span class="event-type-icon" style="background: var(--soft-warm); color: var(--accent-color);">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                        <span class="event-type-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                         </span>
+                                        Rendez-vous personnel
+                                        <span class="event-type-desc">Simple rappel dans votre agenda</span>
                                     {% endif %}
-                                    {{ child.vars.label }}
                                 </label>
                             </div>
                         {% endfor %}
@@ -137,85 +481,360 @@
 
                 {# ── Détails ── #}
                 <div class="form-section">
-                    <div class="form-section-title">Détails</div>
+                    <div class="form-section-title" id="details-title">
+                        <span class="section-icon icon-teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </span>
+                        <span>Détails</span>
+                    </div>
                     <div class="row g-3">
                         <div class="col-12">{{ form_row(form.reason, {'attr': {'class': 'form-control'}}) }}</div>
                         {% if is_pro and form.consultationType is defined %}
-                            <div class="col-12 col-md-6">{{ form_row(form.consultationType, {'attr': {'class': 'form-select'}}) }}</div>
+                            <div class="col-12 col-md-6 pro-only-section" id="section-consultation-type">
+                                {{ form_row(form.consultationType, {'attr': {'class': 'form-select'}}) }}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
 
                 {% if is_pro %}
-                <div class="form-section">
-                    <div class="form-section-title">Client & Animaux</div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">{{ form_row(form.client, {'attr': {'class': 'form-select'}}) }}</div>
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Chevaux concernés</label>
-                            <div class="animal-checkbox-grid">
-                                {% for child in form.animals %}
-                                    <div class="form-check">
-                                        {{ form_widget(child) }}
-                                        <label class="form-check-label" for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+                {# ── Client & Animaux (PRO) ── #}
+                <div class="form-section pro-only-section" id="section-client">
+                    <div class="form-section-title">
+                        <span class="section-icon icon-teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        </span>
+                        Client & Animaux
+                    </div>
+
+                    {# Hidden select for Symfony form binding #}
+                    <div style="display: none;">
+                        {{ form_widget(form.client) }}
+                    </div>
+
+                    {# ═══ MODE 1 : Rechercher un client existant ═══ #}
+                    <div id="mode-search-animal">
+                        <div id="client-search-wrapper" class="search-wrapper mb-3">
+                            <label class="form-label fw-bold">Rechercher un client, cheval ou structure</label>
+                            <input type="text" id="client-search" class="form-control" placeholder="Nom du client, cheval ou structure..." autocomplete="off">
+                            <div id="client-search-results" class="search-results"></div>
+                        </div>
+
+                        <div id="selected-client-display" style="display: none;" class="mb-3">
+                            <div class="selected-client-card">
+                                <div class="selected-client-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </div>
+                                <div class="client-info">
+                                    <div class="client-name" id="selected-client-name"></div>
+                                    <div class="client-email" id="selected-client-email"></div>
+                                </div>
+                                <button type="button" class="btn-remove-client" id="btn-remove-client" title="Retirer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+
+                            <div id="animals-container" class="hidden">
+                                <div class="client-animals-section">
+                                    <div class="client-animals-label">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                                        Chevaux du client
                                     </div>
-                                {% endfor %}
+                                    <div id="dynamic-animals" class="animal-checkbox-grid"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    {# Hidden Symfony checkboxes #}
+                    <div style="display: none;" id="symfony-animals">
+                        {% for child in form.animals %}
+                            <div class="form-check">
+                                {{ form_widget(child) }}
+                                <label class="form-check-label" for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {# Séparateur OU #}
+                    <div class="mode-separator" id="mode-separator-pro">
+                        <span>ou</span>
+                    </div>
+
+                    {# ═══ MODE 2 : Créer un ou plusieurs chevaux ═══ #}
+                    <div id="mode-create-animal" class="mt-0">
+                        <button type="button" class="new-animal-toggle" id="btn-new-animal-toggle">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Créer un nouveau cheval
+                        </button>
+
+                        <div class="new-animal-form" id="new-animal-form">
+                            <div id="new-animal-form-header" class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold small" style="color: var(--primary-color);" id="new-animal-form-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Nouveau cheval
+                                </span>
+                                <button type="button" id="btn-close-animal-form" class="btn-close-form" title="Fermer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Nom *</label>
+                                    <input type="text" name="new_animal_name" id="new_animal_name" class="form-control" placeholder="Nom du cheval">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Date de naissance</label>
+                                    <input type="date" name="new_animal_birth_date" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">Sexe *</label>
+                                    <select name="new_animal_gender" class="form-select">
+                                        <option value="Hongre">Hongre</option>
+                                        <option value="Jument">Jument</option>
+                                        <option value="Étalon">Étalon</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">N° SIRE</label>
+                                    <input type="text" name="new_animal_sire" class="form-control" placeholder="Ex: 12345678A">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">N° Puce</label>
+                                    <input type="text" name="new_animal_microchip" class="form-control" placeholder="N° micropuce">
+                                </div>
+
+                                {# Alerte doublons #}
+                                <div class="col-12">
+                                    <div class="duplicate-alert" id="duplicateAlertPro">
+                                        <div class="duplicate-alert-title">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                            Un cheval similaire existe peut-être déjà
+                                        </div>
+                                        <div id="duplicateListPro"></div>
+                                    </div>
+                                </div>
+
+                                {# Référent principal #}
+                                <div class="col-12" id="na-referent-section">
+                                    <label class="form-label fw-bold">Référent principal</label>
+                                    <div class="row g-2 mb-2" id="naRefActionCards">
+                                        <div class="col-6">
+                                            <div class="ref-action-card" id="naRefSearchCard">
+                                                <div class="ref-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                                </div>
+                                                <div>
+                                                    <strong class="d-block">Rechercher</strong>
+                                                    <small class="text-secondary">un utilisateur</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="ref-action-card" id="naRefCreateCard">
+                                                <div class="ref-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                                </div>
+                                                <div>
+                                                    <strong class="d-block">Créer un contact</strong>
+                                                    <small class="text-secondary">Nouveau</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="naRefSearchPanel" style="display: none;">
+                                        <div class="position-relative mb-2">
+                                            <input type="text" id="naRefSearchInput" class="form-control form-control-sm" placeholder="Rechercher (nom, email, tél.)..." autocomplete="off">
+                                            <div id="naRefSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10; display: none; max-height: 200px; overflow-y: auto;"></div>
+                                        </div>
+                                        <a href="#" id="naRefSearchBack" class="small text-muted text-decoration-none" onclick="return false;" style="font-size: 0.78rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -1px;"><polyline points="15 18 9 12 15 6"/></svg>
+                                            Retour
+                                        </a>
+                                    </div>
+                                    <div id="naRefCreatePanel" style="display: none;">
+                                        <div class="p-2 rounded-3 mb-2" style="background: var(--soft-teal); border: 1px dashed rgba(26,77,69,0.3);">
+                                            <p class="small fw-bold mb-2" style="color: var(--primary-color);">Nouvelle fiche contact</p>
+                                            <div class="row g-2">
+                                                <div class="col-6"><input type="text" name="new_animal_referent_lastname" class="form-control form-control-sm" placeholder="Nom *"></div>
+                                                <div class="col-6"><input type="text" name="new_animal_referent_firstname" class="form-control form-control-sm" placeholder="Prénom *"></div>
+                                                <div class="col-8"><input type="email" name="new_animal_referent_email" class="form-control form-control-sm" placeholder="Email *"></div>
+                                                <div class="col-4"><input type="tel" name="new_animal_referent_phone" class="form-control form-control-sm" placeholder="Tél."></div>
+                                            </div>
+                                        </div>
+                                        <a href="#" id="naRefCreateBack" class="small text-muted text-decoration-none" onclick="return false;" style="font-size: 0.78rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -1px;"><polyline points="15 18 9 12 15 6"/></svg>
+                                            Retour
+                                        </a>
+                                    </div>
+                                    <div id="naRefSelected" style="display: none;">
+                                        <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: var(--soft-teal);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                            <div class="flex-grow-1">
+                                                <strong id="naRefSelectedName" class="small" style="color: var(--primary-color);"></strong>
+                                                <span id="naRefSelectedInfo" class="d-block small text-secondary"></span>
+                                            </div>
+                                            <button type="button" id="naRefRemoveBtn" class="btn btn-sm btn-outline-secondary border-0" style="font-size: 0.8rem;">&#10005;</button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="new_animal_referent_id" id="new_animal_referent_id" value="">
+                                    <div id="naRefSelfAlert" class="mt-2 p-2 rounded-3 d-flex align-items-center gap-2" style="background: #fff8e6; border: 1px solid #e0c97a; font-size: 0.82rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#b08b2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        <span style="color: #6b5a1e;">Si aucun référent n'est désigné, <strong>vous serez enregistré comme référent principal</strong> de ce cheval.</span>
+                                    </div>
+                                </div>
+
+                                {# Structure #}
+                                <div class="col-12" id="na-structure-section">
+                                    <label class="form-label">Rattacher à une structure</label>
+                                    <div id="na-structure-selected" style="display:none;" class="mb-2">
+                                        <span class="na-selected-badge" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.75rem;border:1px solid var(--primary-color);border-radius:2rem;background:#fff;font-weight:600;font-size:0.82rem;color:var(--primary-color);">
+                                            <span id="na-structure-selected-name"></span>
+                                            <button type="button" class="btn-remove" id="na-structure-remove" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;line-height:1;font-size:1.1rem;">&times;</button>
+                                        </span>
+                                    </div>
+                                    <div id="na-structure-search-wrapper" class="na-search-wrapper">
+                                        <input type="text" id="na-structure-search" class="form-control form-control-sm" placeholder="Rechercher une structure..." autocomplete="off">
+                                        <div id="na-structure-results" class="na-search-results"></div>
+                                    </div>
+                                    <input type="hidden" name="new_animal_structure_id" id="new_animal_structure_id" value="">
+                                </div>
+
+                                {# Bouton valider ce cheval #}
+                                <div class="col-12">
+                                    <button type="button" id="btn-validate-animal" class="btn btn-sm w-100" style="background: var(--soft-teal); color: var(--primary-color); border: 1px solid rgba(26,77,69,0.25); font-weight: 600; font-size: 0.85rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Valider ce cheval
+                                    </button>
+                                    <div id="validate-animal-error" class="small text-danger mt-1" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="btn-add-another-wrapper" style="display: none;" class="mt-2">
+                            <button type="button" id="btn-add-another-animal" class="btn btn-sm btn-outline-secondary w-100" style="border-style: dashed; font-size: 0.85rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Ajouter un autre cheval
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn-cancel-mode mode-hidden" id="btn-cancel-create">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                            Revenir à la recherche
+                        </button>
+                    </div>
+
+                    {# ── Chevaux concernés (liste unifiée de cartes) ── #}
+                    <div id="validated-animals-list" class="mb-3" style="display: none;"></div>
+                    <div id="validated-animals-hidden-inputs"></div>
+                    <input type="hidden" name="new_animal_mode" id="new_animal_mode" value="0">
+                    <input type="hidden" name="multi_animal_count" id="multi_animal_count" value="0">
                 </div>
                 {% else %}
                 <div class="form-section">
-                    <div class="form-section-title">Cheval</div>
+                    <div class="form-section-title">
+                        <span class="section-icon icon-teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                        </span>
+                        Cheval
+                    </div>
                     {{ form_row(form.animal, {'attr': {'class': 'form-select'}}) }}
                 </div>
                 {% endif %}
 
                 {# ── Date, Durée, Lieu ── #}
                 <div class="form-section">
-                    <div class="form-section-title">Date, durée & lieu</div>
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            {{ form_label(form.scheduledAt) }}
-                            <div style="display:none;">{{ form_widget(form.scheduledAt, {'attr': {'id': 'appointment_scheduledAt'}}) }}</div>
-                            <div class="d-flex gap-2">
-                                <input type="date" id="appt-date" class="form-control">
-                                <div class="input-group" style="max-width: 160px;">
-                                    <button type="button" class="btn btn-outline-secondary px-2" id="time-down" title="−15 min">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-                                    </button>
-                                    <input type="text" id="appt-time" class="form-control text-center fw-bold" readonly style="min-width: 70px;">
-                                    <button type="button" class="btn btn-outline-secondary px-2" id="time-up" title="+15 min">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="form-section-title">
+                        <span class="section-icon icon-teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </span>
+                        Date, durée & lieu
+                    </div>
+                    <div style="display:none;">{{ form_widget(form.scheduledAt, {'attr': {'id': 'appointment_scheduledAt'}}) }}</div>
+                    <div class="datetime-row">
+                        <div class="datetime-field">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="appt-date" class="form-control">
                             {{ form_errors(form.scheduledAt) }}
                         </div>
-                        <div class="col-6 col-md-3">{{ form_row(form.duration, {'attr': {'class': 'form-control', 'id': 'appt-duration'}}) }}</div>
-                        <div class="col-12">
-                            <div class="duration-display" id="end-time-display">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                <span>Renseignez la date et la durée pour voir l'heure de fin</span>
+                        <div class="datetime-field">
+                            <label class="form-label">Heure</label>
+                            <div class="time-picker-group">
+                                <input type="text" id="appt-hours" class="form-control" maxlength="2" inputmode="numeric" placeholder="09">
+                                <span class="time-sep">:</span>
+                                <input type="text" id="appt-minutes" class="form-control" maxlength="2" inputmode="numeric" placeholder="00">
                             </div>
                         </div>
-                        <div class="col-12">{{ form_row(form.location, {'attr': {'class': 'form-control'}}) }}</div>
+                        <div class="datetime-field datetime-field-duration">
+                            <label class="form-label">Durée</label>
+                            <div class="duration-input-group">
+                                {{ form_widget(form.duration, {'attr': {'class': 'form-control', 'id': 'appt-duration'}}) }}
+                                <span class="duration-unit">min</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="location-field-wrapper">
+                        <label class="form-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            Lieu du rendez-vous
+                        </label>
+                        <div class="search-wrapper" id="location-search-wrapper">
+                            {{ form_widget(form.location, {'attr': {'class': 'form-control', 'id': 'appt-location', 'placeholder': 'Rechercher une structure ou saisir une adresse...', 'autocomplete': 'off'}}) }}
+                            <div id="location-search-results" class="search-results"></div>
+                        </div>
+                        <div class="location-suggestions" id="location-suggestions"></div>
                     </div>
                 </div>
 
                 {% if is_pro %}
-                <div class="form-section">
-                    <div class="form-section-title">Partage</div>
-                    {{ form_row(form.sharedWithProfessional, {'attr': {'class': 'form-select'}}) }}
+                <div class="form-section pro-only-section" id="section-share">
+                    <div class="form-section-title">
+                        <span class="section-icon icon-teal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        </span>
+                        Partage
+                    </div>
+                    <div class="share-field">
+                        <label class="form-label">Partager avec un professionnel</label>
+                        <p class="field-hint">Le professionnel sélectionné pourra voir ce rendez-vous dans son agenda.</p>
+                        {{ form_widget(form.sharedWithProfessional, {'attr': {'class': 'form-select'}}) }}
+                    </div>
                 </div>
                 {% endif %}
 
                 <div class="form-section">
-                    <div class="form-section-title">Notes & consignes</div>
-                    <div class="row g-3">
-                        <div class="col-12">{{ form_row(form.publicNotes, {'attr': {'class': 'form-control'}}) }}</div>
+                    <div class="form-section-title" id="notes-title">
+                        <span class="section-icon icon-gold">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                        </span>
+                        <span id="notes-title-text">Notes & consignes</span>
+                    </div>
+                    <div class="notes-block">
+                        <div class="note-field note-field-public">
+                            <label class="form-label">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <span id="public-notes-label">{{ is_pro ? 'Notes publiques' : 'Notes' }}</span>
+                            </label>
+                            {{ form_widget(form.publicNotes, {'attr': {'class': 'form-control', 'rows': '3', 'placeholder': is_pro ? 'Tarifs, consignes, détails visibles par le client...' : 'Informations complémentaires...'}}) }}
+                            {% if is_pro %}
+                            <p class="field-hint" id="public-notes-hint">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                Visibles par le client et les professionnels associés.
+                            </p>
+                            {% endif %}
+                        </div>
                         {% if is_pro and form.privateNotes is defined %}
-                            <div class="col-12">{{ form_row(form.privateNotes, {'attr': {'class': 'form-control'}}) }}</div>
+                        <div class="note-field note-field-private pro-only-section" id="section-private-notes">
+                            <label class="form-label">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Notes privées
+                            </label>
+                            {{ form_widget(form.privateNotes, {'attr': {'class': 'form-control', 'rows': '3', 'placeholder': 'Notes personnelles, non visibles par le client...'}}) }}
+                            <p class="field-hint field-hint-private">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Visibles uniquement par vous.
+                            </p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -223,7 +842,10 @@
                 {{ form_rest(form) }}
 
                 <div class="d-flex gap-2 mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1">Enregistrer les modifications</button>
+                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Enregistrer les modifications
+                    </button>
                     <a href="{{ path('app_appointment_show', {id: appointment.id}) }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
                 </div>
 
@@ -234,54 +856,62 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Event type toggle: PRO sections visibility ──
+    var proSections = document.querySelectorAll('.pro-only-section');
+    var reasonLabel = document.querySelector('label[for="appointment_reason"]');
+    var reasonInput = document.getElementById('appointment_reason');
+    var notesTitle = document.getElementById('notes-title-text');
+    var publicNotesLabel = document.getElementById('public-notes-label');
+
+    function updateSectionsForType(type) {
+        var isPersonal = (type === 'personal');
+        proSections.forEach(function(section) {
+            if (isPersonal) { section.classList.add('hidden-section'); }
+            else { section.classList.remove('hidden-section'); }
+        });
+        if (reasonLabel) { reasonLabel.textContent = isPersonal ? 'Nom de l\'événement' : 'Motif'; }
+        if (reasonInput) {
+            reasonInput.placeholder = isPersonal
+                ? 'Ex : Réunion, Formation, Rappel...'
+                : 'Ex : Vaccination annuelle, Contrôle post-opératoire...';
+        }
+        if (notesTitle) { notesTitle.textContent = isPersonal ? 'Description' : 'Notes & consignes'; }
+        if (publicNotesLabel) {
+            publicNotesLabel.textContent = isPersonal ? 'Description' : ({{ is_pro ? 'true' : 'false' }} ? 'Notes publiques' : 'Notes');
+        }
+        var publicNotesInput = document.getElementById('appointment_publicNotes');
+        if (publicNotesInput) {
+            publicNotesInput.placeholder = isPersonal
+                ? 'Détails, informations complémentaires...'
+                : ({{ is_pro ? 'true' : 'false' }} ? 'Tarifs, consignes, détails visibles par le client...' : 'Informations complémentaires...');
+        }
+        var publicNotesHint = document.getElementById('public-notes-hint');
+        if (publicNotesHint) { publicNotesHint.style.display = isPersonal ? 'none' : ''; }
+    }
+
+    var radios = document.querySelectorAll('input[name="appointment[eventType]"]');
+    radios.forEach(function(radio) {
+        radio.addEventListener('change', function() { updateSectionsForType(this.value); });
+        if (radio.checked) { updateSectionsForType(radio.value); }
+    });
+
+    // ── Custom date + time picker ──
     const scheduledAt = document.getElementById('appointment_scheduledAt');
-    const duration = document.getElementById('appointment_duration');
-    const display = document.getElementById('end-time-display');
-
-    function updateEndTime() {
-        if (!scheduledAt || !scheduledAt.value || !duration || !duration.value) return;
-        const start = new Date(scheduledAt.value);
-        if (isNaN(start.getTime())) return;
-        const dur = parseInt(duration.value) || 0;
-        const end = new Date(start.getTime() + dur * 60000);
-        const hh = String(end.getHours()).padStart(2, '0');
-        const mm = String(end.getMinutes()).padStart(2, '0');
-        const dd = String(end.getDate()).padStart(2, '0');
-        const mo = String(end.getMonth() + 1).padStart(2, '0');
-        display.querySelector('span').textContent = 'Fin prévue : ' + dd + '/' + mo + ' à ' + hh + ':' + mm + ' (' + dur + ' min)';
-    }
-
-    if (scheduledAt) scheduledAt.addEventListener('change', updateEndTime);
-    if (duration) duration.addEventListener('input', updateEndTime);
-
-    // ── Custom date + time picker (15-min steps) ──
     const apptDate = document.getElementById('appt-date');
-    const apptTime = document.getElementById('appt-time');
-    const timeUp = document.getElementById('time-up');
-    const timeDown = document.getElementById('time-down');
-
-    function roundTo15(date) {
-        var m = date.getMinutes();
-        var r = Math.round(m / 15) * 15;
-        date.setMinutes(r, 0, 0);
-        return date;
-    }
-
+    const apptHours = document.getElementById('appt-hours');
+    const apptMinutes = document.getElementById('appt-minutes');
     function pad2(n) { return String(n).padStart(2, '0'); }
 
+    function getH() { return Math.min(23, Math.max(0, parseInt(apptHours.value) || 0)); }
+    function getM() { return Math.min(59, Math.max(0, parseInt(apptMinutes.value) || 0)); }
+
     function syncToHidden() {
-        if (!apptDate.value || !apptTime.value) return;
-        scheduledAt.value = apptDate.value + 'T' + apptTime.value;
-        scheduledAt.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-
-    function setTimeDisplay(h, m) {
-        apptTime.value = pad2(h) + ':' + pad2(m);
-    }
-
-    function getTimeParts() {
-        var parts = (apptTime.value || '00:00').split(':');
-        return { h: parseInt(parts[0]) || 0, m: parseInt(parts[1]) || 0 };
+        if (!apptDate.value) return;
+        var h = getH(), m = getM();
+        apptHours.value = pad2(h);
+        apptMinutes.value = pad2(m);
+        scheduledAt.value = apptDate.value + 'T' + pad2(h) + ':' + pad2(m);
     }
 
     (function initPicker() {
@@ -290,32 +920,753 @@ document.addEventListener('DOMContentLoaded', function() {
             now = new Date(scheduledAt.value);
             if (isNaN(now.getTime())) now = new Date();
         } else {
-            now = roundTo15(new Date());
+            now = new Date();
         }
         apptDate.value = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
-        setTimeDisplay(now.getHours(), now.getMinutes());
+        apptHours.value = pad2(now.getHours());
+        apptMinutes.value = pad2(now.getMinutes());
         syncToHidden();
     })();
 
     apptDate.addEventListener('change', syncToHidden);
+    apptHours.addEventListener('change', syncToHidden);
+    apptMinutes.addEventListener('change', syncToHidden);
+    apptHours.addEventListener('blur', function() { this.value = pad2(getH()); });
+    apptMinutes.addEventListener('blur', function() { this.value = pad2(getM()); });
 
-    timeUp.addEventListener('click', function() {
-        var t = getTimeParts();
-        t.m += 15;
-        if (t.m >= 60) { t.m = 0; t.h = (t.h + 1) % 24; }
-        setTimeDisplay(t.h, t.m);
-        syncToHidden();
+    // ── Location: structure search ──
+    const locationField = document.getElementById('appt-location') || document.getElementById('appointment_location');
+    const locationResults = document.getElementById('location-search-results');
+    const locationWrapper = document.getElementById('location-search-wrapper');
+    const locationSuggestions = document.getElementById('location-suggestions');
+    let locTimer = null;
+
+    if (locationField && locationResults) {
+        locationField.addEventListener('input', function() {
+            clearTimeout(locTimer);
+            const q = this.value.trim();
+            if (q.length < 2) { locationResults.classList.remove('show'); return; }
+            locTimer = setTimeout(() => {
+                fetch('/rendez-vous/api/search-structures?q=' + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        locationResults.innerHTML = '';
+                        const structs = data.structures || [];
+                        if (structs.length === 0) { locationResults.classList.remove('show'); return; }
+                        structs.forEach(s => {
+                            const addr = [s.street, [s.postalCode, s.city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+                            const fullAddr = [s.name, addr].filter(Boolean).join(', ');
+                            const div = document.createElement('div');
+                            div.className = 'search-result-item';
+                            div.innerHTML = '<div class="search-result-name">' + s.name + '</div>' +
+                                (addr ? '<div class="search-result-detail">' + addr + '</div>' : '');
+                            div.addEventListener('click', function() {
+                                locationField.value = fullAddr;
+                                locationResults.classList.remove('show');
+                            });
+                            locationResults.appendChild(div);
+                        });
+                        locationResults.classList.add('show');
+                    });
+            }, 300);
+        });
+        document.addEventListener('click', function(e) {
+            if (locationWrapper && !locationWrapper.contains(e.target)) { locationResults.classList.remove('show'); }
+        });
+    }
+
+    function addLocationPill(label, address, icon) {
+        if (!locationSuggestions || !address) return;
+        var exists = locationSuggestions.querySelector('[data-address="' + CSS.escape(address) + '"]');
+        if (exists) return;
+        var pill = document.createElement('button');
+        pill.type = 'button'; pill.className = 'location-pill';
+        pill.dataset.address = address;
+        pill.innerHTML = icon + '<span class="pill-label" title="' + address.replace(/"/g, '&quot;') + '">' + label + '</span>';
+        pill.addEventListener('click', function() { locationField.value = address; });
+        locationSuggestions.appendChild(pill);
+    }
+
+    function clearLocationPills() { if (locationSuggestions) locationSuggestions.innerHTML = ''; }
+
+    const iconStructure = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+    const iconUser = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    const iconHorse = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>';
+
+    // ── PRO: Client search & dynamic animals ──
+    const searchInput = document.getElementById('client-search');
+
+    if (searchInput) {
+    const searchResults = document.getElementById('client-search-results');
+    const searchWrapper = document.getElementById('client-search-wrapper');
+    const selectedDisplay = document.getElementById('selected-client-display');
+    const selectedName = document.getElementById('selected-client-name');
+    const selectedEmail = document.getElementById('selected-client-email');
+    const btnRemove = document.getElementById('btn-remove-client');
+    const clientSelect = document.getElementById('appointment_client');
+    const animalsContainer = document.getElementById('animals-container');
+    const dynamicAnimals = document.getElementById('dynamic-animals');
+    let debounceTimer = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const q = this.value.trim();
+        if (q.length < 2) { searchResults.classList.remove('show'); return; }
+        debounceTimer = setTimeout(() => {
+            fetch('/rendez-vous/api/appointment/search?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(data => {
+                    searchResults.innerHTML = '';
+                    if (data.clients.length === 0) {
+                        searchResults.innerHTML = '<div class="search-result-item" style="cursor:default;color:var(--text-muted);font-size:0.85rem;">Aucun résultat</div>';
+                    } else {
+                        data.clients.forEach(client => {
+                            const div = document.createElement('div');
+                            div.className = 'search-result-item';
+                            let animalsHtml = '';
+                            if (client.animals.length > 0) {
+                                animalsHtml = '<div class="search-result-animals">' +
+                                    client.animals.map(a => '<span>' + a.name + (a.structureName ? ' · ' + a.structureName : (a.livingPlaceName ? ' · ' + a.livingPlaceName : '')) + '</span>').join('') +
+                                    '</div>';
+                            }
+                            div.innerHTML = '<div class="search-result-name">' + client.name + '</div>' +
+                                '<div class="search-result-detail">' + client.email + '</div>' + animalsHtml;
+                            div.addEventListener('click', () => selectClient(client));
+                            searchResults.appendChild(div);
+                        });
+                    }
+                    searchResults.classList.add('show');
+                });
+        }, 300);
     });
 
-    timeDown.addEventListener('click', function() {
-        var t = getTimeParts();
-        t.m -= 15;
-        if (t.m < 0) { t.m = 45; t.h = (t.h - 1 + 24) % 24; }
-        setTimeDisplay(t.h, t.m);
-        syncToHidden();
+    document.addEventListener('click', function(e) {
+        if (!searchWrapper.contains(e.target)) { searchResults.classList.remove('show'); }
     });
 
-    updateEndTime();
+    function selectClient(client) {
+        clientSelect.value = client.id;
+        selectedName.textContent = client.name;
+        selectedEmail.textContent = client.email;
+        selectedDisplay.style.display = 'block';
+        searchResults.classList.remove('show');
+        searchInput.value = '';
+        searchWrapper.style.display = 'none';
+        clearLocationPills();
+        if (client.address) { addLocationPill(client.name, client.address, iconUser); }
+        loadAnimals(client.id);
+    }
+
+    btnRemove.addEventListener('click', function() {
+        clientSelect.value = '';
+        selectedDisplay.style.display = 'none';
+        searchWrapper.style.display = '';
+        searchInput.value = '';
+        animalsContainer.classList.add('hidden');
+        dynamicAnimals.innerHTML = '';
+        if (locationField) locationField.value = '';
+        clearLocationPills();
+        // Uncheck all symfony checkboxes
+        document.querySelectorAll('#symfony-animals input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
+        // Remove existing animals from cards
+        if (typeof validatedAnimals !== 'undefined') {
+            for (var i = validatedAnimals.length - 1; i >= 0; i--) {
+                if (validatedAnimals[i].existing_id) { validatedAnimals.splice(i, 1); }
+            }
+            syncValidatedAnimals();
+        }
+    });
+
+    function loadAnimals(clientId) {
+        fetch('/rendez-vous/api/client/' + clientId + '/animals')
+            .then(r => r.json())
+            .then(data => {
+                const animals = data.animals;
+                dynamicAnimals.innerHTML = '';
+
+                if (animals.length === 0) {
+                    dynamicAnimals.innerHTML = '<div class="animals-empty">Aucun cheval trouvé pour ce client.</div>';
+                    animalsContainer.classList.remove('hidden');
+                    return;
+                }
+
+                const seenAddresses = new Set();
+                animals.forEach(animal => {
+                    const bestAddress = animal.structureAddress || animal.address;
+                    const symCb = document.querySelector('#symfony-animals input[type="checkbox"][value="' + animal.id + '"]');
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-check';
+
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.id = 'dynamic_animal_' + animal.id;
+                    cb.dataset.animalId = animal.id;
+                    cb.dataset.address = bestAddress || '';
+
+                    // Check if this animal is already in the appointment
+                    if (typeof validatedAnimals !== 'undefined' && validatedAnimals.some(function(a) { return a.existing_id == animal.id; })) {
+                        cb.checked = true;
+                    }
+
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.htmlFor = cb.id;
+                    label.textContent = animal.name;
+                    const locationHint = animal.structureName || animal.livingPlaceName;
+                    if (locationHint) {
+                        const small = document.createElement('small');
+                        small.style.cssText = 'opacity:0.6;margin-left:0.3rem;';
+                        small.textContent = '· ' + locationHint;
+                        label.appendChild(small);
+                    }
+
+                    cb.addEventListener('change', function() {
+                        if (typeof addExistingAnimalToCards === 'function') {
+                            if (this.checked) {
+                                addExistingAnimalToCards(animal.id, animal.name, animal.ownerName || '', animal.structureName || '');
+                            } else {
+                                if (typeof validatedAnimals !== 'undefined') {
+                                    for (var vi = validatedAnimals.length - 1; vi >= 0; vi--) {
+                                        if (validatedAnimals[vi].existing_id == animal.id) {
+                                            validatedAnimals.splice(vi, 1); break;
+                                        }
+                                    }
+                                    syncValidatedAnimals();
+                                }
+                                if (symCb) symCb.checked = false;
+                            }
+                        } else {
+                            if (symCb) symCb.checked = this.checked;
+                        }
+                    });
+
+                    wrapper.appendChild(cb);
+                    wrapper.appendChild(label);
+                    dynamicAnimals.appendChild(wrapper);
+
+                    if (animal.structureAddress && !seenAddresses.has(animal.structureAddress)) {
+                        seenAddresses.add(animal.structureAddress);
+                        addLocationPill(animal.structureName || 'Structure', animal.structureAddress, iconStructure);
+                    }
+                    if (animal.address && !seenAddresses.has(animal.address)) {
+                        seenAddresses.add(animal.address);
+                        addLocationPill(animal.livingPlaceName || animal.name, animal.address, iconHorse);
+                    }
+                });
+
+                animalsContainer.classList.remove('hidden');
+            });
+    }
+
+    // ── Pre-populate existing client and animals ──
+    var existingAnimalsData = {{ existing_animals_json|raw }};
+    var preselectedClientId = clientSelect.value;
+
+    if (preselectedClientId) {
+        // Find client option to get name/email
+        var clientOption = clientSelect.querySelector('option[value="' + preselectedClientId + '"]');
+        if (clientOption) {
+            var optText = clientOption.textContent;
+            var emailMatch = optText.match(/\(([^)]+)\)/);
+            var clientEmail = emailMatch ? emailMatch[1] : '';
+            var clientName = optText.replace(/\s*\([^)]+\)\s*$/, '');
+            selectedName.textContent = clientName;
+            selectedEmail.textContent = clientEmail;
+            selectedDisplay.style.display = 'block';
+            searchWrapper.style.display = 'none';
+            loadAnimals(preselectedClientId);
+        }
+    }
+
+    } // end if (searchInput) — PRO-only block
+
+    // ── New animal toggle + multi-animal (PRO edit) ──
+    const btnNewAnimalToggle = document.getElementById('btn-new-animal-toggle');
+    if (btnNewAnimalToggle) {
+        const newAnimalForm = document.getElementById('new-animal-form');
+        const newAnimalMode = document.getElementById('new_animal_mode');
+        const modeSearch = document.getElementById('mode-search-animal');
+        const modeCreate = document.getElementById('mode-create-animal');
+        const modeSeparator = document.getElementById('mode-separator-pro');
+        const btnCancelCreate = document.getElementById('btn-cancel-create');
+        const validatedList = document.getElementById('validated-animals-list');
+        const validatedHidden = document.getElementById('validated-animals-hidden-inputs');
+        const multiCount = document.getElementById('multi_animal_count');
+        const btnValidate = document.getElementById('btn-validate-animal');
+        const validateError = document.getElementById('validate-animal-error');
+        const btnAddAnother = document.getElementById('btn-add-another-wrapper');
+        const btnAddAnotherBtn = document.getElementById('btn-add-another-animal');
+        const formTitle = document.getElementById('new-animal-form-title');
+
+        var validatedAnimals = [];
+        var currentUserName = {{ app.user.fullName|json_encode|raw }};
+
+        // Pre-populate with existing animals from the appointment
+        var existingAnimalsData = {{ existing_animals_json|raw }};
+        existingAnimalsData.forEach(function(animal) {
+            validatedAnimals.push({
+                existing_id: animal.id,
+                name: animal.name,
+                owner_name: animal.ownerName || '',
+                structure_name: animal.structureName || ''
+            });
+            var symCb = document.querySelector('#symfony-animals input[type="checkbox"][value="' + animal.id + '"]');
+            if (symCb) symCb.checked = true;
+        });
+
+        function activateCreateMode() {
+            newAnimalForm.classList.add('show');
+            btnNewAnimalToggle.classList.add('active');
+            newAnimalMode.value = '1';
+            if (modeSearch) modeSearch.classList.add('mode-hidden');
+            if (modeSeparator) modeSeparator.classList.add('mode-hidden');
+            if (btnCancelCreate) btnCancelCreate.classList.remove('mode-hidden');
+            var cs = document.getElementById('appointment_client');
+            if (cs && cs.value) {
+                document.getElementById('na-referent-section').style.display = 'none';
+                document.getElementById('new_animal_referent_id').value = cs.value;
+            } else {
+                document.getElementById('na-referent-section').style.display = '';
+            }
+            if (btnAddAnother) btnAddAnother.style.display = 'none';
+            updateFormTitle();
+        }
+
+        function deactivateCreateMode() {
+            newAnimalForm.classList.remove('show');
+            btnNewAnimalToggle.classList.remove('active');
+            if (validatedAnimals.length === 0) { newAnimalMode.value = '0'; }
+            if (modeSearch) modeSearch.classList.remove('mode-hidden');
+            if (modeSeparator) modeSeparator.classList.remove('mode-hidden');
+            if (btnCancelCreate) btnCancelCreate.classList.add('mode-hidden');
+            if (btnAddAnother) btnAddAnother.style.display = 'none';
+        }
+
+        function updateFormTitle() {
+            if (formTitle) {
+                var newCount = validatedAnimals.filter(function(a) { return !a.existing_id; }).length;
+                formTitle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-1" style="vertical-align: -2px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nouveau cheval' + (newCount > 0 ? ' ' + (newCount + 1) : '');
+            }
+        }
+
+        var btnCloseForm = document.getElementById('btn-close-animal-form');
+        if (btnCloseForm) {
+            btnCloseForm.addEventListener('click', function() { deactivateCreateMode(); resetAnimalForm(); });
+        }
+
+        function resetAnimalForm() {
+            var nameInput = document.querySelector('#new-animal-form input[name="new_animal_name"]');
+            var birthInput = document.querySelector('#new-animal-form input[name="new_animal_birth_date"]');
+            var genderSelect = document.querySelector('#new-animal-form select[name="new_animal_gender"]');
+            var sireInput = document.querySelector('#new-animal-form input[name="new_animal_sire"]');
+            var chipInput = document.querySelector('#new-animal-form input[name="new_animal_microchip"]');
+            if (nameInput) nameInput.value = '';
+            if (birthInput) birthInput.value = '';
+            if (genderSelect) genderSelect.value = 'Hongre';
+            if (sireInput) sireInput.value = '';
+            if (chipInput) chipInput.value = '';
+            document.getElementById('new_animal_referent_id').value = '';
+            document.getElementById('new_animal_structure_id').value = '';
+            var structSel = document.getElementById('na-structure-selected');
+            var structWrap = document.getElementById('na-structure-search-wrapper');
+            var structSearch = document.getElementById('na-structure-search');
+            if (structSel) structSel.style.display = 'none';
+            if (structWrap) structWrap.style.display = '';
+            if (structSearch) structSearch.value = '';
+            var refCards = document.getElementById('naRefActionCards');
+            var refSearchP = document.getElementById('naRefSearchPanel');
+            var refCreateP = document.getElementById('naRefCreatePanel');
+            var refSelected = document.getElementById('naRefSelected');
+            var refHidden = document.getElementById('new_animal_referent_id');
+            var selfAlert = document.getElementById('naRefSelfAlert');
+            if (refCards) refCards.style.display = '';
+            if (refSearchP) refSearchP.style.display = 'none';
+            if (refCreateP) refCreateP.style.display = 'none';
+            if (refSelected) refSelected.style.display = 'none';
+            if (refHidden) refHidden.value = '';
+            if (selfAlert) selfAlert.style.display = '';
+            document.querySelectorAll('#naRefCreatePanel input').forEach(function(i) { i.value = ''; });
+            var dupAlert = document.getElementById('duplicateAlertPro');
+            if (dupAlert) dupAlert.classList.remove('show');
+            if (validateError) validateError.style.display = 'none';
+        }
+
+        function collectAnimalData() {
+            var form = document.getElementById('new-animal-form');
+            return {
+                name: (form.querySelector('input[name="new_animal_name"]').value || '').trim(),
+                birth_date: form.querySelector('input[name="new_animal_birth_date"]').value || '',
+                gender: form.querySelector('select[name="new_animal_gender"]').value || 'Hongre',
+                sire: (form.querySelector('input[name="new_animal_sire"]').value || '').trim(),
+                microchip: (form.querySelector('input[name="new_animal_microchip"]').value || '').trim(),
+                referent_id: document.getElementById('new_animal_referent_id').value || '',
+                referent_name: (document.getElementById('naRefSelectedName') || {}).textContent || '',
+                referent_lastname: (document.querySelector('#naRefCreatePanel input[name="new_animal_referent_lastname"]') || {}).value || '',
+                referent_firstname: (document.querySelector('#naRefCreatePanel input[name="new_animal_referent_firstname"]') || {}).value || '',
+                referent_email: (document.querySelector('#naRefCreatePanel input[name="new_animal_referent_email"]') || {}).value || '',
+                referent_phone: (document.querySelector('#naRefCreatePanel input[name="new_animal_referent_phone"]') || {}).value || '',
+                structure_id: document.getElementById('new_animal_structure_id').value || '',
+                structure_name: (document.getElementById('na-structure-selected-name') || {}).textContent || ''
+            };
+        }
+
+        function renderValidatedCards() {
+            validatedList.innerHTML = '';
+            if (validatedAnimals.length === 0) { validatedList.style.display = 'none'; return; }
+            validatedList.style.display = '';
+            var header = document.createElement('div');
+            header.className = 'validated-animals-header';
+            header.innerHTML =
+                '<div class="va-header-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+                '<span class="va-header-text">Chevaux concernés</span>' +
+                '<span class="va-header-count">' + validatedAnimals.length + '</span>';
+            validatedList.appendChild(header);
+            validatedAnimals.forEach(function(animal, idx) {
+                var card = document.createElement('div');
+                card.className = 'validated-animal-card';
+                var details = [];
+                if (animal.existing_id) {
+                    if (animal.owner_name) details.push(animal.owner_name);
+                    if (animal.structure_name) details.push(animal.structure_name);
+                    if (details.length === 0) details.push('Cheval existant');
+                } else {
+                    details.push(animal.gender);
+                    if (animal.sire) details.push('SIRE: ' + animal.sire);
+                    if (animal.referent_name) details.push('Réf: ' + animal.referent_name);
+                    else if (animal.referent_lastname) details.push('Réf: ' + animal.referent_firstname + ' ' + animal.referent_lastname);
+                    else details.push('Réf: ' + currentUserName + ' (vous)');
+                    if (animal.structure_name) details.push(animal.structure_name);
+                }
+                var checkSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+                card.innerHTML =
+                    '<div class="va-icon">' + checkSvg + '</div>' +
+                    '<div class="va-info">' +
+                        '<div class="va-name">' + animal.name + '</div>' +
+                        '<div class="va-detail">' + details.join(' · ') + '</div>' +
+                    '</div>' +
+                    '<button type="button" class="va-remove" data-idx="' + idx + '" title="Retirer">&#10005;</button>';
+                card.querySelector('.va-remove').addEventListener('click', function() {
+                    var removed = validatedAnimals.splice(idx, 1)[0];
+                    if (removed.existing_id) {
+                        var symCb = document.querySelector('#symfony-animals input[type="checkbox"][value="' + removed.existing_id + '"]');
+                        if (symCb) symCb.checked = false;
+                        var dynCb = document.getElementById('dynamic_animal_' + removed.existing_id);
+                        if (dynCb) dynCb.checked = false;
+                    }
+                    syncValidatedAnimals();
+                });
+                validatedList.appendChild(card);
+            });
+        }
+
+        function addExistingAnimalToCards(id, name, ownerName, structureName) {
+            if (validatedAnimals.some(function(a) { return a.existing_id == id; })) return;
+            validatedAnimals.push({
+                existing_id: id, name: name,
+                owner_name: ownerName || '', structure_name: structureName || ''
+            });
+            var symCb = document.querySelector('#symfony-animals input[type="checkbox"][value="' + id + '"]');
+            if (symCb) symCb.checked = true;
+            syncValidatedAnimals();
+        }
+
+        function syncValidatedAnimals() {
+            renderValidatedCards();
+            validatedHidden.innerHTML = '';
+            var newIdx = 0;
+            validatedAnimals.forEach(function(animal) {
+                if (animal.existing_id) return;
+                var fields = ['name', 'birth_date', 'gender', 'sire', 'microchip',
+                    'referent_id', 'referent_lastname', 'referent_firstname', 'referent_email', 'referent_phone',
+                    'structure_id'];
+                fields.forEach(function(f) {
+                    if (animal[f]) {
+                        var inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'new_animals[' + newIdx + '][' + f + ']';
+                        inp.value = animal[f];
+                        validatedHidden.appendChild(inp);
+                    }
+                });
+                newIdx++;
+            });
+            multiCount.value = newIdx;
+            var hasNewAnimals = newIdx > 0;
+            newAnimalMode.value = hasNewAnimals ? '1' : '0';
+            if (validatedAnimals.length > 0) {
+                btnNewAnimalToggle.style.display = 'none';
+                if (btnAddAnother) btnAddAnother.style.display = '';
+            } else {
+                btnNewAnimalToggle.style.display = '';
+                if (modeSearch) modeSearch.classList.remove('mode-hidden');
+                if (modeSeparator) modeSeparator.classList.remove('mode-hidden');
+                if (btnAddAnother) btnAddAnother.style.display = 'none';
+            }
+            updateFormTitle();
+        }
+
+        // Initial render of existing animals
+        syncValidatedAnimals();
+
+        if (btnValidate) {
+            btnValidate.addEventListener('click', function() {
+                var data = collectAnimalData();
+                if (!data.name) {
+                    validateError.textContent = 'Le nom du cheval est obligatoire.';
+                    validateError.style.display = ''; return;
+                }
+                if (!data.referent_id && !data.referent_email) {
+                    data.referent_display = currentUserName + ' (vous)';
+                }
+                validateError.style.display = 'none';
+                validatedAnimals.push(data);
+                syncValidatedAnimals();
+                resetAnimalForm();
+                newAnimalForm.classList.remove('show');
+                btnNewAnimalToggle.classList.remove('active');
+                if (modeSearch) modeSearch.classList.remove('mode-hidden');
+                if (modeSeparator) modeSeparator.classList.remove('mode-hidden');
+                if (btnCancelCreate) btnCancelCreate.classList.add('mode-hidden');
+                if (btnAddAnother) btnAddAnother.style.display = '';
+                updateFormTitle();
+            });
+        }
+
+        if (btnAddAnotherBtn) {
+            btnAddAnotherBtn.addEventListener('click', function() {
+                resetAnimalForm();
+                newAnimalForm.classList.add('show');
+                if (btnAddAnother) btnAddAnother.style.display = 'none';
+                updateFormTitle();
+                var cs = document.getElementById('appointment_client');
+                if (cs && cs.value) {
+                    document.getElementById('na-referent-section').style.display = 'none';
+                    document.getElementById('new_animal_referent_id').value = cs.value;
+                } else {
+                    document.getElementById('na-referent-section').style.display = '';
+                }
+                document.querySelector('#new-animal-form input[name="new_animal_name"]').focus();
+            });
+        }
+
+        btnNewAnimalToggle.addEventListener('click', function() {
+            if (newAnimalForm.classList.contains('show')) { deactivateCreateMode(); }
+            else { activateCreateMode(); }
+        });
+
+        if (btnCancelCreate) {
+            btnCancelCreate.addEventListener('click', function() {
+                if (validatedAnimals.length > 0) {
+                    newAnimalForm.classList.remove('show');
+                    if (btnAddAnother) btnAddAnother.style.display = '';
+                    if (btnCancelCreate) btnCancelCreate.classList.add('mode-hidden');
+                } else {
+                    deactivateCreateMode();
+                }
+            });
+        }
+
+        // ── Referent principal: search / create / selected ──
+        (function() {
+            const actionCards = document.getElementById('naRefActionCards');
+            const searchCard = document.getElementById('naRefSearchCard');
+            const createCard = document.getElementById('naRefCreateCard');
+            const searchPanel = document.getElementById('naRefSearchPanel');
+            const createPanel = document.getElementById('naRefCreatePanel');
+            const selected = document.getElementById('naRefSelected');
+            const selectedName = document.getElementById('naRefSelectedName');
+            const selectedInfo = document.getElementById('naRefSelectedInfo');
+            const removeBtn = document.getElementById('naRefRemoveBtn');
+            const hiddenId = document.getElementById('new_animal_referent_id');
+            const searchInput = document.getElementById('naRefSearchInput');
+            const searchResults = document.getElementById('naRefSearchResults');
+            var selfAlert = document.getElementById('naRefSelfAlert');
+            if (!actionCards) return;
+
+            function resetRef() {
+                actionCards.style.display = ''; searchPanel.style.display = 'none';
+                createPanel.style.display = 'none'; selected.style.display = 'none';
+                hiddenId.value = '';
+                if (searchInput) searchInput.value = '';
+                if (searchResults) { searchResults.innerHTML = ''; searchResults.style.display = 'none'; }
+                document.querySelectorAll('#naRefCreatePanel input').forEach(i => i.value = '');
+                if (selfAlert) selfAlert.style.display = '';
+            }
+            searchCard.addEventListener('click', function() {
+                actionCards.style.display = 'none'; createPanel.style.display = 'none';
+                searchPanel.style.display = ''; searchInput.focus();
+            });
+            createCard.addEventListener('click', function() {
+                actionCards.style.display = 'none'; searchPanel.style.display = 'none';
+                createPanel.style.display = ''; hiddenId.value = '';
+                if (selfAlert) selfAlert.style.display = 'none';
+            });
+            function selectRef(id, name, info) {
+                hiddenId.value = id; selectedName.textContent = name;
+                selectedInfo.textContent = info || '';
+                actionCards.style.display = 'none'; searchPanel.style.display = 'none';
+                createPanel.style.display = 'none'; selected.style.display = '';
+                if (selfAlert) selfAlert.style.display = 'none';
+            }
+            removeBtn.addEventListener('click', resetRef);
+            var searchBack = document.getElementById('naRefSearchBack');
+            var createBack = document.getElementById('naRefCreateBack');
+            if (searchBack) searchBack.addEventListener('click', resetRef);
+            if (createBack) createBack.addEventListener('click', resetRef);
+
+            let refTimer = null;
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(refTimer);
+                    const q = this.value.trim();
+                    if (q.length < 2) { searchResults.style.display = 'none'; return; }
+                    refTimer = setTimeout(() => {
+                        fetch('/rendez-vous/api/search-owners?q=' + encodeURIComponent(q))
+                            .then(r => r.json())
+                            .then(data => {
+                                const items = data.owners || [];
+                                searchResults.innerHTML = '';
+                                if (items.length === 0) {
+                                    searchResults.innerHTML = '<div class="list-group-item small text-muted">Aucun résultat</div>';
+                                    searchResults.style.display = ''; return;
+                                }
+                                items.forEach(item => {
+                                    const el = document.createElement('button');
+                                    el.type = 'button';
+                                    el.className = 'list-group-item list-group-item-action py-1 px-2';
+                                    el.innerHTML = '<strong class="small">' + item.name + '</strong>' +
+                                        '<span class="small text-secondary ms-1">' + item.email + '</span>';
+                                    el.addEventListener('click', function() { selectRef(item.id, item.name, item.email); });
+                                    searchResults.appendChild(el);
+                                });
+                                searchResults.style.display = '';
+                            });
+                    }, 300);
+                });
+            }
+        })();
+
+        setupSearchField(
+            'na-structure-search', 'na-structure-results',
+            '/rendez-vous/api/search-structures', 'structures',
+            function(item) {
+                return '<span class="result-name">' + item.name + '</span>' +
+                    (item.city ? '<span class="result-detail"> — ' + item.city + '</span>' : '');
+            },
+            function(item) {
+                document.getElementById('new_animal_structure_id').value = item.id;
+                document.getElementById('na-structure-selected-name').textContent = item.name + (item.city ? ' — ' + item.city : '');
+                document.getElementById('na-structure-selected').style.display = '';
+                document.getElementById('na-structure-search-wrapper').style.display = 'none';
+            }
+        );
+        document.getElementById('na-structure-remove')?.addEventListener('click', function() {
+            document.getElementById('new_animal_structure_id').value = '';
+            document.getElementById('na-structure-selected').style.display = 'none';
+            document.getElementById('na-structure-search-wrapper').style.display = '';
+            document.getElementById('na-structure-search').value = '';
+        });
+
+        // ── Duplicate detection ──
+        setupDuplicateCheck('new-animal-form', 'duplicateAlertPro', 'duplicateListPro', function(animal) {
+            if (typeof addExistingAnimalToCards === 'function') {
+                addExistingAnimalToCards(animal.id, animal.name, animal.owner || '', '');
+            }
+            var nameInput = document.querySelector('#new-animal-form input[name="new_animal_name"]');
+            if (nameInput) nameInput.value = '';
+            newAnimalForm.classList.remove('show');
+            if (btnAddAnother) btnAddAnother.style.display = '';
+            if (btnCancelCreate) btnCancelCreate.classList.add('mode-hidden');
+        });
+    }
+
+    // ── Generic search field helper ──
+    function setupSearchField(inputId, resultsId, apiUrl, dataKey, renderItem, onSelect) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const results = document.getElementById(resultsId);
+        let timer = null;
+        input.addEventListener('input', function() {
+            clearTimeout(timer);
+            const q = this.value.trim();
+            if (q.length < 2) { results.classList.remove('show'); return; }
+            timer = setTimeout(() => {
+                fetch(apiUrl + '?q=' + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        results.innerHTML = '';
+                        const items = data[dataKey] || [];
+                        if (items.length === 0) {
+                            results.innerHTML = '<div class="na-search-result-item" style="cursor:default;color:var(--text-muted);">Aucun résultat</div>';
+                        } else {
+                            items.forEach(item => {
+                                const div = document.createElement('div');
+                                div.className = 'na-search-result-item';
+                                div.innerHTML = renderItem(item);
+                                div.addEventListener('click', () => { onSelect(item); results.classList.remove('show'); });
+                                results.appendChild(div);
+                            });
+                        }
+                        results.classList.add('show');
+                    });
+            }, 300);
+        });
+        document.addEventListener('click', function(e) {
+            if (!input.parentElement.contains(e.target)) { results.classList.remove('show'); }
+        });
+    }
+
+    // ── Duplicate detection helper ──
+    function setupDuplicateCheck(formId, alertId, listId, onSelectDuplicate) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        const nameInput = form.querySelector('input[name="new_animal_name"]');
+        if (!nameInput) return;
+        const sireInput = form.querySelector('input[name="new_animal_sire"]');
+        const chipInput = form.querySelector('input[name="new_animal_microchip"]');
+        const alertEl = document.getElementById(alertId);
+        const listEl = document.getElementById(listId);
+        let dupTimer = null;
+        function checkDuplicates() {
+            clearTimeout(dupTimer);
+            dupTimer = setTimeout(function() {
+                const name = nameInput.value.trim();
+                const sire = sireInput ? sireInput.value.trim() : '';
+                const chip = chipInput ? chipInput.value.trim() : '';
+                if (name.length < 2 && sire.length < 2 && chip.length < 2) { alertEl.classList.remove('show'); return; }
+                const params = new URLSearchParams();
+                if (name) params.set('name', name);
+                if (sire) params.set('identification', sire);
+                if (chip) params.set('microchip', chip);
+                fetch('/mes-chevaux/api/doublons?' + params.toString())
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.length) { alertEl.classList.remove('show'); return; }
+                        listEl.innerHTML = '';
+                        data.forEach(function(d) {
+                            const btn = document.createElement('button');
+                            btn.type = 'button'; btn.className = 'duplicate-card';
+                            let detail = [];
+                            if (d.breed) detail.push(d.breed);
+                            if (d.identificationNumber) detail.push('SIRE: ' + d.identificationNumber);
+                            if (d.microchipNumber) detail.push('Puce: ' + d.microchipNumber);
+                            if (d.owner) detail.push('Prop: ' + d.owner);
+                            btn.innerHTML = '<div><div class="duplicate-card-name">' + d.name + '</div>' +
+                                (detail.length ? '<div class="duplicate-card-detail">' + detail.join(' · ') + '</div>' : '') + '</div>' +
+                                '<span style="margin-left:auto;font-size:0.75rem;font-weight:700;color:var(--primary-color);">Sélectionner</span>';
+                            btn.addEventListener('click', function() { onSelectDuplicate(d); alertEl.classList.remove('show'); });
+                            listEl.appendChild(btn);
+                        });
+                        alertEl.classList.add('show');
+                    })
+                    .catch(function() { alertEl.classList.remove('show'); });
+            }, 400);
+        }
+        nameInput.addEventListener('input', checkDuplicates);
+        if (sireInput) sireInput.addEventListener('input', checkDuplicates);
+        if (chipInput) chipInput.addEventListener('input', checkDuplicates);
+    }
 });
 </script>
 {% endblock %}

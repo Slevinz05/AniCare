@@ -53,6 +53,14 @@
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0; font-size: 1.1rem;
     }
+    .external-invite-notice {
+        background: rgba(200,151,62,0.08);
+        border: 1px solid rgba(200,151,62,0.25);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.82rem;
+        color: #856404;
+    }
 </style>
 
 <div class="container py-4">
@@ -75,15 +83,18 @@
             <div class="card-body p-4">
                 <form method="post" action="{{ path('app_referent_invite', {animalId: animal.id}) }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('invite_referent') }}">
+                    <input type="hidden" name="email" id="selected-email" value="">
+                    <input type="hidden" name="contact_name" id="contact-name-hidden" value="">
 
                     {# Recherche utilisateur #}
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Rechercher un utilisateur</label>
+                        <label class="form-label fw-semibold">Rechercher un utilisateur ou inviter par email</label>
                         <div style="position: relative;">
                             <input type="text" id="user-search" class="form-control" placeholder="Nom, prénom ou email..." autocomplete="off">
-                            <input type="hidden" name="email" id="selected-email" required>
                             <div id="search-results" class="search-results"></div>
                         </div>
+
+                        {# Utilisateur sélectionné #}
                         <div id="selected-user" class="mt-2" style="display: none;">
                             <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: var(--soft-teal, #eef7f5); border: 1px solid var(--primary-color);">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: var(--primary-color); color: #fff; font-weight: 700; font-size: 0.75rem;" id="selected-avatar"></div>
@@ -94,6 +105,30 @@
                                 <button type="button" class="btn btn-sm ms-auto" id="clear-selection" style="color: var(--primary-color);">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
+                            </div>
+                        </div>
+
+                        {# Invitation externe (pas de compte) #}
+                        <div id="external-invite" class="mt-2" style="display: none;">
+                            <div class="external-invite-notice mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                Cet email n'a pas de compte AniCare. Un lien d'inscription sera envoyé.
+                            </div>
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: rgba(200,151,62,0.08); border: 1px solid var(--accent-color);">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: var(--accent-color); color: #fff; font-weight: 700; font-size: 0.75rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold" style="font-size: 0.875rem;" id="external-email-display"></div>
+                                    <div class="text-secondary" style="font-size: 0.7rem;">Invitation externe</div>
+                                </div>
+                                <button type="button" class="btn btn-sm ms-auto" id="clear-external" style="color: var(--accent-color);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label small text-secondary mb-1">Nom du contact (optionnel)</label>
+                                <input type="text" id="contact-name-input" class="form-control form-control-sm" placeholder="Prénom Nom..." style="border-radius: 8px;">
                             </div>
                         </div>
                     </div>
@@ -150,33 +185,71 @@
     const searchInput = document.getElementById('user-search');
     const resultsDiv = document.getElementById('search-results');
     const emailInput = document.getElementById('selected-email');
+    const contactNameHidden = document.getElementById('contact-name-hidden');
+    const contactNameInput = document.getElementById('contact-name-input');
     const selectedDiv = document.getElementById('selected-user');
+    const externalDiv = document.getElementById('external-invite');
     const submitBtn = document.getElementById('submit-btn');
     let debounce = null;
+    let lastQuery = '';
+
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
 
     searchInput.addEventListener('input', function() {
         clearTimeout(debounce);
         const q = this.value.trim();
+        lastQuery = q;
         if (q.length < 2) { resultsDiv.classList.remove('show'); return; }
         debounce = setTimeout(function() {
             fetch('{{ path('app_referent_search_user') }}?q=' + encodeURIComponent(q))
                 .then(r => r.json())
                 .then(function(users) {
-                    if (!users.length) {
-                        resultsDiv.innerHTML = '<div class="p-3 text-secondary small">Aucun résultat</div>';
-                        resultsDiv.classList.add('show');
-                        return;
+                    let html = '';
+                    if (users.length > 0) {
+                        html = users.map(function(u) {
+                            const badge = u.type === 'PRO'
+                                ? '<span class="result-badge" style="background: var(--soft-teal); color: var(--primary-color);">PRO</span>'
+                                : '<span class="result-badge" style="background: #fff3e0; color: #e65100;">Particulier</span>';
+                            return '<div class="search-result-item" data-email="' + u.email + '" data-name="' + u.name + '">'
+                                + '<div class="d-flex align-items-center justify-content-between">'
+                                + '<div><div class="result-name">' + u.name + '</div>'
+                                + '<div class="result-email">' + u.email + '</div></div>'
+                                + badge + '</div></div>';
+                        }).join('');
                     }
-                    resultsDiv.innerHTML = users.map(function(u) {
-                        const badge = u.type === 'PRO'
-                            ? '<span class="result-badge" style="background: var(--soft-teal); color: var(--primary-color);">PRO</span>'
-                            : '<span class="result-badge" style="background: #fff3e0; color: #e65100;">Particulier</span>';
-                        return '<div class="search-result-item" data-email="' + u.email + '" data-name="' + u.name + '">'
-                            + '<div class="d-flex align-items-center justify-content-between">'
-                            + '<div><div class="result-name">' + u.name + '</div>'
-                            + '<div class="result-email">' + u.email + '</div></div>'
-                            + badge + '</div></div>';
-                    }).join('');
+
+                    if (isValidEmail(q)) {
+                        const alreadyInResults = users.some(function(u) { return u.email.toLowerCase() === q.toLowerCase(); });
+                        if (!alreadyInResults) {
+                            html += '<div class="search-result-item external-item" data-email="' + q + '" data-external="true">'
+                                + '<div class="d-flex align-items-center justify-content-between">'
+                                + '<div><div class="result-name" style="color: var(--accent-color);">'
+                                + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'
+                                + 'Inviter ' + q + '</div>'
+                                + '<div class="result-email">Envoyer un lien d\'inscription par email</div></div>'
+                                + '<span class="result-badge" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">Nouveau</span>'
+                                + '</div></div>';
+                        }
+                    }
+
+                    if (!html) {
+                        if (isValidEmail(q)) {
+                            html = '<div class="search-result-item external-item" data-email="' + q + '" data-external="true">'
+                                + '<div class="d-flex align-items-center justify-content-between">'
+                                + '<div><div class="result-name" style="color: var(--accent-color);">'
+                                + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'
+                                + 'Inviter ' + q + '</div>'
+                                + '<div class="result-email">Aucun compte trouvé — envoyer un lien d\'inscription</div></div>'
+                                + '<span class="result-badge" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">Nouveau</span>'
+                                + '</div></div>';
+                        } else {
+                            html = '<div class="p-3 text-secondary small">Aucun résultat. Saisissez un email complet pour inviter une personne externe.</div>';
+                        }
+                    }
+
+                    resultsDiv.innerHTML = html;
                     resultsDiv.classList.add('show');
                 });
         }, 300);
@@ -185,7 +258,12 @@
     resultsDiv.addEventListener('click', function(e) {
         const item = e.target.closest('.search-result-item');
         if (!item) return;
-        selectUser(item.dataset.name, item.dataset.email);
+
+        if (item.dataset.external === 'true') {
+            selectExternal(item.dataset.email);
+        } else {
+            selectUser(item.dataset.name, item.dataset.email);
+        }
     });
 
     function selectUser(name, email) {
@@ -196,17 +274,39 @@
         document.getElementById('selected-email-display').textContent = email;
         document.getElementById('selected-avatar').textContent = name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().substring(0, 2);
         selectedDiv.style.display = 'block';
+        externalDiv.style.display = 'none';
         submitBtn.disabled = false;
     }
 
-    document.getElementById('clear-selection').addEventListener('click', function() {
+    function selectExternal(email) {
+        emailInput.value = email;
+        searchInput.style.display = 'none';
+        resultsDiv.classList.remove('show');
+        document.getElementById('external-email-display').textContent = email;
+        externalDiv.style.display = 'block';
+        selectedDiv.style.display = 'none';
+        submitBtn.disabled = false;
+    }
+
+    document.getElementById('clear-selection').addEventListener('click', resetForm);
+    document.getElementById('clear-external').addEventListener('click', resetForm);
+
+    function resetForm() {
         emailInput.value = '';
+        contactNameHidden.value = '';
         searchInput.value = '';
         searchInput.style.display = 'block';
         selectedDiv.style.display = 'none';
+        externalDiv.style.display = 'none';
         submitBtn.disabled = true;
         searchInput.focus();
-    });
+    }
+
+    if (contactNameInput) {
+        contactNameInput.addEventListener('input', function() {
+            contactNameHidden.value = this.value;
+        });
+    }
 
     document.querySelectorAll('.role-option').forEach(function(opt) {
         opt.addEventListener('click', function() {

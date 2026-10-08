@@ -25,6 +25,24 @@
 
                 {{ form_start(registrationForm, {'attr': {'class': 'anicare-form'}}) }}
                     
+                    {# Champs Prénom + Nom #}
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.firstName, {'attr': {'class': 'form-control' ~ (registrationForm.firstName.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            {% if registrationForm.firstName.vars.errors|length %}
+                                <div class="text-danger small mt-1">{{ form_errors(registrationForm.firstName) }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-6">
+                            {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.lastName, {'attr': {'class': 'form-control' ~ (registrationForm.lastName.vars.errors|length ? ' is-invalid' : '')}}) }}
+                            {% if registrationForm.lastName.vars.errors|length %}
+                                <div class="text-danger small mt-1">{{ form_errors(registrationForm.lastName) }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     {# Champ Adresse E-mail #}
                     <div class="mb-4">
                         {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}

@@ -200,27 +200,59 @@ class AnimalRepository extends ServiceEntityRepository
 
     public function findDuplicates(string $name, ?string $identificationNumber, ?string $microchipNumber): array
     {
-        $qb = $this->createQueryBuilder('a')
-            ->leftJoin('a.owner', 'o');
+        $conn = $this->getEntityManager()->getConnection();
 
         $conditions = [];
+        $params = [];
+
+        if ($name && $name !== '__no_match__') {
+            $conditions[] = 'LOWER(a.name) = LOWER(:nameExact)';
+            $params['nameExact'] = $name;
+
+            $conditions[] = 'LOWER(a.name) LIKE LOWER(:nameLike)';
+            $params['nameLike'] = '%' . $name . '%';
+
+            $conditions[] = 'SOUNDEX(a.name) = SOUNDEX(:nameSoundex)';
+            $params['nameSoundex'] = $name;
+
+            $conditions[] = 'SOUNDEX(SUBSTRING_INDEX(a.name, \' \', 1)) = SOUNDEX(:nameFirstWord)';
+            $firstWord = explode(' ', $name)[0];
+            $params['nameFirstWord'] = $firstWord;
+        }
 
         if ($identificationNumber) {
-            $conditions[] = 'a.identificationNumber = :idNum';
-            $qb->setParameter('idNum', $identificationNumber);
+            $conditions[] = 'a.identification_number = :idNumExact';
+            $params['idNumExact'] = $identificationNumber;
+
+            $conditions[] = 'a.identification_number LIKE :idNumLike';
+            $params['idNumLike'] = $identificationNumber . '%';
         }
 
         if ($microchipNumber) {
-            $conditions[] = 'a.microchipNumber = :chip';
-            $qb->setParameter('chip', $microchipNumber);
+            $conditions[] = 'a.microchip_number = :chipExact';
+            $params['chipExact'] = $microchipNumber;
+
+            $conditions[] = 'a.microchip_number LIKE :chipLike';
+            $params['chipLike'] = $microchipNumber . '%';
         }
 
-        $conditions[] = 'LOWER(a.name) = LOWER(:name)';
-        $qb->setParameter('name', $name);
+        if (empty($conditions)) {
+            return [];
+        }
 
-        $qb->where(implode(' OR ', $conditions))
-            ->orderBy('a.name', 'ASC');
+        $sql = 'SELECT a.id FROM animal a WHERE ' . implode(' OR ', $conditions) . ' ORDER BY a.name ASC LIMIT 10';
+        $ids = $conn->executeQuery($sql, $params)->fetchFirstColumn();
 
-        return $qb->getQuery()->getResult();
+        if (empty($ids)) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.owner', 'o')
+            ->where('a.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->orderBy('a.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

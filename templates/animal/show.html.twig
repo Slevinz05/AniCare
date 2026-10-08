@@ -2,796 +2,787 @@
 
 {% block title %}Fiche de {{ animal.name }} - AniCare{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.animal-hero {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 280px;
+    background: linear-gradient(135deg, var(--primary-color), #2a6b60);
+}
+.animal-hero img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.animal-hero-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.65));
+    padding: 2rem 2rem 1.5rem;
+}
+.animal-hero-name {
+    font-family: 'Georgia', serif;
+    font-size: 2.2rem; font-weight: 700; color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.animal-hero-stats {
+    position: absolute; top: 1rem; left: 1rem;
+    background: rgba(255,255,255,0.92); border-radius: 12px;
+    padding: 0.75rem 1rem; backdrop-filter: blur(4px);
+    font-size: 0.78rem; line-height: 1.7;
+}
+.animal-hero-stats svg { margin-right: 0.4rem; opacity: 0.6; }
+.animal-photo-count {
+    position: absolute; bottom: 1rem; right: 1rem;
+    background: rgba(0,0,0,0.6); color: #fff; border-radius: 8px;
+    padding: 0.3rem 0.75rem; font-size: 0.75rem; backdrop-filter: blur(4px);
+}
+
+.section-card {
+    background: #fff; border: 1px solid var(--border-color);
+    border-radius: 14px; padding: 1.5rem;
+}
+.section-card-accent { border-left: 4px solid var(--primary-color) !important; }
+
+.section-title-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.field-row { display: flex; align-items: baseline; padding: 0.35rem 0; }
+.field-label {
+    width: 140px; flex-shrink: 0;
+    font-size: 0.78rem; color: #6c757d; font-weight: 500;
+}
+.field-value { font-size: 0.85rem; color: #212529; }
+.field-value strong { font-weight: 600; }
+
+.referent-card {
+    background: var(--soft-teal); border: 1px solid var(--border-color);
+    border-radius: 14px; padding: 1.25rem;
+}
+.referent-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.referent-badge {
+    display: inline-block; padding: 0.15rem 0.55rem;
+    border-radius: 20px; font-size: 0.65rem; font-weight: 600;
+}
+
+.action-link {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.65rem 0; border-bottom: 1px solid var(--border-color);
+    text-decoration: none; color: #212529; font-size: 0.82rem; font-weight: 500;
+    transition: background 0.15s;
+}
+.action-link:last-child { border-bottom: none; }
+.action-link:hover { color: var(--primary-color); }
+.action-link svg { flex-shrink: 0; color: var(--primary-color); }
+.action-link .arrow { margin-left: auto; color: #adb5bd; }
+
+.consult-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.consult-table thead th {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #fff; background: var(--primary-color); padding: 0.6rem 0.75rem;
+    font-weight: 600;
+}
+.consult-table thead th:first-child { border-radius: 10px 0 0 0; }
+.consult-table thead th:last-child { border-radius: 0 10px 0 0; }
+.consult-table tbody td {
+    padding: 0.75rem; border-bottom: 1px solid var(--border-color);
+    font-size: 0.82rem; vertical-align: middle;
+}
+.consult-table tbody tr:last-child td { border-bottom: none; }
+.consult-table tbody tr:hover { background: var(--soft-teal); }
+
+.header-actions .btn-action {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 1rem; border-radius: 8px;
+    font-size: 0.8rem; font-weight: 600;
+    border: 1.5px solid var(--border-color); background: #fff; color: #333;
+    text-decoration: none; transition: all 0.15s;
+}
+.header-actions .btn-action:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.header-actions .btn-action svg { width: 16px; height: 16px; }
+</style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-4">
-    <div class="card anicare-card">
-        <div class="card-header medical-header p-4">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <p class="page-eyebrow mb-2">Fiche clinique</p>
+{% set is_principal = user_role == 'principal' %}
+{% set is_secondaire = user_role == 'secondaire' %}
+{% set is_owner = user_role == 'owner' %}
+{% set is_referent = is_principal or is_secondaire or is_owner %}
+{% set is_pro_space = active_space == 'professionnel' %}
 
-                    <h1 class="page-title mb-1">
-                        {{ animal.name }}
-                    </h1>
+<div class="container py-4" style="max-width: 1100px;">
 
-                    <p class="page-subtitle mb-0">
-                        Identifiant dossier : #{{ animal.id }}
-                    </p>
+    {# ══════════ HEADER ══════════ #}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ path('app_animal_index') }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; padding: 0.3rem 0.6rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <div>
+                <p class="mb-0" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-color); font-weight: 600;">Fiche animal</p>
+                <h1 class="mb-0" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">{{ animal.name }}</h1>
+            </div>
+            <span class="badge rounded-pill" style="background: #d4edda; color: #155724; font-size: 0.7rem; font-weight: 600; padding: 0.3rem 0.7rem;">Actif</span>
+        </div>
+
+        <div class="header-actions d-flex gap-2 flex-wrap">
+            {% if can_edit %}
+                <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn-action">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Modifier
+                </a>
+            {% endif %}
+            {% if is_granted('ANIMAL_MANAGE_SHARE', animal) %}
+                <a href="{{ path('app_animal_share_new') }}" class="btn-action">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Partager
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ══════════ PHOTO HERO ══════════ #}
+    <div class="animal-hero mb-4">
+        {% if animal.photo %}
+            <img src="{{ asset('uploads/photos/' ~ animal.photo) }}" alt="Photo de {{ animal.name }}">
+        {% else %}
+            <div style="width:100%; height:100%; background: linear-gradient(135deg, var(--primary-color), #2a6b60); display:flex; align-items:center; justify-content:center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+        {% endif %}
+        <div class="animal-hero-stats">
+            <div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg> {{ animal.gender|default('Non renseigne') }}</div>
+            {% if animal.birthDate %}
+                <div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> {{ animal.birthDate|date('d/m/Y') }}{% if animal.age is not null %} ({{ animal.age }} an{{ animal.age > 1 ? 's' : '' }}){% endif %}</div>
+            {% endif %}
+            {% if animal.height %}
+                <div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 3H3v18h18V3zM3 9h18M3 15h18M9 3v18"/></svg> {{ animal.height }} m</div>
+            {% endif %}
+            {% if animal.weight %}
+                <div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg> {{ animal.weight }} kg</div>
+            {% endif %}
+            {% if animal.breed %}
+                <div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> {{ animal.breed }}</div>
+            {% endif %}
+            {% if animal.coat %}
+                <div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> {{ animal.coat }}</div>
+            {% endif %}
+        </div>
+        <div class="animal-hero-overlay">
+            <div class="animal-hero-name">{{ animal.name }}</div>
+        </div>
+        {% if animal.documents|length > 0 %}
+            <div class="animal-photo-count">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                {{ animal.documents|length }} doc{{ animal.documents|length > 1 ? 's' : '' }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ══════════ IDENTITE + REFERENT PRINCIPAL ══════════ #}
+    <div class="row g-4 mb-4" style="align-items: flex-start;">
+        <div class="col-12 col-lg-8">
+            <div class="section-card">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="section-title-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+                    </div>
+                    <h2 class="mb-0" style="font-size: 1rem; font-weight: 700; color: var(--primary-color);">Identite</h2>
                 </div>
 
-                <div>
-                    {{ include('_partials/_gender_badge.html.twig', {'gender': animal.gender}) }}
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Nom de l'animal <span style="color: #dc3545;">*</span></label>
+                        <div style="font-size: 0.85rem; font-weight: 600; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.name }}</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Race <span style="color: #dc3545;">*</span></label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.breed|default('Non renseignee') }}</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Robe <span style="color: #dc3545;">*</span></label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                            {% if animal.coat %}
+                                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background: #8B4513; vertical-align: middle; margin-right: 0.3rem;"></span>
+                                {{ animal.coat }}
+                            {% else %}
+                                Non renseignee
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Date de naissance <span style="color: #dc3545;">*</span></label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.birthDate ? animal.birthDate|date('d/m/Y') : 'Non renseignee' }}</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Age</label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.age is not null ? animal.age ~ ' an' ~ (animal.age > 1 ? 's' : '') : '-' }}</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">N SIRE (optionnel)</label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.identificationNumber|default('Non renseigne') }}</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Sexe <span style="color: #dc3545;">*</span></label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.gender|default('Non renseigne') }}</div>
+                    </div>
+                    {% if animal.microchipNumber %}
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Numero de puce</label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.microchipNumber }}</div>
+                    </div>
+                    {% endif %}
+                    {% if animal.height %}
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Taille</label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.height }} m</div>
+                    </div>
+                    {% endif %}
+                    {% if animal.weight %}
+                    <div class="col-12 col-md-4">
+                        <label class="d-block" style="font-size: 0.7rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem;">Poids</label>
+                        <div style="font-size: 0.85rem; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">{{ animal.weight }} kg</div>
+                    </div>
+                    {% endif %}
                 </div>
+
+                {% if animal.vetReferentName %}
+                <div class="mt-3 pt-3" style="border-top: 1px solid var(--border-color);">
+                    <div class="field-row">
+                        <span class="field-label">Veterinaire referent</span>
+                        <span class="field-value"><strong>{{ animal.vetReferentName }}</strong>{% if animal.vetReferentPhone %} &nbsp;<a href="tel:{{ animal.vetReferentPhone }}" class="text-decoration-none" style="color: var(--primary-color);">{{ animal.vetReferentPhone }}</a>{% endif %}</span>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <div class="card-body p-4">
-            <div class="row g-4 mb-5">
-                {# ── Colonne gauche : Le cheval ── #}
-                <div class="col-12 col-lg-7">
-                    <div class="p-4 rounded-3 bg-light h-100">
-                        <p class="page-eyebrow mb-3">{{ animal.species|default('Cheval') }}</p>
-
-                        {% if animal.photo %}
-                            <div class="text-center mb-4">
-                                <img src="{{ asset('uploads/photos/' ~ animal.photo) }}"
-                                     alt="Photo de {{ animal.name }}"
-                                     class="rounded-3 shadow"
-                                     style="max-height: 240px; max-width: 100%; object-fit: cover;">
+        {# ── Colonne droite : Referent + Actions ── #}
+        <div class="col-12 col-lg-4">
+            <div class="d-flex flex-column gap-3">
+                {# Referent principal #}
+                <div class="referent-card">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="section-title-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <h3 class="mb-0" style="font-size: 0.9rem; font-weight: 700; color: var(--primary-color);">Referent principal</h3>
+                    </div>
+                    {% if principal_referent %}
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="referent-avatar" style="background: linear-gradient(135deg, var(--primary-color), #2a6b60);">
+                                {{ principal_referent.user.firstName|first|upper }}{{ principal_referent.user.lastName|first|upper }}
+                            </div>
+                            <div>
+                                <strong class="d-block" style="font-size: 0.88rem;">{{ principal_referent.user.fullName }}</strong>
+                                <span class="referent-badge" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">{{ principal_referent.roleLabel }}</span>
+                            </div>
+                        </div>
+                        {% if principal_referent.user.phone %}
+                            <div class="d-flex align-items-center gap-2 mb-1" style="font-size: 0.78rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                <a href="tel:{{ principal_referent.user.phone }}" class="text-decoration-none" style="color: #333;">{{ principal_referent.user.phone }}</a>
                             </div>
                         {% endif %}
-
-                        <div class="table-responsive mb-4">
-                            <table class="table table-sm table-borderless align-middle mb-0">
-                                <tbody>
-                                    <tr>
-                                        <th style="width: 35%;" class="text-secondary">Race</th>
-                                        <td>{{ animal.breed ?: 'Non renseignée' }}</td>
-                                    </tr>
-                                    {% if animal.coat %}
-                                        <tr>
-                                            <th class="text-secondary">Robe</th>
-                                            <td>{{ animal.coat }}</td>
-                                        </tr>
-                                    {% endif %}
-                                    <tr>
-                                        <th class="text-secondary">Date de naissance</th>
-                                        <td>
-                                            {{ animal.birthDate ? animal.birthDate|date('d/m/Y') : 'Non renseignée' }}
-                                            {% if animal.age is not null %}
-                                                <span class="text-secondary ms-1">({{ animal.age }} an{{ animal.age > 1 ? 's' : '' }})</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% if animal.height %}
-                                        <tr>
-                                            <th class="text-secondary">Taille</th>
-                                            <td>{{ animal.height }} m</td>
-                                        </tr>
-                                    {% endif %}
-                                    <tr>
-                                        <th class="text-secondary">Poids actuel</th>
-                                        <td>
-                                            <span class="badge-medical badge-weight">
-                                                {{ animal.weight ? animal.weight ~ ' kg' : 'Non renseigné' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    {% if animal.averageWeight %}
-                                        <tr>
-                                            <th class="text-secondary">Poids moyen</th>
-                                            <td>{{ animal.averageWeight }} kg</td>
-                                        </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
+                        <div class="d-flex align-items-center gap-2" style="font-size: 0.78rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <span style="color: #333;">{{ principal_referent.user.email }}</span>
                         </div>
-
-                        <p class="page-eyebrow mb-2">Identification</p>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-borderless align-middle mb-0">
-                                <tbody>
-                                    <tr>
-                                        <th style="width: 35%;" class="text-secondary">Numéro de SIRE</th>
-                                        <td>
-                                            <strong class="text-teal">
-                                                {{ animal.identificationNumber ?: 'Non renseigné' }}
-                                            </strong>
-                                        </td>
-                                    </tr>
-                                    {% if animal.microchipNumber %}
-                                        <tr>
-                                            <th class="text-secondary">Numéro de puce</th>
-                                            <td>{{ animal.microchipNumber }}</td>
-                                        </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
+                    {% else %}
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="referent-avatar" style="background: #e9ecef; color: #6c757d;">?</div>
+                            <div>
+                                <strong class="d-block" style="font-size: 0.88rem;">{{ animal.owner.fullName }}</strong>
+                                <span class="small text-secondary">Proprietaire</span>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
 
-                {# ── Colonne droite : Propriétaire, Lieu de vie & Professionnels ── #}
-                <div class="col-12 col-lg-5">
-                    <div class="d-flex flex-column gap-4 h-100">
-                        {# Référent principal #}
-                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0" style="border-left: 4px solid #dc3545 !important;">
-                            <p class="page-eyebrow mb-3" style="color: #dc3545;">Référent principal</p>
-                            {% if principal_referent %}
-                                <div class="d-flex align-items-center gap-3 mb-3">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: linear-gradient(135deg, #dc3545, #c82333); color: #fff; font-weight: 700;">
-                                        {{ principal_referent.user.firstName|first|upper }}{{ principal_referent.user.lastName|first|upper }}
+                {# Referents secondaires — visible par principal/owner #}
+                {% if is_principal or is_owner %}
+                <div class="section-card" style="padding: 1rem 1.25rem;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span style="font-size: 0.82rem; font-weight: 600;">Referents secondaires</span>
+                        {% if can_edit %}
+                            <a href="{{ path('app_referent_invite', {animalId: animal.id}) }}" class="ms-auto" style="font-size: 0.75rem; color: var(--primary-color); text-decoration: none; font-weight: 600;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                                Inviter
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% set refs = secondary_referents|filter(r => true) %}
+                    {% if refs|length > 0 %}
+                        {% for ref in refs %}
+                            {% set is_external = ref.user is null %}
+                            {% set display_name = is_external ? (ref.contactName ?? ref.contactEmail) : ref.user.fullName %}
+                            <div class="d-flex align-items-center gap-2 py-2 {{ not loop.last ? 'border-bottom' : '' }}" style="border-color: var(--border-color) !important;">
+                                {% if is_external %}
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 30px; height: 30px; background-color: var(--accent-color); color: #fff; font-weight: 600; font-size: 0.65rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                                     </div>
-                                    <div>
-                                        <strong class="d-block">{{ principal_referent.user.fullName }}</strong>
-                                        <span class="text-secondary small">{{ principal_referent.user.email }}</span>
-                                        <span class="badge rounded-pill ms-1" style="background-color: #dc3545; font-size: 0.65rem;">{{ principal_referent.roleLabel }}</span>
-                                    </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-borderless align-middle mb-0">
-                                        <tbody>
-                                            {% if principal_referent.user.phone %}
-                                                <tr>
-                                                    <th style="width: 35%;" class="text-secondary">Téléphone</th>
-                                                    <td><a href="tel:{{ principal_referent.user.phone }}">{{ principal_referent.user.phone }}</a></td>
-                                                </tr>
-                                            {% endif %}
-                                            {% if principal_referent.user.city %}
-                                                <tr>
-                                                    <th class="text-secondary">Ville</th>
-                                                    <td>{{ principal_referent.user.city }}</td>
-                                                </tr>
-                                            {% endif %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% if principal_referent.user == app.user %}
-                                    <div class="mt-3 pt-3 border-top">
-                                        <a href="{{ path('app_referent_transfer', {animalId: animal.id}) }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" style="border-radius: 6px; font-size: 0.75rem;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                                            Proposer un transfert
-                                        </a>
+                                {% else %}
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 30px; height: 30px; background-color: {{ ref.isActive ? 'var(--primary-color)' : '#adb5bd' }}; color: #fff; font-weight: 600; font-size: 0.7rem;">
+                                        {{ ref.user.firstName|first|upper }}{{ ref.user.lastName|first|upper }}
                                     </div>
                                 {% endif %}
-                            {% else %}
-                                <div class="d-flex align-items-center gap-3 mb-3">
-                                    <div class="rounded-circle bg-anicare-soft d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
-                                        <span style="font-size: 1.2rem;">👤</span>
-                                    </div>
-                                    <div>
-                                        <strong class="d-block">{{ animal.owner.fullName }}</strong>
-                                        <span class="text-secondary small">{{ animal.owner.email }}</span>
-                                    </div>
-                                </div>
-                                {% if animal.owner == app.user %}
-                                    <div class="mt-2 pt-2 border-top">
-                                        <a href="{{ path('app_referent_transfer', {animalId: animal.id}) }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" style="border-radius: 6px; font-size: 0.75rem;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                                            Proposer un transfert
-                                        </a>
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-
-                        {# Référents secondaires #}
-                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <p class="page-eyebrow mb-0">Référents secondaires</p>
-                                {% if can_edit|default(false) %}
-                                    <a href="{{ path('app_referent_invite', {animalId: animal.id}) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 0.75rem;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                                        Inviter
-                                    </a>
-                                {% endif %}
-                            </div>
-                            {% set refs = secondary_referents|filter(r => true) %}
-                            {% if refs|length > 0 %}
-                                {% for ref in refs %}
-                                    <div class="d-flex align-items-center gap-3 {{ not loop.last ? 'mb-3 pb-3 border-bottom border-light' : '' }}">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: {{ ref.isActive ? 'var(--accent-color)' : '#adb5bd' }}; color: #fff; font-weight: 600; font-size: 0.8rem;">
-                                            {{ ref.user.firstName|first|upper }}{{ ref.user.lastName|first|upper }}
-                                        </div>
-                                        <div class="flex-grow-1 min-width-0">
-                                            <strong class="d-block text-truncate">{{ ref.user.fullName }}</strong>
-                                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                <span class="small text-secondary">{{ ref.roleLabel }}</span>
-                                                {% if ref.status == 'pending' %}
-                                                    <span class="badge rounded-pill" style="background: #fff3cd; color: #856404; font-size: 0.6rem;">En attente</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        {% if can_edit|default(false) and ref.status != 'revoked' %}
-                                            <form method="post" action="{{ path('app_referent_revoke', {id: ref.id}) }}" onsubmit="return confirm('Révoquer {{ ref.user.fullName }} comme référent ?');" class="flex-shrink-0">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('revoke' ~ ref.id) }}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Révoquer" style="border-radius: 6px; font-size: 0.7rem;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                                </button>
-                                            </form>
+                                <div class="flex-grow-1 min-width-0">
+                                    <strong class="d-block text-truncate" style="font-size: 0.8rem;">{{ display_name }}</strong>
+                                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                                        <span style="font-size: 0.68rem; color: #6c757d;">{{ ref.roleLabel }}</span>
+                                        {% if ref.status == 'pending' and is_external %}
+                                            <span class="referent-badge" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">Invitation externe</span>
+                                        {% elseif ref.status == 'pending' %}
+                                            <span class="referent-badge" style="background: #fff3cd; color: #856404;">En attente</span>
+                                        {% endif %}
+                                        {% if ref.isActive and ref.canShare %}
+                                            <span class="referent-badge" style="background: var(--soft-teal); color: var(--primary-color);">Partage</span>
                                         {% endif %}
                                     </div>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-secondary small mb-0">Aucun référent secondaire.</p>
-                            {% endif %}
-                        </div>
-
-                        {# Vétérinaire référent #}
-                        {% if animal.vetReferentName %}
-                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0" style="border-left: 4px solid #2196F3 !important;">
-                            <p class="page-eyebrow mb-3" style="color: #2196F3;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                                Vétérinaire référent
-                            </p>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-borderless align-middle mb-0">
-                                    <tbody>
-                                        <tr>
-                                            <th style="width: 35%;" class="text-secondary">Nom</th>
-                                            <td><strong>{{ animal.vetReferentName }}</strong></td>
-                                        </tr>
-                                        {% if animal.vetReferentPhone %}
-                                        <tr>
-                                            <th class="text-secondary">Téléphone</th>
-                                            <td><a href="tel:{{ animal.vetReferentPhone }}">{{ animal.vetReferentPhone }}</a></td>
-                                        </tr>
-                                        {% endif %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {# Lieu de vie #}
-                        {% if animal.livingPlaceName or animal.livingPlaceCity or animal.livingPlaceManagerLastName %}
-                            <div class="p-4 rounded-3 border border-anicare bg-white flex-grow-1">
-                                <p class="page-eyebrow mb-3">Lieu de vie</p>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-borderless align-middle mb-0">
-                                        <tbody>
-                                            {% if animal.livingPlaceName %}
-                                                <tr>
-                                                    <th style="width: 35%;" class="text-secondary">Structure</th>
-                                                    <td><strong>{{ animal.livingPlaceName }}</strong></td>
-                                                </tr>
-                                            {% endif %}
-                                            {% if animal.livingPlaceManagerLastName or animal.livingPlaceManagerFirstName %}
-                                                <tr>
-                                                    <th class="text-secondary">Gérant</th>
-                                                    <td>{{ animal.livingPlaceManagerFirstName }} {{ animal.livingPlaceManagerLastName }}</td>
-                                                </tr>
-                                            {% endif %}
-                                            {% if animal.livingPlaceManagerPhone %}
-                                                <tr>
-                                                    <th class="text-secondary">Téléphone</th>
-                                                    <td><a href="tel:{{ animal.livingPlaceManagerPhone }}">{{ animal.livingPlaceManagerPhone }}</a></td>
-                                                </tr>
-                                            {% endif %}
-                                            {% if animal.livingPlaceManagerEmail %}
-                                                <tr>
-                                                    <th class="text-secondary">E-mail</th>
-                                                    <td><a href="mailto:{{ animal.livingPlaceManagerEmail }}">{{ animal.livingPlaceManagerEmail }}</a></td>
-                                                </tr>
-                                            {% endif %}
-                                            {% if animal.livingPlaceStreet or animal.livingPlaceCity %}
-                                                <tr>
-                                                    <th class="text-secondary">Adresse</th>
-                                                    <td>
-                                                        {% if animal.livingPlaceStreet %}{{ animal.livingPlaceStreet }}<br>{% endif %}
-                                                        {% if animal.livingPlaceComplement %}{{ animal.livingPlaceComplement }}<br>{% endif %}
-                                                        {% if animal.livingPlacePostalCode %}{{ animal.livingPlacePostalCode }} {% endif %}{{ animal.livingPlaceCity }}
-                                                        {% if animal.livingPlaceCountry %}<br>{{ animal.livingPlaceCountry }}{% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
-                                        </tbody>
-                                    </table>
                                 </div>
-                            </div>
-                        {% endif %}
-
-                        {# Professionnels #}
-                        <div class="p-4 rounded-3 border border-anicare bg-white flex-shrink-0">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <p class="page-eyebrow mb-0">Professionnels</p>
-                                {% if professionals is defined and professionals|length > 0 %}
-                                    <span class="badge rounded-pill" style="background-color: var(--primary-color);">{{ professionals|length }}</span>
-                                {% endif %}
-                            </div>
-
-                            {% if professionals is defined and professionals|length > 0 %}
-                                {% for pro in professionals %}
-                                    <div class="d-flex align-items-center gap-3 {{ not loop.last ? 'mb-3 pb-3 border-bottom border-light' : '' }}">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.85rem;">
-                                            {{ pro.user.firstName|first|upper }}{{ pro.user.lastName|first|upper }}
-                                        </div>
-                                        <div class="flex-grow-1 min-width-0">
-                                            <strong class="d-block text-truncate">{{ pro.user.fullName }}</strong>
-                                            <span class="small text-secondary">{{ pro.user.email }}</span>
-                                            {% if pro.user.phone %}
-                                                <br><a href="tel:{{ pro.user.phone }}" class="small text-decoration-none">{{ pro.user.phone }}</a>
-                                            {% endif %}
-                                        </div>
-                                        {% set perm_label = {
-                                            'VIEW': 'Lecture',
-                                            'WRITE': 'Modification',
-                                            'ADMIN': 'Administration'
-                                        } %}
-                                        <span class="badge bg-anicare-soft text-secondary" style="font-size: 0.7rem;">{{ perm_label[pro.permission]|default(pro.permission) }}</span>
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center py-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-secondary mb-2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                        <circle cx="9" cy="7" r="4"/>
-                                        <line x1="19" y1="8" x2="19" y2="14"/>
-                                        <line x1="22" y1="11" x2="16" y2="11"/>
-                                    </svg>
-                                    <p class="small text-secondary mb-3">Aucun professionnel associe</p>
-                                </div>
-                            {% endif %}
-
-                            {# Formulaire d'invitation #}
-                            <div class="mt-3 pt-3 {{ professionals is defined and professionals|length > 0 ? 'border-top border-light' : '' }}">
-                                <form method="post" action="{{ path('app_animal_invite_pro', {'slug': animal.slug}) }}" id="inviteProForm">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('invite_pro' ~ animal.id) }}">
-                                    <input type="hidden" name="professional_id" id="invite_pro_id" value="">
-                                    <label class="form-label small fw-bold mb-1">Inviter un professionnel</label>
-                                    <div class="position-relative">
-                                        <input type="text"
-                                               id="invite_pro_search"
-                                               class="form-control form-control-sm"
-                                               placeholder="Rechercher par nom ou email..."
-                                               autocomplete="off">
-                                        <div id="invite_pro_results" class="position-absolute w-100 bg-white border rounded-2 shadow-sm mt-1 d-none" style="z-index: 10; max-height: 200px; overflow-y: auto;"></div>
-                                    </div>
-                                    <div id="invite_pro_selected" class="d-none mt-2">
-                                        <div class="d-flex align-items-center gap-2 p-2 rounded-2 bg-anicare-soft">
-                                            <span id="invite_pro_name" class="small fw-bold flex-grow-1"></span>
-                                            <button type="button" class="btn btn-sm btn-link text-danger p-0" id="invite_pro_clear" title="Retirer">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                                {% if can_edit and ref.status != 'revoked' %}
+                                    <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                        {% if ref.isActive and not is_external %}
+                                        <form method="post" action="{{ path('app_referent_toggle_share', {id: ref.id}) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_share' ~ ref.id) }}">
+                                            <button type="submit" class="btn btn-sm py-0 px-1 {{ ref.canShare ? 'btn-outline-warning' : 'btn-outline-secondary' }}" title="{{ ref.canShare ? 'Retirer le partage' : 'Autoriser le partage' }}" style="border-radius: 4px; font-size: 0.65rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                                             </button>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Envoyer l'invitation</button>
+                                        </form>
+                                        {% endif %}
+                                        <form method="post" action="{{ path('app_referent_revoke', {id: ref.id}) }}" onsubmit="return confirm('Revoquer {{ display_name }} ?');" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('revoke' ~ ref.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" title="Revoquer" style="border-radius: 4px; font-size: 0.65rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                            </button>
+                                        </form>
                                     </div>
-                                </form>
+                                {% endif %}
                             </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-secondary small mb-0" style="font-size: 0.78rem;">Aucun referent secondaire.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {# Demande de cession — visible par principal #}
+                {% if is_principal %}
+                <div class="section-card" style="padding: 1rem 1.25rem;">
+                    <a href="{{ path('app_referent_transfer', {animalId: animal.id}) }}" class="action-link" style="border-bottom: none; padding: 0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                        <span>Demande de cession de referent principal</span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+                {% endif %}
+
+                {# Actions rapides #}
+                {% if is_referent %}
+                <div class="section-card" style="padding: 1rem 1.25rem;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span style="font-size: 0.82rem; font-weight: 600;">Actions rapides</span>
+                    </div>
+                    {% if is_granted('ANIMAL_MANAGE_SHARE', animal) %}
+                    <a href="{{ path('app_animal_share_new') }}" class="action-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Visualiser les partages</span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                    {% endif %}
+                    <a href="{{ path('app_emergency_card', {'id': animal.id}) }}" class="action-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#dc3545" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span>Fiche d'urgence</span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                    {% if animal.allergies|length > 0 %}
+                    <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="action-link" style="border-bottom: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#f0ad4e" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>Allergies <span class="badge bg-danger ms-1" style="font-size: 0.6rem;">{{ animal.allergies|length }}</span></span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ══════════ 3 CARTES : Lieu de vie + Antecedents + Notes ══════════ #}
+    <div class="row g-4 mb-4">
+        {# Lieu de vie #}
+        <div class="col-12 col-md-4">
+            <div class="section-card section-card-accent h-100">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="section-title-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" style="font-size: 0.88rem; font-weight: 700; color: var(--primary-color);">Lieu de vie</h3>
+                        <span style="font-size: 0.68rem; color: #6c757d;">Lieu ou vit habituellement cet animal.</span>
+                    </div>
+                </div>
+                {% if animal.structure %}
+                    <div class="d-flex align-items-center gap-2 p-2 rounded-2 mb-2" style="background: var(--soft-teal);">
+                        <strong style="font-size: 0.82rem;">{{ animal.structure.name }}</strong>
+                        <span class="referent-badge" style="background: var(--primary-color); color: #fff;">Structure</span>
+                    </div>
+                    {% if animal.structure.address or animal.structure.city %}
+                        <div style="font-size: 0.78rem; color: #6c757d;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {{ animal.structure.address }}{% if animal.structure.postalCode %}, {{ animal.structure.postalCode }}{% endif %} {{ animal.structure.city }}
+                        </div>
+                    {% endif %}
+                {% elseif animal.livingPlaceName or animal.livingPlaceCity %}
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <div>
+                            <strong style="font-size: 0.82rem;">{{ animal.livingPlaceName|default('Lieu de vie') }}</strong>
+                            {% if animal.livingPlaceStreet or animal.livingPlaceCity %}
+                                <div style="font-size: 0.78rem; color: #6c757d;">
+                                    {% if animal.livingPlaceStreet %}{{ animal.livingPlaceStreet }}, {% endif %}
+                                    {% if animal.livingPlacePostalCode %}{{ animal.livingPlacePostalCode }} {% endif %}{{ animal.livingPlaceCity }}
+                                </div>
+                            {% endif %}
+                            {% if animal.livingPlaceManagerPhone %}
+                                <div style="font-size: 0.78rem; color: #6c757d;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    {{ animal.livingPlaceManagerPhone }}
+                                </div>
+                            {% endif %}
+                            {% if animal.livingPlaceManagerEmail %}
+                                <div style="font-size: 0.78rem; color: #6c757d;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    {{ animal.livingPlaceManagerEmail }}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                </div>
+                {% else %}
+                    <p class="text-secondary small mb-0">Non renseigne.</p>
+                {% endif %}
+                {% if can_edit %}
+                    <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" style="font-size: 0.75rem; color: var(--primary-color); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Modifier le lieu de vie actuel
+                    </a>
+                {% endif %}
             </div>
+        </div>
 
-            {# ── Antécédents ── #}
-            {% if animal.antecedentsPro or animal.antecedentsReferent %}
-            <div class="row g-4 mb-5">
-                {% if animal.antecedentsPro and is_granted('ROLE_PRO') %}
-                <div class="col-12 col-md-6">
-                    <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #9C27B0 !important;">
-                        <p class="page-eyebrow mb-2" style="color: #9C27B0;">Antécédents (professionnel)</p>
-                        <p class="small text-secondary mb-0" style="white-space: pre-line;">{{ animal.antecedentsPro }}</p>
+        {# Antecedents #}
+        <div class="col-12 col-md-4">
+            <div class="section-card section-card-accent h-100">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="section-title-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="mb-0" style="font-size: 0.88rem; font-weight: 700; color: var(--primary-color);">Antecedents</h3>
+                        <span style="font-size: 0.68rem; color: #6c757d;">Informations medicales et comportementales.</span>
                     </div>
                 </div>
+                {% if animal.antecedentsPro and (is_pro or is_pro_space) %}
+                    <a href="#" class="action-link" style="font-size: 0.78rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+                        <span>Antecedents renseignes par le professionnel</span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
                 {% endif %}
                 {% if animal.antecedentsReferent %}
-                <div class="col-12 col-md-6">
-                    <div class="p-4 rounded-3 border border-anicare bg-white" style="border-left: 4px solid #9C27B0 !important;">
-                        <p class="page-eyebrow mb-2" style="color: #9C27B0;">Antécédents (référent)</p>
-                        <p class="small text-secondary mb-0" style="white-space: pre-line;">{{ animal.antecedentsReferent }}</p>
-                    </div>
-                </div>
+                    <a href="#" class="action-link" style="font-size: 0.78rem; border-bottom: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Antecedents renseignes par le referent</span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                {% endif %}
+                {% if not animal.antecedentsPro and not animal.antecedentsReferent %}
+                    <p class="text-secondary small mb-0">Aucun antecedent renseigne.</p>
                 {% endif %}
             </div>
-            {% endif %}
+        </div>
 
-            <section>
-                <div class="mb-3">
-                    <p class="page-eyebrow mb-2">Dossier complet</p>
-                    <h2 class="h4 page-title mb-0">{{ animal.name }}</h2>
-                </div>
-
-                {# ── Onglets ── #}
-                <ul class="nav nav-tabs" id="dossierTabs" role="tablist" style="border-bottom-color: var(--border-color);">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active fw-bold" id="tab-historique" data-bs-toggle="tab" data-bs-target="#panel-historique" type="button" role="tab" style="color: var(--primary-color);">
-                            Historique
-                            {% if animal.healthBookEntries|length > 0 %}
-                                <span class="badge rounded-pill ms-1" style="background-color: var(--primary-color);">{{ animal.healthBookEntries|length }}</span>
-                            {% endif %}
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold" id="tab-documents" data-bs-toggle="tab" data-bs-target="#panel-documents" type="button" role="tab" style="color: var(--secondary-color);">
-                            Documents
-                            {% if animal.documents|length > 0 %}
-                                <span class="badge rounded-pill bg-secondary ms-1">{{ animal.documents|length }}</span>
-                            {% endif %}
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold" id="tab-allergies" data-bs-toggle="tab" data-bs-target="#panel-allergies" type="button" role="tab" style="color: var(--secondary-color);">
-                            Allergies
-                            {% if animal.allergies|length > 0 %}
-                                <span class="badge rounded-pill bg-danger ms-1">{{ animal.allergies|length }}</span>
-                            {% endif %}
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link fw-bold" href="{{ path('app_emergency_card', {'id': animal.id}) }}" style="color: #dc3545;">
-                            Fiche d'urgence
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="tab-content pt-4" id="dossierTabsContent">
-
-                    {# ── HISTORIQUE ── #}
-                    <div class="tab-pane fade show active" id="panel-historique" role="tabpanel">
-                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
-                        <div class="d-flex justify-content-end mb-3">
-                            <a href="{{ path('app_health_book_entry_new', {'animal': animal.id}) }}" class="btn btn-primary btn-sm">Ajouter une consultation</a>
-                        </div>
-                        {% endif %}
-
-                        {% if animal.healthBookEntries is empty %}
-                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                                Aucune consultation enregistree pour le moment.
-                            </div>
-                        {% else %}
-                            <div class="table-responsive">
-                                <table class="table table-hover table-medical align-middle mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Acte</th>
-                                            <th>Intervenant</th>
-                                            <th>Note</th>
-                                            <th>Documents</th>
-                                            <th class="text-end">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for entry in animal.healthBookEntries %}
-                                            {% set entry_type = entry.type|default('')|lower %}
-                                            <tr>
-                                                <td>
-                                                    <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="text-decoration-none">
-                                                        <strong>{{ entry.date|date('d/m/Y') }}</strong>
-                                                        {% if entry.date|date('H:i') != '00:00' %}
-                                                            <br><span class="small text-secondary">{{ entry.date|date('H:i') }}</span>
-                                                        {% endif %}
-                                                    </a>
-                                                    {% if entry.isOverdueReminder %}
-                                                        <br><span class="badge bg-danger" style="font-size: 0.6rem;">Rappel en retard</span>
-                                                    {% elseif entry.isDueSoon %}
-                                                        <br><span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Rappel bientot</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
-                                                        <span class="badge-medical badge-vaccin">Vaccin</span>
-                                                    {% elseif entry_type == 'vermifuge' %}
-                                                        <span class="badge-medical badge-neutral">Vermifuge</span>
-                                                    {% elseif entry_type == 'antiparasitaire' %}
-                                                        <span class="badge-medical badge-neutral">Antiparasitaire</span>
-                                                    {% elseif entry_type == 'consultation' %}
-                                                        <span class="badge-medical badge-consultation">Consultation</span>
-                                                    {% elseif entry_type == 'chirurgie' %}
-                                                        <span class="badge-medical badge-surgery">Chirurgie</span>
-                                                    {% else %}
-                                                        <span class="badge-medical badge-neutral">{{ entry.type }}</span>
-                                                    {% endif %}
-                                                    {% if entry.title %}
-                                                        <br><span class="small text-secondary">{{ entry.title }}</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if entry.veterinarian %}
-                                                        <div class="intervenant-popover-wrapper position-relative d-inline-block">
-                                                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-bold text-start intervenant-toggle" style="color: var(--primary-color); background: none; border: none;">
-                                                                {{ entry.veterinarian.fullName }}
-                                                                {% if entry.veterinarian.specialty %}
-                                                                    <br><span class="small fw-normal text-secondary">{{ entry.veterinarian.specialty }}</span>
-                                                                {% endif %}
-                                                            </button>
-                                                            <div class="intervenant-popover d-none rounded-3 shadow p-3" style="z-index: 1050; min-width: 260px; position: fixed; background: #fff; border: 1px solid #dee2e6; color: #212529;">
-                                                                <div class="d-flex align-items-center gap-2 mb-2 pb-2" style="border-bottom: 1px solid #dee2e6;">
-                                                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.8rem;">
-                                                                        {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
-                                                                    </div>
-                                                                    <div>
-                                                                        <strong class="d-block small" style="color: #212529;">{{ entry.veterinarian.fullName }}</strong>
-                                                                        {% if entry.veterinarian.specialty %}
-                                                                            <span class="badge" style="background-color: var(--primary-color); font-size: 0.65rem;">{{ entry.veterinarian.specialty }}</span>
-                                                                        {% endif %}
-                                                                    </div>
-                                                                </div>
-                                                                {% if entry.veterinarian.phone %}
-                                                                    <div class="small mb-1">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                                                        <a href="tel:{{ entry.veterinarian.phone }}" class="text-decoration-none">{{ entry.veterinarian.phone }}</a>
-                                                                    </div>
-                                                                {% endif %}
-                                                                {% if entry.veterinarian.email %}
-                                                                    <div class="small mb-1">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                                                        <a href="mailto:{{ entry.veterinarian.email }}" class="text-decoration-none">{{ entry.veterinarian.email }}</a>
-                                                                    </div>
-                                                                {% endif %}
-                                                                {% if entry.veterinarian.city %}
-                                                                    <div class="small">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1 text-secondary"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                                        {% if entry.veterinarian.postalCode %}{{ entry.veterinarian.postalCode }} {% endif %}{{ entry.veterinarian.city }}
-                                                                    </div>
-                                                                {% endif %}
-                                                                <a href="{{ path('app_professional_show', {'id': entry.veterinarian.id}) }}" class="btn btn-outline-primary btn-sm w-100 mt-2">Voir la fiche</a>
-                                                            </div>
-                                                        </div>
-                                                    {% elseif entry.veterinarianName %}
-                                                        <span class="text-secondary">{{ entry.veterinarianName }}</span>
-                                                    {% else %}
-                                                        <span class="text-secondary fst-italic">Non renseigné</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if entry.description %}
-                                                        <span class="small" title="{{ entry.description }}">{{ entry.description|length > 60 ? entry.description|slice(0, 60) ~ '...' : entry.description }}</span>
-                                                    {% else %}
-                                                        <span class="text-secondary fst-italic small">-</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% set docs = entry.documents %}
-                                                    {% if docs|length > 0 %}
-                                                        {% for doc in docs %}
-                                                            <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="badge bg-anicare-soft text-teal border border-anicare text-decoration-none me-1 mb-1" title="{{ doc.originalName|default(doc.fileName) }}">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                                                {{ doc.originalName|default(doc.fileName)|length > 15 ? doc.originalName|default(doc.fileName)|slice(0, 12) ~ '...' : doc.originalName|default(doc.fileName) }}
-                                                            </a>
-                                                        {% endfor %}
-                                                    {% else %}
-                                                        <span class="text-secondary fst-italic small">-</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td class="text-end">
-                                                    <div class="d-flex justify-content-end gap-2">
-                                                        <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="btn btn-outline-primary btn-sm">
-                                                            Consulter
-                                                        </a>
-                                                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
-                                                        <a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="btn btn-primary btn-sm">
-                                                            Modifier
-                                                        </a>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% endif %}
+        {# Notes et particularites #}
+        <div class="col-12 col-md-4">
+            <div class="section-card section-card-accent h-100">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="section-title-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
-
-                    {# ── DOCUMENTS ── #}
-                    <div class="tab-pane fade" id="panel-documents" role="tabpanel">
-                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
-                        <div class="d-flex justify-content-end mb-3">
-                            <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-outline-primary btn-sm">Ajouter un document</a>
-                        </div>
-                        {% endif %}
-
-                        {% set sorted_documents = animal.documents|sort((a, b) => (b.uploadedAt ?? '') <=> (a.uploadedAt ?? '')) %}
-                        {% if sorted_documents is empty %}
-                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                                Aucun document n'est encore associé à ce cheval.
-                            </div>
-                        {% else %}
-                            <div class="document-list">
-                                {% for document in sorted_documents %}
-                                    <div class="document-item d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 {{ not loop.last ? 'border-bottom border-light' : '' }}">
-                                        <div>
-                                            <a href="{{ path('app_document_download_animal', {'animalId': animal.id, 'fileName': document.fileName}) }}"
-                                               target="_blank" rel="noopener" class="document-name text-decoration-none">
-                                                {{ document.originalName|default(document.fileName) }}
-                                            </a>
-                                            <span class="document-meta d-block small text-secondary">
-                                                {% if document.size is defined %}
-                                                    {{ (document.size / 1024)|round(0, 'ceil') }} Ko
-                                                {% endif %}
-                                                {% if document.uploadedAt is defined %}
-                                                    · {{ document.uploadedAt|date('d/m/Y') }}
-                                                {% endif %}
-                                            </span>
-                                        </div>
-
-                                        <div class="d-flex align-items-center gap-2">
-                                            {% set doc_status = document.status|default('pending') %}
-                                            {% if doc_status == 'approved' %}
-                                                <span class="badge bg-success">Valide</span>
-                                            {% elseif doc_status == 'rejected' %}
-                                                <span class="badge bg-danger">Refuse</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">En attente</span>
-                                            {% endif %}
-
-                                            {% if animal.owner == app.user %}
-                                                {% if doc_status != 'approved' %}
-                                                    <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
-                                                        <input type="hidden" name="status" value="approved">
-                                                        <button type="submit" class="btn btn-success btn-sm py-0 px-2">Valider</button>
-                                                    </form>
-                                                {% endif %}
-                                                {% if doc_status != 'rejected' %}
-                                                    <form method="post" action="{{ path('app_document_status', {'animalId': animal.id, 'fileName': document.fileName}) }}" style="display:inline;">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('document_status' ~ document.fileName) }}">
-                                                        <input type="hidden" name="status" value="rejected">
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2">Refuser</button>
-                                                    </form>
-                                                {% endif %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    {# ── ALLERGIES ── #}
-                    <div class="tab-pane fade" id="panel-allergies" role="tabpanel">
-                        {% if is_granted('ANIMAL_EDIT_HEALTH', animal) %}
-                        <div class="d-flex justify-content-end mb-3">
-                            <a href="{{ path('app_allergy_index', {'id': animal.id}) }}" class="btn btn-outline-primary btn-sm">Gérer les allergies</a>
-                        </div>
-                        {% endif %}
-
-                        {% if animal.allergies is empty %}
-                            <div class="alert bg-anicare-soft border border-anicare text-secondary mb-0">
-                                Aucune allergie connue pour ce cheval.
-                            </div>
-                        {% else %}
-                            <div class="row g-3">
-                                {% for allergy in animal.allergies %}
-                                    <div class="col-12 col-md-6">
-                                        <div class="p-3 rounded-3 border {{ allergy.severity == 'SEVERE' ? 'border-danger bg-danger bg-opacity-10' : 'border-anicare bg-white' }}">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <strong>{{ allergy.name }}</strong>
-                                                {% if allergy.severity == 'SEVERE' %}
-                                                    <span class="badge bg-danger">Sévère</span>
-                                                {% elseif allergy.severity == 'MODERATE' %}
-                                                    <span class="badge bg-warning text-dark">Modérée</span>
-                                                {% else %}
-                                                    <span class="badge bg-info text-dark">Légère</span>
-                                                {% endif %}
-                                            </div>
-                                            {% if allergy.symptoms %}
-                                                <p class="small text-secondary mb-0">{{ allergy.symptoms }}</p>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                </div>
-            </section>
-
-            {# ── Demande de suppression en attente (visible par le propriétaire) ── #}
-            {% if pending_deletion_request and is_granted('ANIMAL_DELETE', animal) %}
-                <div class="alert border-warning bg-warning bg-opacity-10 mt-5">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background: linear-gradient(135deg, #f0ad4e, #ec971f);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                            </svg>
-                        </div>
-                        <div class="flex-grow-1">
-                            <strong class="d-block mb-1">Demande de suppression en attente</strong>
-                            <p class="small text-secondary mb-2">
-                                <strong>{{ pending_deletion_request.requestedBy.fullName }}</strong> (gérant de structure)
-                                a demandé la suppression de {{ animal.name }}
-                                le {{ pending_deletion_request.createdAt|date('d/m/Y à H:i') }}.
-                            </p>
-                            {% if pending_deletion_request.reason %}
-                                <p class="small fst-italic mb-2">« {{ pending_deletion_request.reason }} »</p>
-                            {% endif %}
-                            <div class="d-flex gap-2">
-                                <form method="post" action="{{ path('app_animal_deletion_respond', {'id': pending_deletion_request.id}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('respond_deletion' ~ pending_deletion_request.id) }}">
-                                    <input type="hidden" name="action" value="approve">
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirmer la suppression définitive de {{ animal.name }} ? Cette action est irréversible.');">
-                                        Approuver la suppression
-                                    </button>
-                                </form>
-                                <form method="post" action="{{ path('app_animal_deletion_respond', {'id': pending_deletion_request.id}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('respond_deletion' ~ pending_deletion_request.id) }}">
-                                    <input type="hidden" name="action" value="reject">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                        Refuser
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                    <div>
+                        <h3 class="mb-0" style="font-size: 0.88rem; font-weight: 700; color: var(--primary-color);">Notes et particularites</h3>
+                        <span style="font-size: 0.68rem; color: #6c757d;">Informations complementaires importantes.</span>
                     </div>
                 </div>
-            {% endif %}
+                {% if animal.notes %}
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24" class="flex-shrink-0 mt-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <div>
+                            <strong style="font-size: 0.82rem; display: block; margin-bottom: 0.2rem;">Notes</strong>
+                            <p class="small text-secondary mb-0" style="white-space: pre-line;">{{ animal.notes }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if animal.allergies|length > 0 %}
+                    <div class="d-flex align-items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#f0ad4e" stroke-width="2" viewBox="0 0 24 24" class="flex-shrink-0 mt-1"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <div>
+                            {% for allergy in animal.allergies %}
+                                <span class="badge mb-1 {{ allergy.severity == 'SEVERE' ? 'bg-danger' : (allergy.severity == 'MODERATE' ? 'bg-warning text-dark' : 'bg-info text-dark') }}" style="font-size: 0.68rem;">{{ allergy.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if not animal.notes and animal.allergies|length == 0 %}
+                    <p class="text-secondary small mb-0">Aucune note.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-5 pt-4 border-top border-anicare">
-                <a href="{{ path('app_animal_index') }}" class="btn btn-outline-primary">
-                    Retour
-                </a>
+    {# ══════════ PROFESSIONNELS — visible uniquement par referent #}
+    {% if is_referent %}
+    <div class="section-card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="section-title-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <h3 class="mb-0" style="font-size: 0.9rem; font-weight: 700; color: var(--primary-color);">Professionnels</h3>
+                {% if professionals|length > 0 %}
+                    <span class="badge rounded-pill" style="background: var(--primary-color); font-size: 0.65rem;">{{ professionals|length }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if professionals|length > 0 %}
+            {% for pro in professionals %}
+                <div class="d-flex align-items-center gap-3 py-2 {{ not loop.last ? 'border-bottom' : '' }}" style="border-color: var(--border-color) !important;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.8rem;">
+                        {{ pro.user.firstName|first|upper }}{{ pro.user.lastName|first|upper }}
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <strong class="d-block text-truncate" style="font-size: 0.82rem;">{{ pro.user.fullName }}</strong>
+                        <span class="small text-secondary">{{ pro.user.specialty|default(pro.user.email) }}</span>
+                    </div>
+                    {% set perm_label = { 'VIEW': 'Lecture', 'WRITE': 'Modification', 'ADMIN': 'Administration' } %}
+                    <span class="referent-badge" style="background: var(--soft-teal); color: var(--primary-color);">{{ perm_label[pro.permission]|default(pro.permission) }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-secondary small mb-0">Aucun professionnel associe.</p>
+        {% endif %}
+        <div class="mt-3 pt-2" style="border-top: 1px solid var(--border-color);">
+            <form method="post" action="{{ path('app_animal_invite_pro', {'slug': animal.slug}) }}" id="inviteProForm">
+                <input type="hidden" name="_token" value="{{ csrf_token('invite_pro' ~ animal.id) }}">
+                <input type="hidden" name="professional_id" id="invite_pro_id" value="">
+                <label class="form-label small fw-bold mb-1" style="font-size: 0.78rem;">Inviter un professionnel</label>
+                <div class="position-relative">
+                    <input type="text" id="invite_pro_search" class="form-control form-control-sm" placeholder="Rechercher par nom ou email..." autocomplete="off" style="border-radius: 8px; font-size: 0.8rem;">
+                    <div id="invite_pro_results" class="position-absolute w-100 bg-white border rounded-2 shadow-sm mt-1 d-none" style="z-index: 10; max-height: 200px; overflow-y: auto;"></div>
+                </div>
+                <div id="invite_pro_selected" class="d-none mt-2">
+                    <div class="d-flex align-items-center gap-2 p-2 rounded-2" style="background: var(--soft-teal);">
+                        <span id="invite_pro_name" class="small fw-bold flex-grow-1"></span>
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0" id="invite_pro_clear">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn btn-sm w-100 mt-2" style="background: var(--primary-color); color: #fff; border-radius: 8px; font-size: 0.78rem; font-weight: 600;">Envoyer l'invitation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 
-                <div class="d-flex gap-2 flex-wrap">
-                    {% if is_granted('ANIMAL_MANAGE_SHARE', animal) %}
-                        <a href="{{ path('app_animal_share_new') }}" class="btn btn-outline-primary">
-                            Partager
-                        </a>
-                    {% endif %}
-
-                    {% if is_granted('ANIMAL_EDIT', animal) %}
-                        <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn btn-primary">
-                            Modifier le profil
-                        </a>
-                    {% endif %}
-
-                    {% if is_granted('ANIMAL_DELETE', animal) %}
-                        {{ include('animal/_delete_form.html.twig') }}
-                    {% elseif is_granted('ANIMAL_REQUEST_DELETE', animal) %}
-                        {% if pending_deletion_request %}
-                            <span class="btn btn-outline-warning btn-sm disabled">
-                                Suppression demandée
-                            </span>
-                        {% else %}
-                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#requestDeleteModal">
-                                Demander la suppression
-                            </button>
-                        {% endif %}
-                    {% endif %}
+    {# ══════════ HISTORIQUE DES CONSULTATIONS ══════════ #}
+    <div class="section-card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="section-title-icon" style="background: var(--soft-teal); color: var(--primary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div>
+                    <h3 class="mb-0" style="font-size: 0.9rem; font-weight: 700; color: var(--primary-color);">Historique des consultations</h3>
+                    <span style="font-size: 0.68rem; color: #6c757d;">Dernieres consultations enregistrees pour cet animal.</span>
                 </div>
             </div>
+            <div class="d-flex gap-2">
+                {% if is_pro and is_pro_space and is_granted('ANIMAL_EDIT_HEALTH', animal) %}
+                    <a href="{{ path('app_health_book_entry_new', {'animal': animal.id}) }}" class="btn btn-sm" style="background: var(--primary-color); color: #fff; border-radius: 8px; font-size: 0.78rem; font-weight: 600;">+ Ajouter une consultation</a>
+                {% endif %}
+            </div>
+        </div>
 
-            {# ── Modal demande de suppression (gérant) ── #}
-            {% if is_granted('ANIMAL_REQUEST_DELETE', animal) and not pending_deletion_request %}
-                <div class="modal fade" id="requestDeleteModal" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content border-0 shadow">
-                            <div class="modal-header text-white" style="background: linear-gradient(135deg, #dc3545, #c82333);">
-                                <h5 class="modal-title">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2">
-                                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                    </svg>
-                                    Demander la suppression
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form method="post" action="{{ path('app_animal_request_delete', {'slug': animal.slug}) }}">
-                                <div class="modal-body">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('request_delete' ~ animal.id) }}">
-                                    <p class="text-secondary">
-                                        Vous demandez la suppression de <strong>{{ animal.name }}</strong>.
-                                        Le propriétaire ({{ animal.owner.fullName }}) devra valider cette demande avant la suppression définitive.
-                                    </p>
-                                    <div class="mb-0">
-                                        <label for="deletion_reason" class="form-label fw-bold">Motif (optionnel)</label>
-                                        <textarea name="reason" id="deletion_reason" class="form-control" rows="3" placeholder="Expliquez la raison de cette demande..."></textarea>
+        {% set visible_entries = animal.healthBookEntries|filter(e => not e.isDraft or (e.veterinarian == app.user or e.createdBy == app.user)) %}
+        {% if visible_entries is empty %}
+            <div class="text-center py-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="#ccc" stroke-width="1.5" viewBox="0 0 24 24" class="mb-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <p class="text-secondary small mb-0">Aucune consultation enregistree pour le moment.</p>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="consult-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Professionnel</th>
+                            <th>Motif</th>
+                            <th>Type d'acte</th>
+                            <th class="text-end" style="width: 40px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in visible_entries %}
+                        <tr{% if entry.isArchived %} style="opacity: 0.55;"{% endif %}>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    <div>
+                                        <strong style="font-size: 0.82rem;">{{ entry.date|date('d/m/Y') }}</strong>
+                                        {% if entry.isDraft %}
+                                            <span class="referent-badge ms-1" style="background: #fff3cd; color: #856404;">Brouillon</span>
+                                        {% elseif entry.isArchived %}
+                                            <span class="referent-badge ms-1" style="background: #e0e0e0; color: #616161;">Archive</span>
+                                        {% elseif entry.isShared %}
+                                            <span class="referent-badge ms-1" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">Transmis</span>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-danger">Envoyer la demande</button>
-                                </div>
-                            </form>
-                        </div>
+                            </td>
+                            <td>
+                                {% if entry.veterinarian %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px; background: var(--primary-color); color: #fff; font-weight: 600; font-size: 0.6rem;">
+                                            {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
+                                        </div>
+                                        <div>
+                                            <strong style="font-size: 0.8rem;">{{ entry.veterinarian.fullName }}</strong>
+                                            {% if entry.veterinarian.specialty %}
+                                                <br><span style="font-size: 0.68rem; color: #6c757d;">{{ entry.veterinarian.specialty }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% elseif entry.veterinarianName %}
+                                    <span class="text-secondary" style="font-size: 0.82rem;">{{ entry.veterinarianName }}</span>
+                                {% else %}
+                                    <span class="text-secondary fst-italic" style="font-size: 0.82rem;">-</span>
+                                {% endif %}
+                            </td>
+                            {% set motif = entry.title|default(entry.description|default('-')) %}
+                            <td style="font-size: 0.82rem;">{{ motif|length > 50 ? motif|slice(0, 50) ~ '...' : motif }}</td>
+                            <td>
+                                {% set entry_type = entry.type|default('')|lower %}
+                                {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
+                                    <span class="referent-badge" style="background: #e8f5e9; color: #2e7d32;">Vaccination</span>
+                                {% elseif entry_type == 'consultation' %}
+                                    <span class="referent-badge" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">Consultation</span>
+                                {% elseif entry_type == 'chirurgie' %}
+                                    <span class="referent-badge" style="background: #fce4ec; color: #c62828;">Chirurgie</span>
+                                {% else %}
+                                    <span class="referent-badge" style="background: #f5f5f5; color: #616161;">{{ entry.type|default('Autre') }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" style="color: var(--primary-color); text-decoration: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    {# ══════════ DEMANDE DE SUPPRESSION EN ATTENTE ══════════ #}
+    {% if pending_deletion_request and is_granted('ANIMAL_DELETE', animal) %}
+        <div class="section-card mb-4" style="border-left: 4px solid #f0ad4e !important;">
+            <div class="d-flex align-items-start gap-3">
+                <div class="section-title-icon" style="background: #fef3cd; color: #856404;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="flex-grow-1">
+                    <strong class="d-block mb-1">Demande de suppression en attente</strong>
+                    <p class="small text-secondary mb-2">
+                        <strong>{{ pending_deletion_request.requestedBy.fullName }}</strong> a demande la suppression le {{ pending_deletion_request.createdAt|date('d/m/Y') }}.
+                    </p>
+                    {% if pending_deletion_request.reason %}
+                        <p class="small fst-italic mb-2">{{ pending_deletion_request.reason }}</p>
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        <form method="post" action="{{ path('app_animal_deletion_respond', {'id': pending_deletion_request.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('respond_deletion' ~ pending_deletion_request.id) }}">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirmer la suppression de {{ animal.name }} ?');" style="border-radius: 8px; font-size: 0.78rem;">Approuver</button>
+                        </form>
+                        <form method="post" action="{{ path('app_animal_deletion_respond', {'id': pending_deletion_request.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('respond_deletion' ~ pending_deletion_request.id) }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm" style="border-radius: 8px; font-size: 0.78rem;">Refuser</button>
+                        </form>
                     </div>
                 </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# ══════════ FOOTER ACTIONS ══════════ #}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a href="{{ path('app_animal_index') }}" class="btn btn-outline-secondary" style="border-radius: 8px; font-size: 0.82rem;">Retour</a>
+        <div class="d-flex gap-2 flex-wrap">
+            {% if can_edit %}
+                <a href="{{ path('app_animal_edit', {'slug': animal.slug}) }}" class="btn" style="background: var(--primary-color); color: #fff; border-radius: 8px; font-size: 0.82rem; font-weight: 600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="me-1"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Modifier la fiche
+                </a>
+            {% endif %}
+            {% if is_granted('ANIMAL_REQUEST_DELETE', animal) and not is_granted('ANIMAL_DELETE', animal) %}
+                {% if pending_deletion_request %}
+                    <span class="btn btn-outline-warning btn-sm disabled" style="border-radius: 8px;">Suppression demandee</span>
+                {% else %}
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#requestDeleteModal" style="border-radius: 8px;">Demander la suppression</button>
+                {% endif %}
             {% endif %}
         </div>
     </div>
 </div>
+
+{# ══════════ MODAL SUPPRESSION ══════════ #}
+{% if is_granted('ANIMAL_REQUEST_DELETE', animal) and not pending_deletion_request %}
+    <div class="modal fade" id="requestDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow" style="border-radius: 14px; overflow: hidden;">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                    <h5 class="modal-title">Demander la suppression</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="{{ path('app_animal_request_delete', {'slug': animal.slug}) }}">
+                    <div class="modal-body">
+                        <input type="hidden" name="_token" value="{{ csrf_token('request_delete' ~ animal.id) }}">
+                        <p class="text-secondary">Vous demandez la suppression de <strong>{{ animal.name }}</strong>. Le proprietaire devra valider.</p>
+                        <div class="mb-0">
+                            <label for="deletion_reason" class="form-label fw-bold" style="font-size: 0.82rem;">Motif (optionnel)</label>
+                            <textarea name="reason" id="deletion_reason" class="form-control" rows="3" placeholder="Expliquez la raison..." style="border-radius: 8px;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Annuler</button>
+                        <button type="submit" class="btn btn-danger" style="border-radius: 8px;">Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block javascripts %}
@@ -804,9 +795,7 @@
     const hiddenId = document.getElementById('invite_pro_id');
     const nameSpan = document.getElementById('invite_pro_name');
     const clearBtn = document.getElementById('invite_pro_clear');
-
     if (!searchInput) return;
-
     let debounce;
     searchInput.addEventListener('input', function() {
         clearTimeout(debounce);
@@ -817,7 +806,7 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.length === 0) {
-                        resultsDiv.innerHTML = '<div class="p-2 small text-secondary">Aucun résultat</div>';
+                        resultsDiv.innerHTML = '<div class="p-2 small text-secondary">Aucun resultat</div>';
                     } else {
                         resultsDiv.innerHTML = data.map(p =>
                             '<div class="invite-pro-result p-2 border-bottom" style="cursor:pointer;" data-id="' + p.id + '" data-name="' + p.fullName + ' (' + p.email + ')">' +
@@ -828,7 +817,6 @@
                 });
         }, 300);
     });
-
     resultsDiv.addEventListener('click', function(e) {
         const item = e.target.closest('.invite-pro-result');
         if (!item) return;
@@ -838,7 +826,6 @@
         resultsDiv.classList.add('d-none');
         selectedDiv.classList.remove('d-none');
     });
-
     clearBtn.addEventListener('click', function() {
         hiddenId.value = '';
         nameSpan.textContent = '';
@@ -846,52 +833,9 @@
         searchInput.classList.remove('d-none');
         selectedDiv.classList.add('d-none');
     });
-
     document.addEventListener('click', function(e) {
-        if (!resultsDiv.contains(e.target) && e.target !== searchInput) {
-            resultsDiv.classList.add('d-none');
-        }
+        if (!resultsDiv.contains(e.target) && e.target !== searchInput) resultsDiv.classList.add('d-none');
     });
-})();
-
-// Popover intervenants (position: fixed pour éviter le clipping)
-(function() {
-    document.querySelectorAll('.intervenant-toggle').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var popover = this.nextElementSibling;
-            document.querySelectorAll('.intervenant-popover').forEach(function(p) {
-                if (p !== popover) p.classList.add('d-none');
-            });
-            if (popover.classList.contains('d-none')) {
-                var rect = this.getBoundingClientRect();
-                popover.style.top = (rect.bottom + 4) + 'px';
-                popover.style.left = rect.left + 'px';
-                // Empêcher le débordement à droite
-                popover.classList.remove('d-none');
-                var popRect = popover.getBoundingClientRect();
-                if (popRect.right > window.innerWidth - 8) {
-                    popover.style.left = (window.innerWidth - popRect.width - 8) + 'px';
-                }
-            } else {
-                popover.classList.add('d-none');
-            }
-        });
-    });
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.intervenant-popover-wrapper')) {
-            document.querySelectorAll('.intervenant-popover').forEach(function(p) {
-                p.classList.add('d-none');
-            });
-        }
-    });
-
-    window.addEventListener('scroll', function() {
-        document.querySelectorAll('.intervenant-popover').forEach(function(p) {
-            p.classList.add('d-none');
-        });
-    }, true);
 })();
 </script>
 {% endblock %}

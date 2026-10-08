@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Animal;
+use App\Entity\AnimalReferent;
 use App\Entity\Appointment;
 use App\Entity\Structure;
 use App\Entity\User;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/rendez-vous')]
@@ -33,7 +35,7 @@ final class AppointmentController extends AbstractController
     }
 
     #[Route('/nouveau', name: 'app_appointment_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, AnimalRepository $animalRepository): Response
+    public function new(Request $request, EntityManagerInterface $em, AnimalRepository $animalRepository, UserPasswordHasherInterface $passwordHasher): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -77,13 +79,29 @@ final class AppointmentController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $appointment->setCreatedBy($user);
+            $newAnimalsCreated = [];
 
             $newAnimalMode = $request->request->get('new_animal_mode') === '1';
-            if ($newAnimalMode) {
-                $newAnimal = $this->createAnimalFromRequest($request, $em, $user, $isPro, $isStructure);
+            $multiAnimalCount = (int) $request->request->get('multi_animal_count', '0');
+
+            if ($newAnimalMode && $multiAnimalCount > 0) {
+                $newAnimalsData = $request->request->all('new_animals');
+                foreach ($newAnimalsData as $animalData) {
+                    $newAnimal = $this->createAnimalFromArray($animalData, $em, $user, $isPro, $passwordHasher);
+                    if ($newAnimal) {
+                        $appointment->addAnimal($newAnimal);
+                        if (empty($newAnimalsCreated)) {
+                            $appointment->setAnimal($newAnimal);
+                        }
+                        $newAnimalsCreated[] = $newAnimal;
+                    }
+                }
+            } elseif ($newAnimalMode) {
+                $newAnimal = $this->createAnimalFromRequest($request, $em, $user, $isPro, $isStructure, $passwordHasher);
                 if ($newAnimal) {
                     $appointment->addAnimal($newAnimal);
                     $appointment->setAnimal($newAnimal);
+                    $newAnimalsCreated[] = $newAnimal;
                 }
 
                 if ($isStructure) {
@@ -103,14 +121,31 @@ final class AppointmentController extends AbstractController
                 }
             }
 
+            foreach ($newAnimalsCreated as $createdAnimal) {
+                $createdAnimal->generateCompleteToken();
+            }
+
             $em->persist($appointment);
             $em->flush();
 
+            foreach ($newAnimalsCreated as $createdAnimal) {
+                $createdAnimal->ensureSlug();
+            }
+            if (!empty($newAnimalsCreated)) {
+                $em->flush();
+            }
+
             $this->addFlash('success', 'Rendez-vous créé avec succès.');
 
-            return $this->redirectToRoute('app_appointment_show', [
-                'id' => $appointment->getId(),
-            ], Response::HTTP_SEE_OTHER);
+            $params = ['id' => $appointment->getId()];
+            if (!empty($newAnimalsCreated)) {
+                $params['complete_animals'] = implode(',', array_map(
+                    fn(Animal $a) => $a->getId() . ':' . $a->getCompleteToken(),
+                    $newAnimalsCreated
+                ));
+            }
+
+            return $this->redirectToRoute('app_appointment_show', $params, Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('appointment/new.html.twig', [
@@ -120,7 +155,100 @@ final class AppointmentController extends AbstractController
         ]);
     }
 
-    private function createAnimalFromRequest(Request $request, EntityManagerInterface $em, User $user, bool $isPro, bool $isStructure): ?Animal
+    private function createAnimalFromArray(array $data, EntityManagerInterface $em, User $user, bool $isPro, UserPasswordHasherInterface $passwordHasher): ?Animal
+    {
+        $name = trim($data['name'] ?? '');
+        if (!$name) {
+            return null;
+        }
+
+        $animal = new Animal();
+        $animal->setName($name);
+        $animal->setSpecies('Cheval');
+        $animal->setGender($data['gender'] ?? 'Hongre');
+
+        $birthDateStr = $data['birth_date'] ?? '';
+        if ($birthDateStr) {
+            try {
+                $animal->setBirthDate(new \DateTimeImmutable($birthDateStr));
+            } catch (\Exception) {
+            }
+        }
+
+        $sire = trim($data['sire'] ?? '');
+        if ($sire) {
+            $animal->setIdentificationNumber($sire);
+        }
+
+        $microchip = trim($data['microchip'] ?? '');
+        if ($microchip) {
+            $animal->setMicrochipNumber($microchip);
+        }
+
+        if ($isPro) {
+            $animal->setCreatedByPro($user);
+        }
+
+        $referentUser = null;
+
+        $referentId = $data['referent_id'] ?? '';
+        if ($referentId) {
+            $referentUser = $em->getRepository(User::class)->find((int) $referentId);
+        }
+
+        $refEmail = trim($data['referent_email'] ?? '');
+        $refFirstName = trim($data['referent_firstname'] ?? '');
+        $refLastName = trim($data['referent_lastname'] ?? '');
+
+        if (!$referentUser && $refEmail && $refFirstName && $refLastName) {
+            $existingRef = $em->getRepository(User::class)->findOneBy(['email' => $refEmail]);
+            if ($existingRef) {
+                $referentUser = $existingRef;
+            } else {
+                $referentUser = new User();
+                $referentUser->setFirstName($refFirstName);
+                $referentUser->setLastName($refLastName);
+                $referentUser->setEmail($refEmail);
+                $refPhone = trim($data['referent_phone'] ?? '');
+                if ($refPhone) {
+                    $referentUser->setPhone($refPhone);
+                }
+                $referentUser->setPassword($passwordHasher->hashPassword($referentUser, bin2hex(random_bytes(8))));
+                $referentUser->setRoles(['ROLE_USER']);
+                $referentUser->setAccountType('Propriétaire');
+                $referentUser->setActivationToken(bin2hex(random_bytes(32)));
+                $em->persist($referentUser);
+            }
+        }
+
+        $animal->setOwner($referentUser ?? $user);
+
+        if ($referentUser) {
+            $referent = new AnimalReferent();
+            $referent->setAnimal($animal);
+            $referent->setUser($referentUser);
+            $referent->setRole('principal');
+            $referent->setStatus('active');
+            $em->persist($referent);
+        }
+
+        $structureId = $data['structure_id'] ?? '';
+        if ($structureId) {
+            $structure = $em->getRepository(Structure::class)->find((int) $structureId);
+            if ($structure) {
+                $animal->setStructure($structure);
+            }
+        }
+
+        $em->persist($animal);
+        $em->flush();
+        $animal->generateSlug();
+        $em->flush();
+
+        return $animal;
+    }
+
+    private function createAnimalFromRequest(Request $request, EntityManagerInterface $em, User $user, bool $isPro, bool $isStructure, UserPasswordHasherInterface $passwordHasher): ?Animal
     {
         $name = trim($request->request->get('new_animal_name', ''));
         if (!$name) {
@@ -150,16 +278,51 @@ final class AppointmentController extends AbstractController
             $animal->setMicrochipNumber($microchip);
         }
 
-        $ownerId = $request->request->get('new_animal_owner_id');
-        if ($ownerId) {
-            $owner = $em->getRepository(User::class)->find((int) $ownerId);
-            if ($owner) {
-                $animal->setOwner($owner);
+        if ($isPro) {
+            $animal->setCreatedByPro($user);
+        }
+
+        $referentUser = null;
+
+        $referentId = $request->request->get('new_animal_referent_id');
+        if ($referentId) {
+            $referentUser = $em->getRepository(User::class)->find((int) $referentId);
+        }
+
+        $refEmail = trim($request->request->get('new_animal_referent_email', ''));
+        $refFirstName = trim($request->request->get('new_animal_referent_firstname', ''));
+        $refLastName = trim($request->request->get('new_animal_referent_lastname', ''));
+
+        if (!$referentUser && $refEmail && $refFirstName && $refLastName) {
+            $existingRef = $em->getRepository(User::class)->findOneBy(['email' => $refEmail]);
+            if ($existingRef) {
+                $referentUser = $existingRef;
+            } else {
+                $referentUser = new User();
+                $referentUser->setFirstName($refFirstName);
+                $referentUser->setLastName($refLastName);
+                $referentUser->setEmail($refEmail);
+                $refPhone = trim($request->request->get('new_animal_referent_phone', ''));
+                if ($refPhone) {
+                    $referentUser->setPhone($refPhone);
+                }
+                $referentUser->setPassword($passwordHasher->hashPassword($referentUser, bin2hex(random_bytes(8))));
+                $referentUser->setRoles(['ROLE_USER']);
+                $referentUser->setAccountType('Propriétaire');
+                $referentUser->setActivationToken(bin2hex(random_bytes(32)));
+                $em->persist($referentUser);
             }
         }
 
-        if (!$animal->getOwner()) {
-            $animal->setOwner($user);
+        $animal->setOwner($referentUser ?? $user);
+
+        if ($referentUser) {
+            $referent = new AnimalReferent();
+            $referent->setAnimal($animal);
+            $referent->setUser($referentUser);
+            $referent->setRole('principal');
+            $referent->setStatus('active');
+            $em->persist($referent);
         }
 
         $structureId = $request->request->get('new_animal_structure_id');
@@ -179,15 +342,39 @@ final class AppointmentController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_appointment_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Appointment $appointment): Response
+    public function show(Appointment $appointment, Request $request, AnimalRepository $animalRepository): Response
     {
+        $completeAnimals = [];
+        $completeTokens = [];
+        $completeAnimalsParam = $request->query->get('complete_animals', '');
+        if ($completeAnimalsParam) {
+            $entries = explode(',', $completeAnimalsParam);
+            foreach ($entries as $entry) {
+                $parts = explode(':', $entry, 2);
+                $id = (int) $parts[0];
+                $token = $parts[1] ?? null;
+                if ($id <= 0) {
+                    continue;
+                }
+                $animal = $animalRepository->find($id);
+                if ($animal) {
+                    $completeAnimals[] = $animal;
+                    if ($token) {
+                        $completeTokens[$animal->getId()] = $token;
+                    }
+                }
+            }
+        }
+
         return $this->render('appointment/show.html.twig', [
             'appointment' => $appointment,
+            'complete_animals' => $completeAnimals,
+            'complete_tokens' => $completeTokens,
         ]);
     }
 
     #[Route('/{id}/modifier', name: 'app_appointment_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $em): Response
+    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -200,7 +387,23 @@ final class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$isPro && $form->has('animal')) {
+            $newAnimalsCreated = [];
+
+            if ($isPro) {
+                $newAnimalMode = $request->request->get('new_animal_mode') === '1';
+                $multiAnimalCount = (int) $request->request->get('multi_animal_count', '0');
+
+                if ($newAnimalMode && $multiAnimalCount > 0) {
+                    $newAnimalsData = $request->request->all('new_animals');
+                    foreach ($newAnimalsData as $animalData) {
+                        $newAnimal = $this->createAnimalFromArray($animalData, $em, $user, $isPro, $passwordHasher);
+                        if ($newAnimal) {
+                            $appointment->addAnimal($newAnimal);
+                            $newAnimalsCreated[] = $newAnimal;
+                        }
+                    }
+                }
+            } elseif ($form->has('animal')) {
                 $animal = $form->get('animal')->getData();
                 if ($animal) {
                     foreach ($appointment->getAnimals() as $a) {
@@ -211,18 +414,49 @@ final class AppointmentController extends AbstractController
                 }
             }
 
+            foreach ($newAnimalsCreated as $createdAnimal) {
+                $createdAnimal->generateCompleteToken();
+            }
+
             $em->flush();
+
+            foreach ($newAnimalsCreated as $createdAnimal) {
+                $createdAnimal->ensureSlug();
+            }
+            if (!empty($newAnimalsCreated)) {
+                $em->flush();
+            }
+
             $this->addFlash('success', 'Rendez-vous modifié.');
 
-            return $this->redirectToRoute('app_appointment_show', [
-                'id' => $appointment->getId(),
-            ], Response::HTTP_SEE_OTHER);
+            $params = ['id' => $appointment->getId()];
+            if (!empty($newAnimalsCreated)) {
+                $params['complete_animals'] = implode(',', array_map(
+                    fn(Animal $a) => $a->getId() . ':' . $a->getCompleteToken(),
+                    $newAnimalsCreated
+                ));
+            }
+
+            return $this->redirectToRoute('app_appointment_show', $params, Response::HTTP_SEE_OTHER);
+        }
+
+        $existingAnimalsJson = [];
+        if ($isPro) {
+            foreach ($appointment->getAnimals() as $animal) {
+                $existingAnimalsJson[] = [
+                    'id' => $animal->getId(),
+                    'name' => $animal->getName(),
+                    'ownerName' => $animal->getOwner()?->getFullName() ?? '',
+                    'structureName' => $animal->getStructure()?->getName() ?? '',
+                ];
+            }
         }
 
         return $this->render('appointment/edit.html.twig', [
             'form' => $form,
             'appointment' => $appointment,
             'is_pro' => $isPro,
+            'existing_animals_json' => json_encode($existingAnimalsJson),
         ]);
     }
 
@@ -264,7 +498,7 @@ final class AppointmentController extends AbstractController
     }
 
     #[Route('/api/client/{id}/animals', name: 'app_appointment_client_animals', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function clientAnimals(User $client): JsonResponse
+    public function clientAnimals(User $client, EntityManagerInterface $em): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_PRO');
 
@@ -273,8 +507,19 @@ final class AppointmentController extends AbstractController
             trim(($client->getPostalCode() ?? '') . ' ' . ($client->getCity() ?? '')),
         ]));
 
+        $allAnimals = $em->getRepository(Animal::class)->createQueryBuilder('a')
+            ->leftJoin('a.referents', 'r')
+            ->where('a.owner = :user')
+            ->orWhere('r.user = :user AND r.status = :active')
+            ->setParameter('user', $client)
+            ->setParameter('active', 'active')
+            ->groupBy('a.id')
+            ->orderBy('a.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
         $animals = [];
-        foreach ($client->getAnimals() as $animal) {
+        foreach ($allAnimals as $animal) {
             $livingAddress = implode(', ', array_filter([
                 $animal->getLivingPlaceName(),
                 $animal->getLivingPlaceStreet(),
@@ -294,6 +539,7 @@ final class AppointmentController extends AbstractController
                 'id' => $animal->getId(),
                 'name' => $animal->getName(),
                 'photo' => $animal->getPhoto(),
+                'ownerName' => $animal->getOwner()?->getFullName(),
                 'livingPlaceName' => $animal->getLivingPlaceName(),
                 'structureName' => $structure?->getName(),
                 'address' => $livingAddress,
@@ -318,16 +564,19 @@ final class AppointmentController extends AbstractController
         }
 
         $clients = $em->getRepository(User::class)->createQueryBuilder('u')
-            ->innerJoin('u.animals', 'a')
-            ->where('u.id != :self')
-            ->andWhere(
+            ->leftJoin('u.animals', 'a')
+            ->leftJoin('u.animalReferents', 'ar', 'WITH', 'ar.status = :active')
+            ->leftJoin('ar.animal', 'ra')
+            ->where(
                 'LOWER(u.firstName) LIKE :q OR LOWER(u.lastName) LIKE :q '
                 . 'OR LOWER(a.name) LIKE :q '
                 . 'OR LOWER(a.livingPlaceName) LIKE :q '
-                . 'OR LOWER(a.livingPlaceCity) LIKE :q'
+                . 'OR LOWER(a.livingPlaceCity) LIKE :q '
+                . 'OR LOWER(ra.name) LIKE :q'
             )
-            ->setParameter('self', $user->getId())
+            ->andWhere('a.id IS NOT NULL OR ra.id IS NOT NULL')
             ->setParameter('q', '%' . $query . '%')
+            ->setParameter('active', 'active')
             ->groupBy('u.id')
             ->orderBy('u.lastName', 'ASC')
             ->setMaxResults(10)
@@ -336,8 +585,19 @@ final class AppointmentController extends AbstractController
 
         $results = [];
         foreach ($clients as $client) {
+            $clientAnimals = $em->getRepository(Animal::class)->createQueryBuilder('a')
+                ->leftJoin('a.referents', 'r')
+                ->where('a.owner = :client')
+                ->orWhere('r.user = :client AND r.status = :activeStatus')
+                ->setParameter('client', $client)
+                ->setParameter('activeStatus', 'active')
+                ->groupBy('a.id')
+                ->orderBy('a.name', 'ASC')
+                ->getQuery()
+                ->getResult();
+
             $animals = [];
-            foreach ($client->getAnimals() as $animal) {
+            foreach ($clientAnimals as $animal) {
                 $structure = $animal->getStructure();
                 $animals[] = [
                     'id' => $animal->getId(),
@@ -346,10 +606,16 @@ final class AppointmentController extends AbstractController
                     'structureName' => $structure?->getName(),
                 ];
             }
+            $clientAddress = implode(', ', array_filter([
+                $client->getAddress(),
+                trim(($client->getPostalCode() ?? '') . ' ' . ($client->getCity() ?? '')),
+            ]));
+
             $results[] = [
                 'id' => $client->getId(),
                 'name' => $client->getFullName(),
                 'email' => $client->getEmail(),
+                'address' => $clientAddress ?: null,
                 'animals' => $animals,
             ];
         }

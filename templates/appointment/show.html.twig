@@ -282,4 +282,55 @@
         </div>
     </div>
 </div>
+
+{% if complete_animals is defined and complete_animals|length > 0 %}
+<div class="modal fade" id="completeAnimalModal" tabindex="-1" aria-labelledby="completeAnimalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+            <div class="modal-body text-center p-4">
+                <div style="width: 60px; height: 60px; border-radius: 14px; background: var(--soft-teal); color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: var(--secondary-color);">Rendez-vous créé !</h5>
+                {% if complete_animals|length == 1 %}
+                    <p class="text-secondary mb-3" style="font-size: 0.88rem;">
+                        La fiche animale <strong>{{ complete_animals[0].name }}</strong> a été créée avec les informations de base.<br>
+                        Souhaitez-vous compléter le profil maintenant ?
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600;">Plus tard</button>
+                        <a href="{{ path('app_animal_edit', {slug: complete_animals[0].slug}) }}{% if complete_tokens[complete_animals[0].id] is defined %}?complete_token={{ complete_tokens[complete_animals[0].id] }}{% endif %}" target="_blank" class="btn" style="background: var(--primary-color); color: #fff; border-radius: 10px; font-weight: 600;">Compléter la fiche</a>
+                    </div>
+                {% else %}
+                    <p class="text-secondary mb-3" style="font-size: 0.88rem;">
+                        <strong>{{ complete_animals|length }} fiches animales</strong> ont été créées avec les informations de base.<br>
+                        Complétez leurs profils pour un suivi optimal.
+                    </p>
+                    <div class="d-flex flex-column gap-2 mb-3" style="text-align: left;">
+                        {% for animal in complete_animals %}
+                        <a href="{{ path('app_animal_edit', {slug: animal.slug}) }}{% if complete_tokens[animal.id] is defined %}?complete_token={{ complete_tokens[animal.id] }}{% endif %}" target="_blank" class="d-flex align-items-center gap-2 p-2 text-decoration-none" style="background: var(--soft-teal); border-radius: 10px; border: 1px solid rgba(26,77,69,0.15);">
+                            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </div>
+                            <div>
+                                <div class="fw-bold small" style="color: var(--primary-color);">{{ animal.name }}</div>
+                                <div style="font-size: 0.72rem; color: var(--text-muted);">Compléter la fiche</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="ms-auto"><polyline points="9 18 15 12 9 6"/></svg>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600;">Plus tard</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = new bootstrap.Modal(document.getElementById('completeAnimalModal'));
+    modal.show();
+});
+</script>
+{% endif %}
 {% endblock %}

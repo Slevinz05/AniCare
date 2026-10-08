@@ -32,7 +32,7 @@ class HealthBookEntryRepository extends ServiceEntityRepository
                 ->andWhere('h.status IN (:visibleStatuses) OR h.veterinarian = :user OR h.createdBy = :user')
                 ->setParameter('user', $user)
                 ->setParameter('email', $user->getEmail())
-                ->setParameter('visibleStatuses', ['published', 'shared']);
+                ->setParameter('visibleStatuses', ['published', 'archived']);
         }
 
         if (!empty($filters['animal_id'])) {

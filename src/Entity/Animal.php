@@ -117,6 +117,9 @@ class Animal
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $completeToken = null;
+
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $documents = [];
 
@@ -532,6 +535,23 @@ class Animal
         $this->photo = $photo;
 
         return $this;
+    }
+
+    public function getCompleteToken(): ?string
+    {
+        return $this->completeToken;
+    }
+
+    public function setCompleteToken(?string $completeToken): static
+    {
+        $this->completeToken = $completeToken;
+        return $this;
+    }
+
+    public function generateCompleteToken(): string
+    {
+        $this->completeToken = bin2hex(random_bytes(16));
+        return $this->completeToken;
     }
 
     public function getDocuments(): array

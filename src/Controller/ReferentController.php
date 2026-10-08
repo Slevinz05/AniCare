@@ -12,7 +12,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/referents')]
@@ -38,6 +41,7 @@ final class ReferentController extends AbstractController
         UserRepository $userRepository,
         AnimalReferentRepository $referentRepository,
         EntityManagerInterface $entityManager,
+        MailerInterface $mailer,
     ): Response {
         $animal = $animalRepository->find($animalId);
         if (!$animal) {
@@ -58,8 +62,8 @@ final class ReferentController extends AbstractController
             $email = trim($request->request->get('email', ''));
             $role = $request->request->get('role', AnimalReferent::ROLE_CAVALIER);
 
-            if (!$email) {
-                $this->addFlash('danger', 'Veuillez saisir un email.');
+            if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->addFlash('danger', 'Veuillez saisir un email valide.');
                 return $this->redirectToRoute('app_referent_invite', ['animalId' => $animalId]);
             }
 
@@ -68,37 +72,77 @@ final class ReferentController extends AbstractController
             }
 
             $invitedUser = $userRepository->findOneBy(['email' => $email]);
-            if (!$invitedUser) {
-                $this->addFlash('danger', 'Aucun utilisateur trouvé avec cet email. La personne doit d\'abord créer un compte AniCare.');
-                return $this->redirectToRoute('app_referent_invite', ['animalId' => $animalId]);
-            }
 
-            if ($invitedUser === $user) {
+            if ($invitedUser && $invitedUser === $user) {
                 $this->addFlash('warning', 'Vous ne pouvez pas vous inviter vous-même.');
                 return $this->redirectToRoute('app_referent_invite', ['animalId' => $animalId]);
             }
 
-            if ($referentRepository->hasExistingRelation($animal, $invitedUser)) {
+            if ($invitedUser && $referentRepository->hasExistingRelation($animal, $invitedUser)) {
                 $this->addFlash('warning', 'Cette personne est déjà référent ou a une invitation en attente pour cet animal.');
+                return $this->redirectToRoute('app_referent_invite', ['animalId' => $animalId]);
+            }
+
+            if (!$invitedUser && $referentRepository->hasExistingRelationByEmail($animal, $email)) {
+                $this->addFlash('warning', 'Une invitation est déjà en attente pour cet email.');
                 return $this->redirectToRoute('app_referent_invite', ['animalId' => $animalId]);
             }
 
             $referent = new AnimalReferent();
             $referent->setAnimal($animal);
-            $referent->setUser($invitedUser);
             $referent->setType(AnimalReferent::TYPE_SECONDAIRE);
             $referent->setRole($role);
             $referent->setStatus(AnimalReferent::STATUS_PENDING);
             $referent->setDesignatedBy($user);
 
-            $entityManager->persist($referent);
-            $entityManager->flush();
+            if ($invitedUser) {
+                $referent->setUser($invitedUser);
+                $entityManager->persist($referent);
+                $entityManager->flush();
 
-            $this->addFlash('success', sprintf(
-                'Invitation envoyée à %s en tant que %s.',
-                $invitedUser->getFullName(),
-                $referent->getRoleLabel()
-            ));
+                $this->addFlash('success', sprintf(
+                    'Invitation envoyée à %s en tant que %s.',
+                    $invitedUser->getFullName(),
+                    $referent->getRoleLabel()
+                ));
+            } else {
+                $contactName = trim($request->request->get('contact_name', ''));
+                $token = bin2hex(random_bytes(32));
+
+                $referent->setContactEmail($email);
+                $referent->setContactName($contactName ?: null);
+                $referent->setInvitationToken($token);
+
+                $entityManager->persist($referent);
+                $entityManager->flush();
+
+                $registrationUrl = $this->generateUrl('app_register', [
+                    'invitation' => $token,
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                try {
+                    $emailMessage = (new Email())
+                        ->from('noreply@anicare.fr')
+                        ->to($email)
+                        ->subject(sprintf('Invitation à rejoindre AniCare — %s', $animal->getName()))
+                        ->html($this->renderView('emails/referent_invitation.html.twig', [
+                            'referent_name' => $contactName ?: $email,
+                            'referent_email' => $email,
+                            'sender_name' => $user->getFullName(),
+                            'animal_name' => $animal->getName(),
+                            'is_new_user' => true,
+                            'activation_url' => $registrationUrl,
+                            'app_url' => $this->generateUrl('app_home', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                        ]));
+                    $mailer->send($emailMessage);
+                } catch (\Exception) {
+                }
+
+                $this->addFlash('success', sprintf(
+                    'Invitation envoyée à %s. Un lien d\'inscription a été envoyé par email.',
+                    $email
+                ));
+            }
 
             return $this->redirectToRoute('app_animal_show', ['slug' => $animal->getSlug()]);
         }
@@ -145,6 +189,39 @@ final class ReferentController extends AbstractController
         }
 
         return $this->json($results);
+    }
+
+    #[Route('/accepter-invitation/{token}', name: 'app_referent_accept_by_token', methods: ['GET'])]
+    public function acceptByToken(
+        string $token,
+        AnimalReferentRepository $referentRepository,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $referent = $referentRepository->findByToken($token);
+
+        if (!$referent || $referent->getStatus() !== AnimalReferent::STATUS_PENDING) {
+            $this->addFlash('warning', 'Cette invitation n\'est plus valide ou a déjà été traitée.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('app_register', ['invitation' => $token]);
+        }
+
+        $referent->setUser($user);
+        $referent->setStatus(AnimalReferent::STATUS_ACTIVE);
+        $referent->setInvitationToken(null);
+        $entityManager->flush();
+
+        $this->addFlash('success', sprintf(
+            'Vous êtes maintenant référent secondaire de %s.',
+            $referent->getAnimal()->getName()
+        ));
+
+        return $this->redirectToRoute('app_animal_show', ['slug' => $referent->getAnimal()->getSlug()]);
     }
 
     #[Route('/{id}/accepter', name: 'app_referent_accept', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -214,8 +291,35 @@ final class ReferentController extends AbstractController
             $referent->revoke();
             $entityManager->flush();
 
+            $displayName = $referent->getUser()
+                ? $referent->getUser()->getFullName()
+                : ($referent->getContactName() ?? $referent->getContactEmail() ?? 'Invitation');
             $this->addFlash('success', sprintf(
                 '%s a été révoqué comme référent.',
+                $displayName
+            ));
+        }
+
+        return $this->redirectToRoute('app_animal_show', ['slug' => $referent->getAnimal()->getSlug()]);
+    }
+
+    #[Route('/{id}/toggle-share', name: 'app_referent_toggle_share', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function toggleShare(AnimalReferent $referent, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $referent->getAnimal());
+
+        if (!$referent->isSecondaire() || !$referent->isActive()) {
+            $this->addFlash('danger', 'Seul un référent secondaire actif peut recevoir le droit de partage.');
+            return $this->redirectToRoute('app_animal_show', ['slug' => $referent->getAnimal()->getSlug()]);
+        }
+
+        if ($this->isCsrfTokenValid('toggle_share' . $referent->getId(), $request->request->get('_token'))) {
+            $referent->setCanShare(!$referent->getCanShare());
+            $entityManager->flush();
+
+            $this->addFlash('success', sprintf(
+                'Droit de partage %s pour %s.',
+                $referent->getCanShare() ? 'activé' : 'retiré',
                 $referent->getUser()->getFullName()
             ));
         }

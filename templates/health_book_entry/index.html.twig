@@ -7,330 +7,258 @@
 {% block stylesheets %}
 {{ parent() }}
 <style>
-    .ch-page { max-width: 1140px; margin: 0 auto; }
+.consult-page { max-width: 1100px; margin: 0 auto; }
 
-    /* ---------- hero ---------- */
-    .ch-hero {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #0a7a70 60%, var(--secondary-color) 100%);
-        border-radius: var(--radius-lg);
-        padding: 2.2rem 2.5rem;
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-    }
-    .ch-hero::before {
-        content: '';
-        position: absolute; top: -40%; right: -10%; width: 340px; height: 340px;
-        background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .ch-hero-eyebrow {
-        font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-        opacity: .8; margin-bottom: .35rem;
-    }
-    .ch-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 .35rem; }
-    .ch-hero p { font-size: .92rem; opacity: .85; margin: 0; }
-    .ch-hero-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .ch-hero-actions .btn {
-        border-radius: var(--radius-md); font-size: .85rem; font-weight: 600;
-        padding: .55rem 1.2rem; border: none; display: inline-flex; align-items: center; gap: .4rem;
-    }
-    .ch-hero-actions .ch-btn-white {
-        background: #fff; color: var(--primary-color);
-    }
-    .ch-hero-actions .ch-btn-white:hover { background: var(--soft-teal); }
-    .ch-hero-actions .ch-btn-outline {
-        background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.35);
-    }
-    .ch-hero-actions .ch-btn-outline:hover { background: rgba(255,255,255,.25); }
+.consult-hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #2a6b60 50%, #1a4d45 100%);
+    border-radius: 16px; padding: 2rem 2.5rem; color: #fff;
+    overflow: hidden;
+}
+.consult-hero::before {
+    content: ''; position: absolute; top: -30%; right: -5%;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%);
+}
+.consult-hero::after {
+    content: ''; position: absolute; bottom: -40%; left: 10%;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,151,62,.1) 0%, transparent 70%);
+}
 
-    /* ---------- stats row ---------- */
-    .ch-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .ch-stat-card {
-        flex: 1; min-width: 140px;
-        background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md);
-        padding: 1.1rem 1.3rem; display: flex; align-items: center; gap: .9rem;
-        transition: box-shadow .2s, transform .2s;
-    }
-    .ch-stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
-    .ch-stat-icon {
-        width: 42px; height: 42px; border-radius: var(--radius-sm);
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .ch-stat-icon svg { width: 20px; height: 20px; }
-    .ch-stat-value { font-size: 1.35rem; font-weight: 800; color: var(--secondary-color); line-height: 1; }
-    .ch-stat-label { font-size: .78rem; color: var(--taupe); font-weight: 500; margin-top: 2px; }
+.section-card {
+    background: #fff; border: 1px solid var(--border-color);
+    border-radius: 14px; overflow: hidden;
+}
 
-    /* ---------- list ---------- */
-    .ch-list { display: flex; flex-direction: column; gap: 0; }
-    .ch-list-header {
-        display: grid;
-        grid-template-columns: 2fr 1.2fr 1.6fr 1.8fr 2.5fr .6fr;
-        padding: .7rem 1.4rem;
-        font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-        color: var(--taupe); border-bottom: 2px solid var(--border-color);
-    }
-    .ch-entry {
-        display: grid;
-        grid-template-columns: 2fr 1.2fr 1.6fr 1.8fr 2.5fr .6fr;
-        padding: 1rem 1.4rem;
-        align-items: center;
-        background: #fff;
-        border-bottom: 1px solid var(--border-color);
-        transition: background .15s, box-shadow .15s;
-        text-decoration: none; color: inherit;
-        position: relative;
-    }
-    .ch-entry:hover { background: var(--soft-teal); }
-    .ch-entry:last-child { border-bottom: none; }
+.stat-card {
+    background: #fff; border: 1px solid var(--border-color);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); transform: translateY(-1px); }
+.stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.stat-value { font-size: 1.3rem; font-weight: 800; line-height: 1; }
+.stat-label { font-size: 0.75rem; color: #6c757d; font-weight: 500; margin-top: 2px; }
 
-    /* animal cell */
-    .ch-animal { display: flex; align-items: center; gap: .7rem; }
-    .ch-animal-avatar {
-        width: 38px; height: 38px; border-radius: 50%;
-        background: linear-gradient(135deg, var(--soft-teal) 0%, #d5f5f0 100%);
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        color: var(--primary-color); font-weight: 700; font-size: .82rem;
-        border: 2px solid var(--primary-color);
-    }
-    .ch-animal-name {
-        font-weight: 700; color: var(--secondary-color); font-size: .9rem;
-        transition: color .15s;
-    }
-    .ch-entry:hover .ch-animal-name { color: var(--primary-color); }
+.consult-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.consult-table thead th {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #fff; background: var(--primary-color); padding: 0.65rem 1rem;
+    font-weight: 600; white-space: nowrap;
+}
+.consult-table thead th:first-child { border-radius: 14px 0 0 0; }
+.consult-table thead th:last-child { border-radius: 0 14px 0 0; }
+.consult-table tbody td {
+    padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color);
+    font-size: 0.82rem; vertical-align: middle;
+}
+.consult-table tbody tr:last-child td { border-bottom: none; }
+.consult-table tbody tr { transition: background 0.15s; }
+.consult-table tbody tr:hover { background: var(--soft-teal); }
 
-    /* date cell */
-    .ch-date-main { font-weight: 700; font-size: .88rem; color: var(--secondary-color); }
-    .ch-date-time { font-size: .75rem; color: var(--taupe); }
-    .ch-badge-reminder {
-        display: inline-block; font-size: .62rem; font-weight: 700; padding: .15rem .45rem;
-        border-radius: 999px; margin-top: 2px;
-    }
-    .ch-badge-overdue { background: #fee2e2; color: #b91c1c; }
-    .ch-badge-soon { background: #fef3c7; color: #92400e; }
+.avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.7rem; color: #fff; flex-shrink: 0;
+}
 
-    /* acte pill */
-    .ch-acte-pill {
-        display: inline-flex; align-items: center; gap: .3rem;
-        padding: .35rem .75rem; border-radius: 999px;
-        font-size: .78rem; font-weight: 600; line-height: 1.3;
-        max-width: 100%; white-space: normal; word-break: break-word;
-    }
-    .ch-acte-pill svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .ch-pill-consultation { background: var(--soft-warm, #fdf6ee); color: var(--accent-hover, #a67c2e); }
-    .ch-pill-vaccin { background: #dcfce7; color: #15803d; }
-    .ch-pill-surgery { background: #fee2e2; color: #b91c1c; }
-    .ch-pill-vermifuge { background: #e0f2fe; color: #0369a1; }
-    .ch-pill-neutral { background: var(--bg-color); color: var(--secondary-color); }
+.pill {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.2rem 0.6rem; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600;
+}
+.pill-consult { background: var(--soft-teal); color: var(--primary-color); }
+.pill-vaccin { background: rgba(200,151,62,0.12); color: var(--accent-color); }
+.pill-chirurgie { background: #fce4ec; color: #c62828; }
+.pill-vermifuge { background: rgba(26,77,69,0.08); color: #2a6b60; }
+.pill-neutral { background: #f5f5f5; color: #616161; }
 
-    /* status badges */
-    .ch-status-badge {
-        display: inline-flex; align-items: center; gap: .25rem;
-        padding: .2rem .55rem; border-radius: 999px;
-        font-size: .68rem; font-weight: 700; letter-spacing: .02em;
-    }
-    .ch-status-draft { background: #fff3cd; color: #856404; }
-    .ch-status-shared { background: #cce5ff; color: #004085; }
+.status-badge {
+    display: inline-flex; align-items: center; gap: 0.2rem;
+    padding: 0.15rem 0.45rem; border-radius: 20px;
+    font-size: 0.62rem; font-weight: 700;
+}
+.status-draft { background: #fff3cd; color: #856404; }
+.status-shared { background: var(--soft-teal); color: var(--primary-color); }
+.status-archived { background: #e0e0e0; color: #616161; }
+.status-reminder-overdue { background: #fee2e2; color: #b91c1c; }
+.status-reminder-soon { background: #fef3c7; color: #92400e; }
 
-    /* person cell */
-    .ch-person-btn {
-        background: none; border: none; padding: 0; cursor: pointer;
-        display: flex; align-items: center; gap: .55rem;
-        text-align: left; transition: opacity .15s;
-    }
-    .ch-person-btn:hover { opacity: .8; }
-    .ch-person-avatar {
-        width: 32px; height: 32px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        font-weight: 700; font-size: .7rem; color: #fff;
-    }
-    .ch-person-avatar-pro { background: var(--primary-color); }
-    .ch-person-avatar-client { background: var(--accent-color); }
-    .ch-person-name { font-weight: 600; font-size: .85rem; color: var(--secondary-color); }
-    .ch-person-sub { font-size: .72rem; color: var(--taupe); }
+.action-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #6c757d; transition: all 0.15s; text-decoration: none;
+}
+.action-btn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.action-btn svg { width: 14px; height: 14px; }
 
-    /* note cell */
-    .ch-note {
-        font-size: .82rem; color: var(--taupe); line-height: 1.45;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
+.btn-action-header {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1.1rem; border-radius: 10px;
+    font-size: 0.82rem; font-weight: 600; border: none;
+    text-decoration: none; transition: all 0.15s;
+}
 
-    /* actions cell */
-    .ch-actions { display: flex; justify-content: flex-end; gap: .35rem; }
-    .ch-action-btn {
-        width: 34px; height: 34px; border-radius: var(--radius-sm);
-        border: 1px solid var(--border-color); background: #fff;
-        display: inline-flex; align-items: center; justify-content: center;
-        color: var(--taupe); transition: all .15s; text-decoration: none;
-    }
-    .ch-action-btn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
-    .ch-action-btn svg { width: 15px; height: 15px; }
+.filter-card {
+    background: #fff; border: 1px solid var(--border-color);
+    border-radius: 14px; padding: 1rem 1.25rem;
+}
+.filter-toggle { cursor: pointer; }
+.filter-toggle svg.chevron { transition: transform 0.2s; }
 
-    /* popover */
-    .ch-popover {
-        display: none; position: fixed; z-index: 1060;
-        min-width: 270px; background: #fff; border: 1px solid var(--border-color);
-        border-radius: var(--radius-md); box-shadow: 0 8px 30px rgba(0,0,0,.12);
-        padding: 1rem 1.1rem;
-        animation: ch-pop-in .15s ease;
-    }
-    .ch-popover.is-open { display: block; }
-    @keyframes ch-pop-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-    .ch-popover-header {
-        display: flex; align-items: center; gap: .6rem;
-        padding-bottom: .65rem; margin-bottom: .65rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .ch-popover-avatar {
-        width: 40px; height: 40px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        font-weight: 700; font-size: .85rem; color: #fff;
-    }
-    .ch-popover-name { font-weight: 700; font-size: .88rem; color: var(--secondary-color); }
-    .ch-popover-badge {
-        display: inline-block; padding: .12rem .45rem; border-radius: 999px;
-        font-size: .65rem; font-weight: 600; color: #fff; background: var(--primary-color);
-    }
-    .ch-popover-row {
-        display: flex; align-items: center; gap: .5rem;
-        font-size: .82rem; color: var(--secondary-color); margin-bottom: .35rem;
-    }
-    .ch-popover-row svg { width: 14px; height: 14px; color: var(--taupe); flex-shrink: 0; }
-    .ch-popover-row a { color: var(--primary-color); text-decoration: none; }
-    .ch-popover-row a:hover { text-decoration: underline; }
-    .ch-popover-action {
-        display: block; width: 100%; text-align: center; margin-top: .6rem;
-        padding: .4rem; border-radius: var(--radius-sm);
-        font-size: .8rem; font-weight: 600; color: var(--primary-color);
-        border: 1px solid var(--primary-color); background: #fff;
-        text-decoration: none; transition: all .15s;
-    }
-    .ch-popover-action:hover { background: var(--primary-color); color: #fff; }
+.note-preview {
+    font-size: 0.78rem; color: #6c757d; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
 
-    /* empty state */
-    .ch-empty {
-        text-align: center; padding: 3.5rem 2rem;
-        background: linear-gradient(135deg, #fff 0%, var(--bg-color) 100%);
-        border: 2px dashed var(--border-color); border-radius: var(--radius-lg);
-    }
-    .ch-empty-icon {
-        width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 1.2rem;
-        background: var(--soft-teal); display: flex; align-items: center; justify-content: center;
-    }
-    .ch-empty-icon svg { width: 28px; height: 28px; color: var(--primary-color); }
+.popover-card {
+    display: none; position: fixed; z-index: 1060;
+    min-width: 260px; background: #fff; border: 1px solid var(--border-color);
+    border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    padding: 1rem; animation: pop-in 0.15s ease;
+}
+.popover-card.is-open { display: block; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
-    @media (max-width: 768px) {
-        .ch-list-header { display: none; }
-        .ch-entry {
-            display: flex; flex-direction: column; gap: .6rem;
-            padding: 1rem; border-radius: var(--radius-md); margin-bottom: .5rem;
-            border: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
-        }
-        .ch-actions { justify-content: flex-start; }
-        .ch-hero { padding: 1.5rem; }
-        .ch-hero h1 { font-size: 1.3rem; }
+.empty-state {
+    text-align: center; padding: 3.5rem 2rem;
+    background: linear-gradient(135deg, #fff 0%, var(--soft-teal) 100%);
+    border: 2px dashed var(--border-color); border-radius: 16px;
+}
+.empty-icon {
+    width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 1rem;
+    background: var(--soft-teal); display: flex; align-items: center; justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .consult-hero { padding: 1.5rem; }
+    .consult-table thead { display: none; }
+    .consult-table tbody tr {
+        display: flex; flex-direction: column; gap: 0.4rem;
+        padding: 1rem; border: 1px solid var(--border-color);
+        border-radius: 12px; margin-bottom: 0.5rem; background: #fff;
     }
+    .consult-table tbody td { padding: 0; border: none; }
+}
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="container py-4">
-<div class="ch-page">
+<div class="consult-page">
 
-    {# ── Hero ── #}
-    <div class="ch-hero mb-4">
-        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+    {# ══════════ HEADER ══════════ #}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ path('app_home') }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; padding: 0.3rem 0.6rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
             <div>
-                <div class="ch-hero-eyebrow">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="vertical-align: -2px; margin-right: 4px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                    Consultations
-                </div>
-                <h1>Historique des consultations</h1>
-                <p>{{ is_pro|default(false) ? 'Retrouvez toutes vos interventions et suivis réalisés.' : 'Consultez l\'ensemble des consultations enregistrées pour vos chevaux.' }}</p>
+                <p class="mb-0" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-color); font-weight: 600;">Espace professionnel</p>
+                <h1 class="mb-0" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">Mes consultations</h1>
             </div>
-            <div class="ch-hero-actions">
-                <a href="{{ path('app_health_book_entry_import') }}" class="btn ch-btn-outline">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Importer
-                </a>
-                <a href="{{ path('app_health_book_entry_new') }}" class="btn ch-btn-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Nouvelle consultation
-                </a>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ path('app_health_book_entry_import') }}" class="btn-action-header" style="background: rgba(26,77,69,0.08); color: var(--primary-color);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importer
+            </a>
+            {% if can_create_consultation|default(false) %}
+            <a href="{{ path('app_health_book_entry_new') }}" class="btn-action-header" style="background: var(--primary-color); color: #fff;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nouvelle consultation
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ══════════ HERO ══════════ #}
+    <div class="consult-hero mb-4">
+        <div class="d-flex align-items-center gap-3 position-relative" style="z-index: 1;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div>
+                <h2 class="mb-1" style="font-size: 1.15rem; font-weight: 700;">Historique des consultations</h2>
+                <p class="mb-0" style="font-size: 0.85rem; opacity: 0.8;">Retrouvez toutes vos interventions et suivis realises.</p>
             </div>
         </div>
     </div>
 
-    {# ── Filters ── #}
-    <div class="card anicare-card mb-4" id="filtersCard">
-        <div class="card-body" style="padding: 1rem 1.25rem;">
-            <div class="d-flex align-items-center justify-content-between mb-0" id="filtersToggle" style="cursor: pointer;">
-                <div class="d-flex align-items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    <span style="font-weight: 700; font-size: .88rem; color: var(--secondary-color);">Filtrer les consultations</span>
-                    {% if has_filters|default(false) %}
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--primary-color); color: #fff; font-size: .65rem; font-weight: 700;">!</span>
-                    {% endif %}
-                </div>
-                <svg id="filtersChevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--taupe)" stroke-width="2" viewBox="0 0 24 24" style="transition: transform .2s; {{ has_filters|default(false) ? 'transform: rotate(180deg);' : '' }}"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <form method="get" id="filtersForm" style="{{ has_filters|default(false) ? '' : 'display: none;' }} margin-top: 1rem;">
-                <div class="row g-2 align-items-end">
-                    <div class="col-12 col-md-3">
-                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Recherche</label>
-                        <input type="text" name="q" value="{{ filters.q|default('') }}" class="form-control form-control-sm" placeholder="Nom, titre, description..." style="border-radius: var(--radius-sm); font-size: .82rem;">
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Animal</label>
-                        <select name="animal" class="form-select form-select-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
-                            <option value="">Tous</option>
-                            {% for animal in animals|default([]) %}
-                                <option value="{{ animal.id }}" {{ filters.animal_id|default('') == animal.id ? 'selected' : '' }}>{{ animal.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Type</label>
-                        <select name="type" class="form-select form-select-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
-                            <option value="">Tous</option>
-                            <option value="Ostéopathe" {{ filters.type|default('') == 'Ostéopathe' ? 'selected' : '' }}>Ostéopathe</option>
-                            <option value="Vétérinaire" {{ filters.type|default('') == 'Vétérinaire' ? 'selected' : '' }}>Vétérinaire</option>
-                            <option value="Dentiste" {{ filters.type|default('') == 'Dentiste' ? 'selected' : '' }}>Dentiste</option>
-                            <option value="Maréchal-ferrant" {{ filters.type|default('') == 'Maréchal-ferrant' ? 'selected' : '' }}>Maréchal-ferrant</option>
-                            <option value="Vaccination" {{ filters.type|default('') == 'Vaccination' ? 'selected' : '' }}>Vaccination</option>
-                            <option value="Vermifuge" {{ filters.type|default('') == 'Vermifuge' ? 'selected' : '' }}>Vermifuge</option>
-                            <option value="Chirurgie" {{ filters.type|default('') == 'Chirurgie' ? 'selected' : '' }}>Chirurgie</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Du</label>
-                        <input type="date" name="date_from" value="{{ filters.date_from|default('') }}" class="form-control form-control-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label style="font-size: .72rem; font-weight: 600; color: var(--taupe); text-transform: uppercase; letter-spacing: .04em;">Au</label>
-                        <input type="date" name="date_to" value="{{ filters.date_to|default('') }}" class="form-control form-control-sm" style="border-radius: var(--radius-sm); font-size: .82rem;">
-                    </div>
-                    <div class="col-12 col-md-1 d-flex gap-1">
-                        <button type="submit" class="btn btn-sm w-100" style="background: var(--primary-color); color: #fff; border-radius: var(--radius-sm); font-weight: 600; font-size: .78rem; padding: .4rem;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        </button>
-                    </div>
-                </div>
+    {# ══════════ FILTRES ══════════ #}
+    <div class="filter-card mb-4" id="filtersCard">
+        <div class="d-flex align-items-center justify-content-between filter-toggle" id="filtersToggle">
+            <div class="d-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <span style="font-weight: 700; font-size: 0.85rem; color: var(--primary-color);">Filtrer les consultations</span>
                 {% if has_filters|default(false) %}
-                    <div class="mt-2 text-end">
-                        <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-link btn-sm text-decoration-none" style="font-size: .78rem; color: var(--taupe);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                            Réinitialiser les filtres
-                        </a>
-                    </div>
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color); color: #fff; font-size: 0.6rem; font-weight: 700;">!</span>
                 {% endif %}
-            </form>
+            </div>
+            <svg class="chevron" id="filtersChevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24" style="{{ has_filters|default(false) ? 'transform: rotate(180deg);' : '' }}"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
+        <form method="get" id="filtersForm" style="{{ has_filters|default(false) ? '' : 'display: none;' }} margin-top: 1rem;">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label style="font-size: 0.7rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.04em;">Recherche</label>
+                    <input type="text" name="q" value="{{ filters.q|default('') }}" class="form-control form-control-sm" placeholder="Nom, titre, description..." style="border-radius: 8px; font-size: 0.8rem;">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label style="font-size: 0.7rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.04em;">Animal</label>
+                    <select name="animal" class="form-select form-select-sm" style="border-radius: 8px; font-size: 0.8rem;">
+                        <option value="">Tous</option>
+                        {% for animal in animals|default([]) %}
+                            <option value="{{ animal.id }}" {{ filters.animal_id|default('') == animal.id ? 'selected' : '' }}>{{ animal.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label style="font-size: 0.7rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.04em;">Type</label>
+                    <select name="type" class="form-select form-select-sm" style="border-radius: 8px; font-size: 0.8rem;">
+                        <option value="">Tous</option>
+                        <option value="Ostéopathe" {{ filters.type|default('') == 'Ostéopathe' ? 'selected' : '' }}>Osteopathe</option>
+                        <option value="Vétérinaire" {{ filters.type|default('') == 'Vétérinaire' ? 'selected' : '' }}>Veterinaire</option>
+                        <option value="Dentiste" {{ filters.type|default('') == 'Dentiste' ? 'selected' : '' }}>Dentiste</option>
+                        <option value="Maréchal-ferrant" {{ filters.type|default('') == 'Maréchal-ferrant' ? 'selected' : '' }}>Marechal-ferrant</option>
+                        <option value="Vaccination" {{ filters.type|default('') == 'Vaccination' ? 'selected' : '' }}>Vaccination</option>
+                        <option value="Vermifuge" {{ filters.type|default('') == 'Vermifuge' ? 'selected' : '' }}>Vermifuge</option>
+                        <option value="Chirurgie" {{ filters.type|default('') == 'Chirurgie' ? 'selected' : '' }}>Chirurgie</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label style="font-size: 0.7rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.04em;">Du</label>
+                    <input type="date" name="date_from" value="{{ filters.date_from|default('') }}" class="form-control form-control-sm" style="border-radius: 8px; font-size: 0.8rem;">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label style="font-size: 0.7rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.04em;">Au</label>
+                    <input type="date" name="date_to" value="{{ filters.date_to|default('') }}" class="form-control form-control-sm" style="border-radius: 8px; font-size: 0.8rem;">
+                </div>
+                <div class="col-12 col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm w-100" style="background: var(--primary-color); color: #fff; border-radius: 8px; font-weight: 600; font-size: 0.78rem; padding: 0.4rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                </div>
+            </div>
+            {% if has_filters|default(false) %}
+                <div class="mt-2 text-end">
+                    <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-link btn-sm text-decoration-none" style="font-size: 0.78rem; color: #6c757d;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Reinitialiser les filtres
+                    </a>
+                </div>
+            {% endif %}
+        </form>
     </div>
 
     {% if health_book_entries is not empty %}
 
-        {# ── Stats ── #}
+        {# ══════════ STATS ══════════ #}
         {% set total = health_book_entries|length %}
         {% set docs_count = 0 %}
         {% set drafts_count = 0 %}
@@ -343,271 +271,218 @@
             {% endif %}
         {% endfor %}
 
-        <div class="ch-stats mb-4">
-            <div class="ch-stat-card">
-                <div class="ch-stat-icon" style="background: var(--soft-teal);">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                </div>
-                <div>
-                    <div class="ch-stat-value">{{ total }}</div>
-                    <div class="ch-stat-label">Consultation{{ total > 1 ? 's' : '' }}</div>
-                </div>
-            </div>
-            <div class="ch-stat-card">
-                <div class="ch-stat-icon" style="background: var(--soft-warm, #fdf6ee);">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </div>
-                <div>
-                    <div class="ch-stat-value">{{ animals_set|length }}</div>
-                    <div class="ch-stat-label">Cheva{{ animals_set|length > 1 ? 'ux' : 'l' }}</div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--soft-teal);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color: var(--primary-color);">{{ total }}</div>
+                        <div class="stat-label">Consultation{{ total > 1 ? 's' : '' }}</div>
+                    </div>
                 </div>
             </div>
-            <div class="ch-stat-card">
-                <div class="ch-stat-icon" style="background: #e0f2fe;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#0369a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(200,151,62,0.1);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--accent-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color: var(--accent-color);">{{ animals_set|length }}</div>
+                        <div class="stat-label">Cheva{{ animals_set|length > 1 ? 'ux' : 'l' }}</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="ch-stat-value">{{ docs_count }}</div>
-                    <div class="ch-stat-label">Document{{ docs_count > 1 ? 's' : '' }}</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(26,77,69,0.08);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2a6b60" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color: #2a6b60;">{{ docs_count }}</div>
+                        <div class="stat-label">Document{{ docs_count > 1 ? 's' : '' }}</div>
+                    </div>
                 </div>
             </div>
             {% if drafts_count > 0 %}
-            <div class="ch-stat-card">
-                <div class="ch-stat-icon" style="background: #fff3cd;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#856404" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </div>
-                <div>
-                    <div class="ch-stat-value">{{ drafts_count }}</div>
-                    <div class="ch-stat-label">Brouillon{{ drafts_count > 1 ? 's' : '' }}</div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff3cd;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#856404" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color: #856404;">{{ drafts_count }}</div>
+                        <div class="stat-label">Brouillon{{ drafts_count > 1 ? 's' : '' }}</div>
+                    </div>
                 </div>
             </div>
             {% endif %}
         </div>
 
-        {# ── List ── #}
-        <div class="card anicare-card overflow-hidden">
-            <div class="card-body p-0">
-                <div class="ch-list">
-                    <div class="ch-list-header">
-                        <span>Cheval</span>
-                        <span>Date</span>
-                        <span>Acte</span>
-                        <span>{{ is_pro|default(false) ? 'Client' : 'Intervenant' }}</span>
-                        <span>Note</span>
-                        <span></span>
-                    </div>
-
-                    {% for entry in health_book_entries %}
+        {# ══════════ TABLEAU ══════════ #}
+        <div class="section-card">
+            <div class="table-responsive">
+                <table class="consult-table">
+                    <thead>
+                        <tr>
+                            <th>Cheval</th>
+                            <th>Date</th>
+                            <th>Acte</th>
+                            <th>Client</th>
+                            <th>Note</th>
+                            <th style="width: 80px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in health_book_entries %}
                         {% set entry_type = entry.type|default('')|lower %}
-
-                        <div class="ch-entry">
-                            {# ── Animal ── #}
-                            <div class="ch-animal">
-                                <div class="ch-animal-avatar">
-                                    {{ entry.animal ? entry.animal.name|first|upper : '?' }}
+                        <tr{% if entry.isArchived %} style="opacity: 0.55;"{% endif %}>
+                            {# Cheval #}
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-sm" style="background: linear-gradient(135deg, var(--soft-teal), #d5f5f0); color: var(--primary-color); border: 2px solid var(--primary-color); font-size: 0.75rem;">
+                                        {{ entry.animal ? entry.animal.name|first|upper : '?' }}
+                                    </div>
+                                    <div>
+                                        <a href="{{ path('app_animal_show', {'slug': entry.animal.slug}) }}" class="text-decoration-none d-block" style="font-weight: 700; font-size: 0.85rem; color: var(--primary-color);">
+                                            {{ entry.animal.name ?? 'Non specifie' }}
+                                        </a>
+                                        {% if entry.animal.structure %}
+                                            <span style="font-size: 0.7rem; color: #6c757d;">{{ entry.animal.structure.name }}</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div>
-                                    <a href="{{ path('app_animal_show', {'slug': entry.animal.slug}) }}" class="ch-animal-name text-decoration-none d-block">
-                                        {{ entry.animal.name ?? 'Non spécifié' }}
-                                    </a>
-                                    {% if entry.animal.structure %}
-                                        <span class="ch-date-time">{{ entry.animal.structure.name }}</span>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            </td>
 
-                            {# ── Date ── #}
-                            <div>
+                            {# Date #}
+                            <td>
                                 <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="text-decoration-none">
-                                    <span class="ch-date-main">{{ entry.date ? entry.date|date('d/m/Y') : 'N/A' }}</span>
+                                    <strong style="font-size: 0.85rem; color: #212529;">{{ entry.date ? entry.date|date('d/m/Y') : 'N/A' }}</strong>
                                     {% if entry.date and entry.date|date('H:i') != '00:00' %}
-                                        <br><span class="ch-date-time">{{ entry.date|date('H:i') }}</span>
+                                        <br><span style="font-size: 0.72rem; color: #6c757d;">{{ entry.date|date('H:i') }}</span>
                                     {% endif %}
                                 </a>
                                 {% if entry.isOverdueReminder %}
-                                    <br><span class="ch-badge-reminder ch-badge-overdue">Rappel en retard</span>
+                                    <br><span class="status-badge status-reminder-overdue">Rappel en retard</span>
                                 {% elseif entry.isDueSoon %}
-                                    <br><span class="ch-badge-reminder ch-badge-soon">Rappel bientôt</span>
+                                    <br><span class="status-badge status-reminder-soon">Rappel bientot</span>
                                 {% endif %}
-                            </div>
+                            </td>
 
-                            {# ── Acte ── #}
-                            <div>
-                                {% set pill_label = entry.title ?: entry.type ?: 'Non renseigné' %}
+                            {# Acte #}
+                            <td>
+                                {% set motif = entry.title ?: entry.type ?: 'Non renseigne' %}
                                 {% if entry_type == 'vaccination' or entry_type == 'vaccin' %}
-                                    {% set pill_class = 'ch-pill-vaccin' %}
-                                    {% set pill_label = entry.title ?: 'Vaccin' %}
+                                    <span class="pill pill-vaccin">{{ entry.title ?: 'Vaccin' }}</span>
                                 {% elseif entry_type == 'chirurgie' %}
-                                    {% set pill_class = 'ch-pill-surgery' %}
-                                    {% set pill_label = entry.title ?: 'Chirurgie' %}
+                                    <span class="pill pill-chirurgie">{{ entry.title ?: 'Chirurgie' }}</span>
                                 {% elseif entry_type == 'vermifuge' %}
-                                    {% set pill_class = 'ch-pill-vermifuge' %}
-                                    {% set pill_label = entry.title ?: 'Vermifuge' %}
+                                    <span class="pill pill-vermifuge">{{ entry.title ?: 'Vermifuge' }}</span>
                                 {% else %}
-                                    {% set pill_class = 'ch-pill-consultation' %}
+                                    <span class="pill pill-consult">{{ motif }}</span>
                                 {% endif %}
-                                <span class="ch-acte-pill {{ pill_class }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                                    {{ pill_label }}
-                                </span>
                                 {% if entry.isDraft %}
-                                    <span class="ch-status-badge ch-status-draft mt-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                        Brouillon
-                                    </span>
+                                    <br><span class="status-badge status-draft mt-1">Brouillon</span>
+                                {% elseif entry.isArchived %}
+                                    <br><span class="status-badge status-archived mt-1">Archive</span>
                                 {% elseif entry.isShared %}
-                                    <span class="ch-status-badge ch-status-shared mt-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4z"/></svg>
-                                        Transmis
-                                    </span>
+                                    <br><span class="status-badge status-shared mt-1">Transmis</span>
                                 {% endif %}
-                            </div>
+                            </td>
 
-                            {# ── Client / Intervenant ── #}
-                            <div>
-                                {% if is_pro|default(false) %}
-                                    {% set client = entry.animal.owner %}
-                                    {% if client %}
-                                        <div class="ch-popover-wrapper" style="position: relative; display: inline-block;">
-                                            <button type="button" class="ch-person-btn ch-popover-toggle">
-                                                <div class="ch-person-avatar ch-person-avatar-client">
+                            {# Client #}
+                            <td>
+                                {% set client = entry.animal.owner %}
+                                {% if client %}
+                                    <div class="popover-wrapper" style="position: relative; display: inline-block;">
+                                        <button type="button" class="border-0 bg-transparent p-0 d-flex align-items-center gap-2 popover-toggle" style="cursor: pointer;">
+                                            <div class="avatar-sm" style="background: var(--primary-color);">
+                                                {{ client.firstName|first|upper }}{{ client.lastName|first|upper }}
+                                            </div>
+                                            <div class="text-start">
+                                                <strong style="font-size: 0.82rem; color: #212529; display: block;">{{ client.fullName }}</strong>
+                                            </div>
+                                        </button>
+                                        <div class="popover-card">
+                                            <div class="d-flex align-items-center gap-2 pb-2 mb-2" style="border-bottom: 1px solid var(--border-color);">
+                                                <div class="avatar-sm" style="background: var(--primary-color); width: 38px; height: 38px; font-size: 0.8rem;">
                                                     {{ client.firstName|first|upper }}{{ client.lastName|first|upper }}
                                                 </div>
                                                 <div>
-                                                    <div class="ch-person-name">{{ client.fullName }}</div>
+                                                    <strong style="font-size: 0.88rem;">{{ client.fullName }}</strong>
                                                 </div>
-                                            </button>
-                                            <div class="ch-popover">
-                                                <div class="ch-popover-header">
-                                                    <div class="ch-popover-avatar" style="background: var(--accent-color);">
-                                                        {{ client.firstName|first|upper }}{{ client.lastName|first|upper }}
-                                                    </div>
-                                                    <div>
-                                                        <div class="ch-popover-name">{{ client.fullName }}</div>
-                                                    </div>
-                                                </div>
-                                                {% if client.phone %}
-                                                    <div class="ch-popover-row">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                                        <a href="tel:{{ client.phone }}">{{ client.phone }}</a>
-                                                    </div>
-                                                {% endif %}
-                                                {% if client.email %}
-                                                    <div class="ch-popover-row">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                                        <a href="mailto:{{ client.email }}">{{ client.email }}</a>
-                                                    </div>
-                                                {% endif %}
-                                                {% if client.city %}
-                                                    <div class="ch-popover-row">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                        <span>{% if client.postalCode %}{{ client.postalCode }} {% endif %}{{ client.city }}</span>
-                                                    </div>
-                                                {% endif %}
                                             </div>
+                                            {% if client.phone %}
+                                                <div class="d-flex align-items-center gap-2 mb-1" style="font-size: 0.78rem;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                                    <a href="tel:{{ client.phone }}" class="text-decoration-none" style="color: var(--primary-color);">{{ client.phone }}</a>
+                                                </div>
+                                            {% endif %}
+                                            {% if client.email %}
+                                                <div class="d-flex align-items-center gap-2" style="font-size: 0.78rem;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="#6c757d" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                                    <a href="mailto:{{ client.email }}" class="text-decoration-none" style="color: var(--primary-color);">{{ client.email }}</a>
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                    {% else %}
-                                        <span class="ch-date-time fst-italic">Non renseigné</span>
-                                    {% endif %}
+                                    </div>
                                 {% else %}
-                                    {% if entry.veterinarian %}
-                                        <div class="ch-popover-wrapper" style="position: relative; display: inline-block;">
-                                            <button type="button" class="ch-person-btn ch-popover-toggle">
-                                                <div class="ch-person-avatar ch-person-avatar-pro">
-                                                    {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
-                                                </div>
-                                                <div>
-                                                    <div class="ch-person-name">{{ entry.veterinarian.fullName }}</div>
-                                                    {% if entry.veterinarian.specialty %}
-                                                        <div class="ch-person-sub">{{ entry.veterinarian.specialty }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            </button>
-                                            <div class="ch-popover">
-                                                <div class="ch-popover-header">
-                                                    <div class="ch-popover-avatar" style="background: var(--primary-color);">
-                                                        {{ entry.veterinarian.firstName|first|upper }}{{ entry.veterinarian.lastName|first|upper }}
-                                                    </div>
-                                                    <div>
-                                                        <div class="ch-popover-name">{{ entry.veterinarian.fullName }}</div>
-                                                        {% if entry.veterinarian.specialty %}
-                                                            <span class="ch-popover-badge">{{ entry.veterinarian.specialty }}</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                                {% if entry.veterinarian.phone %}
-                                                    <div class="ch-popover-row">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                                        <a href="tel:{{ entry.veterinarian.phone }}">{{ entry.veterinarian.phone }}</a>
-                                                    </div>
-                                                {% endif %}
-                                                {% if entry.veterinarian.email %}
-                                                    <div class="ch-popover-row">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                                        <a href="mailto:{{ entry.veterinarian.email }}">{{ entry.veterinarian.email }}</a>
-                                                    </div>
-                                                {% endif %}
-                                                {% if entry.veterinarian.city %}
-                                                    <div class="ch-popover-row">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                        <span>{% if entry.veterinarian.postalCode %}{{ entry.veterinarian.postalCode }} {% endif %}{{ entry.veterinarian.city }}</span>
-                                                    </div>
-                                                {% endif %}
-                                                <a href="{{ path('app_professional_show', {'id': entry.veterinarian.id}) }}" class="ch-popover-action">Voir la fiche</a>
-                                            </div>
-                                        </div>
-                                    {% elseif entry.veterinarianName %}
-                                        <span class="ch-person-name" style="font-size: .85rem;">{{ entry.veterinarianName }}</span>
-                                    {% else %}
-                                        <span class="ch-date-time fst-italic">Non renseigné</span>
-                                    {% endif %}
+                                    <span class="fst-italic" style="font-size: 0.78rem; color: #6c757d;">Non renseigne</span>
                                 {% endif %}
-                            </div>
+                            </td>
 
-                            {# ── Note ── #}
-                            <div>
+                            {# Note #}
+                            <td>
                                 {% if entry.description %}
-                                    <div class="ch-note" title="{{ entry.description }}">{{ entry.description }}</div>
+                                    <div class="note-preview" title="{{ entry.description }}">{{ entry.description }}</div>
                                 {% else %}
-                                    <span class="ch-date-time fst-italic">—</span>
+                                    <span style="color: #ccc;">—</span>
                                 {% endif %}
-                            </div>
+                            </td>
 
-                            {# ── Actions ── #}
-                            <div class="ch-actions">
-                                <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="ch-action-btn" title="Consulter">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                </a>
-                                <a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="ch-action-btn" title="Modifier">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </a>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
+                            {# Actions #}
+                            <td>
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{{ path('app_health_book_entry_show', {'id': entry.id}) }}" class="action-btn" title="Consulter">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </a>
+                                    {% if not entry.isArchived %}
+                                    <a href="{{ path('app_health_book_entry_edit', {'id': entry.id}) }}" class="action-btn" title="Modifier">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
     {% else %}
 
-        <div class="ch-empty">
-            <div class="ch-empty-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="var(--primary-color)" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary-color); margin-bottom: .35rem;">
-                {% if has_filters|default(false) %}Aucun résultat{% else %}Aucune consultation enregistrée{% endif %}
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.35rem;">
+                {% if has_filters|default(false) %}Aucun resultat{% else %}Aucune consultation enregistree{% endif %}
             </h2>
-            <p style="color: var(--taupe); font-size: .9rem; margin-bottom: 1.2rem;">
+            <p style="color: #6c757d; font-size: 0.88rem; margin-bottom: 1.2rem;">
                 {% if has_filters|default(false) %}
-                    Aucune consultation ne correspond aux filtres sélectionnés.
+                    Aucune consultation ne correspond aux filtres selectionnes.
                 {% else %}
-                    Ajoutez une première consultation pour commencer le suivi médical.
+                    Ajoutez une premiere consultation pour commencer le suivi medical.
                 {% endif %}
             </p>
             {% if has_filters|default(false) %}
-                <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-primary me-2">Réinitialiser les filtres</a>
+                <a href="{{ path('app_health_book_entry_index') }}" class="btn btn-outline-secondary me-2" style="border-radius: 8px;">Reinitialiser les filtres</a>
             {% endif %}
-            <a href="{{ path('app_health_book_entry_new') }}" class="btn btn-primary">Créer une consultation</a>
+            {% if can_create_consultation|default(false) %}
+                <a href="{{ path('app_health_book_entry_new') }}" class="btn" style="background: var(--primary-color); color: #fff; border-radius: 8px; font-weight: 600;">Creer une consultation</a>
+            {% endif %}
         </div>
 
     {% endif %}
@@ -620,22 +495,19 @@
 {{ parent() }}
 <script>
 (function() {
-    document.querySelectorAll('.ch-popover-toggle').forEach(function(btn) {
+    document.querySelectorAll('.popover-toggle').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            var popover = this.closest('.ch-popover-wrapper').querySelector('.ch-popover');
-
-            document.querySelectorAll('.ch-popover.is-open').forEach(function(p) {
+            var popover = this.closest('.popover-wrapper').querySelector('.popover-card');
+            document.querySelectorAll('.popover-card.is-open').forEach(function(p) {
                 if (p !== popover) p.classList.remove('is-open');
             });
-
             if (!popover.classList.contains('is-open')) {
                 var rect = this.getBoundingClientRect();
                 popover.style.position = 'fixed';
                 popover.style.top = (rect.bottom + 6) + 'px';
                 popover.style.left = rect.left + 'px';
                 popover.classList.add('is-open');
-
                 var popRect = popover.getBoundingClientRect();
                 if (popRect.right > window.innerWidth - 12) {
                     popover.style.left = (window.innerWidth - popRect.width - 12) + 'px';
@@ -648,22 +520,15 @@
             }
         });
     });
-
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('.ch-popover-wrapper')) {
-            document.querySelectorAll('.ch-popover.is-open').forEach(function(p) {
-                p.classList.remove('is-open');
-            });
+        if (!e.target.closest('.popover-wrapper')) {
+            document.querySelectorAll('.popover-card.is-open').forEach(function(p) { p.classList.remove('is-open'); });
         }
     });
-
     window.addEventListener('scroll', function() {
-        document.querySelectorAll('.ch-popover.is-open').forEach(function(p) {
-            p.classList.remove('is-open');
-        });
+        document.querySelectorAll('.popover-card.is-open').forEach(function(p) { p.classList.remove('is-open'); });
     }, true);
 })();
-
 (function() {
     var toggle = document.getElementById('filtersToggle');
     var form = document.getElementById('filtersForm');

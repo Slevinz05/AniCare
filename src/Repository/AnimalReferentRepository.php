@@ -136,4 +136,36 @@ class AnimalReferentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function hasExistingRelationByEmail(Animal $animal, string $email): bool
+    {
+        return (bool) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.animal = :animal')
+            ->andWhere('r.contactEmail = :email')
+            ->andWhere('r.user IS NULL')
+            ->andWhere('r.status IN (:statuses)')
+            ->setParameter('animal', $animal)
+            ->setParameter('email', $email)
+            ->setParameter('statuses', [AnimalReferent::STATUS_ACTIVE, AnimalReferent::STATUS_PENDING])
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function findPendingByEmail(string $email): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.contactEmail = :email')
+            ->andWhere('r.user IS NULL')
+            ->andWhere('r.status = :status')
+            ->setParameter('email', $email)
+            ->setParameter('status', AnimalReferent::STATUS_PENDING)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByToken(string $token): ?AnimalReferent
+    {
+        return $this->findOneBy(['invitationToken' => $token]);
+    }
 }

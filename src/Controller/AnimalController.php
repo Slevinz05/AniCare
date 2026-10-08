@@ -262,7 +262,26 @@ final class AnimalController extends AbstractController
         $allReferents = $referentRepository->findAllForAnimal($animal);
         $secondaryReferents = array_filter($allReferents, fn($r) => $r->isSecondaire());
 
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
         $canEdit = $this->isGranted('ANIMAL_EDIT', $animal);
+        $isPro = $currentUser->hasProSpace();
+        $isActiveSpace = $currentUser->isInProSpace() ? 'professionnel' : ($currentUser->getActiveSpace() ?? 'particulier');
+
+        $userRole = 'viewer';
+        if ($principalReferent && $principalReferent->getUser() === $currentUser) {
+            $userRole = 'principal';
+        } else {
+            foreach ($secondaryReferents as $ref) {
+                if ($ref->getUser() === $currentUser && $ref->isActive()) {
+                    $userRole = 'secondaire';
+                    break;
+                }
+            }
+        }
+        if ($userRole === 'viewer' && $animal->getOwner() === $currentUser) {
+            $userRole = 'owner';
+        }
 
         return $this->render('animal/show.html.twig', [
             'animal' => $animal,
@@ -271,6 +290,9 @@ final class AnimalController extends AbstractController
             'principal_referent' => $principalReferent,
             'secondary_referents' => $secondaryReferents,
             'can_edit' => $canEdit,
+            'user_role' => $userRole,
+            'is_pro' => $isPro,
+            'active_space' => $isActiveSpace,
         ]);
     }
 
@@ -281,7 +303,15 @@ final class AnimalController extends AbstractController
         if (!$animal) {
             throw $this->createNotFoundException();
         }
-        $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+
+        $completeToken = $request->query->get('complete_token');
+        $tokenValid = $completeToken
+            && $animal->getCompleteToken()
+            && hash_equals($animal->getCompleteToken(), $completeToken);
+
+        if (!$tokenValid) {
+            $this->denyAccessUnlessGranted('ANIMAL_EDIT', $animal);
+        }
 
         /** @var User $user */
         $user = $this->getUser();
@@ -309,6 +339,10 @@ final class AnimalController extends AbstractController
 
             $this->handleProfessionalInvitation($request, $animal, $userRepository, $entityManager);
             $this->handleReminders($request, $animal, $user, $entityManager);
+
+            if ($tokenValid) {
+                $animal->setCompleteToken(null);
+            }
 
             $animal->generateSlug();
             $entityManager->flush();

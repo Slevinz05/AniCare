@@ -48,7 +48,7 @@ class AnimalReferent
     private ?Animal $animal = null;
 
     #[ORM\ManyToOne(inversedBy: 'animalReferents')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
     #[ORM\Column(length: 20)]
@@ -75,6 +75,12 @@ class AnimalReferent
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contactEmail = null;
+
+    #[ORM\Column(length: 64, nullable: true, unique: true)]
+    private ?string $invitationToken = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $canShare = false;
 
     public function __construct()
     {
@@ -223,6 +229,42 @@ class AnimalReferent
     public function setContactEmail(?string $contactEmail): static
     {
         $this->contactEmail = $contactEmail;
+        return $this;
+    }
+
+    public function getInvitationToken(): ?string
+    {
+        return $this->invitationToken;
+    }
+
+    public function setInvitationToken(?string $invitationToken): static
+    {
+        $this->invitationToken = $invitationToken;
+        return $this;
+    }
+
+    public function isExternalInvitation(): bool
+    {
+        return $this->user === null && $this->contactEmail !== null;
+    }
+
+    public function canShare(): bool
+    {
+        if ($this->isPrincipal() && $this->isActive()) {
+            return true;
+        }
+
+        return $this->isSecondaire() && $this->isActive() && $this->canShare;
+    }
+
+    public function getCanShare(): bool
+    {
+        return $this->canShare;
+    }
+
+    public function setCanShare(bool $canShare): static
+    {
+        $this->canShare = $canShare;
         return $this;
     }
 }

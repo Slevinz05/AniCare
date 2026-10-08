@@ -71,8 +71,31 @@ class HealthBookEntry
     #[ORM\ManyToOne]
     private ?User $veterinarian = null;
 
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PUBLISHED = 'published';
+    public const STATUS_ARCHIVED = 'archived';
+
+    public const ALLOWED_TRANSITIONS = [
+        self::STATUS_DRAFT => [self::STATUS_PUBLISHED],
+        self::STATUS_PUBLISHED => [self::STATUS_ARCHIVED],
+        self::STATUS_ARCHIVED => [],
+    ];
+
     #[ORM\Column(length: 20, options: ['default' => 'published'])]
     private string $status = 'published';
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $publishedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $archivedAt = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $archivedBy = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $archiveReason = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $documents = [];
@@ -119,6 +142,19 @@ class HealthBookEntry
 
     #[ORM\Column(nullable: true)]
     private ?int $workDone = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $correctedAt = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $correctionReason = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $lastCorrectedBy = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 1])]
+    private int $version = 1;
 
     /** @var Collection<int, HealthBookEntryShare> */
     #[ORM\OneToMany(targetEntity: HealthBookEntryShare::class, mappedBy: 'entry', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -441,26 +477,93 @@ class HealthBookEntry
         return $this->status;
     }
 
-    public function setStatus(string $status): static
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
     public function isDraft(): bool
     {
-        return $this->status === 'draft';
+        return $this->status === self::STATUS_DRAFT;
     }
 
     public function isPublished(): bool
     {
-        return $this->status === 'published';
+        return $this->status === self::STATUS_PUBLISHED;
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->status === self::STATUS_ARCHIVED;
     }
 
     public function isShared(): bool
     {
-        return $this->status === 'shared';
+        return $this->shares->count() > 0;
+    }
+
+    public function canTransitionTo(string $targetStatus): bool
+    {
+        return in_array($targetStatus, self::ALLOWED_TRANSITIONS[$this->status] ?? [], true);
+    }
+
+    public function initAsDraft(): static
+    {
+        $this->status = self::STATUS_DRAFT;
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    public function initAsPublished(): static
+    {
+        $this->status = self::STATUS_PUBLISHED;
+        $this->publishedAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    public function publish(): static
+    {
+        if (!$this->isDraft()) {
+            throw new \LogicException('Seul un brouillon peut être publié.');
+        }
+        $this->status = self::STATUS_PUBLISHED;
+        $this->publishedAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    public function archive(User $archivedBy, ?string $reason = null): static
+    {
+        if (!$this->isPublished()) {
+            throw new \LogicException('Seule une consultation publiée peut être archivée.');
+        }
+        $this->status = self::STATUS_ARCHIVED;
+        $this->archivedAt = new \DateTimeImmutable();
+        $this->archivedBy = $archivedBy;
+        $this->archiveReason = $reason;
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return $this->isDraft();
+    }
+
+    public function getPublishedAt(): ?\DateTimeImmutable
+    {
+        return $this->publishedAt;
+    }
+
+    public function getArchivedAt(): ?\DateTimeImmutable
+    {
+        return $this->archivedAt;
+    }
+
+    public function getArchivedBy(): ?User
+    {
+        return $this->archivedBy;
+    }
+
+    public function getArchiveReason(): ?string
+    {
+        return $this->archiveReason;
     }
 
     public function getCreatedBy(): ?User
@@ -667,5 +770,55 @@ class HealthBookEntry
     {
         $this->workDone = $workDone;
         return $this;
+    }
+
+    public function getCorrectedAt(): ?\DateTimeImmutable
+    {
+        return $this->correctedAt;
+    }
+
+    public function getCorrectionReason(): ?string
+    {
+        return $this->correctionReason;
+    }
+
+    public function getLastCorrectedBy(): ?User
+    {
+        return $this->lastCorrectedBy;
+    }
+
+    public function getVersion(): int
+    {
+        return $this->version;
+    }
+
+    public function applyCorrection(User $correctedBy, ?string $reason = null): static
+    {
+        $this->version++;
+        $this->correctedAt = new \DateTimeImmutable();
+        $this->lastCorrectedBy = $correctedBy;
+        $this->correctionReason = $reason;
+        $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    public function canBeSharedBy(User $user): bool
+    {
+        if ($this->isAuthor($user)) {
+            return true;
+        }
+
+        $animal = $this->getAnimal();
+        if (!$animal) {
+            return false;
+        }
+
+        foreach ($animal->getReferents() as $referent) {
+            if ($referent->getUser() === $user && $referent->canShare()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

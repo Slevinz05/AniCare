@@ -23,6 +23,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Entity\HealthBookEntryAuditLog;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/consultations')]
@@ -49,6 +50,11 @@ final class HealthBookEntryController extends AbstractController
         $user = $this->getUser();
         $isPro = $this->isGranted('ROLE_PRO');
 
+        if (!$isPro || !$user->isInProSpace()) {
+            $this->addFlash('danger', 'L\'historique des consultations est accessible uniquement depuis l\'espace professionnel.');
+            return $this->redirectToRoute('app_home');
+        }
+
         $filters = [
             'animal_id' => $request->query->get('animal'),
             'type' => $request->query->get('type'),
@@ -64,9 +70,12 @@ final class HealthBookEntryController extends AbstractController
             ? $animalRepository->findByProHistory($user)
             : $animalRepository->findAccessibleAnimals($user);
 
+        $canCreateConsultation = $isPro && $user->isInProSpace();
+
         return $this->render('health_book_entry/index.html.twig', [
             'health_book_entries' => $healthBookEntryRepository->findAccessibleByUser($user, $isPro, $filters),
             'is_pro' => $isPro,
+            'can_create_consultation' => $canCreateConsultation,
             'filters' => $filters,
             'has_filters' => $hasFilters,
             'animals' => $animals,
@@ -156,6 +165,11 @@ final class HealthBookEntryController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if (!$user->hasProSpace() || !$user->isInProSpace()) {
+            $this->addFlash('danger', 'Seul un professionnel en espace PRO peut créer une consultation.');
+            return $this->redirectToRoute('app_health_book_entry_index');
+        }
+
         $healthBookEntry = new HealthBookEntry();
 
         $presetDateString = $request->query->get('preset_date');
@@ -221,8 +235,11 @@ final class HealthBookEntryController extends AbstractController
             $this->handleUploadedDocuments($form, $healthBookEntry);
 
             $isDraft = $request->request->get('save_draft') !== null;
-            $healthBookEntry->setStatus($isDraft ? 'draft' : 'published');
-            $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+            if ($isDraft) {
+                $healthBookEntry->initAsDraft();
+            } else {
+                $healthBookEntry->initAsPublished();
+            }
             $healthBookEntry->setCreatedBy($user);
 
             $behaviorScore = $request->request->get('behavior_score');
@@ -321,9 +338,18 @@ final class HealthBookEntryController extends AbstractController
             }
 
             $entityManager->persist($healthBookEntry);
+
+            $auditLog = new HealthBookEntryAuditLog(
+                $healthBookEntry,
+                $isDraft ? HealthBookEntryAuditLog::ACTION_CREATED_DRAFT : HealthBookEntryAuditLog::ACTION_CREATED_PUBLISHED,
+                $user,
+                ['type' => $healthBookEntry->getType(), 'animal' => $healthBookEntry->getAnimal()?->getName()]
+            );
+            $entityManager->persist($auditLog);
             $entityManager->flush();
 
             if ($newAnimalCreated) {
+                $healthBookEntry->getAnimal()->generateCompleteToken();
                 $healthBookEntry->getAnimal()->ensureSlug();
                 $entityManager->flush();
             }
@@ -386,7 +412,11 @@ final class HealthBookEntryController extends AbstractController
 
             $params = ['id' => $healthBookEntry->getId()];
             if ($newAnimalCreated) {
-                $params['complete_animal'] = $healthBookEntry->getAnimal()->getId();
+                $animal = $healthBookEntry->getAnimal();
+                $params['complete_animal'] = $animal->getId();
+                if ($animal->getCompleteToken()) {
+                    $params['complete_token'] = $animal->getCompleteToken();
+                }
             }
 
             return $this->redirectToRoute('app_health_book_entry_show', $params, Response::HTTP_SEE_OTHER);
@@ -478,10 +508,12 @@ final class HealthBookEntryController extends AbstractController
 
         $isAuthor = $healthBookEntry->isAuthor($user);
         $viewerShareMode = $isAuthor ? null : $healthBookEntry->getShareModeFor($user);
+        $canShare = $healthBookEntry->canBeSharedBy($user);
 
         return $this->render('health_book_entry/show.html.twig', [
             'health_book_entry' => $healthBookEntry,
             'is_author' => $isAuthor,
+            'can_share' => $canShare,
             'viewer_share_mode' => $viewerShareMode,
         ]);
     }
@@ -494,6 +526,11 @@ final class HealthBookEntryController extends AbstractController
 
         if (!$healthBookEntry->isAuthor($user)) {
             throw $this->createAccessDeniedException('Seul l\'auteur peut modifier cette consultation.');
+        }
+
+        if ($healthBookEntry->isArchived()) {
+            $this->addFlash('danger', 'Une consultation archivée ne peut plus être modifiée.');
+            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
         }
 
         $rehabTemplates = [];
@@ -516,7 +553,12 @@ final class HealthBookEntryController extends AbstractController
             $this->handleUploadedDocuments($form, $healthBookEntry);
 
             $isDraft = $request->request->get('save_draft') !== null;
-            $healthBookEntry->setStatus($isDraft ? 'draft' : 'published');
+            $wasPublished = !$healthBookEntry->isDraft();
+
+            if ($wasPublished && $isDraft) {
+                $this->addFlash('danger', 'Une consultation publiée ne peut pas repasser en brouillon. Utilisez l\'archivage si nécessaire.');
+                return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+            }
 
             $behaviorScore = $request->request->get('behavior_score');
             $healthBookEntry->setBehaviorScore($behaviorScore !== null && $behaviorScore !== '' ? (int) $behaviorScore : null);
@@ -525,11 +567,38 @@ final class HealthBookEntryController extends AbstractController
             $workDone = $request->request->get('work_done');
             $healthBookEntry->setWorkDone($workDone !== null && $workDone !== '' ? (int) $workDone : null);
 
+            if ($wasPublished) {
+                $correctionReason = trim($request->request->get('correction_reason', ''));
+                $healthBookEntry->applyCorrection($user, $correctionReason ?: null);
+
+                $entityManager->persist(new HealthBookEntryAuditLog(
+                    $healthBookEntry,
+                    HealthBookEntryAuditLog::ACTION_CORRECTED,
+                    $user,
+                    ['version' => $healthBookEntry->getVersion(), 'reason' => $correctionReason ?: null]
+                ));
+            } else {
+                if (!$isDraft) {
+                    $healthBookEntry->initAsPublished();
+                    $entityManager->persist(new HealthBookEntryAuditLog(
+                        $healthBookEntry,
+                        HealthBookEntryAuditLog::ACTION_PUBLISHED,
+                        $user
+                    ));
+                } else {
+                    $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+                }
+            }
+
             $entityManager->flush();
 
             if ($isDraft) {
                 $this->addFlash('success', 'Brouillon enregistré.');
                 return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
+            }
+
+            if ($wasPublished) {
+                $this->addFlash('success', 'Correction enregistrée (version ' . $healthBookEntry->getVersion() . ').');
             }
 
             return $this->redirectToRoute('app_health_book_entry_show', [
@@ -561,8 +630,13 @@ final class HealthBookEntryController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('validate' . $healthBookEntry->getId(), $request->request->get('_token'))) {
-            $healthBookEntry->setStatus('published');
-            $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+            $healthBookEntry->publish();
+
+            $entityManager->persist(new HealthBookEntryAuditLog(
+                $healthBookEntry,
+                HealthBookEntryAuditLog::ACTION_PUBLISHED,
+                $user,
+            ));
             $entityManager->flush();
 
             $this->addFlash('success', 'Consultation validée avec succès.');
@@ -577,12 +651,17 @@ final class HealthBookEntryController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        if (!$healthBookEntry->isAuthor($user)) {
-            throw $this->createAccessDeniedException('Seul l\'auteur peut partager cette consultation.');
+        if (!$healthBookEntry->canBeSharedBy($user)) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas le droit de partager cette consultation.');
         }
 
         if ($healthBookEntry->isDraft()) {
             $this->addFlash('warning', 'Veuillez d\'abord valider le brouillon avant de le partager.');
+            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+        }
+
+        if ($healthBookEntry->isArchived()) {
+            $this->addFlash('danger', 'Une consultation archivée ne peut plus être partagée.');
             return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
         }
 
@@ -591,9 +670,17 @@ final class HealthBookEntryController extends AbstractController
             $sharesData = $sharesJson ? json_decode($sharesJson, true) : [];
 
             if (!empty($sharesData)) {
+                $shareCountBefore = $healthBookEntry->getShares()->count();
                 $this->handleMultiSharing($healthBookEntry, $sharesData, $entityManager, $user);
                 $healthBookEntry->setSharedAt(new \DateTimeImmutable());
                 $healthBookEntry->setUpdatedAt(new \DateTimeImmutable());
+
+                $entityManager->persist(new HealthBookEntryAuditLog(
+                    $healthBookEntry,
+                    HealthBookEntryAuditLog::ACTION_SHARED,
+                    $user,
+                    ['new_shares' => $healthBookEntry->getShares()->count() - $shareCountBefore]
+                ));
                 $entityManager->flush();
             } else {
                 $this->addFlash('warning', 'Aucun destinataire sélectionné.');
@@ -628,14 +715,62 @@ final class HealthBookEntryController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ANIMAL_DELETE', $healthBookEntry->getAnimal());
 
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$healthBookEntry->canBeDeleted()) {
+            $this->addFlash('danger', 'Une consultation publiée ne peut pas être supprimée. Utilisez l\'archivage.');
+            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+        }
+
         if ($this->isCsrfTokenValid('delete' . $healthBookEntry->getId(), $request->getPayload()->getString('_token'))) {
             $this->deletePhysicalDocuments($healthBookEntry->getDocuments());
+
+            $entityManager->persist(new HealthBookEntryAuditLog(
+                $healthBookEntry,
+                HealthBookEntryAuditLog::ACTION_DELETED,
+                $user,
+                ['title' => $healthBookEntry->getTitle()]
+            ));
 
             $entityManager->remove($healthBookEntry);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_health_book_entry_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/archiver', name: 'app_health_book_entry_archive', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function archive(Request $request, HealthBookEntry $healthBookEntry, EntityManagerInterface $entityManager): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$healthBookEntry->isAuthor($user)) {
+            throw $this->createAccessDeniedException('Seul l\'auteur peut archiver cette consultation.');
+        }
+
+        if (!$healthBookEntry->isPublished()) {
+            $this->addFlash('danger', 'Seule une consultation publiée peut être archivée.');
+            return $this->redirectToRoute('app_health_book_entry_show', ['id' => $healthBookEntry->getId()]);
+        }
+
+        if ($this->isCsrfTokenValid('archive' . $healthBookEntry->getId(), $request->request->get('_token'))) {
+            $reason = trim($request->request->get('archive_reason', ''));
+            $healthBookEntry->archive($user, $reason ?: null);
+
+            $entityManager->persist(new HealthBookEntryAuditLog(
+                $healthBookEntry,
+                HealthBookEntryAuditLog::ACTION_ARCHIVED,
+                $user,
+                ['reason' => $reason ?: null, 'had_shares' => $healthBookEntry->getShares()->count()]
+            ));
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Consultation archivée.');
+        }
+
+        return $this->redirectToRoute('app_health_book_entry_index');
     }
 
     private function syncTypeCustom(FormInterface $form, HealthBookEntry $healthBookEntry): void
@@ -831,9 +966,8 @@ final class HealthBookEntryController extends AbstractController
             }
         }
 
-        if ($hasShared) {
-            $entry->setStatus('shared');
-        }
+        // Le statut ne change plus lors du partage (séparation statut/partage)
+        // isShared() est désormais calculé depuis la collection shares
     }
 
     private function sendShareEmail(string $to, string $template, array $params): void
