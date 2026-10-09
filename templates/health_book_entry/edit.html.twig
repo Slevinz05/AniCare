@@ -583,11 +583,15 @@
                         <svg class="conseil-chevron ms-auto" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div id="colleagueBody" class="conseil-col-body" style="display: none; padding: 0.85rem 1.25rem 1.25rem;">
-                        <select class="form-select form-select-sm mb-2" name="recommended_colleague">
+                        {% set colleague_tpls = app.user.recommendedColleagues|default([]) %}
+                        <select class="form-select form-select-sm mb-2" id="colleagueSelect" data-colleagues="{{ colleague_tpls|json_encode }}">
                             <option value="">Sélectionner un professionnel</option>
+                            {% for col in colleague_tpls|filter(c => (c.name ?? '') is not empty) %}
+                                <option value="{{ loop.index0 }}">{{ col.name }}{{ col.specialty|default('') ? ' — ' ~ col.specialty : '' }}</option>
+                            {% endfor %}
                         </select>
                         <div class="dictaphone-wrap">
-                            <textarea class="form-control form-control-sm dictaphone-target" rows="2" name="colleague_notes" placeholder="Précisez la recommandation..."></textarea>
+                            {{ form_widget(form.colleagueRecommendation, {'attr': {'class': 'form-control form-control-sm dictaphone-target', 'rows': 3, 'placeholder': 'Précisez la recommandation...'}}) }}
                             <button type="button" class="btn-dictaphone" title="Dicter" style="top: 0.3rem; right: 0.3rem; width: 28px; height: 28px;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                             </button>
@@ -950,6 +954,24 @@ document.addEventListener('DOMContentLoaded', function () {
             body.style.display = isOpen ? 'none' : '';
         });
     });
+
+    // ── Confrères recommandés (paramètres PRO) ──
+    var colleagueSelect = document.getElementById('colleagueSelect');
+    if (colleagueSelect) {
+        var colleagues = [];
+        try { colleagues = JSON.parse(colleagueSelect.dataset.colleagues || '[]'); } catch(e) {}
+        var colleagueTextarea = document.getElementById('health_book_entry_colleagueRecommendation');
+        colleagueSelect.addEventListener('change', function() {
+            var col = colleagues[parseInt(this.value, 10)];
+            if (!col || !colleagueTextarea) return;
+            var details = [col.specialty, col.phone].filter(function(v) { return v; }).join(' · ');
+            var line = '▸ ' + col.name + (details ? ' (' + details + ')' : '');
+            var current = colleagueTextarea.value.trim();
+            colleagueTextarea.value = current ? current + '\n' + line : line;
+            colleagueTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+            this.value = '';
+        });
+    }
 
     // ── Rehab templates ──
     var rehabSelect = document.getElementById('health_book_entry_rehabilitationType');

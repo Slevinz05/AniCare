@@ -40,6 +40,9 @@ class HealthBookEntry
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $rehabilitation = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $colleagueRecommendation = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $veterinarianName = null;
 
@@ -250,6 +253,18 @@ class HealthBookEntry
     public function setRehabilitation(?string $rehabilitation): static
     {
         $this->rehabilitation = $rehabilitation;
+
+        return $this;
+    }
+
+    public function getColleagueRecommendation(): ?string
+    {
+        return $this->colleagueRecommendation;
+    }
+
+    public function setColleagueRecommendation(?string $colleagueRecommendation): static
+    {
+        $this->colleagueRecommendation = $colleagueRecommendation;
 
         return $this;
     }

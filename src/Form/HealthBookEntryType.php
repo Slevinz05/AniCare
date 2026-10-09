@@ -155,6 +155,11 @@ class HealthBookEntryType extends AbstractType
                 ],
             ])
 
+            ->add('colleagueRecommendation', TextareaType::class, [
+                'label' => 'Confrère recommandé',
+                'required' => false,
+            ])
+
             ->add('dosage', TextType::class, [
                 'label' => 'Posologie',
                 'required' => false,

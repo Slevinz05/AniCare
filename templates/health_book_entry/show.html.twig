@@ -573,6 +573,21 @@
                 </div>
                 {% endif %}
 
+                {# Confrère recommandé #}
+                {% if entry.colleagueRecommendation %}
+                <div class="cr-section">
+                    <div class="cr-section-header">
+                        <div class="s-icon" style="background: rgba(26,77,69,0.08); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <p class="s-title" style="color: var(--primary-color);">Confrère recommandé</p>
+                    </div>
+                    <div class="cr-section-body">
+                        <div class="cr-text-block">{{ entry.colleagueRecommendation|e('html')|nl2br }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
                 {# Notes #}
                 {% if entry.description %}
                 <div class="cr-section">
