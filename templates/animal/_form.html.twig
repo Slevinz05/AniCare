@@ -1005,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', function () {
             refIdInput.value = '';
             refSelected.style.display = 'none';
             refSearchPanel.style.display = 'none';
-            refCreatePanel.style.display = 'none';
+            if (refCreatePanel) clearReferentContact();
         } else {
             refOtherPanel.style.display = 'block';
         }
@@ -1016,16 +1016,28 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleReferentSelf();
     }
 
+    // Un seul référent principal : la recherche et la création de fiche contact sont exclusives
+    function clearReferentContact() {
+        refCreatePanel.querySelectorAll('input').forEach(function (i) { i.value = ''; });
+        refCreatePanel.style.display = 'none';
+    }
+
+    function clearReferentSelection() {
+        refIdInput.value = '';
+        refSelected.style.display = 'none';
+    }
+
     if (refSearchCard) {
         refSearchCard.addEventListener('click', function () {
+            clearReferentContact();
             refSearchPanel.style.display = 'block';
-            refCreatePanel.style.display = 'none';
             refInput.focus();
         });
     }
 
     if (refCreateCard) {
         refCreateCard.addEventListener('click', function () {
+            clearReferentSelection();
             refCreatePanel.style.display = 'block';
             refSearchPanel.style.display = 'none';
         });
@@ -1057,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     refSelectedInfo.textContent = user.email + (user.city ? ' — ' + user.city : '');
                                     refSelected.style.display = 'block';
                                     refSearchPanel.style.display = 'none';
-                                    refCreatePanel.style.display = 'none';
+                                    clearReferentContact();
                                     refResults.style.display = 'none';
                                 });
                                 refResults.appendChild(item);
