@@ -1,0 +1,136 @@
+{# Styles communs aux pages Profil et Paramètres PRO : en-tête, cartes, sections numérotées, pastilles d'état #}
+<style>
+    .ps-page { max-width: 1100px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .ps-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0f332e 100%);
+        border-radius: 16px;
+        padding: 2rem 2.25rem;
+        color: #fff;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .ps-header::after {
+        content: ''; position: absolute; top: -30px; right: -20px;
+        width: 140px; height: 140px; border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+    }
+    .ps-header h1 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+    .ps-header p { opacity: 0.65; font-size: 0.82rem; margin: 0.3rem 0 0; font-weight: 400; }
+
+    /* ── Cards ── */
+    .ps-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 14px;
+        padding: 1.5rem 1.75rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .ps-card:hover {
+        border-color: rgba(26,77,69,0.12);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .ps-card-header {
+        display: flex; align-items: flex-start; gap: 0.85rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .ps-card-icon {
+        width: 38px; height: 38px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .ps-card-title { font-size: 0.92rem; font-weight: 700; color: var(--secondary-color); margin: 0; }
+    .ps-card-desc { font-size: 0.73rem; color: var(--taupe); margin: 0.2rem 0 0; line-height: 1.4; }
+
+    /* ── Sections numérotées, cartes accentuées, pastilles ── */
+    .ps-page [hidden] { display: none !important; }
+    .pa-section-title {
+        display: flex; align-items: center; gap: 0.6rem;
+        font-size: 0.7rem; font-weight: 800;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--taupe);
+        margin: 0.25rem 0 0.85rem;
+    }
+    .pa-section-title::after {
+        content: ''; flex: 1; height: 1px;
+        background: linear-gradient(90deg, var(--border-color), transparent);
+    }
+    .pa-step {
+        width: 22px; height: 22px; border-radius: 7px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: var(--soft-teal); color: var(--primary-color);
+        font-size: 0.7rem; letter-spacing: 0;
+    }
+
+    .pa-card { height: 100%; margin-bottom: 0; position: relative; overflow: hidden; }
+    .pa-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, var(--pa-accent, var(--primary-color)), transparent);
+        opacity: 0.8;
+    }
+    .pa-card .ps-card-icon { transition: transform 0.25s ease; }
+    .pa-card:hover .ps-card-icon { transform: scale(1.08) rotate(-4deg); }
+    .pa-card-pill { margin-top: 0.5rem; }
+
+    /* Pills d'état */
+    .pa-pill {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        font-size: 0.68rem; font-weight: 700;
+        padding: 0.25rem 0.65rem; border-radius: 20px;
+        white-space: nowrap;
+        background: var(--soft-teal); color: var(--primary-color);
+        transition: background 0.2s, color 0.2s;
+    }
+    .pa-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pa-pill.is-off { background: #f3f1ec; color: var(--taupe); }
+    .pa-pill.is-warn { background: var(--soft-warm); color: var(--accent-hover); }
+
+
+    /* ── Barre de complétude ── */
+    .pf-progress {
+        background: linear-gradient(135deg, #fff 0%, var(--soft-teal) 100%);
+        border: 1px solid rgba(26,77,69,0.1);
+        border-radius: 14px;
+        padding: 1.1rem 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+    .pf-progress-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.65rem; }
+    .pf-progress-title { font-size: 0.88rem; font-weight: 700; color: var(--secondary-color); margin: 0; }
+    .pf-progress-desc { font-size: 0.72rem; color: var(--taupe); margin: 0.1rem 0 0; }
+    .pf-progress-value { font-size: 1.35rem; font-weight: 800; color: var(--primary-color); white-space: nowrap; letter-spacing: -0.02em; }
+    .pf-progress-bar { height: 8px; border-radius: 8px; background: rgba(26,77,69,0.08); overflow: hidden; }
+    .pf-progress-bar span {
+        display: block; height: 100%; width: 0; border-radius: 8px;
+        background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pf-progress.is-complete .pf-progress-bar span { background: var(--primary-color); }
+    .pf-progress-items { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; }
+    .pf-progress-item {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.3rem 0.75rem 0.3rem 0.45rem;
+        border: 1.5px dashed rgba(200,151,62,0.55); border-radius: 20px;
+        background: #fff;
+        font-size: 0.72rem; font-weight: 600; color: var(--accent-hover);
+        cursor: pointer; transition: all 0.2s;
+    }
+    .pf-progress-item:hover { border-style: solid; transform: translateY(-1px); }
+    .pf-check { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid currentColor; flex-shrink: 0; }
+    .pf-progress-item.done { border-style: solid; border-color: rgba(26,77,69,0.15); background: var(--soft-teal); color: var(--primary-color); }
+    .pf-progress-item.done .pf-check {
+        border-color: var(--primary-color);
+        background: var(--primary-color) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") center / 11px no-repeat;
+    }
+    a.pf-progress-item { text-decoration: none; }
+
+    @media (max-width: 768px) {
+        .ps-card { padding: 1.25rem; }
+        .ps-header { padding: 1.5rem; }
+    }
+</style>

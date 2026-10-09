@@ -163,4 +163,22 @@
     postal_id: 'profile_postalCode',
     city_id: 'profile_city'
 } %}
+
+{# Arrivée depuis « Mon profil » sur un champ précis (ex : #profile_phone) #}
+<style>
+    .anicare-form [id^="profile_"] { scroll-margin-top: 140px; }
+    .anicare-form .field-target { animation: fieldTarget 2s ease; }
+    @keyframes fieldTarget {
+        0%, 40% { box-shadow: 0 0 0 4px rgba(200,151,62,0.35); border-color: var(--accent-color); }
+        100% { box-shadow: none; }
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var target = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+    if (!target || !target.closest('.anicare-form')) return;
+    target.classList.add('field-target');
+    target.focus({ preventScroll: true });
+});
+</script>
 {% endblock %}

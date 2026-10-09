@@ -12,26 +12,8 @@
 {% set locations = user.consultationLocations ?? [] %}
 
 {% block body %}
+{{ include('profile/_settings_ui.html.twig') }}
 <style>
-    .ps-page { max-width: 1100px; margin: 0 auto; }
-
-    /* ── Header ── */
-    .ps-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #0f332e 100%);
-        border-radius: 16px;
-        padding: 2rem 2.25rem;
-        color: #fff;
-        margin-bottom: 1.75rem;
-        position: relative;
-        overflow: hidden;
-    }
-    .ps-header::after {
-        content: ''; position: absolute; top: -30px; right: -20px;
-        width: 140px; height: 140px; border-radius: 50%;
-        background: rgba(255,255,255,0.04);
-    }
-    .ps-header h1 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
-    .ps-header p { opacity: 0.65; font-size: 0.82rem; margin: 0.3rem 0 0; font-weight: 400; }
 
     /* ── Tabs ── */
     .ps-tabs {
@@ -63,34 +45,6 @@
         transition: background 0.2s;
     }
     .ps-tab.active .tab-icon { background: var(--soft-teal); }
-
-    /* ── Cards ── */
-    .ps-card {
-        background: #fff;
-        border: 1px solid rgba(0,0,0,0.06);
-        border-radius: 14px;
-        padding: 1.5rem 1.75rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-        transition: box-shadow 0.2s, border-color 0.2s;
-    }
-    .ps-card:hover {
-        border-color: rgba(26,77,69,0.12);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .ps-card-header {
-        display: flex; align-items: flex-start; gap: 0.85rem;
-        margin-bottom: 1.25rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(0,0,0,0.04);
-    }
-    .ps-card-icon {
-        width: 38px; height: 38px; border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0;
-    }
-    .ps-card-title { font-size: 0.92rem; font-weight: 700; color: var(--secondary-color); margin: 0; }
-    .ps-card-desc { font-size: 0.73rem; color: var(--taupe); margin: 0.2rem 0 0; line-height: 1.4; }
 
     /* ── Form inputs ── */
     .ps-page .form-control,
@@ -344,7 +298,7 @@
         backdrop-filter: blur(8px);
         border-top: 1px solid rgba(0,0,0,0.06);
         box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
-        padding: 1rem 0;
+        padding: 1rem 1.25rem;
         margin-top: 1.5rem;
         display: flex; align-items: center; gap: 1rem;
         border-radius: 14px 14px 0 0;
@@ -371,18 +325,6 @@
     }
     .ps-footer .btn-back:hover { color: var(--secondary-color); }
 
-    /* ── Dept badges ── */
-    .dept-badge {
-        background: var(--soft-teal) !important;
-        color: var(--primary-color) !important;
-        font-size: 0.78rem !important;
-        padding: 0.4rem 0.75rem !important;
-        border-radius: 20px !important;
-        font-weight: 600 !important;
-        border: 1px solid rgba(26,77,69,0.1);
-        transition: all 0.15s;
-    }
-    .dept-badge:hover { border-color: var(--primary-color); }
 
     /* ── Flash ── */
     .ps-page .alert-success {
@@ -522,11 +464,288 @@
         color: var(--primary-color);
     }
 
+    /* ══ Composants de formulaire (onglets Profil et Agenda) ══ */
+    /* Interrupteurs */
+    .ps-page .pa-switch {
+        -webkit-appearance: none; appearance: none;
+        position: relative; flex-shrink: 0;
+        width: 42px; height: 24px; margin: 0;
+        border: none; border-radius: 24px;
+        background: #ddd8cd;
+        cursor: pointer;
+        transition: background 0.25s ease, box-shadow 0.2s;
+    }
+    .ps-page .pa-switch::after {
+        content: ''; position: absolute; top: 3px; left: 3px;
+        width: 18px; height: 18px; border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ps-page .pa-switch:checked { background: var(--primary-color); }
+    .ps-page .pa-switch:checked::after { transform: translateX(18px); }
+    .ps-page .pa-switch:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(26,77,69,0.2); }
+
+    /* Ligne réglage + interrupteur */
+    .pa-toggle {
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        padding: 0.65rem 0.75rem; margin: 0 -0.75rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .pa-toggle:hover { background: #faf8f4; }
+    .pa-toggle-title { display: block; font-size: 0.82rem; font-weight: 600; color: var(--secondary-color); line-height: 1.3; }
+    .pa-toggle-desc { display: block; font-size: 0.72rem; color: var(--taupe); margin-top: 0.15rem; line-height: 1.35; }
+    .pa-toggle.is-off { opacity: 0.5; cursor: not-allowed; }
+
+    /* Options qui dépendent d'un interrupteur */
+    .pa-dependent {
+        margin: 0.15rem 0 0.6rem;
+        padding: 0.9rem 1rem;
+        background: #faf8f4;
+        border-left: 3px solid var(--pa-accent, var(--primary-color));
+        border-radius: 0 12px 12px 0;
+        transition: opacity 0.25s, filter 0.25s;
+    }
+    .pa-dependent.is-off { opacity: 0.45; filter: grayscale(0.7); }
+    .pa-dependent .pa-toggle { margin: 0 -0.5rem; padding: 0.5rem; }
+    .pa-dependent .pa-toggle:hover { background: rgba(255,255,255,0.7); }
+
+    /* Phrase avec champs */
+    .pa-sentence {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem;
+        font-size: 0.8rem; color: var(--secondary-color);
+    }
+    .pa-sentence .ps-inline-input { width: 64px; }
+    .ps-page .ps-inline-input:invalid { border-color: var(--danger-color); }
+
+    /* Préréglages de durée */
+    .pa-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+    .pa-chip {
+        padding: 0.4rem 0.8rem;
+        border: 1.5px solid #e0ddd5; border-radius: 20px;
+        background: #fafaf8;
+        font-size: 0.76rem; font-weight: 600; color: var(--taupe);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .pa-chip:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-1px); }
+    .pa-chip.active {
+        background: var(--primary-color); border-color: var(--primary-color); color: #fff;
+        box-shadow: 0 2px 6px rgba(26,77,69,0.25);
+    }
+    .pa-field-head {
+        display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    .pa-custom {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        font-size: 0.78rem; color: var(--taupe);
+    }
+    .pa-custom .ps-inline-input { width: 64px; padding: 0.35rem 0.4rem; }
+
+    /* Aperçu d'un créneau */
+    .pa-preview {
+        margin-top: 1rem; padding: 0.85rem 1rem;
+        background: linear-gradient(135deg, var(--soft-teal) 0%, #f7fbfa 100%);
+        border: 1px solid rgba(26,77,69,0.08);
+        border-radius: 12px;
+    }
+    .pa-preview-bar { display: flex; gap: 3px; height: 26px; margin-bottom: 0.55rem; }
+    .pa-preview-bar > span {
+        display: flex; align-items: center; justify-content: center;
+        min-width: 0; overflow: hidden; white-space: nowrap;
+        border-radius: 7px;
+        font-size: 0.66rem; font-weight: 700;
+        transition: flex-grow 0.35s ease;
+    }
+    .pa-bar-appt { background: linear-gradient(135deg, var(--primary-color), #2a6b60); color: #fff; }
+    .pa-bar-gap {
+        color: var(--accent-hover);
+        background: repeating-linear-gradient(-45deg, var(--soft-warm), var(--soft-warm) 5px, #fde7b4 5px, #fde7b4 10px);
+    }
+    .pa-preview-text { font-size: 0.74rem; color: var(--secondary-color); margin: 0; }
+    .pa-preview-text strong { color: var(--primary-color); }
+
+    /* Horaires */
+    .pa-days { display: flex; flex-direction: column; }
+    .pa-day {
+        display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;
+        padding: 0.5rem 0.6rem; margin: 0 -0.6rem;
+        border-radius: 10px;
+        transition: background 0.15s;
+    }
+    .pa-day:hover { background: #faf8f4; }
+    .pa-day + .pa-day { border-top: 1px solid rgba(0,0,0,0.035); }
+    .pa-day-name { font-size: 0.82rem; font-weight: 600; color: var(--secondary-color); cursor: pointer; margin: 0; }
+    .pa-day-times { display: flex; align-items: center; gap: 0.4rem; }
+    .pa-time { width: 98px; }
+    .pa-time-sep { color: var(--taupe); font-size: 0.8rem; }
+    .pa-day-closed {
+        display: none; justify-self: end;
+        font-size: 0.72rem; font-weight: 600; color: var(--taupe);
+        background: #f3f1ec; padding: 0.2rem 0.6rem; border-radius: 20px;
+    }
+    .pa-day.is-closed .pa-day-times { display: none; }
+    .pa-day.is-closed .pa-day-closed { display: inline-block; }
+    .pa-day.is-closed .pa-day-name { color: var(--taupe); font-weight: 500; }
+    .pa-day.is-invalid .pa-time-end { border-color: var(--danger-color); background: #fef2f2; }
+    .pa-link-btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        margin-top: 0.75rem; padding: 0.4rem 0.75rem;
+        background: none; border: 1.5px dashed rgba(200,151,62,0.45); border-radius: 8px;
+        font-size: 0.74rem; font-weight: 700; color: var(--accent-hover);
+        cursor: pointer; transition: all 0.2s;
+    }
+    .pa-link-btn:hover { background: var(--soft-warm); border-color: var(--accent-color); }
+    .pa-link-btn.done { border-style: solid; background: var(--soft-teal); border-color: rgba(26,77,69,0.2); color: var(--primary-color); }
+
+    /* Choix segmentés */
+    .pa-segmented {
+        display: flex; flex-wrap: wrap; gap: 0.25rem;
+        padding: 0.25rem; background: #f5f3ee; border-radius: 12px;
+    }
+    .pa-seg {
+        flex: 1 1 auto;
+        display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+        padding: 0.5rem 0.75rem; border-radius: 9px;
+        font-size: 0.76rem; font-weight: 600; color: var(--taupe);
+        cursor: pointer; text-align: center;
+        transition: all 0.2s;
+    }
+    .pa-seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .pa-seg:hover { color: var(--primary-color); }
+    .pa-seg:has(input:checked) { background: #fff; color: var(--primary-color); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .pa-seg:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(26,77,69,0.18); }
+
+    /* Pastilles canal / espèce */
+    .pa-channel, .pa-species { gap: 0.35rem; }
+    .pa-species .pa-check { display: none; }
+    .pa-species:has(input:checked) .pa-check { display: inline-block; }
+
+    /* Pied de page : modifications non enregistrées */
+    .pa-dirty {
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        font-size: 0.75rem; font-weight: 700; color: var(--accent-hover);
+    }
+    .pa-dirty .dot {
+        width: 8px; height: 8px; border-radius: 50%; background: var(--accent-color);
+        animation: paPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes paPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    /* ══ Onglet Profil ══ */
+
+    .pf-field-status { position: relative; }
+    .ps-page .pf-field-status .form-control { padding-right: 2.2rem; }
+    .pf-field-icon {
+        display: none; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+        width: 16px; height: 16px; border-radius: 50%;
+        background-position: center; background-repeat: no-repeat; background-size: 10px;
+    }
+    .pf-field-status.is-valid .pf-field-icon {
+        display: block;
+        background-color: var(--primary-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+    .pf-field-status.is-warn .pf-field-icon {
+        display: block;
+        background-color: var(--accent-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-width='3' d='M10 5v6M10 15h.01'/%3e%3c/svg%3e");
+    }
+    .ps-page .pf-field-status.is-warn .form-control { border-color: var(--accent-color); }
+    .ps-help.is-warn { color: var(--accent-hover); font-weight: 600; }
+    .ps-help.is-error { color: var(--danger-color); font-weight: 600; }
+    .ps-help.is-ok { color: var(--primary-color); font-weight: 600; }
+
+    .pf-input-icon { position: relative; }
+    .pf-input-icon > svg { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--taupe); pointer-events: none; }
+    .ps-page .pf-input-icon .form-control { padding-left: 2.15rem; }
+    .pf-counter { font-size: 0.7rem; font-weight: 600; color: var(--taupe); }
+    .pa-toggle-desc a { color: var(--primary-color); font-weight: 600; }
+
+    .pf-empty {
+        display: none;
+        margin: 0 0 0.5rem; padding: 0.85rem 1rem;
+        border: 1.5px dashed var(--border-color); border-radius: 10px;
+        background: #fdfcfa;
+        font-size: 0.76rem; color: var(--taupe);
+    }
+    #locationsList:not(:has(.ps-list-item)) + .pf-empty,
+    #deptsList:not(:has(.dept-badge)) + .pf-empty { display: block; }
+    #locationsList .ps-list-item { position: relative; padding-left: 2.4rem; }
+    #locationsList .ps-list-item::before {
+        content: ''; position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+        width: 16px; height: 16px;
+        background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C8973E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3e%3ccircle cx='12' cy='10' r='3'/%3e%3c/svg%3e") center / contain no-repeat;
+    }
+
+    .pf-panel { background: #faf8f4; border-radius: 12px; padding: 1rem 1.1rem; height: 100%; }
+    .pf-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .pf-clear {
+        background: none; border: none; padding: 0.15rem 0.4rem; border-radius: 6px;
+        font-size: 0.72rem; font-weight: 700; color: var(--taupe); cursor: pointer;
+    }
+    .pf-clear:hover { color: var(--danger-color); background: #fef2f2; }
+    .pf-dept-list { display: flex; flex-wrap: wrap; gap: 0.35rem; max-height: 210px; overflow-y: auto; }
+    .pf-dept-list .dept-badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.25rem 0.3rem 0.25rem 0.3rem;
+        background: #fff; color: var(--secondary-color);
+        border: 1px solid rgba(26,77,69,0.14); border-radius: 20px;
+        font-size: 0.74rem; font-weight: 600; white-space: nowrap;
+        animation: pfPop 0.2s ease;
+    }
+    @keyframes pfPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .dept-code {
+        background: var(--primary-color); color: #fff;
+        border-radius: 12px; padding: 0.1rem 0.4rem;
+        font-size: 0.66rem; font-weight: 800;
+    }
+    .dept-remove {
+        width: 18px; height: 18px; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: none; border-radius: 50%; background: none;
+        font-size: 0.95rem; line-height: 1; color: var(--taupe); cursor: pointer;
+        transition: all 0.15s;
+    }
+    .dept-remove:hover { background: #fef2f2; color: var(--danger-color); }
+    .pf-add-btn {
+        flex-shrink: 0;
+        padding: 0 0.9rem; border: none; border-radius: 10px;
+        background: var(--soft-teal); color: var(--primary-color);
+        font-size: 0.78rem; font-weight: 700; cursor: pointer;
+        transition: all 0.2s;
+    }
+    .pf-add-btn:hover { background: var(--primary-color); color: #fff; }
+    .pf-regions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .pf-region {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.28rem 0.6rem;
+        border: 1.5px solid #e0ddd5; border-radius: 20px; background: #fff;
+        font-size: 0.7rem; font-weight: 600; color: var(--taupe);
+        cursor: pointer; transition: all 0.2s;
+    }
+    .pf-region:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    .pf-region-count { font-size: 0.62rem; font-weight: 700; background: #f3f1ec; border-radius: 10px; padding: 0.05rem 0.35rem; }
+    .pf-region.partial { border-color: rgba(26,77,69,0.35); color: var(--primary-color); }
+    .pf-region.partial .pf-region-count { background: var(--soft-teal); color: var(--primary-color); }
+    .pf-region.full { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+    .pf-region.full .pf-region-count { background: rgba(255,255,255,0.2); color: #fff; }
+
+    @media (max-width: 480px) {
+        #locationsList .ps-list-item { flex-wrap: wrap; padding-right: 2.6rem; }
+        #locationsList .ps-list-item .form-control { flex: 1 1 100% !important; }
+        #locationsList .ps-list-item::before { top: 1.25rem; transform: none; }
+        #locationsList .ps-remove-btn { position: absolute; top: 0.6rem; right: 0.5rem; }
+        .pa-day { row-gap: 0.4rem; }
+        .pa-day-times { grid-column: 1 / -1; padding-left: 54px; }
+    }
+
     @media (max-width: 768px) {
         .ps-tabs { flex-direction: column; gap: 0.25rem; }
         .ps-tab { justify-content: flex-start; }
-        .ps-card { padding: 1.25rem; }
-        .ps-header { padding: 1.5rem; }
         .dept-map-container { grid-template-columns: 1fr; }
     }
 </style>
@@ -563,55 +782,145 @@
     {# ║  TAB 1 : PROFIL                                        ║ #}
     {# ╚══════════════════════════════════════════════════════════╝ #}
     {% if tab == 'profil' %}
-    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'profil'}) }}">
+    {% set dept_names = {
+        '01': 'Ain', '02': 'Aisne', '03': 'Allier', '04': 'Alpes-de-Haute-Provence', '05': 'Hautes-Alpes',
+        '06': 'Alpes-Maritimes', '07': 'Ardèche', '08': 'Ardennes', '09': 'Ariège', '10': 'Aube',
+        '11': 'Aude', '12': 'Aveyron', '13': 'Bouches-du-Rhône', '14': 'Calvados', '15': 'Cantal',
+        '16': 'Charente', '17': 'Charente-Maritime', '18': 'Cher', '19': 'Corrèze', '2A': 'Corse-du-Sud',
+        '2B': 'Haute-Corse', '21': 'Côte-d\'Or', '22': 'Côtes-d\'Armor', '23': 'Creuse', '24': 'Dordogne',
+        '25': 'Doubs', '26': 'Drôme', '27': 'Eure', '28': 'Eure-et-Loir', '29': 'Finistère',
+        '30': 'Gard', '31': 'Haute-Garonne', '32': 'Gers', '33': 'Gironde', '34': 'Hérault',
+        '35': 'Ille-et-Vilaine', '36': 'Indre', '37': 'Indre-et-Loire', '38': 'Isère', '39': 'Jura',
+        '40': 'Landes', '41': 'Loir-et-Cher', '42': 'Loire', '43': 'Haute-Loire', '44': 'Loire-Atlantique',
+        '45': 'Loiret', '46': 'Lot', '47': 'Lot-et-Garonne', '48': 'Lozère', '49': 'Maine-et-Loire',
+        '50': 'Manche', '51': 'Marne', '52': 'Haute-Marne', '53': 'Mayenne', '54': 'Meurthe-et-Moselle',
+        '55': 'Meuse', '56': 'Morbihan', '57': 'Moselle', '58': 'Nièvre', '59': 'Nord',
+        '60': 'Oise', '61': 'Orne', '62': 'Pas-de-Calais', '63': 'Puy-de-Dôme', '64': 'Pyrénées-Atlantiques',
+        '65': 'Hautes-Pyrénées', '66': 'Pyrénées-Orientales', '67': 'Bas-Rhin', '68': 'Haut-Rhin', '69': 'Rhône',
+        '70': 'Haute-Saône', '71': 'Saône-et-Loire', '72': 'Sarthe', '73': 'Savoie', '74': 'Haute-Savoie',
+        '75': 'Paris', '76': 'Seine-Maritime', '77': 'Seine-et-Marne', '78': 'Yvelines', '79': 'Deux-Sèvres',
+        '80': 'Somme', '81': 'Tarn', '82': 'Tarn-et-Garonne', '83': 'Var', '84': 'Vaucluse',
+        '85': 'Vendée', '86': 'Vienne', '87': 'Haute-Vienne', '88': 'Vosges', '89': 'Yonne',
+        '90': 'Territoire de Belfort', '91': 'Essonne', '92': 'Hauts-de-Seine', '93': 'Seine-Saint-Denis', '94': 'Val-de-Marne',
+        '95': 'Val-d\'Oise', '971': 'Guadeloupe', '972': 'Martinique', '973': 'Guyane', '974': 'La Réunion', '976': 'Mayotte'
+    } %}
+    {% set regions = {
+        'Île-de-France': ['75','77','78','91','92','93','94','95'],
+        'Hauts-de-France': ['02','59','60','62','80'],
+        'Grand Est': ['08','10','51','52','54','55','57','67','68','88'],
+        'Normandie': ['14','27','50','61','76'],
+        'Bretagne': ['22','29','35','56'],
+        'Pays de la Loire': ['44','49','53','72','85'],
+        'Centre-Val de Loire': ['18','28','36','37','41','45'],
+        'Bourgogne-Franche-Comté': ['21','25','39','58','70','71','89','90'],
+        'Nouvelle-Aquitaine': ['16','17','19','23','24','33','40','47','64','79','86','87'],
+        'Occitanie': ['09','11','12','30','31','32','34','46','48','65','66','81','82'],
+        'Auvergne-Rhône-Alpes': ['01','03','07','15','26','38','42','43','63','69','73','74'],
+        'Provence-Alpes-Côte d\'Azur': ['04','05','06','13','83','84'],
+        'Corse': ['2A','2B'],
+        'Outre-mer': ['971','972','973','974','976']
+    } %}
+    {% set selected_depts = user.interventionDepartments ?? [] %}
+    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'profil'}) }}" id="profilForm">
         <input type="hidden" name="_section" value="profil">
 
-        {# ── Activité professionnelle ── #}
-        <div class="ps-card">
-            <div class="ps-card-header">
-                <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-                </div>
+        {# ── Complétude ── #}
+        <div class="pf-progress" id="profileProgress">
+            <div class="pf-progress-head">
                 <div>
-                    <p class="ps-card-title">Activité professionnelle</p>
-                    <p class="ps-card-desc">Informations liées à votre activité et votre entreprise.</p>
+                    <p class="pf-progress-title">Votre profil professionnel</p>
+                    <p class="pf-progress-desc">Les informations qui présentent votre activité.</p>
+                </div>
+                <span class="pf-progress-value"><span id="progressPct">0</span> %</span>
+            </div>
+            <div class="pf-progress-bar"><span id="progressBar"></span></div>
+            <div class="pf-progress-items">
+                <button type="button" class="pf-progress-item" data-check="company" data-focus="companyName"><span class="pf-check"></span>Nom de l'entreprise</button>
+                <button type="button" class="pf-progress-item" data-check="siren" data-focus="siren"><span class="pf-check"></span>SIREN</button>
+                <button type="button" class="pf-progress-item" data-check="description" data-focus="profileDescription"><span class="pf-check"></span>Présentation</button>
+                <button type="button" class="pf-progress-item" data-check="depts" data-focus="deptInput"><span class="pf-check"></span>Zones d'intervention</button>
+            </div>
+        </div>
+
+        {# ═══ 1. Activité ═══ #}
+        <div class="pa-section-title"><span class="pa-step">1</span>Votre activité</div>
+        <div class="row g-3 mb-4">
+            {# ── Entreprise ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: var(--primary-color);">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Entreprise</p>
+                            <p class="ps-card-desc">Raison sociale et identifiant de votre activité.</p>
+                            <span class="pa-pill pa-card-pill" id="pillCompany"><span class="dot"></span><span class="txt">—</span></span>
+                        </div>
+                    </div>
+
+                    <label class="ps-label" for="companyName">Nom de l'entreprise</label>
+                    <input type="text" name="company_name" id="companyName" class="form-control form-control-sm" value="{{ user.companyName }}" placeholder="Nom de votre entreprise" autocomplete="organization">
+
+                    <label class="ps-label mt-3" for="siren">SIREN</label>
+                    <div class="pf-field-status">
+                        <input type="text" name="siren" id="siren" class="form-control form-control-sm" value="{{ user.siren }}" placeholder="123 456 789" maxlength="14" inputmode="numeric" autocomplete="off">
+                        <span class="pf-field-icon" id="sirenIcon" aria-hidden="true"></span>
+                    </div>
+                    <p class="ps-help" id="sirenHelp">9 chiffres, indiqués sur votre avis de situation INSEE.</p>
+
+                    <label class="pa-toggle mt-2" for="showCompany" id="showCompanyRow">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Afficher le nom de l'entreprise sur mes comptes rendus</span>
+                            <span class="pa-toggle-desc" id="showCompanyDesc" hidden>Renseignez d'abord le nom de l'entreprise.</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="show_company_name" value="1" id="showCompany" {{ user.showCompanyName ? 'checked' : '' }}>
+                    </label>
                 </div>
             </div>
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <label class="ps-label">Nom de l'entreprise</label>
-                    <input type="text" name="company_name" class="form-control form-control-sm" value="{{ user.companyName }}" placeholder="Nom de votre entreprise">
-                </div>
-                <div class="col-12 col-md-6">
-                    <label class="ps-label">SIREN</label>
-                    <input type="text" name="siren" class="form-control form-control-sm" value="{{ user.siren }}" placeholder="123 456 789" maxlength="14">
-                </div>
-                <div class="col-12">
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="show_company_name" value="1" id="showCompany" {{ user.showCompanyName ? 'checked' : '' }}>
-                        <label for="showCompany">Afficher le nom de l'entreprise sur mes comptes rendus</label>
+
+            {# ── Présentation ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: #e0796b;">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(224,121,107,0.12); color: #e0796b;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Présentation</p>
+                            <p class="ps-card-desc">Affichée sur votre fiche dans l'annuaire.</p>
+                            <span class="pa-pill pa-card-pill" id="pillPresentation"><span class="dot"></span><span class="txt">—</span></span>
+                        </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label class="ps-label">Site web</label>
-                    <input type="url" name="website" class="form-control form-control-sm" value="{{ user.website }}" placeholder="https://www.votre-site.fr">
-                </div>
-                <div class="col-12">
-                    <label class="ps-label">Biographie / Description</label>
-                    <textarea name="profile_description" class="form-control form-control-sm" rows="3" placeholder="Quelques mots sur votre parcours...">{{ user.profileDescription }}</textarea>
+
+                    <label class="ps-label" for="website">Site web</label>
+                    <div class="pf-input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <input type="url" name="website" id="website" class="form-control form-control-sm" value="{{ user.website }}" placeholder="www.votre-site.fr" autocomplete="url">
+                    </div>
+
+                    <div class="pa-field-head mt-3">
+                        <label class="ps-label mb-0" for="profileDescription">Biographie / Description</label>
+                        <span class="pf-counter" id="descCounter">0 caractère</span>
+                    </div>
+                    <textarea name="profile_description" id="profileDescription" class="form-control form-control-sm" rows="6" placeholder="Votre parcours, vos spécialités, votre façon de travailler…">{{ user.profileDescription }}</textarea>
                 </div>
             </div>
         </div>
 
+        {# ═══ 2. Lieux ═══ #}
+        <div class="pa-section-title"><span class="pa-step">2</span>Où vous exercez</div>
+
         {# ── Lieux de consultation ── #}
-        <div class="ps-card">
+        <div class="ps-card pa-card mb-3" style="--pa-accent: var(--accent-color);">
             <div class="ps-card-header">
-                <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <div class="ps-card-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
                 <div>
                     <p class="ps-card-title">Lieux de consultation</p>
-                    <p class="ps-card-desc">Définissez vos lieux d'exercice en cabinet.</p>
+                    <p class="ps-card-desc">Vos lieux d'exercice en cabinet, si vous en avez.</p>
+                    <span class="pa-pill pa-card-pill" id="pillLocations"><span class="dot"></span><span class="txt">—</span></span>
                 </div>
             </div>
             <div id="locationsList">
@@ -619,10 +928,11 @@
                 <div class="ps-list-item loc-row">
                     <input type="text" class="form-control form-control-sm loc-name" value="{{ loc.name }}" placeholder="Ex : Cabinet principal" style="flex:1;">
                     <input type="text" class="form-control form-control-sm loc-address" value="{{ loc.address }}" placeholder="Adresse" style="flex:2;">
-                    <button type="button" class="ps-remove-btn loc-remove"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    <button type="button" class="ps-remove-btn loc-remove" title="Retirer ce lieu"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
                 {% endfor %}
             </div>
+            <p class="pf-empty">Aucun lieu enregistré. Vous intervenez uniquement en déplacement ? Rien à ajouter ici.</p>
             <button type="button" class="ps-btn-add" id="addLocation">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Ajouter un lieu de consultation
@@ -631,100 +941,107 @@
         </div>
 
         {# ── Zones d'intervention ── #}
-        <div class="ps-card">
+        <div class="ps-card pa-card mb-4" style="--pa-accent: var(--primary-color);">
             <div class="ps-card-header">
                 <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
                 </div>
                 <div>
                     <p class="ps-card-title">Zones d'intervention</p>
-                    <p class="ps-card-desc">Cliquez sur les départements où vous intervenez.</p>
+                    <p class="ps-card-desc">Les départements où vous vous déplacez. Utilisés pour vous trouver dans l'annuaire.</p>
+                    <span class="pa-pill pa-card-pill" id="pillDepts"><span class="dot"></span><span class="txt">—</span></span>
                 </div>
             </div>
 
-            {# Sélection badges #}
-            <div id="deptsList" class="d-flex flex-wrap gap-2 mb-3">
-                {% for dept in user.interventionDepartments ?? [] %}
-                <span class="badge dept-badge">
-                    {{ dept }} <button type="button" class="btn-close btn-close-sm ms-1 dept-remove" style="font-size: 0.5rem;" data-dept="{{ dept }}"></button>
-                </span>
-                {% endfor %}
-            </div>
-            <p id="deptsCount" class="small mb-3" style="color: var(--taupe);"><strong id="deptsNum">{{ (user.interventionDepartments ?? [])|length }}</strong> département{{ (user.interventionDepartments ?? [])|length > 1 ? 's' : '' }} sélectionné{{ (user.interventionDepartments ?? [])|length > 1 ? 's' : '' }}</p>
-
-            {# ── Carte de France SVG ── #}
-            <div class="france-map-wrap" id="franceMapWrap">
-                <div class="france-map-tooltip" id="mapTooltip"></div>
-                <div id="franceMap"><div class="france-map-loading">Chargement de la carte…</div></div>
-            </div>
-
-            <div class="mt-3 mb-2">
-                <button type="button" class="dept-region-toggle" id="regionGridToggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-                    Sélection par région
-                </button>
-            </div>
-            <div id="regionGridWrap" style="display:none;">
-            {# Grille par régions (alternative) #}
-            <div class="dept-map-container">
-                {% set regions = {
-                    'Île-de-France': ['75','77','78','91','92','93','94','95'],
-                    'Hauts-de-France': ['02','59','60','62','80'],
-                    'Grand Est': ['08','10','51','52','54','55','57','67','68','88'],
-                    'Normandie': ['14','27','50','61','76'],
-                    'Bretagne': ['22','29','35','56'],
-                    'Pays de la Loire': ['44','49','53','72','85'],
-                    'Centre-Val de Loire': ['18','28','36','37','41','45'],
-                    'Bourgogne-Franche-Comté': ['21','25','39','58','70','71','89','90'],
-                    'Nouvelle-Aquitaine': ['16','17','19','23','24','33','40','47','64','79','86','87'],
-                    'Occitanie': ['09','11','12','30','31','32','34','46','48','65','66','81','82'],
-                    'Auvergne-Rhône-Alpes': ['01','03','07','15','26','38','42','43','63','69','73','74'],
-                    'Provence-Alpes-Côte d\'Azur': ['04','05','06','13','83','84'],
-                    'Corse': ['2A','2B']
-                } %}
-                {% set selectedDepts = user.interventionDepartments ?? [] %}
-                {% for region, depts in regions %}
-                <div class="dept-region">
-                    <div class="dept-region-header" data-region="{{ region }}">
-                        <span class="dept-region-name">{{ region }}</span>
-                        <span class="dept-region-count" data-region-count="{{ region }}">0</span>
+            <div class="row g-4">
+                <div class="col-12 col-lg-7">
+                    <div class="france-map-wrap" id="franceMapWrap">
+                        <div class="france-map-tooltip" id="mapTooltip"></div>
+                        <div id="franceMap"><div class="france-map-loading">Chargement de la carte…</div></div>
                     </div>
-                    <div class="dept-region-grid">
-                        {% for dept in depts %}
-                        <button type="button" class="dept-btn {{ dept in selectedDepts ? 'selected' : '' }}" data-dept="{{ dept }}">{{ dept }}</button>
-                        {% endfor %}
+                    <p class="ps-help mt-2">Cliquez sur un département pour l'ajouter ou le retirer.</p>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="pf-panel">
+                        <div class="pf-panel-head">
+                            <span class="ps-label mb-0">Votre sélection</span>
+                            <button type="button" class="pf-clear" id="clearDepts" hidden>Tout retirer</button>
+                        </div>
+                        <div id="deptsList" class="pf-dept-list">
+                            {% for dept in selected_depts %}
+                            <span class="badge dept-badge"><span class="dept-code">{{ dept }}</span> {{ dept_names[dept] ?? '' }} <button type="button" class="dept-remove" data-dept="{{ dept }}" aria-label="Retirer {{ dept }}">×</button></span>
+                            {% endfor %}
+                        </div>
+                        <p class="pf-empty pf-empty-depts">Aucun département sélectionné.</p>
+
+                        <label class="ps-label mt-3" for="deptInput">Ajouter par numéro</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm" id="deptInput" placeholder="Ex : 83, 13, 2A" autocomplete="off">
+                            <button type="button" class="pf-add-btn" id="addDept">Ajouter</button>
+                        </div>
+                        <p class="ps-help" id="deptFeedback" aria-live="polite"></p>
+
+                        <span class="ps-label mt-3">Par région</span>
+                        <div class="pf-regions">
+                            {% for region, depts in regions %}
+                            <button type="button" class="pf-region" data-region-depts="{{ depts|join(',') }}" title="Sélectionner ou retirer toute la région">
+                                {{ region }} <span class="pf-region-count" data-region-count>0/{{ depts|length }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
             </div>
 
-            <div class="d-flex gap-2 align-items-center mt-3">
-                <input type="text" class="form-control form-control-sm" id="deptInput" placeholder="Ou saisir un numéro..." style="max-width: 200px;">
-                <button type="button" class="btn btn-sm" style="background: var(--soft-teal); color: var(--primary-color); font-weight: 600; border-radius: 8px;" id="addDept">Ajouter</button>
+            {# Grille de secours, affichée seulement si la carte ne se charge pas #}
+            <div id="regionGridWrap" class="mt-3" hidden>
+                <div class="dept-map-container">
+                    {% for region, depts in regions %}
+                    <div class="dept-region">
+                        <div class="dept-region-header" data-region="{{ region }}">
+                            <span class="dept-region-name">{{ region }}</span>
+                            <span class="dept-region-count" data-region-count="{{ region }}">0</span>
+                        </div>
+                        <div class="dept-region-grid">
+                            {% for dept in depts %}
+                            <button type="button" class="dept-btn {{ dept in selected_depts ? 'selected' : '' }}" data-dept="{{ dept }}" title="{{ dept_names[dept] ?? dept }}">{{ dept }}</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             <input type="hidden" name="intervention_departments_data" id="deptsData">
+            <script type="application/json" id="deptNames">{{ dept_names|json_encode|raw }}</script>
         </div>
 
-        {# ── Visibilité annuaire ── #}
-        <div class="ps-card">
+        {# ═══ 3. Visibilité ═══ #}
+        <div class="pa-section-title"><span class="pa-step">3</span>Visibilité</div>
+        <div class="ps-card pa-card" style="--pa-accent: #16a34a;">
             <div class="ps-card-header">
                 <div class="ps-card-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </div>
                 <div>
-                    <p class="ps-card-title">Visibilité dans l'annuaire</p>
-                    <p class="ps-card-desc">Contrôlez quelles informations sont visibles publiquement.</p>
+                    <p class="ps-card-title">Annuaire et profil public</p>
+                    <p class="ps-card-desc">Ce que les autres utilisateurs voient de vous.</p>
+                    <span class="pa-pill pa-card-pill" id="pillVisibility"><span class="dot"></span><span class="txt">—</span></span>
                 </div>
             </div>
-            <div class="ps-switch">
-                <input type="checkbox" class="form-check-input" name="directory_visible" value="1" id="dirVisible" {{ user.directoryVisible ? 'checked' : '' }}>
-                <label for="dirVisible">Apparaître dans l'annuaire des professionnels</label>
-            </div>
-            <div class="ps-switch">
-                <input type="checkbox" class="form-check-input" name="opening_hours_visible" value="1" id="hoursVisible" {{ user.openingHoursVisible ? 'checked' : '' }}>
-                <label for="hoursVisible">Afficher mes horaires sur mon profil public</label>
-            </div>
+            <label class="pa-toggle" for="dirVisible">
+                <span class="pa-toggle-text">
+                    <span class="pa-toggle-title">Apparaître dans l'annuaire des professionnels</span>
+                    <span class="pa-toggle-desc">Les particuliers peuvent vous trouver par métier et par département.</span>
+                </span>
+                <input type="checkbox" class="pa-switch" name="directory_visible" value="1" id="dirVisible" {{ user.directoryVisible ? 'checked' : '' }}>
+            </label>
+            <label class="pa-toggle" for="hoursVisible">
+                <span class="pa-toggle-text">
+                    <span class="pa-toggle-title">Afficher mes horaires sur mon profil public</span>
+                    <span class="pa-toggle-desc">Horaires définis dans l'onglet <a href="{{ path('app_profile_pro_settings', {tab: 'agenda'}) }}">Agenda</a>.</span>
+                </span>
+                <input type="checkbox" class="pa-switch" name="opening_hours_visible" value="1" id="hoursVisible" {{ user.openingHoursVisible ? 'checked' : '' }}>
+            </label>
         </div>
 
         <div class="ps-footer">
@@ -732,7 +1049,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Enregistrer les modifications
             </button>
-            <a href="{{ path('app_profile') }}" class="btn-back">← Retour</a>
+            <span class="pa-dirty" hidden><span class="dot"></span>Modifications non enregistrées</span>
+            <a href="{{ path('app_profile') }}" class="btn-back ms-auto">← Retour</a>
         </div>
     </form>
     {% endif %}
@@ -741,208 +1059,337 @@
     {# ║  TAB 2 : AGENDA                                        ║ #}
     {# ╚══════════════════════════════════════════════════════════╝ #}
     {% if tab == 'agenda' %}
-    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'agenda'}) }}">
+    {% set a_duration = agenda.default_duration ?? user.defaultConsultationDuration ?? 60 %}
+    {% set a_between = agenda.time_between ?? 15 %}
+    {% set a_notes_vis = agenda.notes_visibility ?? 'shared' %}
+    {% set a_channels = agenda.reminder_channels ?? ['email'] %}
+    {% set a_species = agenda.booking_species ?? ['Équidé'] %}
+    <form method="post" action="{{ path('app_profile_pro_settings', {tab: 'agenda'}) }}" id="agendaForm">
         <input type="hidden" name="_section" value="agenda">
 
-        <div class="row g-4">
-            {# ── Colonne gauche : RDV ── #}
-            <div class="col-12 col-lg-6">
-                {# Rendez-vous #}
-                <div class="ps-card">
+        {# ═══ 1. Organisation ═══ #}
+        <div class="pa-section-title"><span class="pa-step">1</span>Organisation de l'agenda</div>
+        <div class="row g-3 mb-4">
+            {# ── Durées ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: var(--primary-color);">
                     <div class="ps-card-header">
                         <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
                         </div>
                         <div>
-                            <p class="ps-card-title">Rendez-vous</p>
-                            <p class="ps-card-desc">Durée, rappels et visibilité de vos rendez-vous.</p>
+                            <p class="ps-card-title">Durée des rendez-vous</p>
+                            <p class="ps-card-desc">Appliquée à chaque nouveau rendez-vous.</p>
+                            <span class="pa-pill pa-card-pill" id="pillDuration"><span class="dot"></span><span class="txt">{{ a_duration }} min</span></span>
                         </div>
                     </div>
 
-                    <label class="ps-label">Durée par défaut</label>
-                    <div class="ps-row mb-3">
-                        <input type="number" name="default_duration" class="ps-inline-input" value="{{ agenda.default_duration ?? user.defaultConsultationDuration ?? 60 }}" min="5" max="480" step="5">
-                        <span style="font-size: 0.8rem; color: var(--taupe);">minutes</span>
+                    <div class="pa-field-head">
+                        <label class="ps-label mb-0" for="defaultDuration">Durée par défaut</label>
+                        <span class="pa-custom">
+                            <input type="number" name="default_duration" id="defaultDuration" class="ps-inline-input" value="{{ a_duration }}" min="5" max="480" step="5" aria-label="Durée par défaut en minutes">
+                            <span>min</span>
+                        </span>
+                    </div>
+                    <div class="pa-presets" data-target="defaultDuration">
+                        {% for v in [30, 45, 60, 90] %}
+                        <button type="button" class="pa-chip" data-value="{{ v }}">{{ v }} min</button>
+                        {% endfor %}
                     </div>
 
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="allow_custom_duration" value="1" id="customDuration" {{ (agenda.allow_custom_duration ?? false) ? 'checked' : '' }}>
-                        <label for="customDuration">Autoriser une durée personnalisée</label>
+                    <div class="pa-field-head mt-3">
+                        <label class="ps-label mb-0" for="timeBetween">Temps entre deux rendez-vous</label>
+                        <span class="pa-custom">
+                            <input type="number" name="time_between" id="timeBetween" class="ps-inline-input" value="{{ a_between }}" min="0" max="120" step="5" aria-label="Temps entre deux rendez-vous en minutes">
+                            <span>min</span>
+                        </span>
+                    </div>
+                    <div class="pa-presets" data-target="timeBetween">
+                        {% for v in [0, 10, 15, 30] %}
+                        <button type="button" class="pa-chip" data-value="{{ v }}">{{ v == 0 ? 'Aucun' : v ~ ' min' }}</button>
+                        {% endfor %}
+                    </div>
+                    <p class="ps-help">Trajet, préparation, désinfection du matériel…</p>
+
+                    <div class="pa-preview" aria-live="polite">
+                        <div class="pa-preview-bar">
+                            <span class="pa-bar-appt" id="barAppt"><span id="barApptLabel">RDV · {{ a_duration }} min</span></span>
+                            <span class="pa-bar-gap" id="barGap"><span id="barGapLabel">{{ a_between }} min</span></span>
+                        </div>
+                        <p class="pa-preview-text">
+                            Un RDV à <strong>09:00</strong> se termine à <strong id="previewEnd">—</strong><span id="previewNextWrap"> · prochain créneau possible à <strong id="previewNext">—</strong></span>
+                        </p>
                     </div>
 
-                    <label class="ps-label mt-2">Temps entre deux rendez-vous</label>
-                    <div class="ps-row mb-3">
-                        <input type="number" name="time_between" class="ps-inline-input" value="{{ agenda.time_between ?? 15 }}" min="0" max="120" step="5">
-                        <select name="time_between_unit" class="ps-select"><option>minutes</option></select>
-                    </div>
-                </div>
-
-                {# Visibilité et notes #}
-                <div class="ps-card">
-                    <div class="ps-card-header">
-                        <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </div>
-                        <div>
-                            <p class="ps-card-title">Visibilité et notes</p>
-                            <p class="ps-card-desc">Informations envoyées à vos clients.</p>
-                        </div>
-                    </div>
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="visible_by_client" value="1" id="visClient" {{ (agenda.visible_by_client ?? true) ? 'checked' : '' }}>
-                        <label for="visClient">Rendez-vous visible par défaut par le client</label>
-                    </div>
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="send_notes_on_confirm" value="1" id="notesConfirm" {{ (agenda.send_notes_on_confirm ?? false) ? 'checked' : '' }}>
-                        <label for="notesConfirm">Notes envoyées au client lors de la confirmation</label>
-                    </div>
-                    <label class="ps-label mt-2">Notes par défaut</label>
-                    <textarea name="default_appointment_notes" class="form-control form-control-sm" rows="3" placeholder="Mode de règlement, temps de consultation, consignes...">{{ agenda.default_notes ?? user.defaultAppointmentNotes }}</textarea>
-                    <p class="ps-help">Visibilité des notes :</p>
-                    <div class="ps-radio-group">
-                        <label class="ps-radio-pill"><input type="radio" name="notes_visibility" value="private" {{ (agenda.notes_visibility ?? 'shared') == 'private' ? 'checked' : '' }}> Privée</label>
-                        <label class="ps-radio-pill"><input type="radio" name="notes_visibility" value="client" {{ (agenda.notes_visibility ?? '') == 'client' ? 'checked' : '' }}> Visible par mon client</label>
-                        <label class="ps-radio-pill"><input type="radio" name="notes_visibility" value="shared" {{ (agenda.notes_visibility ?? 'shared') == 'shared' ? 'checked' : '' }}> Visible par tous</label>
-                    </div>
-                </div>
-
-                {# Confirmation et rappels #}
-                <div class="ps-card">
-                    <div class="ps-card-header">
-                        <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        </div>
-                        <div>
-                            <p class="ps-card-title">Confirmation et rappels</p>
-                            <p class="ps-card-desc">Notifications automatiques à vos clients.</p>
-                        </div>
-                    </div>
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="notify_on_confirm" value="1" id="notifyConfirm" {{ (agenda.notify_on_confirm ?? true) ? 'checked' : '' }}>
-                        <label for="notifyConfirm">Notifier le client à la confirmation</label>
-                    </div>
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="send_reminders" value="1" id="sendReminders" {{ (agenda.send_reminders ?? true) ? 'checked' : '' }}>
-                        <label for="sendReminders">Envoyer les rappels par défaut</label>
-                    </div>
-                    <div class="ps-species-group ms-4 mb-2">
-                        <label class="ps-species-pill"><input type="checkbox" name="reminder_channels[]" value="email" {{ 'email' in (agenda.reminder_channels ?? ['email']) ? 'checked' : '' }}> Email</label>
-                        <label class="ps-species-pill"><input type="checkbox" name="reminder_channels[]" value="sms" {{ 'sms' in (agenda.reminder_channels ?? []) ? 'checked' : '' }}> SMS</label>
-                    </div>
-                    <label class="ps-label">Rappel avant le rendez-vous</label>
-                    <div class="ps-row">
-                        <input type="number" name="reminder_before_days" class="ps-inline-input" value="{{ agenda.reminder_before_days ?? 1 }}" min="1" max="30">
-                        <select name="reminder_before_unit" class="ps-select">
-                            <option value="jour" {{ (agenda.reminder_before_unit ?? 'jour') == 'jour' ? 'selected' : '' }}>jour</option>
-                            <option value="heures" {{ (agenda.reminder_before_unit ?? '') == 'heures' ? 'selected' : '' }}>heures</option>
-                        </select>
-                    </div>
-                    <div class="ps-switch mt-2">
-                        <input type="checkbox" class="form-check-input" name="notify_me_reminder" value="1" id="notifyMe" {{ (agenda.notify_me ?? false) ? 'checked' : '' }}>
-                        <label for="notifyMe">Me notifier également</label>
-                    </div>
-                </div>
-
-                {# Annulation #}
-                <div class="ps-card">
-                    <div class="ps-card-header">
-                        <div class="ps-card-icon" style="background: rgba(220,53,69,0.1); color: #dc3545;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                        </div>
-                        <div>
-                            <p class="ps-card-title">Annulation par le client</p>
-                            <p class="ps-card-desc">Conditions d'annulation de vos rendez-vous.</p>
-                        </div>
-                    </div>
-                    <div class="ps-switch">
-                        <input type="checkbox" class="form-check-input" name="allow_cancellation" value="1" id="allowCancel" {{ (agenda.allow_cancellation ?? true) ? 'checked' : '' }}>
-                        <label for="allowCancel">Autoriser l'annulation en ligne</label>
-                    </div>
-                    <label class="ps-label">Délai minimum avant le rendez-vous</label>
-                    <div class="ps-row">
-                        <input type="number" name="cancel_min_hours" class="ps-inline-input" value="{{ agenda.cancel_min_hours ?? 24 }}" min="1">
-                        <select name="cancel_min_unit" class="ps-select">
-                            <option value="heures" {{ (agenda.cancel_min_unit ?? 'heures') == 'heures' ? 'selected' : '' }}>heures</option>
-                            <option value="jours" {{ (agenda.cancel_min_unit ?? '') == 'jours' ? 'selected' : '' }}>jours</option>
-                        </select>
-                    </div>
-                    <div class="ps-switch mt-2">
-                        <input type="checkbox" class="form-check-input" name="notify_me_cancel" value="1" id="notifyCancel" {{ (agenda.notify_me_cancel ?? true) ? 'checked' : '' }}>
-                        <label for="notifyCancel">Me notifier en cas d'annulation</label>
-                    </div>
+                    <label class="pa-toggle mt-2" for="customDuration">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Autoriser une durée personnalisée</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="allow_custom_duration" value="1" id="customDuration" {{ (agenda.allow_custom_duration ?? false) ? 'checked' : '' }}>
+                    </label>
                 </div>
             </div>
 
-            {# ── Colonne droite : Réservation / Horaires ── #}
-            <div class="col-12 col-lg-6">
-                {# Réservation en ligne #}
-                <div class="ps-card">
+            {# ── Horaires ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: var(--accent-color);">
                     <div class="ps-card-header">
-                        <div class="ps-card-icon" style="background: rgba(34,197,94,0.1); color: #16a34a;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        </div>
-                        <div>
-                            <p class="ps-card-title">Réservation en ligne</p>
-                            <p class="ps-card-desc">Activez la réservation et définissez qui peut réserver.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <label class="ps-label mb-0">Activation</label>
-                        <div class="form-check form-switch">
-                            <input type="checkbox" class="form-check-input" name="booking_enabled" value="1" id="bookingEnabled" {{ (agenda.booking_enabled ?? false) ? 'checked' : '' }}>
-                        </div>
-                    </div>
-                    <label class="ps-label">Qui peut réserver ?</label>
-                    <select name="booking_who" class="form-control form-control-sm mb-3">
-                        <option value="clients" {{ (agenda.booking_who ?? 'clients') == 'clients' ? 'selected' : '' }}>Clients du répertoire</option>
-                        <option value="all" {{ (agenda.booking_who ?? '') == 'all' ? 'selected' : '' }}>Tous les utilisateurs</option>
-                    </select>
-
-                    <label class="ps-label">Espèces possibles en cabinet</label>
-                    <div class="ps-species-group">
-                        {% for sp in ['Équidé', 'Chien', 'Chat', 'Bovin', 'Lapin', 'NAC'] %}
-                        <label class="ps-species-pill">
-                            <input type="checkbox" name="booking_species[]" value="{{ sp }}" {{ sp in (agenda.booking_species ?? ['Équidé']) ? 'checked' : '' }}>
-                            {{ sp }}
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                {# Horaires de consultation #}
-                <div class="ps-card">
-                    <div class="ps-card-header">
-                        <div class="ps-card-icon" style="background: rgba(200,151,62,0.1); color: var(--accent-color);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <div class="ps-card-icon" style="background: rgba(200,151,62,0.12); color: var(--accent-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         </div>
                         <div>
                             <p class="ps-card-title">Horaires de consultation</p>
                             <p class="ps-card-desc">Vos disponibilités hebdomadaires.</p>
+                            <span class="pa-pill pa-card-pill" id="pillHours"><span class="dot"></span><span class="txt">—</span></span>
                         </div>
                     </div>
+
                     {% set days = [
-                        {key: 'lundi', label: 'Lun'},
-                        {key: 'mardi', label: 'Mar'},
-                        {key: 'mercredi', label: 'Mer'},
-                        {key: 'jeudi', label: 'Jeu'},
-                        {key: 'vendredi', label: 'Ven'},
-                        {key: 'samedi', label: 'Sam'},
-                        {key: 'dimanche', label: 'Dim'}
+                        {key: 'lundi', label: 'Lundi', short: 'Lun'},
+                        {key: 'mardi', label: 'Mardi', short: 'Mar'},
+                        {key: 'mercredi', label: 'Mercredi', short: 'Mer'},
+                        {key: 'jeudi', label: 'Jeudi', short: 'Jeu'},
+                        {key: 'vendredi', label: 'Vendredi', short: 'Ven'},
+                        {key: 'samedi', label: 'Samedi', short: 'Sam'},
+                        {key: 'dimanche', label: 'Dimanche', short: 'Dim'}
                     ] %}
-                    {% for day in days %}
-                    {% set dh = hours[day.key] ?? {} %}
-                    <div class="ps-day-row">
-                        <div class="form-check" style="min-width: 65px;">
-                            <input type="checkbox" class="form-check-input hour-toggle" name="hours_{{ day.key }}_enabled" value="1" id="h_{{ day.key }}" data-day="{{ day.key }}" {{ (dh.enabled ?? false) ? 'checked' : '' }}>
-                            <label class="form-check-label ps-day-label" for="h_{{ day.key }}">{{ day.label }}</label>
+                    <div class="pa-days">
+                        {% for day in days %}
+                        {% set dh = hours[day.key] ?? {} %}
+                        {% set open = dh.enabled ?? false %}
+                        <div class="pa-day {{ open ? '' : 'is-closed' }}" data-day="{{ day.key }}" data-label="{{ day.label|lower }}">
+                            <input type="checkbox" class="pa-switch pa-day-toggle" name="hours_{{ day.key }}_enabled" value="1" id="h_{{ day.key }}" {{ open ? 'checked' : '' }} aria-label="{{ day.label }} ouvert">
+                            <label class="pa-day-name" for="h_{{ day.key }}">{{ day.label }}</label>
+                            <div class="pa-day-times">
+                                <input type="time" name="hours_{{ day.key }}_start" class="ps-inline-input pa-time pa-time-start" value="{{ dh.start ?? '09:00' }}" aria-label="{{ day.label }} : début">
+                                <span class="pa-time-sep">–</span>
+                                <input type="time" name="hours_{{ day.key }}_end" class="ps-inline-input pa-time pa-time-end" value="{{ dh.end ?? '18:00' }}" aria-label="{{ day.label }} : fin">
+                            </div>
+                            <span class="pa-day-closed">Fermé</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2 hour-times" data-day="{{ day.key }}" style="{{ not (dh.enabled ?? false) ? 'opacity:0.35;pointer-events:none;' : '' }}">
-                            <input type="text" name="hours_{{ day.key }}_start" class="ps-inline-input" value="{{ dh.start ?? '09:00' }}" placeholder="09:00">
-                            <span style="font-size:0.78rem;color:var(--taupe);">→</span>
-                            <input type="text" name="hours_{{ day.key }}_end" class="ps-inline-input" value="{{ dh.end ?? '18:00' }}" placeholder="18:00">
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="pa-link-btn" id="copyHours" hidden>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span id="copyHoursLabel">Copier les horaires sur les autres jours ouverts</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {# ═══ 2. Communication client ═══ #}
+        <div class="pa-section-title"><span class="pa-step">2</span>Communication avec vos clients</div>
+        <div class="row g-3 mb-4">
+            {# ── Notes & visibilité ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: #e0796b;">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(224,121,107,0.12); color: #e0796b;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Notes et visibilité</p>
+                            <p class="ps-card-desc">Ce que voit votre client.</p>
+                            <span class="pa-pill pa-card-pill" id="pillNotes"><span class="dot"></span><span class="txt">—</span></span>
                         </div>
                     </div>
-                    {% endfor %}
+
+                    <label class="pa-toggle" for="visClient">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Rendez-vous visible par le client</span>
+                            <span class="pa-toggle-desc">Réglage appliqué par défaut à vos nouveaux rendez-vous.</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="visible_by_client" value="1" id="visClient" {{ (agenda.visible_by_client ?? true) ? 'checked' : '' }}>
+                    </label>
+
+                    <label class="ps-label mt-3" for="defaultAppointmentNotes">Notes par défaut</label>
+                    <textarea name="default_appointment_notes" id="defaultAppointmentNotes" class="form-control form-control-sm" rows="3" placeholder="Mode de règlement, durée de consultation, consignes…">{{ agenda.default_notes ?? user.defaultAppointmentNotes }}</textarea>
+                    <p class="ps-help">Pré-remplies dans chaque nouveau rendez-vous, modifiables au cas par cas.</p>
+
+                    <span class="ps-label mt-3">Visibilité des notes</span>
+                    <div class="pa-segmented" role="radiogroup" aria-label="Visibilité des notes">
+                        <label class="pa-seg">
+                            <input type="radio" name="notes_visibility" value="private" {{ a_notes_vis == 'private' ? 'checked' : '' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Privées
+                        </label>
+                        <label class="pa-seg">
+                            <input type="radio" name="notes_visibility" value="client" {{ a_notes_vis == 'client' ? 'checked' : '' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Mon client
+                        </label>
+                        <label class="pa-seg">
+                            <input type="radio" name="notes_visibility" value="shared" {{ a_notes_vis == 'shared' ? 'checked' : '' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Client et pros
+                        </label>
+                    </div>
+                    <p class="ps-help" id="notesVisDesc">&nbsp;</p>
+
+                    <label class="pa-toggle mt-1" for="notesConfirm" id="notesConfirmRow">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Joindre les notes à la confirmation</span>
+                            <span class="pa-toggle-desc" id="notesConfirmDesc">Les notes accompagnent le message de confirmation envoyé au client.</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="send_notes_on_confirm" value="1" id="notesConfirm" {{ (agenda.send_notes_on_confirm ?? false) ? 'checked' : '' }}>
+                    </label>
+                </div>
+            </div>
+
+            {# ── Confirmation & rappels ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: var(--primary-color);">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(26,77,69,0.1); color: var(--primary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Confirmation et rappels</p>
+                            <p class="ps-card-desc">Messages automatiques envoyés à vos clients.</p>
+                            <span class="pa-pill pa-card-pill" id="pillReminders"><span class="dot"></span><span class="txt">—</span></span>
+                        </div>
+                    </div>
+
+                    <label class="pa-toggle" for="notifyConfirm">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Message de confirmation</span>
+                            <span class="pa-toggle-desc">Prévenir le client quand le rendez-vous est confirmé.</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="notify_on_confirm" value="1" id="notifyConfirm" {{ (agenda.notify_on_confirm ?? true) ? 'checked' : '' }}>
+                    </label>
+
+                    <label class="pa-toggle" for="sendReminders">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Rappels avant le rendez-vous</span>
+                            <span class="pa-toggle-desc">Activés par défaut sur vos nouveaux rendez-vous.</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="send_reminders" value="1" id="sendReminders" data-controls="remindersOptions" {{ (agenda.send_reminders ?? true) ? 'checked' : '' }}>
+                    </label>
+
+                    <div class="pa-dependent" id="remindersOptions">
+                        <span class="ps-label">Canaux</span>
+                        <div class="ps-species-group mb-3">
+                            <label class="ps-species-pill pa-channel">
+                                <input type="checkbox" name="reminder_channels[]" value="email" {{ 'email' in a_channels ? 'checked' : '' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                Email
+                            </label>
+                            <label class="ps-species-pill pa-channel">
+                                <input type="checkbox" name="reminder_channels[]" value="sms" {{ 'sms' in a_channels ? 'checked' : '' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                SMS
+                            </label>
+                        </div>
+                        <div class="pa-sentence">
+                            Envoyé
+                            <input type="number" name="reminder_before_days" id="reminderBefore" class="ps-inline-input" value="{{ agenda.reminder_before_days ?? 1 }}" min="1" max="30" aria-label="Délai du rappel">
+                            <select name="reminder_before_unit" id="reminderUnit" class="ps-select" aria-label="Unité du délai">
+                                <option value="jour" {{ (agenda.reminder_before_unit ?? 'jour') == 'jour' ? 'selected' : '' }}>jour(s)</option>
+                                <option value="heures" {{ (agenda.reminder_before_unit ?? '') == 'heures' ? 'selected' : '' }}>heure(s)</option>
+                            </select>
+                            avant le RDV
+                        </div>
+                        <label class="pa-toggle mt-2" for="notifyMe">
+                            <span class="pa-toggle-text">
+                                <span class="pa-toggle-title">M'envoyer aussi le rappel</span>
+                            </span>
+                            <input type="checkbox" class="pa-switch" name="notify_me_reminder" value="1" id="notifyMe" {{ (agenda.notify_me ?? false) ? 'checked' : '' }}>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ═══ 3. Réservation & annulation ═══ #}
+        <div class="pa-section-title"><span class="pa-step">3</span>Réservation et annulation</div>
+        <div class="row g-3">
+            {# ── Annulation ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: var(--danger-color);">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(239,68,68,0.1); color: var(--danger-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="18"/><line x1="14" y1="14" x2="10" y2="18"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Annulation par le client</p>
+                            <p class="ps-card-desc">Conditions d'annulation de vos rendez-vous.</p>
+                            <span class="pa-pill pa-card-pill" id="pillCancel"><span class="dot"></span><span class="txt">—</span></span>
+                        </div>
+                    </div>
+
+                    <label class="pa-toggle" for="allowCancel">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Annulation en ligne</span>
+                            <span class="pa-toggle-desc">Le client peut annuler lui-même depuis AniCare.</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="allow_cancellation" value="1" id="allowCancel" data-controls="cancelOptions" {{ (agenda.allow_cancellation ?? true) ? 'checked' : '' }}>
+                    </label>
+
+                    <div class="pa-dependent" id="cancelOptions">
+                        <div class="pa-sentence">
+                            Jusqu'à
+                            <input type="number" name="cancel_min_hours" id="cancelMin" class="ps-inline-input" value="{{ agenda.cancel_min_hours ?? 24 }}" min="1" aria-label="Délai minimum d'annulation">
+                            <select name="cancel_min_unit" id="cancelUnit" class="ps-select" aria-label="Unité du délai d'annulation">
+                                <option value="heures" {{ (agenda.cancel_min_unit ?? 'heures') == 'heures' ? 'selected' : '' }}>heure(s)</option>
+                                <option value="jours" {{ (agenda.cancel_min_unit ?? '') == 'jours' ? 'selected' : '' }}>jour(s)</option>
+                            </select>
+                            avant le RDV
+                        </div>
+                    </div>
+
+                    <label class="pa-toggle" for="notifyCancel">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Me prévenir en cas d'annulation</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="notify_me_cancel" value="1" id="notifyCancel" {{ (agenda.notify_me_cancel ?? true) ? 'checked' : '' }}>
+                    </label>
+                </div>
+            </div>
+
+            {# ── Réservation en ligne ── #}
+            <div class="col-12 col-xl-6">
+                <div class="ps-card pa-card" style="--pa-accent: var(--secondary-color);">
+                    <div class="ps-card-header">
+                        <div class="ps-card-icon" style="background: rgba(74,63,51,0.08); color: var(--secondary-color);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </div>
+                        <div>
+                            <p class="ps-card-title">Réservation en ligne</p>
+                            <p class="ps-card-desc">Activez la réservation et définissez qui peut réserver.</p>
+                            <span class="pa-pill pa-card-pill" id="pillBooking"><span class="dot"></span><span class="txt">—</span></span>
+                        </div>
+                    </div>
+
+                    <label class="pa-toggle" for="bookingEnabled">
+                        <span class="pa-toggle-text">
+                            <span class="pa-toggle-title">Activer la réservation en ligne</span>
+                        </span>
+                        <input type="checkbox" class="pa-switch" name="booking_enabled" value="1" id="bookingEnabled" data-controls="bookingOptions" {{ (agenda.booking_enabled ?? false) ? 'checked' : '' }}>
+                    </label>
+
+                    <div class="pa-dependent" id="bookingOptions">
+                        <span class="ps-label">Qui peut réserver ?</span>
+                        <div class="pa-segmented mb-3" role="radiogroup" aria-label="Qui peut réserver">
+                            <label class="pa-seg">
+                                <input type="radio" name="booking_who" value="clients" {{ (agenda.booking_who ?? 'clients') == 'clients' ? 'checked' : '' }}>
+                                Clients du répertoire
+                            </label>
+                            <label class="pa-seg">
+                                <input type="radio" name="booking_who" value="all" {{ (agenda.booking_who ?? '') == 'all' ? 'checked' : '' }}>
+                                Tous les utilisateurs
+                            </label>
+                        </div>
+                        <span class="ps-label">Espèces acceptées en cabinet</span>
+                        <div class="ps-species-group">
+                            {% for sp in ['Équidé', 'Chien', 'Chat', 'Bovin', 'Lapin', 'NAC'] %}
+                            <label class="ps-species-pill pa-species">
+                                <input type="checkbox" name="booking_species[]" value="{{ sp }}" {{ sp in a_species ? 'checked' : '' }}>
+                                <svg class="pa-check" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                {{ sp }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -952,7 +1399,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Enregistrer les modifications
             </button>
-            <a href="{{ path('app_profile') }}" class="btn-back">← Retour</a>
+            <span class="pa-dirty" id="agendaDirty" hidden><span class="dot"></span>Modifications non enregistrées</span>
+            <a href="{{ path('app_profile') }}" class="btn-back ms-auto">← Retour</a>
         </div>
     </form>
     {% endif %}
@@ -1191,6 +1639,37 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ── Outils communs aux formulaires de paramètres ──
+    function psSetPill(id, text, state) {
+        var pill = document.getElementById(id);
+        if (!pill) return;
+        pill.querySelector('.txt').textContent = text;
+        pill.classList.toggle('is-off', state === 'off');
+        pill.classList.toggle('is-warn', state === 'warn');
+    }
+    function psSetInert(el, off) {
+        el.classList.toggle('is-off', off);
+        if (off) { el.setAttribute('inert', ''); } else { el.removeAttribute('inert'); }
+    }
+    // Affiche « Modifications non enregistrées » et renvoie la fonction qui le déclenche
+    function psTrackDirty(form) {
+        var indicator = form.querySelector('.pa-dirty');
+        function mark() { if (indicator) indicator.hidden = false; }
+        ['input', 'change'].forEach(function(evt) {
+            form.addEventListener(evt, function(e) {
+                if (!e.target.closest('[data-no-dirty]')) mark();
+            });
+        });
+        // Un champ invalide dans un bloc désactivé doit rester atteignable par la validation du navigateur
+        var saveBtn = form.querySelector('.btn-save');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function() {
+                form.querySelectorAll('[inert]').forEach(function(el) { el.removeAttribute('inert'); });
+            });
+        }
+        return mark;
+    }
+
     // ── France Tile Map ──
     // ── Load France SVG map from CDN ──
     (function() {
@@ -1244,28 +1723,193 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (typeof window._deptUpdateUI === 'function') window._deptUpdateUI();
             })
             .catch(function() {
-                mapEl.innerHTML = '<p class="france-map-loading" style="color:#c00;">Impossible de charger la carte. Utilisez la sélection par région ci-dessous.</p>';
+                mapEl.innerHTML = '<p class="france-map-loading" style="color:#c00;">Impossible de charger la carte. Utilisez la grille ci-dessous.</p>';
+                var fallback = document.getElementById('regionGridWrap');
+                if (fallback) fallback.hidden = false;
             });
     })();
 
-    // ── Region grid toggle ──
-    var regionToggle = document.getElementById('regionGridToggle');
-    var regionWrap = document.getElementById('regionGridWrap');
-    if (regionToggle && regionWrap) {
-        regionToggle.addEventListener('click', function() {
-            var open = regionWrap.style.display !== 'none';
-            regionWrap.style.display = open ? 'none' : 'block';
-            regionToggle.classList.toggle('open', !open);
-        });
-    }
+    // ── Onglet Agenda ──
+    (function() {
+        var form = document.getElementById('agendaForm');
+        if (!form) return;
 
-    // ── Hour toggles ──
-    document.querySelectorAll('.hour-toggle').forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            var times = document.querySelector('.hour-times[data-day="' + this.dataset.day + '"]');
-            if (times) { times.style.opacity = this.checked ? '1' : '0.35'; times.style.pointerEvents = this.checked ? '' : 'none'; }
+        var setPill = psSetPill;
+        var setInert = psSetInert;
+        var markDirty = psTrackDirty(form);
+        function intVal(id, fallback) {
+            var v = parseInt(document.getElementById(id).value, 10);
+            return isNaN(v) ? fallback : v;
+        }
+        function plural(n, word) { return n + ' ' + word + (n > 1 ? 's' : ''); }
+        function fmtTime(minutes) {
+            minutes = ((minutes % 1440) + 1440) % 1440;
+            var h = Math.floor(minutes / 60), m = minutes % 60;
+            return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+        }
+        function toMinutes(v) {
+            if (!v) return null;
+            var p = v.split(':');
+            return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+        }
+
+        // Interrupteurs qui activent un bloc d'options (les valeurs restent envoyées même désactivées)
+        form.querySelectorAll('[data-controls]').forEach(function(sw) {
+            var target = document.getElementById(sw.dataset.controls);
+            function sync() { if (target) setInert(target, !sw.checked); }
+            sw.addEventListener('change', sync);
+            sync();
         });
-    });
+
+        // Préréglages de durée
+        form.querySelectorAll('.pa-presets').forEach(function(group) {
+            var input = document.getElementById(group.dataset.target);
+            var chips = group.querySelectorAll('.pa-chip');
+            function sync() {
+                chips.forEach(function(c) { c.classList.toggle('active', c.dataset.value === String(parseInt(input.value, 10))); });
+            }
+            chips.forEach(function(c) {
+                c.addEventListener('click', function() {
+                    input.value = c.dataset.value;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            });
+            input.addEventListener('input', sync);
+            sync();
+        });
+
+        // Aperçu d'un créneau
+        function updateDuration() {
+            var dur = Math.max(intVal('defaultDuration', 60), 0);
+            var gap = Math.max(intVal('timeBetween', 0), 0);
+            var start = 9 * 60;
+            document.getElementById('barAppt').style.flexGrow = Math.max(dur, 1);
+            document.getElementById('barApptLabel').textContent = 'RDV · ' + dur + ' min';
+            var gapBar = document.getElementById('barGap');
+            gapBar.style.display = gap > 0 ? '' : 'none';
+            gapBar.style.flexGrow = gap;
+            document.getElementById('barGapLabel').textContent = gap + ' min';
+            document.getElementById('previewEnd').textContent = fmtTime(start + dur);
+            document.getElementById('previewNext').textContent = fmtTime(start + dur + gap);
+            setPill('pillDuration', dur + ' min' + (gap > 0 ? ' · +' + gap + ' min' : ''), null);
+        }
+
+        // Horaires
+        var dayRows = form.querySelectorAll('.pa-day');
+        var copyBtn = document.getElementById('copyHours');
+        var copyLabel = document.getElementById('copyHoursLabel');
+        function openRows() {
+            return Array.prototype.filter.call(dayRows, function(r) { return r.querySelector('.pa-day-toggle').checked; });
+        }
+        function updateHours() {
+            var total = 0;
+            dayRows.forEach(function(row) {
+                var on = row.querySelector('.pa-day-toggle').checked;
+                var startI = row.querySelector('.pa-time-start'), endI = row.querySelector('.pa-time-end');
+                var s = toMinutes(startI.value), e = toMinutes(endI.value);
+                var invalid = on && s !== null && e !== null && e <= s;
+                row.classList.toggle('is-closed', !on);
+                row.classList.toggle('is-invalid', invalid);
+                endI.setCustomValidity(invalid ? "L'heure de fin doit être après l'heure de début." : '');
+                if (on && !invalid && s !== null && e !== null) total += e - s;
+            });
+            var open = openRows();
+            if (open.length === 0) {
+                setPill('pillHours', 'Aucun horaire', 'off');
+            } else {
+                var h = Math.round(total / 6) / 10;
+                setPill('pillHours', plural(open.length, 'jour') + ' · ' + String(h).replace('.', ',') + ' h/sem.', null);
+            }
+            if (copyBtn) {
+                copyBtn.hidden = open.length < 2;
+                copyBtn.classList.remove('done');
+                if (open.length >= 2) {
+                    copyLabel.textContent = 'Appliquer les horaires du ' + open[0].dataset.label + ' aux autres jours ouverts';
+                }
+            }
+        }
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                var open = openRows();
+                if (open.length < 2) return;
+                var s = open[0].querySelector('.pa-time-start').value;
+                var e = open[0].querySelector('.pa-time-end').value;
+                open.slice(1).forEach(function(r) {
+                    r.querySelector('.pa-time-start').value = s;
+                    r.querySelector('.pa-time-end').value = e;
+                });
+                updateHours();
+                markDirty();
+                copyBtn.classList.add('done');
+                copyLabel.textContent = 'Horaires appliqués à ' + plural(open.length - 1, 'jour');
+            });
+        }
+
+        // Visibilité des notes
+        var visDescs = {
+            'private': 'Seul vous voyez ces notes.',
+            'client': 'Vous et votre client voyez ces notes.',
+            'shared': 'Visibles par votre client et les professionnels associés au rendez-vous.'
+        };
+        var visPills = { 'private': 'Notes privées', 'client': 'Notes : client', 'shared': 'Notes : client + pros' };
+        var notesConfirm = document.getElementById('notesConfirm');
+        var notesConfirmRow = document.getElementById('notesConfirmRow');
+        var notesConfirmDesc = document.getElementById('notesConfirmDesc');
+        var notesConfirmDefault = notesConfirmDesc.textContent;
+        var notesConfirmMemory = notesConfirm.checked;
+        function updateNotes() {
+            var checked = form.querySelector('input[name="notes_visibility"]:checked');
+            var v = checked ? checked.value : 'shared';
+            var priv = v === 'private';
+            // Des notes privées ne peuvent pas partir avec la confirmation envoyée au client
+            if (priv && !notesConfirmRow.classList.contains('is-off')) {
+                notesConfirmMemory = notesConfirm.checked;
+                notesConfirm.checked = false;
+            }
+            if (!priv && notesConfirmRow.classList.contains('is-off')) {
+                notesConfirm.checked = notesConfirmMemory;
+            }
+            setInert(notesConfirmRow, priv);
+            notesConfirmDesc.textContent = priv ? 'Indisponible : vos notes sont privées.' : notesConfirmDefault;
+            document.getElementById('notesVisDesc').textContent = visDescs[v] || '';
+            setPill('pillNotes', visPills[v] || '', priv ? 'off' : null);
+        }
+
+        function updateReminders() {
+            if (!document.getElementById('sendReminders').checked) { setPill('pillReminders', 'Rappels désactivés', 'off'); return; }
+            var channels = Array.prototype.map.call(form.querySelectorAll('input[name="reminder_channels[]"]:checked'), function(i) {
+                return i.value === 'sms' ? 'SMS' : 'Email';
+            });
+            if (channels.length === 0) { setPill('pillReminders', 'Aucun canal choisi', 'warn'); return; }
+            var unit = document.getElementById('reminderUnit').value === 'heures' ? 'h' : 'j';
+            setPill('pillReminders', channels.join(' + ') + ' · ' + intVal('reminderBefore', 1) + ' ' + unit + ' avant', null);
+        }
+
+        function updateCancel() {
+            if (!document.getElementById('allowCancel').checked) { setPill('pillCancel', 'Désactivée', 'off'); return; }
+            var unit = document.getElementById('cancelUnit').value === 'jours' ? 'j' : 'h';
+            setPill('pillCancel', "Jusqu'à " + intVal('cancelMin', 24) + ' ' + unit + ' avant', null);
+        }
+
+        function updateBooking() {
+            if (!document.getElementById('bookingEnabled').checked) { setPill('pillBooking', 'Désactivée', 'off'); return; }
+            if (!form.querySelector('input[name="booking_species[]"]:checked')) { setPill('pillBooking', 'Aucune espèce', 'warn'); return; }
+            setPill('pillBooking', 'Active', null);
+        }
+
+        function updateAll() {
+            updateDuration();
+            updateHours();
+            updateNotes();
+            updateReminders();
+            updateCancel();
+            updateBooking();
+        }
+        ['input', 'change'].forEach(function(evt) {
+            form.addEventListener(evt, updateAll);
+        });
+        updateAll();
+    })();
 
     // ── Generic list management ──
     function setupList(listId, addBtnId, dataId, fieldDefs) {
@@ -1327,120 +1971,290 @@ document.addEventListener('DOMContentLoaded', function() {
         {key: 'address', cls: 'loc-address', placeholder: 'Adresse', flex: 2}
     ]);
 
-    // Departments map + badges
-    var deptsList = document.getElementById('deptsList');
-    var deptsData = document.getElementById('deptsData');
-    var deptInput = document.getElementById('deptInput');
-    var addDeptBtn = document.getElementById('addDept');
-    var deptsNum = document.getElementById('deptsNum');
-    var deptsCount = document.getElementById('deptsCount');
+    // ── Onglet Profil ──
+    (function() {
+        var form = document.getElementById('profilForm');
+        if (!form) return;
+        var markDirty = psTrackDirty(form);
 
-    if (deptsList) {
-        function getSelectedDepts() {
-            var depts = [];
-            deptsList.querySelectorAll('.dept-badge').forEach(function(b) {
-                var rm = b.querySelector('.dept-remove');
-                if (rm) depts.push(rm.dataset.dept);
-            });
-            return depts;
+        var company = document.getElementById('companyName');
+        var siren = document.getElementById('siren');
+        var sirenWrap = siren.closest('.pf-field-status');
+        var sirenHelp = document.getElementById('sirenHelp');
+        var sirenHelpDefault = sirenHelp.textContent;
+        var showCompany = document.getElementById('showCompany');
+        var showCompanyRow = document.getElementById('showCompanyRow');
+        var showCompanyDesc = document.getElementById('showCompanyDesc');
+        var showCompanyMemory = showCompany.checked;
+        var website = document.getElementById('website');
+        var desc = document.getElementById('profileDescription');
+        var locationsList = document.getElementById('locationsList');
+
+        // ── Entreprise ──
+        function sirenDigits() { return siren.value.replace(/\D/g, ''); }
+        function sirenState() {
+            var d = sirenDigits();
+            if (!d) return 'empty';
+            if (d.length === 9) return 'valid';
+            return d.length === 14 ? 'siret' : 'invalid';
+        }
+        siren.addEventListener('blur', function() {
+            var d = sirenDigits();
+            if (d.length === 9) siren.value = d.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+        });
+        function updateCompany() {
+            var hasName = company.value.trim() !== '';
+            // Sans nom d'entreprise, il n'y a rien à afficher sur les comptes rendus
+            if (!hasName && !showCompanyRow.classList.contains('is-off')) {
+                showCompanyMemory = showCompany.checked;
+                showCompany.checked = false;
+            }
+            if (hasName && showCompanyRow.classList.contains('is-off')) {
+                showCompany.checked = showCompanyMemory;
+            }
+            psSetInert(showCompanyRow, !hasName);
+            showCompanyDesc.hidden = hasName;
+
+            var st = sirenState();
+            var warn = st === 'invalid' || st === 'siret';
+            sirenWrap.classList.toggle('is-valid', st === 'valid');
+            sirenWrap.classList.toggle('is-warn', warn);
+            sirenHelp.classList.toggle('is-warn', warn);
+            sirenHelp.textContent = st === 'siret'
+                ? 'Ceci ressemble à un SIRET (14 chiffres) : le SIREN correspond aux 9 premiers.'
+                : (st === 'invalid' ? 'Le SIREN compte 9 chiffres (' + sirenDigits().length + ' saisis).' : sirenHelpDefault);
+
+            if (!hasName && st === 'empty') psSetPill('pillCompany', 'À compléter', 'warn');
+            else if (!hasName) psSetPill('pillCompany', 'Nom manquant', 'warn');
+            else if (st !== 'valid') psSetPill('pillCompany', st === 'empty' ? 'SIREN manquant' : 'SIREN à vérifier', 'warn');
+            else psSetPill('pillCompany', 'Complet', null);
         }
 
+        // ── Présentation ──
+        // Le navigateur refuse une adresse sans « https:// » : on la complète pour l'utilisateur
+        function normalizeWebsite() {
+            var v = website.value.trim();
+            if (v && !/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) {
+                website.value = 'https://' + v;
+                updateAll();
+            }
+        }
+        website.addEventListener('blur', normalizeWebsite);
+        form.querySelector('.btn-save').addEventListener('click', normalizeWebsite);
+        function updatePresentation() {
+            var n = desc.value.trim().length;
+            document.getElementById('descCounter').textContent = n + ' caractère' + (n > 1 ? 's' : '');
+            var hasSite = website.value.trim() !== '';
+            if (n === 0) psSetPill('pillPresentation', hasSite ? 'Description manquante' : 'À compléter', 'warn');
+            else psSetPill('pillPresentation', hasSite ? 'Description et site web' : 'Description', null);
+        }
+
+        // ── Lieux de consultation ──
+        function updateLocations() {
+            var n = Array.prototype.filter.call(locationsList.querySelectorAll('.ps-list-item'), function(row) {
+                return row.querySelector('.loc-name').value.trim() || row.querySelector('.loc-address').value.trim();
+            }).length;
+            psSetPill('pillLocations', n === 0 ? 'Aucun lieu' : n + (n > 1 ? ' lieux' : ' lieu'), n === 0 ? 'off' : null);
+        }
+        // Ajout et suppression de lignes : pas d'événement « input », on observe la liste
+        new MutationObserver(function() { updateLocations(); markDirty(); })
+            .observe(locationsList, { childList: true });
+
+        // ── Zones d'intervention ──
+        var deptsList = document.getElementById('deptsList');
+        var deptInput = document.getElementById('deptInput');
+        var deptFeedback = document.getElementById('deptFeedback');
+        var clearBtn = document.getElementById('clearDepts');
+        var deptNames = {};
+        try { deptNames = JSON.parse(document.getElementById('deptNames').textContent); } catch (e) {}
+        deptInput.setAttribute('data-no-dirty', '');
+
+        function deptKey(d) { return d === '2A' ? 20.1 : (d === '2B' ? 20.2 : parseInt(d, 10)); }
+        function normalizeDept(raw) {
+            var d = String(raw).trim().toUpperCase();
+            if (/^\d$/.test(d)) d = '0' + d;
+            return Object.prototype.hasOwnProperty.call(deptNames, d) ? d : null;
+        }
+        function getSelectedDepts() {
+            return Array.prototype.map.call(deptsList.querySelectorAll('.dept-remove'), function(b) { return b.dataset.dept; });
+        }
+        function makeBadge(d) {
+            var badge = document.createElement('span');
+            badge.className = 'badge dept-badge';
+            var code = document.createElement('span');
+            code.className = 'dept-code';
+            code.textContent = d;
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'dept-remove';
+            rm.dataset.dept = d;
+            rm.setAttribute('aria-label', 'Retirer ' + d);
+            rm.textContent = '×';
+            badge.appendChild(code);
+            badge.appendChild(document.createTextNode(' ' + (deptNames[d] || '') + ' '));
+            badge.appendChild(rm);
+            return badge;
+        }
+        // Ajoute en gardant l'ordre des numéros ; renvoie false si déjà sélectionné
+        function addDept(d) {
+            if (getSelectedDepts().indexOf(d) !== -1) return false;
+            var next = null;
+            deptsList.querySelectorAll('.dept-remove').forEach(function(b) {
+                if (!next && deptKey(b.dataset.dept) > deptKey(d)) next = b.closest('.dept-badge');
+            });
+            deptsList.insertBefore(makeBadge(d), next);
+            return true;
+        }
+        function removeDept(d) {
+            deptsList.querySelectorAll('.dept-remove').forEach(function(b) {
+                if (b.dataset.dept === d) b.closest('.dept-badge').remove();
+            });
+        }
         function updateDeptsUI() {
             var depts = getSelectedDepts();
-            if (deptsNum) deptsNum.textContent = depts.length;
-            if (deptsCount) deptsCount.innerHTML = '<strong>' + depts.length + '</strong> département' + (depts.length > 1 ? 's' : '') + ' sélectionné' + (depts.length > 1 ? 's' : '');
-            // Sync region grid buttons
+            var n = depts.length;
+            psSetPill('pillDepts', n === 0 ? 'Aucune zone' : n + ' département' + (n > 1 ? 's' : ''), n === 0 ? 'warn' : null);
+            clearBtn.hidden = n === 0;
             document.querySelectorAll('.dept-btn').forEach(function(btn) {
                 btn.classList.toggle('selected', depts.indexOf(btn.dataset.dept) !== -1);
             });
-            // Sync SVG geographic map paths
             document.querySelectorAll('#franceMap svg path[id]').forEach(function(path) {
                 path.classList.toggle('selected', depts.indexOf(path.id) !== -1);
             });
-            // Update region counts
+            document.querySelectorAll('.pf-region').forEach(function(chip) {
+                var list = chip.dataset.regionDepts.split(',');
+                var c = list.filter(function(x) { return depts.indexOf(x) !== -1; }).length;
+                chip.querySelector('[data-region-count]').textContent = c + '/' + list.length;
+                chip.classList.toggle('full', c === list.length);
+                chip.classList.toggle('partial', c > 0 && c < list.length);
+            });
             document.querySelectorAll('.dept-region').forEach(function(region) {
                 var count = region.querySelectorAll('.dept-btn.selected').length;
                 var countEl = region.querySelector('.dept-region-count');
-                if (countEl) {
-                    countEl.textContent = count;
-                    countEl.classList.toggle('has-selection', count > 0);
-                }
-                var total = region.querySelectorAll('.dept-btn').length;
-                var header = region.querySelector('.dept-region-header');
-                if (header) header.classList.toggle('all-selected', count === total && count > 0);
+                countEl.textContent = count;
+                countEl.classList.toggle('has-selection', count > 0);
+                region.querySelector('.dept-region-header').classList.toggle('all-selected', count > 0 && count === region.querySelectorAll('.dept-btn').length);
             });
+            updateProgress();
         }
-        // Expose for async SVG map
-        window._deptAddDept = addDept;
-        window._deptRemoveDept = removeDept;
+        function toggleDepts(list) {
+            var depts = getSelectedDepts();
+            var all = list.every(function(x) { return depts.indexOf(x) !== -1; });
+            list.forEach(function(x) { if (all) { removeDept(x); } else { addDept(x); } });
+            updateDeptsUI();
+            markDirty();
+        }
+
+        // Carte (chargée de façon asynchrone)
+        window._deptAddDept = function(d) { if (addDept(d)) { updateDeptsUI(); markDirty(); } };
+        window._deptRemoveDept = function(d) { removeDept(d); updateDeptsUI(); markDirty(); };
         window._deptUpdateUI = updateDeptsUI;
 
-        function addDept(d) {
-            d = d.trim();
-            if (!d || getSelectedDepts().indexOf(d) !== -1) return;
-            var span = document.createElement('span');
-            span.className = 'badge dept-badge';
-            span.innerHTML = d + ' <button type="button" class="btn-close btn-close-sm ms-1 dept-remove" style="font-size:0.5rem;" data-dept="' + d + '"></button>';
-            deptsList.appendChild(span);
-            updateDeptsUI();
-        }
-
-        function removeDept(d) {
-            deptsList.querySelectorAll('.dept-badge').forEach(function(b) {
-                var rm = b.querySelector('.dept-remove');
-                if (rm && rm.dataset.dept === d) b.remove();
-            });
-            updateDeptsUI();
-        }
-
-        // Map button clicks
-        document.querySelectorAll('.dept-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var d = this.dataset.dept;
-                if (this.classList.contains('selected')) { removeDept(d); }
-                else { addDept(d); }
-            });
+        deptsList.addEventListener('click', function(e) {
+            var rm = e.target.closest('.dept-remove');
+            if (rm) { removeDept(rm.dataset.dept); updateDeptsUI(); markDirty(); }
         });
-
-        // Region header click = select/deselect all
+        clearBtn.addEventListener('click', function() {
+            var n = getSelectedDepts().length;
+            if (n > 3 && !window.confirm('Retirer les ' + n + ' départements sélectionnés ?')) return;
+            getSelectedDepts().forEach(removeDept);
+            updateDeptsUI();
+            markDirty();
+        });
+        document.querySelectorAll('.pf-region').forEach(function(chip) {
+            chip.addEventListener('click', function() { toggleDepts(chip.dataset.regionDepts.split(',')); });
+        });
+        document.querySelectorAll('.dept-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() { toggleDepts([btn.dataset.dept]); });
+        });
         document.querySelectorAll('.dept-region-header').forEach(function(header) {
             header.addEventListener('click', function() {
-                var region = this.closest('.dept-region');
-                var btns = region.querySelectorAll('.dept-btn');
-                var allSelected = region.querySelectorAll('.dept-btn.selected').length === btns.length;
-                btns.forEach(function(btn) {
-                    if (allSelected) { removeDept(btn.dataset.dept); }
-                    else { addDept(btn.dataset.dept); }
-                });
+                var btns = header.closest('.dept-region').querySelectorAll('.dept-btn');
+                toggleDepts(Array.prototype.map.call(btns, function(b) { return b.dataset.dept; }));
             });
         });
 
-        // Badge remove click
-        deptsList.addEventListener('click', function(e) {
-            if (e.target.classList.contains('dept-remove')) {
-                removeDept(e.target.dataset.dept);
-            }
+        // Saisie par numéro : « 83, 13 2A » ; Entrée ajoute sans envoyer le formulaire
+        function addFromInput() {
+            var added = [], already = [], unknown = [];
+            deptInput.value.split(/[\s,;]+/).forEach(function(part) {
+                if (!part) return;
+                var d = normalizeDept(part);
+                if (!d) { unknown.push(part); return; }
+                (addDept(d) ? added : already).push(d);
+            });
+            if (!added.length && !already.length && !unknown.length) return;
+            updateDeptsUI();
+            if (added.length) markDirty();
+            var msg = [];
+            if (added.length === 1) msg.push(added[0] + ' · ' + deptNames[added[0]] + ' ajouté');
+            if (added.length > 1) msg.push(added.length + ' départements ajoutés');
+            if (already.length) msg.push(already.join(', ') + ' déjà sélectionné' + (already.length > 1 ? 's' : ''));
+            if (unknown.length) msg.push('Numéro inconnu : ' + unknown.join(', '));
+            deptFeedback.textContent = msg.join(' · ');
+            deptFeedback.classList.toggle('is-error', unknown.length > 0);
+            deptFeedback.classList.toggle('is-ok', unknown.length === 0);
+            deptInput.value = unknown.join(', ');
+        }
+        document.getElementById('addDept').addEventListener('click', addFromInput);
+        deptInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); addFromInput(); }
         });
 
-        // Manual input
-        if (addDeptBtn) {
-            addDeptBtn.addEventListener('click', function() {
-                var val = deptInput.value.trim();
-                if (!val) return;
-                val.split(',').forEach(function(d) { addDept(d.trim()); });
-                deptInput.value = '';
-            });
+        form.addEventListener('submit', function() {
+            document.getElementById('deptsData').value = JSON.stringify(getSelectedDepts());
+        });
+
+        // ── Visibilité ──
+        function updateVisibility() {
+            var dir = document.getElementById('dirVisible').checked;
+            var hrs = document.getElementById('hoursVisible').checked;
+            if (!dir) psSetPill('pillVisibility', "Masqué de l'annuaire", 'off');
+            else psSetPill('pillVisibility', hrs ? 'Annuaire et horaires' : "Visible dans l'annuaire", null);
         }
 
-        // Serialize on submit
-        if (deptsData) {
-            deptsData.closest('form').addEventListener('submit', function() {
-                deptsData.value = JSON.stringify(getSelectedDepts());
+        // ── Complétude ──
+        function updateProgress() {
+            var checks = {
+                company: company.value.trim() !== '',
+                siren: sirenState() === 'valid',
+                description: desc.value.trim() !== '',
+                depts: getSelectedDepts().length > 0
+            };
+            var items = form.querySelectorAll('.pf-progress-item');
+            var done = 0;
+            items.forEach(function(item) {
+                var ok = !!checks[item.dataset.check];
+                item.classList.toggle('done', ok);
+                if (ok) done++;
             });
+            var pct = items.length ? Math.round(done / items.length * 100) : 0;
+            document.getElementById('progressPct').textContent = pct;
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('profileProgress').classList.toggle('is-complete', pct === 100);
         }
+        form.querySelectorAll('.pf-progress-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                var target = document.getElementById(item.dataset.focus);
+                if (!target) return;
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function() { target.focus({ preventScroll: true }); }, 400);
+            });
+        });
 
+        function updateAll() {
+            updateCompany();
+            updatePresentation();
+            updateLocations();
+            updateVisibility();
+            updateProgress();
+        }
+        ['input', 'change'].forEach(function(evt) {
+            form.addEventListener(evt, updateAll);
+        });
+        updateAll();
         updateDeptsUI();
-    }
+    })();
 
     // Report tab
     setupList('rehabList', 'addRehab', 'rehabData', [
