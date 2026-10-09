@@ -292,8 +292,8 @@ class AppFixtures extends Fixture
             ['reason' => 'Contrôle post-blessure — Pégase', 'at' => '2026-08-15 16:00', 'duration' => 30, 'status' => 'PENDING', 'type' => 'Suivi', 'client' => 'antoine.faure@owner.com', 'createdBy' => 'claire.morel@pro.com', 'animal' => 'Pégase', 'location' => 'Domicile client, Istres'],
             ['reason' => 'Ferrage — Figaro', 'at' => '2026-09-10 08:30', 'duration' => 90, 'status' => 'PENDING', 'type' => 'Maréchalerie', 'client' => 'thomas.leroy@owner.com', 'createdBy' => 'julien.roux@pro.com', 'animal' => 'Figaro', 'location' => 'Clinique Vétérinaire Équine de Provence'],
             // Personal / rest blocks
-            ['reason' => 'Formation ostéo crânienne', 'at' => '2026-09-15 09:00', 'duration' => 480, 'status' => 'PENDING', 'type' => null, 'client' => null, 'createdBy' => 'pierre.renault83@gmail.com', 'animal' => null, 'location' => 'Montpellier', 'eventType' => 'personal'],
-            ['reason' => 'Pause déjeuner', 'at' => '2026-08-20 12:30', 'duration' => 60, 'status' => 'PENDING', 'type' => null, 'client' => null, 'createdBy' => 'pierre.renault83@gmail.com', 'animal' => null, 'location' => null, 'eventType' => 'rest'],
+            ['reason' => 'Formation ostéo crânienne', 'at' => '2026-09-15 09:00', 'duration' => 480, 'status' => 'CONFIRMED', 'type' => null, 'client' => null, 'createdBy' => 'pierre.renault83@gmail.com', 'animal' => null, 'location' => 'Montpellier', 'eventType' => 'personal'],
+            ['reason' => 'Pause déjeuner', 'at' => '2026-08-20 12:30', 'duration' => 60, 'status' => 'CONFIRMED', 'type' => null, 'client' => null, 'createdBy' => 'pierre.renault83@gmail.com', 'animal' => null, 'location' => null, 'eventType' => 'rest'],
             // Cancelled
             ['reason' => 'Ostéo — Bijou (annulé)', 'at' => '2026-07-28 14:00', 'duration' => 60, 'status' => 'CANCELLED', 'type' => 'Ostéopathie', 'client' => 'julie.moreau@owner.com', 'createdBy' => 'pierre.renault83@gmail.com', 'animal' => 'Bijou', 'location' => 'Domicile client, Martigues'],
         ];

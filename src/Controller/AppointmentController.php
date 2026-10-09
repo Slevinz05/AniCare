@@ -125,6 +125,7 @@ final class AppointmentController extends AbstractController
                 $createdAnimal->generateCompleteToken();
             }
 
+            $appointment->syncStatusWithClient();
             $em->persist($appointment);
             $em->flush();
 
@@ -380,6 +381,8 @@ final class AppointmentController extends AbstractController
         $user = $this->getUser();
         $isPro = $this->isGranted('ROLE_PRO');
 
+        $previousClient = $appointment->getClient();
+
         $form = $this->createForm(AppointmentType::class, $appointment, [
             'user' => $user,
             'is_pro' => $isPro,
@@ -418,6 +421,7 @@ final class AppointmentController extends AbstractController
                 $createdAnimal->generateCompleteToken();
             }
 
+            $appointment->syncStatusWithClient($previousClient);
             $em->flush();
 
             foreach ($newAnimalsCreated as $createdAnimal) {

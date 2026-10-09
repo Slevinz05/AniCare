@@ -488,7 +488,7 @@
 
                 {% set all_events = [] %}
                 {% for appt in pro.agenda_appointments %}
-                    {% set all_events = all_events|merge([{type: 'appointment', date: appt.scheduledAt, title: appt.reason, animal: appt.animals|length > 1 ? appt.animals|length ~ ' chevaux' : (appt.animals|length == 1 ? appt.animals|first.name : (appt.animal ? appt.animal.name : 'RDV')), status: appt.status, id: appt.id}]) %}
+                    {% set all_events = all_events|merge([{type: 'appointment', date: appt.scheduledAt, title: appt.reason, animal: appt.animals|length > 1 ? appt.animals|length ~ ' chevaux' : (appt.animals|length == 1 ? appt.animals|first.name : (appt.animal ? appt.animal.name : appt.eventTypeShortLabel)), status: appt.status, id: appt.id}]) %}
                 {% endfor %}
                 {% for entry in pro.agenda_entries %}
                     {% set all_events = all_events|merge([{type: 'consultation', date: entry.date, title: entry.title, animal: entry.animal.name, entryType: entry.type, id: entry.id}]) %}
@@ -991,6 +991,7 @@
                                 type: 'appointment',
                                 status: appt.status,
                                 id: appt.id,
+                                createdByMe: appt.createdBy == app.user,
                                 link: path('app_appointment_show', {id: appt.id})
                             }]) %}
                         {% endfor %}
@@ -1047,7 +1048,7 @@
                                                 {% if event.time %}<span style="font-weight: 600;">{{ event.time }}</span> · {% endif %}{{ event.subtitle }}
                                             </span>
                                         </div>
-                                        {% if event.status == 'PENDING' and event.type == 'appointment' and event.id is defined %}
+                                        {% if event.status == 'PENDING' and event.type == 'appointment' and event.id is defined and not (event.createdByMe ?? false) %}
                                             <form method="post" action="{{ path('app_appointment_confirm', {id: event.id}) }}?redirect=home" class="evt-accept-form" style="position: relative; z-index: 2;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ event.id) }}">
                                                 <button type="submit" class="evt-accept-btn" title="Accepter le rendez-vous">

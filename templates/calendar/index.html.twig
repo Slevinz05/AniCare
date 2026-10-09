@@ -633,15 +633,15 @@
                     {% set hasNotifs = false %}
 
                     {# Upcoming events today as notifications #}
-                    {% for event in todayEvents|slice(0, 5) %}
+                    {% for event in notifEvents|slice(0, 5) %}
                         {% set hasNotifs = true %}
                         <a href="{{ path(event.link, event.linkParams) }}" class="notif-item">
                             <span class="notif-dot notif-dot--{{ event.type == 'consultation' ? 'teal' : (event.type == 'appointment' ? 'gold' : 'warning') }}"></span>
                             <div>
                                 <div class="notif-text">
                                     <strong>{{ event.date|date('H:i') }}</strong> —
-                                    {{ event.type == 'consultation' ? 'Consultation' : (event.type == 'appointment' ? 'RDV' : 'Rappel') }}
-                                    {{ event.animal }}
+                                    {{ event.type == 'consultation' ? 'Consultation' : (event.type == 'appointment' ? event.typeLabel : 'Rappel') }}
+                                    · {{ (event.hasAnimal ?? true) ? event.animal : event.title }}
                                 </div>
                                 <div class="notif-time">
                                     {% if event.clientName %}{{ event.clientName }}{% endif %}

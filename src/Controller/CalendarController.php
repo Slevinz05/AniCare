@@ -57,13 +57,20 @@ final class CalendarController extends AbstractController
         );
         $pendingCount = 0;
         foreach ($pendingAppointments as $apt) {
-            if ($apt->getStatus() === 'PENDING') {
+            if ($apt->getStatus() === 'PENDING' && $apt->getCreatedBy() !== $user) {
                 $pendingCount++;
             }
         }
 
+        // Les RDV créés par l'utilisateur lui-même ne sont pas des notifications pour lui
+        $notifEvents = array_values(array_filter(
+            $todayEvents,
+            fn(array $e) => !($e['type'] === 'appointment' && $e['createdByMe'])
+        ));
+
         $extra = [
             'todayEvents' => $todayEvents,
+            'notifEvents' => $notifEvents,
             'todayDate' => $todayStart,
             'todayDayName' => self::DAYS_FR[((int) $todayStart->format('N')) - 1],
             'pendingAppointmentsCount' => $pendingCount,
@@ -240,8 +247,11 @@ final class CalendarController extends AbstractController
                 'animal' => $appointment->getAnimals()->count() > 1
                     ? $appointment->getAnimals()->count() . ' chevaux'
                     : ($appointment->getAnimals()->isEmpty()
-                        ? ($appointment->getAnimal()?->getName() ?? 'RDV')
+                        ? ($appointment->getAnimal()?->getName() ?? $appointment->getEventTypeShortLabel())
                         : $appointment->getAnimals()->first()->getName()),
+                'hasAnimal' => $firstAnimal !== null,
+                'typeLabel' => $appointment->getEventTypeShortLabel(),
+                'createdByMe' => $appointment->getCreatedBy() === $user,
                 'professional' => null,
                 'link' => 'app_appointment_show',
                 'linkParams' => ['id' => $appointment->getId()],

@@ -119,6 +119,16 @@ class Appointment
         };
     }
 
+    public function getEventTypeShortLabel(): string
+    {
+        return match ($this->eventType) {
+            self::TYPE_APPOINTMENT => 'Pro',
+            self::TYPE_REST => 'Repos',
+            self::TYPE_PERSONAL => 'Perso',
+            default => $this->eventType,
+        };
+    }
+
     public function getReason(): ?string
     {
         return $this->reason;
@@ -180,6 +190,25 @@ class Appointment
     public function setStatus(string $status): static
     {
         $this->status = $status;
+        return $this;
+    }
+
+    /**
+     * Sans client, personne d'autre n'a à confirmer : le RDV est confirmé d'office.
+     * Si un client est ajouté à un RDV confirmé d'office, il repasse en attente de sa confirmation.
+     */
+    public function syncStatusWithClient(?User $previousClient = null): static
+    {
+        if ($this->status === 'CANCELLED') {
+            return $this;
+        }
+
+        if ($this->client === null) {
+            $this->status = 'CONFIRMED';
+        } elseif ($this->client !== $previousClient) {
+            $this->status = 'PENDING';
+        }
+
         return $this;
     }
 
