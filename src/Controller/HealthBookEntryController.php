@@ -213,6 +213,19 @@ final class HealthBookEntryController extends AbstractController
             if ($defaultNotes) {
                 $healthBookEntry->setDescription($defaultNotes);
             }
+
+            // Protocoles cochés « Par défaut » dans les paramètres PRO : pré-remplis comme les notes des RDV
+            $defaultRehabBlocks = [];
+            foreach ($user->getRehabilitationTemplates() as $tpl) {
+                $name = trim($tpl['name'] ?? '');
+                if (($tpl['isDefault'] ?? false) && $name !== '') {
+                    $description = trim($tpl['description'] ?? '');
+                    $defaultRehabBlocks[] = '▸ ' . $name . ($description !== '' ? "\n" . $description : '');
+                }
+            }
+            if ($defaultRehabBlocks && !$healthBookEntry->getRehabilitation()) {
+                $healthBookEntry->setRehabilitation(implode("\n\n", $defaultRehabBlocks));
+            }
         }
 
         $rehabTemplates = [];
