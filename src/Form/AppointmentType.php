@@ -104,10 +104,8 @@ class AppointmentType extends AbstractType
                     'choice_label' => fn (User $u) => $u->getFullName() . ($u->getSpecialty() ? ' — ' . $u->getSpecialty() : ''),
                     'placeholder' => 'Aucun',
                     'required' => false,
-                    'query_builder' => fn (UserRepository $repo) => $repo->createQueryBuilder('u')
-                        ->where('u.accountType = :pro')
+                    'query_builder' => fn (UserRepository $repo) => $repo->createProfessionalQueryBuilder()
                         ->andWhere('u.id != :self')
-                        ->setParameter('pro', 'PRO')
                         ->setParameter('self', $user->getId())
                         ->orderBy('u.lastName', 'ASC'),
                 ])

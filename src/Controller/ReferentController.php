@@ -185,6 +185,7 @@ final class ReferentController extends AbstractController
                 'name' => $u->getFullName(),
                 'email' => $u->getEmail(),
                 'type' => $u->getAccountType(),
+                'isPro' => $u->hasProSpace(),
             ];
         }
 

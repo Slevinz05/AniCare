@@ -31,6 +31,7 @@ final class UserSearchController extends AbstractController
             'lastName' => $u->getLastName(),
             'firstName' => $u->getFirstName(),
             'accountType' => $u->getAccountType(),
+            'isPro' => $u->hasProSpace(),
             'city' => $u->getCity(),
         ], $users);
 

@@ -108,9 +108,7 @@ class HealthBookEntryType extends AbstractType
                 'choice_label' => fn (User $u) => $u->getFullName() . ($u->getSpecialty() ? ' (' . $u->getSpecialty() . ')' : ''),
                 'placeholder' => 'Selectionner un intervenant',
                 'required' => false,
-                'query_builder' => fn (UserRepository $repo) => $repo->createQueryBuilder('u')
-                    ->where('u.accountType = :type')
-                    ->setParameter('type', 'PRO')
+                'query_builder' => fn (UserRepository $repo) => $repo->createProfessionalQueryBuilder()
                     ->orderBy('u.lastName', 'ASC'),
             ])
 

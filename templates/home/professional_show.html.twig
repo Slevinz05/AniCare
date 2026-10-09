@@ -13,6 +13,17 @@
         </a>
     </div>
 
+    {# ── Aperçu : fiche masquée de l'annuaire (visible par le professionnel seul) ── #}
+    {% if owner_preview %}
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" role="status">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="flex-shrink-0 mt-1"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            <div>
+                Votre fiche n'apparaît pas dans l'annuaire : vous êtes seul à pouvoir la consulter.
+                <a href="{{ path('app_profile_pro_settings', {tab: 'profil'}) }}" class="alert-link">Modifier ce réglage</a>
+            </div>
+        </div>
+    {% endif %}
+
     {# ══════════════════════════════════════════════
        GALERIE PHOTOS (style Airbnb)
        ══════════════════════════════════════════════ #}
@@ -125,36 +136,6 @@
                         Adresse
                     </h2>
                     <p class="mb-0">{{ professional.fullAddress }}</p>
-                </div>
-            {% endif %}
-
-            {# ── Consultations recentes ── #}
-            {% if recent_consultations|length > 0 %}
-                <div class="mb-4">
-                    <h2 class="h5 fw-bold mb-3" style="color: var(--secondary-color);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="me-2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        Activite recente
-                    </h2>
-                    <div class="list-group list-group-flush">
-                        {% for entry in recent_consultations %}
-                            <div class="list-group-item px-0 d-flex justify-content-between align-items-center" style="background: transparent; border-color: var(--border-color);">
-                                <div>
-                                    <strong class="small">{{ entry.title }}</strong>
-                                    {% if entry.type %}
-                                        {% set etype = entry.type|lower %}
-                                        {% if etype == 'vaccination' or etype == 'vaccin' %}
-                                            <span class="badge-medical badge-vaccin ms-1" style="font-size: 0.6rem;">Vaccination</span>
-                                        {% elseif etype == 'chirurgie' %}
-                                            <span class="badge-medical badge-surgery ms-1" style="font-size: 0.6rem;">Chirurgie</span>
-                                        {% else %}
-                                            <span class="badge-medical badge-neutral ms-1" style="font-size: 0.6rem;">{{ entry.type }}</span>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                                <span class="small text-secondary">{{ entry.date ? entry.date|date('d/m/Y') : '' }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
                 </div>
             {% endif %}
         </div>

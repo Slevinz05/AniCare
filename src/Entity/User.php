@@ -719,6 +719,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->hasProSpace() && $this->hasParticulierSpace();
     }
 
+    /**
+     * Fiche listée dans l'annuaire et visible sur /annuaire/{id} : espace PRO (comptes PRO et BOTH)
+     * et option « Apparaître dans l'annuaire » activée. Même règle que UserRepository::createDirectoryQueryBuilder().
+     */
+    public function isListedInDirectory(): bool
+    {
+        return $this->hasProSpace() && $this->directoryVisible;
+    }
+
     public function isInProSpace(): bool
     {
         if ($this->activeSpace === 'professionnel') {

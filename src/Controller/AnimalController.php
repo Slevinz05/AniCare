@@ -246,7 +246,7 @@ final class AnimalController extends AbstractController
         $professionals = [];
         foreach ($animal->getAnimalShares() as $share) {
             $user = $userRepository->findOneBy(['email' => $share->getSharedWithEmail()]);
-            if ($user && $user->getAccountType() === 'PRO') {
+            if ($user && $user->hasProSpace()) {
                 $professionals[] = [
                     'user' => $user,
                     'permission' => $share->getPermissionLevel(),
@@ -374,7 +374,7 @@ final class AnimalController extends AbstractController
         $proId = $request->request->get('professional_id');
         if ($proId) {
             $professional = $userRepository->find((int) $proId);
-            if ($professional && $professional->getAccountType() === 'PRO') {
+            if ($professional && $professional->hasProSpace()) {
                 $existing = $entityManager->getRepository(AnimalShare::class)->findOneBy([
                     'animal' => $animal,
                     'sharedWithEmail' => $professional->getEmail(),

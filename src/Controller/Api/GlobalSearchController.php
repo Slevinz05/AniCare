@@ -45,6 +45,7 @@ final class GlobalSearchController extends AbstractController
             'id' => $u->getId(),
             'fullName' => $u->getFullName(),
             'accountType' => $u->getAccountType(),
+            'isPro' => $u->hasProSpace(),
             'city' => $u->getCity(),
         ], $users);
 

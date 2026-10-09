@@ -121,8 +121,8 @@ class HomeController extends AbstractController
                 $structure = $membership->getStructure();
                 foreach ($structure->getAnimals() as $animal) {
                     foreach ($animal->getAnimalShares() as $share) {
-                        $pro = $userRepository->findOneBy(['email' => $share->getSharedWithEmail(), 'accountType' => 'PRO']);
-                        if ($pro) {
+                        $pro = $userRepository->findOneBy(['email' => $share->getSharedWithEmail()]);
+                        if ($pro && $pro->hasProSpace()) {
                             $structureProIds[$pro->getId()] = true;
                         }
                     }
@@ -145,21 +145,14 @@ class HomeController extends AbstractController
     }
 
     #[Route('/annuaire/{id}', name: 'app_professional_show', methods: ['GET'])]
-    public function showProfessional(User $professional, HealthBookEntryRepository $healthBookEntryRepository): Response
+    public function showProfessional(User $professional): Response
     {
-        if ($professional->getAccountType() !== 'PRO') {
-            throw $this->createNotFoundException();
-        }
-
-        $recentConsultations = $healthBookEntryRepository->findBy(
-            ['veterinarian' => $professional],
-            ['date' => 'DESC'],
-            5,
-        );
+        $this->denyUnlessPublicProfileVisible($professional);
 
         return $this->render('home/professional_show.html.twig', [
             'professional' => $professional,
-            'recent_consultations' => $recentConsultations,
+            // Fiche masquée de l'annuaire : seul le professionnel lui-même arrive ici.
+            'owner_preview' => !$professional->isListedInDirectory(),
         ]);
     }
 
@@ -169,9 +162,7 @@ class HomeController extends AbstractController
         string $fileName,
         #[Autowire('%kernel.project_dir%/var/uploads/profiles')] string $uploadsDir,
     ): BinaryFileResponse {
-        if ($professional->getAccountType() !== 'PRO') {
-            throw $this->createNotFoundException();
-        }
+        $this->denyUnlessPublicProfileVisible($professional);
 
         $photos = $professional->getProfilePhotos() ?? [];
         $found = false;
@@ -199,6 +190,22 @@ class HomeController extends AbstractController
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $originalName);
 
         return $response;
+    }
+
+    /**
+     * Fiche publique et photos servies uniquement pour un professionnel listé dans l'annuaire.
+     * Le professionnel garde l'accès à sa propre fiche (aperçu, photos de son formulaire de profil).
+     */
+    private function denyUnlessPublicProfileVisible(User $professional): void
+    {
+        $viewer = $this->getUser();
+        $isOwnProfile = $viewer instanceof User && $viewer->getId() === $professional->getId();
+
+        if ($professional->isListedInDirectory() || ($isOwnProfile && $professional->hasProSpace())) {
+            return;
+        }
+
+        throw $this->createNotFoundException();
     }
 
     #[Route('/repertoire', name: 'app_repertoire_reseau', methods: ['GET'])]

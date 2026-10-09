@@ -183,7 +183,7 @@
                         return;
                     }
                     resultsDiv.innerHTML = users.map(function(u) {
-                        const badge = u.type === 'PRO'
+                        const badge = u.isPro
                             ? '<span class="result-badge" style="background: var(--soft-teal); color: var(--primary-color);">PRO</span>'
                             : '<span class="result-badge" style="background: #fff3e0; color: #e65100;">Particulier</span>';
                         return '<div class="search-result-item" data-email="' + u.email + '" data-name="' + u.name + '">'

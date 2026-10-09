@@ -383,7 +383,7 @@
                             </div>
                             <p class="card-title" style="color: var(--primary-color);">Référent</p>
                         </div>
-                        {% if referent and referent.accountType == 'PRO' %}
+                        {% if referent and referent.listedInDirectory %}
                         <a href="{{ path('app_professional_show', {id: referent.id}) }}" style="color: var(--taupe);" title="Voir le profil du référent">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                         </a>

@@ -37,7 +37,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        $isPro = $user->getAccountType() === 'PRO';
+        $isPro = $user->hasProSpace();
 
         $form = $this->createForm(ProfileType::class, $user, [
             'is_pro' => $isPro,

@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Form\AppointmentType;
 use App\Repository\AnimalRepository;
 use App\Repository\AppointmentRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -108,7 +109,7 @@ final class AppointmentController extends AbstractController
                     $proId = $request->request->get('new_animal_pro_id');
                     if ($proId) {
                         $pro = $em->getRepository(User::class)->find((int) $proId);
-                        if ($pro && $pro->getAccountType() === 'PRO') {
+                        if ($pro && $pro->hasProSpace()) {
                             $appointment->setSharedWithProfessional($pro);
                         }
                     }
@@ -688,7 +689,7 @@ final class AppointmentController extends AbstractController
     }
 
     #[Route('/api/search-professionals', name: 'app_appointment_search_professionals', methods: ['GET'])]
-    public function searchProfessionals(Request $request, EntityManagerInterface $em): JsonResponse
+    public function searchProfessionals(Request $request, UserRepository $userRepository): JsonResponse
     {
         $query = mb_strtolower(trim($request->query->get('q', '')));
         if (strlen($query) < 2) {
@@ -698,11 +699,9 @@ final class AppointmentController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        $pros = $em->getRepository(User::class)->createQueryBuilder('u')
-            ->where('u.accountType = :pro')
+        $pros = $userRepository->createProfessionalQueryBuilder()
             ->andWhere('u.id != :self')
             ->andWhere('LOWER(u.firstName) LIKE :q OR LOWER(u.lastName) LIKE :q OR LOWER(u.specialty) LIKE :q')
-            ->setParameter('pro', 'PRO')
             ->setParameter('self', $user->getId())
             ->setParameter('q', '%' . $query . '%')
             ->orderBy('u.lastName', 'ASC')

@@ -1049,7 +1049,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 var item = document.createElement('button');
                                 item.type = 'button';
                                 item.className = 'list-group-item list-group-item-action py-2';
-                                var badge = user.accountType === 'PRO' ? ' <span class="badge" style="background:#e3f2fd;color:#1565C0;font-size:.65rem;">PRO</span>' : '';
+                                var badge = user.isPro ? ' <span class="badge" style="background:#e3f2fd;color:#1565C0;font-size:.65rem;">PRO</span>' : '';
                                 item.innerHTML = '<strong>' + user.fullName + '</strong>' + badge + '<br><span class="small text-secondary">' + user.email + (user.city ? ' — ' + user.city : '') + '</span>';
                                 item.addEventListener('click', function () {
                                     refIdInput.value = user.id;
